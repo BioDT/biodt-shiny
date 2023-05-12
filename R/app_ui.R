@@ -9,9 +9,23 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      h1("BioDTShiny")
-    )
+
+      navbarPage("App Title",
+                 navbarMenu(""),
+                 navbarMenu("Species response to environmental change",
+                            tabPanel("Biodiversity dynamics"),
+                            tabPanel("Ecosystem services")),
+                 navbarMenu("Genetically detected biodiversity",
+                            tabPanel("Crop wild relatives and genetic resources for food security"),
+                            tabPanel("DNA detected biodiversity, poorly known habitats"),
+                 navbarMenu("Dynamics and threats from and for species of policy concern",
+                            tabPanel("Endangered species"),
+                            tabPanel("Invasive Species")),
+                 navbarMenu("Species interactions with each other and with humans",
+                            tabPanel("Pollinators"),
+                            tabPanel("Disease Outbreaks"))
+                 )
+      )
   )
 }
 
