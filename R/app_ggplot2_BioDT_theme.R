@@ -116,25 +116,6 @@ scale_color_biodt_c <- function(palette = "main", direction = 1, ...) {
   scale_color_gradientn(colors = pal(256), ...)
   }
 
-
-
-# Testing the theme
-iris |>
-  group_by(Species) |> 
-  summarise(ave_sepal_length = mean(Sepal.Length, na.rm = TRUE)) |> 
-  ggplot(aes(x = Species, y = ave_sepal_length, fill = Species)) +
-  geom_col() +
-  coord_flip() +
-  labs(title = "BioDT theme demonstration",
-       subtitle = "It contains custom color palette",
-       caption = "by: Souza AT") +
-  scale_fill_biodt(palette = "main") +
-  scale_color_biodt(palette = "main") +
-  theme_biodt()
-
-
-
-
 # Testing the the theme and the scale_fill_biodt and scale_color_biodt functions ----
 ## Dummy dataset
 dummy_df <- tibble(species = c("sp1", "sp2", "sp3", "sp4", "sp5", "sp6", "sp7", "sp8"),
