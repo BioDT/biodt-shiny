@@ -9,18 +9,17 @@
 #' @importFrom shiny NS tagList
 #' @import gridlayout
 #' @importFrom DT DTOutput
-mod_beehave_ui <- function(id) {
+mod_beehave_ui2 <- function(id) {
   ns <- NS(id)
   tagList(
     grid_page(
-      layout =
-        c(
-          "input_map    locations",
-          "lookup_table parameters_table",
-          "output_bees  output_bees",
-          "output_honey output_honey",
-          "output_map   output_map"
-        ),
+      layout = c(
+        "input_map locations",
+        "lookup_table parameters_table",
+        "output_bees_plot output_bees_plot",
+        "output_honey_plot output_honey_plot",
+        "output_map output_map"
+      ),
       row_sizes = c("1fr",
                     "1fr",
                     "1fr",
@@ -38,52 +37,55 @@ mod_beehave_ui <- function(id) {
       grid_card(
         area = "locations",
         full_screen = TRUE,
-        min_height = "500px",
         card_title("Locations"),
-        card_body()
+        card_body(),
+        min_height = "500px"
       ),
-      grid_card(
-        area = "lookup_table",
-        full_screen = TRUE,
-        min_height = "500px",
-        card_title("Lookup Table"),
-        card_body(DTOutput(ns("lookup_table")))
-      ),
-      grid_card(
-        area = "parameters_table",
-        full_screen = TRUE,
-        min_height = "500px",
-        card_title("Parameters Table"),
-        card_body(DTOutput(ns(
-          "parameters_table"
-        )))
-      ),
-      grid_card(
-        area = "output_bees",
-        full_screen = TRUE,
-        min_height = "400px",
-        card_title("Output Bees Plot"),
-        card_body(plotOutput(ns(
-          "output_bees_plot"
-        )))
-      ),
-      grid_card(
-        area = "output_honey",
-        full_screen = TRUE,
-        min_height = "400px",
-        card_title("Output Honey Plot"),
-        card_body(plotOutput(ns(
-          "output_honey_plot"
-        )))
-      ),
-      grid_card(
-        area = "output_map",
-        full_screen = TRUE,
-        min_height = "500px",
-        card_title("Output Map"),
-        card_body(plotOutput(ns(
-          "output_map_plot"
-        )))
+      accordion(
+        "outputs_accordion",
+        grid_card(
+          area = "lookup_table",
+          full_screen = TRUE,
+          card_title("Lookup Table"),
+          card_body(DTOutput(ns("lookup_table"))),
+          min_height = "500px"
+        ),
+        grid_card(
+          area = "parameters_table",
+          full_screen = TRUE,
+          card_title("Parameters Table"),
+          card_body(DTOutput(ns(
+            "parameters_table"
+          ))),
+          min_height = "500px"
+        ),
+        grid_card(
+          area = "output_bees_plot",
+          full_screen = TRUE,
+          card_title("Output Bees Plot"),
+          card_body(plotOutput(ns(
+            "output_bees_plot"
+          ))),
+          min_height = "400px"
+        ),
+        grid_card(
+          area = "output_honey_plot",
+          full_screen = TRUE,
+          card_title("Output Honey Plot"),
+          card_body(plotOutput(ns(
+            "output_honey_plot"
+          ))),
+          min_height = "400px"
+        ),
+        grid_card(
+          area = "output_map",
+          full_screen = TRUE,
+          card_title("Output Map"),
+          card_body(plotOutput(ns(
+            "output_map_plot"
+          ))),
+          min_height = "500px"
+        )
       )
     )
   )
@@ -95,9 +97,11 @@ mod_beehave_ui <- function(id) {
 #' @importFrom shinipsum random_DT random_ggplot
 #'
 #' @noRd
-mod_beehave_server <- function(id) {
+mod_beehave_server2 <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    
     
     output$input_map_plot <- renderPlot({
       random_ggplot(type = "hex")

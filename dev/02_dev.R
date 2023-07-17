@@ -20,7 +20,7 @@ attachment::att_amend_desc()
 
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "BEEHAVE", with_test = TRUE) # Name of the module
+golem::add_module(name = "beehave", with_test = TRUE) # Name of the module
 golem::add_module(name = "Grassmind", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
