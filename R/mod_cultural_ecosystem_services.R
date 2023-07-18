@@ -7,11 +7,28 @@
 #' @noRd 
 #'
 #' @importFrom shiny NS tagList 
+#' @import leaflet
 mod_cultural_ecosystem_services_ui <- function(id){
   ns <- NS(id)
   tagList(
     fluidPage(
-      "Hello, world!"
+      titlePanel("Cultural Ecosystem Services Prototype Digital Twin"),
+      
+      sidebarLayout(
+        
+        sidebarPanel(
+          h3("Controls"),
+          selectInput("location", "Location", "Cairngorms National Park"),
+          selectInput("taxon", "Species group", c("Birds","Plants")),
+          selectInput("layer", "Layer", c("Recreation potential","Biodiversity")),
+        ),
+        
+        mainPanel(
+          h1("Map"),
+          leafletOutput("map", height = 400)
+          
+        )
+      )
     )
  
   )
@@ -23,6 +40,11 @@ mod_cultural_ecosystem_services_ui <- function(id){
 mod_cultural_ecosystem_services_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+    
+    output$map <- renderLeaflet({
+      leaflet() %>% 
+        addTiles()
+    })
  
   })
 }
