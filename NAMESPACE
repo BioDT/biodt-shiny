@@ -3,6 +3,7 @@
 export(run_app)
 import(bslib)
 import(gridlayout)
+import(leaflet)
 import(shiny)
 importFrom(DT,DTOutput)
 importFrom(DT,renderDT)

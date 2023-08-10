@@ -25,7 +25,7 @@ mod_cultural_ecosystem_services_ui <- function(id){
         
         mainPanel(
           h1("Map"),
-          leafletOutput("map", height = 400)
+          leafletOutput(ns("map"), height = 400)
           
         )
       )
