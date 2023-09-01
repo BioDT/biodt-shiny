@@ -19,24 +19,40 @@ app_ui <- function(request) {
       nav_menu(
         title = "Species response to environmental change",
         nav_panel(title = "Biodiversity dynamics"),
-        nav_panel(title = "Ecosystem services",
-                  mod_cultural_ecosystem_services_ui("cultural_ecosystem_services_1"))
+        nav_panel(
+          title = "Ecosystem services",
+          mod_cultural_ecosystem_services_ui("cultural_ecosystem_services_1")
+        )
       ),
       nav_menu(
         title = "Genetically detected biodiversity",
         nav_panel(title = "Crop wild relatives and genetic resources for food security"),
         nav_panel(title = "DNA detected biodiversity, poorly known habitats")
       ),
-      nav_menu(
-        title = "Dynamics and threats from and for species of policy concern",
-        nav_panel(title = "Invasive Species")
-      ),
+      nav_menu(title = "Dynamics and threats from and for species of policy concern",
+               nav_panel(title = "Invasive Species")),
       nav_menu(
         title = "Species interactions with each other and with humans",
         nav_panel(title = "Pollinators",
                   mod_beehave_ui("beehave")),
         nav_panel(title = "Disease Outbreaks")
-      )
+      ),
+      nav_menu(title = "Computations"),
+      nav_menu(title = "Info"),
+      nav_menu(title = "User",
+               icon = icon("user"),
+               nav_item(actionButton(
+                 "login_button",
+                 "Login",
+                 width = "100%",
+                 icon = icon("arrow-right-to-bracket")
+               )),
+               nav_item(
+                 actionButton("logout_button",
+                              "Logout",
+                              width = "100%",
+                              icon = icon("arrow-right-from-bracket"))
+               ))
     )
   )
 }
@@ -59,4 +75,4 @@ golem_add_external_resources <- function() {
             # Add here other external resources
             # for example, you can add shinyalert::useShinyalert()
             )
-  }
+            }
