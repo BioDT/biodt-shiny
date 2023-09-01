@@ -33,7 +33,11 @@ mod_beehave_ui <- function(id) {
         area = "input_map",
         full_screen = TRUE,
         card_title("Input Map"),
-        card_body(plotOutput(ns("input_map_plot")))
+        card_body(
+          shiny::selectInput(ns("input_map_list"),
+                             label = "Choose input map",
+                             choices = NULL),
+          plotOutput(ns("input_map_plot")))
       ),
       grid_card(
         area = "locations",
@@ -95,9 +99,50 @@ mod_beehave_ui <- function(id) {
 #' @importFrom shinipsum random_DT random_ggplot
 #'
 #' @noRd
-mod_beehave_server <- function(id) {
+mod_beehave_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    r_beehave <- reactiveValues(
+      input_map_list = NULL,
+      map_files = NULL
+    )
+    
+    observeEvent(r$lexis_token,
+                 {
+                   req(r$lexis_token,
+                       r$lexis_dataset_list)
+                   
+                   ds_id <- purrr::map_chr(r$lexis_dataset_list, function(x){purrr::pluck(x, "location", "internalID")})
+                   ds_titles <- purrr::map(r$lexis_dataset_list, function(x){purrr::pluck(x, "metadata", "title")}) |> unlist()
+                   
+                   ind_titles_true <- purrr::map_lgl(ds_titles, ~length(.x)>0)
+                   ind_maps <- ds_titles == "Beehave Input Maps"
+                   
+                   r_beehave$map_files <- r4lexis::get_dataset_file_list(
+                     r$lexis_token,
+                     internalID = ds_id[ind_titles_true][ind_maps],
+                     project = "biodt_development"
+                   )
+                   
+                   beehave_map_list <- r_beehave$map_files$contents |>
+                     purrr::map_chr(purrr::pluck("name")) 
+                   
+                   r_beehave$input_map_list <-  beehave_map_list[stringr::str_detect(beehave_map_list,
+                                                                             ".tif$")]
+                   
+                   
+                   updateSelectInput(
+                     session = session,
+                     inputId = "input_map_list",
+                     selected = beehave_map_list[1],
+                     choices = beehave_map_list
+                   )
+                   
+                   
+                   ind_lookup_table <- ds_titles == "Beehave Input Lookup"
+                 })
+    
     
     output$input_map_plot <- renderPlot({
       random_ggplot(type = "hex")
