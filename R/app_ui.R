@@ -64,6 +64,7 @@ app_ui <- function(request) {
 #'
 #' @import shiny
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
+#' @importFrom shinyjs useShinyjs
 #' @noRd
 golem_add_external_resources <- function() {
   add_resource_path("www",
@@ -71,8 +72,9 @@ golem_add_external_resources <- function() {
   
   tags$head(favicon(),
             bundle_resources(path = app_sys("app/www"),
-                             app_title = "BioDTShiny")
+                             app_title = "BioDTShiny"),
             # Add here other external resources
             # for example, you can add shinyalert::useShinyalert()
+            shinyjs::useShinyjs()
             )
             }
