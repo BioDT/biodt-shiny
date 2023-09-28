@@ -22,6 +22,7 @@ attachment::att_amend_desc()
 ## Create a module infrastructure in R/
 golem::add_module(name = "beehave", with_test = TRUE) # Name of the module
 golem::add_module(name = "Grassmind", with_test = TRUE) # Name of the module
+golem::add_module(name = "computations", with_test = TRUE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*

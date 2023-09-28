@@ -1,0 +1,9 @@
+.html-fill-container > .html-fill-item{
+  display: block;
+}
+
+.btn-navbar{
+  color: #414F2F;
+  background-color: #fff;
+  border-color: #fff;
+}
