@@ -11,8 +11,14 @@ app_server <- function(input, output, session) {
   # Define common interactive variables
   r <- reactiveValues(
     lexis_token = NULL,
-    lexis_dataset_list = NULL
+    lexis_dataset_list = NULL,
+    page_name = NULL,
+    user_info = NULL
   )
+  
+  # Computations module ----
+  mod_computations_server("computations",
+                     r)
   
   # Beehave module ----
   mod_beehave_server("beehave",
@@ -31,5 +37,13 @@ app_server <- function(input, output, session) {
                  r$lexis_dataset_list <- r4lexis::get_dataset_list(
                    r$lexis_token,
                    project = "biodt_development")
+                 
+                 r$user_info <- r4lexis::get_lexis_user_info(r$lexis_token)
+               })
+  
+  # Page navigation reactive event that can be passed to modules ----
+  observeEvent(input$navbar,
+               {
+                 r$page_name <- input$navbar
                })
 }
