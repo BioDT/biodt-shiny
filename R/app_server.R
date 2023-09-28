@@ -16,6 +16,10 @@ app_server <- function(input, output, session) {
     user_info = NULL
   )
   
+  # Info module ----
+  mod_info_server("info",
+                  r)
+  
   # Computations module ----
   mod_computations_server("computations",
                      r)

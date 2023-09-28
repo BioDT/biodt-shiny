@@ -15,91 +15,79 @@
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    div(id = "test",
-        shinyjs::hidden(
-          shiny::actionButton(
-            ns("load_resources"),
-            label = "Load beehave resources",
-            width = "100%",
-            class = "btn-primary"
-          )
-        )),
-    bslib::card(
-      title = "input_map",
-      full_screen = TRUE,
-      fill = FALSE, 
-      card_title("Input Map"),
-      card_body(
-        shiny::fluidRow(
-          shiny::column(
-            6,
-            shiny::selectInput(ns("map_list"),
-                               label = "Choose input map",
-                               choices = NULL)
-          ),
-          shiny::column(
-            6,
-            shiny::fileInput(ns("upload_dbf"),
-                             label = "Upload dbf locations file",
-                             accept = ".dbf")
-          )
-        ),
-        # shinyjs::hidden(shiny::actionButton(ns("load_maps"),
-        #                                     label = "Load maps")),
-        shinycssloaders::withSpinner(leaflet::leafletOutput(ns("input_map_plot"),
-                                                            height = NULL))
-      )
-    ),
-    bslib::card(
-      title = "lookup_table",
-      full_screen = TRUE,
-      card_title("Lookup Table"),
-      card_body(
+    bslib::page_sidebar(
+      theme = biodt_theme,
+      sidebar = bslib::sidebar(
+        div(id = "test",
+            shinyjs::hidden(
+              shiny::actionButton(
+                ns("load_resources"),
+                label = "Load beehave resources",
+                width = "100%",
+                class = "btn-primary"
+              )
+            )),
+        shiny::h3("Map"),
+        shiny::selectInput(ns("map_list"),
+                           label = "Choose input map",
+                           choices = NULL),
+        shiny::fileInput(ns("upload_dbf"),
+                         label = "Upload dbf locations file",
+                         accept = ".dbf"),
+        shiny::h3("Lookup table"),
         shiny::selectInput(ns("lookup_list"),
                            label = "Choose input lookup table",
                            choices = NULL),
-        # shinyjs::hidden(shiny::actionButton(ns("load_lookup"),
-        #                                     label = "Load lookup table")),
-        DTOutput(ns("lookup_table"))
+        shiny::h3("Workflow"),
+        shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
+                                              label = "Run Workflow"))
+      ),
+      bslib::card(
+        title = "input_map",
+        full_screen = TRUE,
+        card_title("Input Map"),
+        card_body(shinyjs::hidden(leaflet::leafletOutput(
+          ns("input_map_plot")
+        )))
+      ),
+      bslib::card(
+        title = "lookup_table",
+        full_screen = TRUE,
+        card_title("Lookup Table"),
+        card_body(DTOutput(ns("lookup_table")))
+      ),
+      bslib::card(
+        title = "parameters_table",
+        full_screen = TRUE,
+        card_title("Parameters Table"),
+        card_body(DTOutput(ns(
+          "parameters_table"
+        )))
+      ),
+      bslib::card(
+        title = "output_bees",
+        full_screen = TRUE,
+        card_title("Output Bees Plot"),
+        card_body(plotOutput(ns(
+          "output_bees_plot"
+        )))
+      ),
+      bslib::card(
+        title = "output_honey",
+        full_screen = TRUE,
+        card_title("Output Honey Plot"),
+        card_body(plotOutput(ns(
+          "output_honey_plot"
+        )))
+      ),
+      bslib::card(
+        title = "output_map",
+        full_screen = TRUE,
+        card_title("Output Map"),
+        card_body(plotOutput(ns(
+          "output_map_plot"
+        )))
       )
-    ),
-    bslib::card(
-      title = "parameters_table",
-      full_screen = TRUE,
-      card_title("Parameters Table"),
-      card_body(DTOutput(ns(
-        "parameters_table"
-      )))
-    ),
-    bslib::card(
-      title = "run_workflow",
-      full_screen = TRUE,
-      shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
-                                            label = "Run Workflow"))
-    ),
-    bslib::card(
-      title = "output_bees",
-      full_screen = TRUE,
-      card_title("Output Bees Plot"),
-      card_body(plotOutput(ns(
-        "output_bees_plot"
-      )))
-    ),
-    bslib::card(
-      title = "output_honey",
-      full_screen = TRUE,
-      card_title("Output Honey Plot"),
-      card_body(plotOutput(ns(
-        "output_honey_plot"
-      )))
-    ),
-    bslib::card(
-      title = "output_map",
-      full_screen = TRUE,
-      card_title("Output Map"),
-      card_body(plotOutput(ns(
-        "output_map_plot"
-      )))
     )
   )
 }
@@ -250,7 +238,6 @@ mod_beehave_server <- function(id, r) {
                    if (length(list.files(beehave_maps_dir)) > 0 &
                        golem::app_dev()) {
                      r_beehave$maps_loaded <- TRUE
-                     # shinyjs::hideElement("load_maps")
                      shinyjs::hideElement("load_resources")
                      non_dev <- NULL
                    }
@@ -258,7 +245,6 @@ mod_beehave_server <- function(id, r) {
                    if (length(list.files(beehave_lookup_dir)) > 0 &
                        golem::app_dev()) {
                      r_beehave$lookup_loaded <- TRUE
-                     # shinyjs::hideElement("load_lookup")
                      non_dev <- NULL
                    }
                    
@@ -275,6 +261,7 @@ mod_beehave_server <- function(id, r) {
                    if (length(list.files(beehave_maps_dir)) > 0) {
                      golem::print_dev("Input maps downloaded.")
                      r_beehave$maps_loaded <- TRUE
+                     shinyjs::showElement("input_map_plot")
                    } else {
                      golem::print_dev("Input maps NOT downloaded.")
                    }
@@ -533,17 +520,19 @@ mod_beehave_server <- function(id, r) {
     output$lookup_table <- DT::renderDT({
       DT::datatable(
         r_beehave$lookup_table,
-        editable = list(target = "cell", disable = list(columns = 1)),
+        editable = list(target = "cell", disable = list(columns = c(0,1))),
         selection = "none",
-        options = list(scrollX = TRUE)
+        options = list(scrollX = TRUE),
+        class = c("hover", "compact")
       )
     })
     output$parameters_table <- DT::renderDT({
       DT::datatable(
         r_beehave$input_parameters,
-        editable = list(target = "cell", disable = list(columns = c(1, 3))),
+        editable = list(target = "cell", disable = list(columns = c(0, 1, 3))),
         selection = "none",
-        options = list(scrollX = TRUE)
+        options = list(scrollX = TRUE),
+        class = c("hover", "compact")
       )
     })
     

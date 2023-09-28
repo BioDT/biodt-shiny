@@ -59,7 +59,26 @@ mod_computations_server <- function(id, r){
     output$workflows <- DT::renderDataTable(
       {
         req(r_computations$df_workflows)
-        datatable <- r_computations$df_workflows
+        DT::datatable(
+          r_computations$df_workflows,
+          selection = "none",
+          options = list(scrollX = TRUE),
+          class = c("hover", "compact")
+        ) |>
+          DT::formatStyle(
+            columns = "State",
+            valueColumns = "State",
+            target = "cell",
+            color = DT::styleEqual(levels = c("running", "failed", "success"),
+                                   values = c("blue", "red", "green")),
+            # backgroundColor = DT::styleEqual(c("running", "failed", "success"),
+            #                                  c("rgba(256,256,0,0.3)", "rgba(256,0,0,0.3)", "rgba(0,256,0,0.3)"))
+          ) |>
+          DT::formatStyle(
+            columns = "State",
+            target = "cell",
+            fontWeight = "bold"
+            )
       }
     )
   })

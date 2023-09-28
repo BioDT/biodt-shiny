@@ -23,6 +23,7 @@ attachment::att_amend_desc()
 golem::add_module(name = "beehave", with_test = TRUE) # Name of the module
 golem::add_module(name = "Grassmind", with_test = TRUE) # Name of the module
 golem::add_module(name = "computations", with_test = TRUE)
+golem::add_module(name = "info", with_test = TRUE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*

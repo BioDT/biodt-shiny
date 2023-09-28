@@ -17,16 +17,11 @@ app_ui <- function(request) {
                       style = "padding-right: 20px"),
                   width = "500px"),#"BioDT",
       id = "navbar",
-      theme = bslib::bs_theme(
-        primary = "#bc6c25",
-        secondary = "#414f2f",
-        bg = "#fff",
-        fg = "#414f2f",
-        version = 5,
-        bootswatch = "bootstrap"
-      ),
+      theme = biodt_theme,
       bg = "#fff",
       fillable = TRUE,
+      nav_panel(title = "Info",
+                mod_info_ui("info")),
       nav_menu(
         title = "Species response to environmental change",
         nav_panel(title = "Biodiversity dynamics"),
@@ -50,7 +45,6 @@ app_ui <- function(request) {
       ),
       nav_panel(title = "Computations",
                 mod_computations_ui("computations")),
-      nav_panel(title = "Info"),
       nav_menu(
         title = "User",
         icon = icon("user"),
@@ -102,3 +96,14 @@ golem_add_external_resources <- function() {
   )
   
 }
+
+
+# App theme ----
+biodt_theme <- bslib::bs_theme(
+  primary = "#bc6c25",
+  secondary = "#414f2f",
+  bg = "#fff",
+  fg = "#414f2f",
+  version = 5,
+  bootswatch = "bootstrap"
+)
