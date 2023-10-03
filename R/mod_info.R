@@ -10,19 +10,8 @@
 mod_info_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    shiny::HTML(
-      '<head>
-        <style>
-        body {
-          background-image: url("www/forest2.png");
-          background-repeat: no-repeat;
-          background-size: 100%;
-          background-position: bottom;
-        }
-        </style>
-        </head>'
-    ),
     shiny::div(
+      class = "info-text",
       shiny::p(
         'The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.'
       ),
@@ -31,8 +20,7 @@ mod_info_ui <- function(id) {
       ),
       shiny::p(
         "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth."
-      ),
-      style = 'color: #bc6c25; background-color: rgba(256,256,256,0.8); border-radius: 25px; padding-left: 10px; padding-right: 10px'
+      )
     )
   )
 }

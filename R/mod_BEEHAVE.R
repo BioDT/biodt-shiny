@@ -7,7 +7,7 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-#' @importFrom bslib card
+#' @importFrom bslib card card_header card_body
 #' @importFrom DT DTOutput
 #' @importFrom leaflet leafletOutput
 #' @importFrom shinycssloaders withSpinner
@@ -15,32 +15,35 @@
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    bslib::page_sidebar(
-      theme = biodt_theme,
+    bslib::page_fluid(
+      class = "p-0",
+    bslib::layout_sidebar(
+      border = FALSE,
+    # bslib::page_fluid(
+      # theme = biodt_theme,
       sidebar = bslib::sidebar(
-        div(id = "test",
-            shinyjs::hidden(
-              shiny::actionButton(
-                ns("load_resources"),
-                label = "Load beehave resources",
-                width = "100%",
-                class = "btn-primary"
-              )
-            )),
-        shiny::h3("Map"),
-        shiny::selectInput(ns("map_list"),
-                           label = "Choose input map",
-                           choices = NULL),
-        shiny::fileInput(ns("upload_dbf"),
-                         label = "Upload dbf locations file",
-                         accept = ".dbf"),
-        shiny::h3("Lookup table"),
-        shiny::selectInput(ns("lookup_list"),
-                           label = "Choose input lookup table",
-                           choices = NULL),
-        shiny::h3("Workflow"),
-        shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
-                                              label = "Run Workflow"))
+      div(shinyjs::hidden(
+        shiny::actionButton(
+          ns("load_resources"),
+          label = "Load beehave resources",
+          width = "100%",
+          class = "btn-primary"
+        )
+      )),
+      shiny::h3("Map"),
+      shiny::selectInput(ns("map_list"),
+                         label = "Choose input map",
+                         choices = NULL),
+      shiny::fileInput(ns("upload_dbf"),
+                       label = "Upload dbf locations file",
+                       accept = ".dbf"),
+      shiny::h3("Lookup table"),
+      shiny::selectInput(ns("lookup_list"),
+                         label = "Choose input lookup table",
+                         choices = NULL),
+      shiny::h3("Workflow"),
+      shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
+                                            label = "Run Workflow")),
       ),
       bslib::card(
         title = "input_map",
@@ -54,7 +57,7 @@ mod_beehave_ui <- function(id) {
         title = "lookup_table",
         full_screen = TRUE,
         card_title("Lookup Table"),
-        card_body(DTOutput(ns("lookup_table")))
+        card_body(shinyjs::hidden(DTOutput(ns("lookup_table"))))
       ),
       bslib::card(
         title = "parameters_table",
@@ -68,9 +71,7 @@ mod_beehave_ui <- function(id) {
         title = "output_bees",
         full_screen = TRUE,
         card_title("Output Bees Plot"),
-        card_body(plotOutput(ns(
-          "output_bees_plot"
-        )))
+        plotOutput(ns("output_bees_plot"))
       ),
       bslib::card(
         title = "output_honey",
@@ -89,6 +90,7 @@ mod_beehave_ui <- function(id) {
         )))
       )
     )
+  )
   )
 }
 
@@ -239,6 +241,8 @@ mod_beehave_server <- function(id, r) {
                        golem::app_dev()) {
                      r_beehave$maps_loaded <- TRUE
                      shinyjs::hideElement("load_resources")
+                     shinyjs::showElement("lookup_table")
+                     shinyjs::showElement("input_map_plot")
                      non_dev <- NULL
                    }
                    
@@ -277,6 +281,7 @@ mod_beehave_server <- function(id, r) {
                    
                    if (length(list.files(beehave_lookup_dir)) > 0) {
                      golem::print_dev("Input lookup tables downloaded.")
+                     shinyjs::showElement("lookup_table")
                      r_beehave$lookup_loaded <- TRUE
                      shinyjs::hideElement("load_resources")
                    } else {
@@ -517,15 +522,17 @@ mod_beehave_server <- function(id, r) {
     
     output$input_map_plot <-
       leaflet::renderLeaflet(r_beehave$input_leaflet_map)
+    
     output$lookup_table <- DT::renderDT({
       DT::datatable(
         r_beehave$lookup_table,
-        editable = list(target = "cell", disable = list(columns = c(0,1))),
+        editable = list(target = "cell", disable = list(columns = c(0, 1))),
         selection = "none",
         options = list(scrollX = TRUE),
         class = c("hover", "compact")
       )
     })
+    
     output$parameters_table <- DT::renderDT({
       DT::datatable(
         r_beehave$input_parameters,
@@ -539,9 +546,11 @@ mod_beehave_server <- function(id, r) {
     output$output_bees_plot <- renderPlot({
       random_ggplot(type = "line")
     })
+    
     output$output_honey_plot <- renderPlot({
       random_ggplot(type = "line")
     })
+    
     output$output_map_plot <- renderPlot({
       random_ggplot(type = "hex")
     })

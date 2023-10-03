@@ -21,6 +21,7 @@ app_ui <- function(request) {
       bg = "#fff",
       fillable = TRUE,
       nav_panel(title = "Info",
+                class = "container-fluid info",
                 mod_info_ui("info")),
       nav_menu(
         title = "Species response to environmental change",
@@ -40,6 +41,7 @@ app_ui <- function(request) {
       nav_menu(
         title = "Species interactions with each other and with humans",
         nav_panel(title = "Pollinators",
+                  class = "p-0",
                   mod_beehave_ui("beehave")),
         nav_panel(title = "Disease Outbreaks")
       ),
