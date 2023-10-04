@@ -2,7 +2,9 @@ Package: BioDTShiny
 Title: BioDT Shiny App
 Version: 0.0.0.9000
 Authors@R: 
-    person("AUTHOR_FIRST", "AUTHOR_LAST", , "AUTHOR@MAIL.COM", role = c("cre", "aut"))
+    c(person("Tomas", "Martinovic", email = "tomas.martinovic@vsb.cz", role = c("cre", "aut"), comment = c(ORCID = "0000-0002-0132-1434")),
+    person("Simon", "Rolph", email = "SimRol@ceh.ac.uk", role = c("aut"), comment = c(ORCID = "0000-0001-6755-9456")),
+    person("Allan", "Souza", email = "allan.souza@helsinki.fi", role = c("aut"), comment = c(ORCID = "0000-0002-1851-681X"))
 Description: This app is for the interaction with BioDT.
 License: MIT + file LICENSE
 Imports: 
@@ -30,4 +32,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.2.3 

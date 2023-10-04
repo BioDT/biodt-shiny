@@ -18,7 +18,7 @@ app_ui <- function(request) {
         img(src = "www/logo.svg",
                       height = "80px",
                       style = "padding-right: 20px"),
-                  width = "500px")),#"BioDT",
+                  width = "500px")),
       id = "navbar",
       theme = biodt_theme,
       bg = "#fff",
