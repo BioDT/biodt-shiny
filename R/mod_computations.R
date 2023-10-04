@@ -53,7 +53,8 @@ mod_computations_server <- function(id, r){
                    r_computations$df_workflows <- r4lexis::get_workflow_states(
                      r$lexis_token,
                      input$pdt
-                   )
+                   ) |>
+                     dplyr::arrange(dplyr::desc(`Execution Date`))
                  })
     
     output$workflows <- DT::renderDataTable(
