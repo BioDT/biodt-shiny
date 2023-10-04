@@ -12,10 +12,13 @@ app_ui <- function(request) {
     # Your application UI logic
     
     bslib::page_navbar(
-      title = div(img(src = "www/logo.svg",
+      window_title = "BioDT",
+      title = div(shiny::a(
+        href = "https://www.biodt.eu",
+        img(src = "www/logo.svg",
                       height = "80px",
                       style = "padding-right: 20px"),
-                  width = "500px"),#"BioDT",
+                  width = "500px")),#"BioDT",
       id = "navbar",
       theme = biodt_theme,
       bg = "#fff",
