@@ -991,7 +991,7 @@
       "Source": "Git",
       "RemoteType": "xgit",
       "RemoteUrl": "https://github.com/It4innovations/r4lexis",
-      "RemoteSha": "8ec152c5d5d6eef6acf8224ba4eacf6d93e0f7ca",
+      "RemoteSha": "a559ea3739403ad6c0bd2b525831a07ea357f6b0",
       "Requirements": [
         "curl",
         "fs",
@@ -1003,7 +1003,7 @@
         "stringr",
         "tibble"
       ],
-      "Hash": "fdb15cfa46f09a30543b2d629144f25e"
+      "Hash": "cf6ee2ab0a90c9b7f0a582259d98f82a"
     },
     "rappdirs": {
       "Package": "rappdirs",
