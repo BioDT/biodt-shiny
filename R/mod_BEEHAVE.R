@@ -12,6 +12,7 @@
 #' @importFrom leaflet leafletOutput
 #' @importFrom shinycssloaders withSpinner
 #' @importFrom shinyjs hidden
+#' @importFrom ggplot2 ggplot geom_line aes
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -71,6 +72,18 @@ mod_beehave_ui <- function(id) {
         title = "output_bees",
         full_screen = TRUE,
         card_title("Output Bees Plot"),
+        bslib::layout_column_wrap(
+          width = 1/3,
+        shiny::selectInput(ns("output_list"),
+                           label = "Choose output dataset",
+                           choices = NULL),
+        shiny::selectInput(ns("output_files_list"),
+                           label = "Choose output files",
+                           choices = NULL,
+                           multiple = TRUE),
+        shinyjs::disabled(shiny::actionButton(ns("update_output"),
+                                              label = "Show results"))
+        ),
         plotOutput(ns("output_bees_plot"))
       ),
       bslib::card(
@@ -81,14 +94,14 @@ mod_beehave_ui <- function(id) {
           "output_honey_plot"
         )))
       ),
-      bslib::card(
-        title = "output_map",
-        full_screen = TRUE,
-        card_title("Output Map"),
-        card_body(plotOutput(ns(
-          "output_map_plot"
-        )))
-      )
+      # bslib::card(
+      #   title = "output_map",
+      #   full_screen = TRUE,
+      #   card_title("Output Map"),
+      #   card_body(plotOutput(ns(
+      #     "output_map_plot"
+      #   )))
+      # )
     )
   )
   )
@@ -124,7 +137,12 @@ mod_beehave_server <- function(id, r) {
       lookup_loaded = FALSE,
       lookup_table = NULL,
       input_lookup_list = NULL,
-      input_parameters = init_input_parameters_beehave()
+      input_parameters = init_input_parameters_beehave(),
+      output_datasets_list = NULL,
+      output_datasets_names = NULL,
+      output_ds = NULL,
+      output_data = NULL,
+      output_last_dataset = ""
     )
     
     # Define beehave variables ----
@@ -150,7 +168,11 @@ mod_beehave_server <- function(id, r) {
     if (!dir.exists(beehave_parameter_dir)) {
       dir.create(beehave_parameter_dir)
     }
-    
+    beehave_output_dir <-
+      file.path(temp_dir, "output")
+    if (!dir.exists(beehave_output_dir)) {
+      dir.create(beehave_output_dir)
+    }
     # constant_defaults <- init_const()
     
     # Load maps and lookup table list ----
@@ -187,8 +209,6 @@ mod_beehave_server <- function(id, r) {
                      selected = r_beehave$input_map_list[1],
                      choices = r_beehave$input_map_list
                    )
-                   
-                   golem::print_dev(input$map_list)
                    
                    # Show download resources button if they are not downloaded
                    if ((length(r_beehave$input_map_list) > 0 &
@@ -227,7 +247,101 @@ mod_beehave_server <- function(id, r) {
                      choices = r_beehave$input_lookup_list
                    )
                    
+                   # Update result datasets ----
+                   
+                   r_beehave$output_datasets_list <- r4lexis::extract_dataset(r$lexis_dataset_list,
+                                                   "Beehave WF Output ",
+                                                   "metadata",
+                                                   "title")
+                   
+                   r_beehave$output_datasets_names <- r_beehave$output_datasets_list |>
+                     purrr::map(purrr::pluck, "metadata", "title") |>
+                     unlist()
+                   
+                   updateSelectInput(
+                     session = session,
+                     inputId = "output_list",
+                     selected = r_beehave$output_datasets_names[1],
+                     choices = r_beehave$output_datasets_names
+                   )
+                   
                  })
+    # Output dataset logic ----
+    
+    observeEvent(
+      input$output_list,
+      {
+        req(r_beehave$output_datasets_list,
+            r_beehave$output_datasets_names)
+        output_ind <- which(r_beehave$output_datasets_names == input$output_list)
+        
+        r_beehave$output_ds <- r_beehave$output_datasets_list[[output_ind]]
+        output_uuid <- r_beehave$output_datasets_list[[output_ind]] |>
+          purrr::pluck("location",
+                       "internalID")
+        
+        
+        r_beehave$output_files <-
+          r4lexis::get_dataset_file_list(
+            r$lexis_token,
+            internalID = output_uuid,
+            project = "biodt_development"
+          )
+        
+        r_beehave$output_list <-
+          r_beehave$output_files$contents |>
+          purrr::map_chr(purrr::pluck, "name")
+        
+        updateSelectInput(
+          session = session,
+          inputId = "output_files_list",
+          selected = r_beehave$output_list[1],
+          choices = r_beehave$output_list
+        )
+      },
+      ignoreInit = TRUE
+    )
+    
+    observeEvent(
+      input$output_files_list,
+      {
+        if (length(input$output_files_list) > 0) {
+          shinyjs::enable("update_output")
+        } else {
+          shinyjs::disable("update_output")
+        }
+      }
+    )
+    
+    observeEvent(
+      input$update_output,
+      {
+        req(input$output_files_list,
+            input$output_list)
+        
+        golem::print_dev("Update outputs button pressed.")
+        # Delete files if dataset changed and download new ones
+        if (r_beehave$output_last_dataset != input$output_list) {
+          file.remove(list.files(beehave_output_dir,
+                                 full.names = TRUE))
+          
+          r4lexis::download_file_from_dataset(
+            r$lexis_token,
+            r_beehave$output_ds,
+            destination_path = beehave_output_dir,
+            extract = TRUE
+          )
+        }
+        
+        print(input$output_files_list)
+        r_beehave$output_data <- purrr::map_dfr(file.path(beehave_output_dir,
+                             input$output_files_list),
+                   read.csv) |>
+          tibble::as_tibble()
+        
+        r_beehave$output_last_dataset <- input$output_list
+      }
+    )
     
     # Download maps from Lexis DDI ----
     
@@ -544,11 +658,19 @@ mod_beehave_server <- function(id, r) {
     })
     
     output$output_bees_plot <- renderPlot({
-      random_ggplot(type = "line")
+      req(r_beehave$output_data)
+      ggplot2::ggplot(r_beehave$output_data) +
+        ggplot2::geom_line(ggplot2::aes(x = `X.step.`,
+                      y = `TotalIHbees...TotalForagers`,
+                      color = WeatherFile))
     })
     
     output$output_honey_plot <- renderPlot({
-      random_ggplot(type = "line")
+      req(r_beehave$output_data)
+      ggplot2::ggplot(r_beehave$output_data) +
+        ggplot2::geom_line(ggplot2::aes(x = `X.step.`,
+                      y = `X.honeyEnergyStore.....ENERGY_HONEY_per_g...1000...`,
+                      color = WeatherFile))
     })
     
     output$output_map_plot <- renderPlot({
