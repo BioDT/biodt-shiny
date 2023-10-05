@@ -662,7 +662,10 @@ mod_beehave_server <- function(id, r) {
       ggplot2::ggplot(r_beehave$output_data) +
         ggplot2::geom_line(ggplot2::aes(x = `X.step.`,
                       y = `TotalIHbees...TotalForagers`,
-                      color = WeatherFile))
+                      color = WeatherFile)) +
+        ggplot2::xlab("Total Bees + Foragers") +
+        ggplot2::ylab("Timestep") +
+        ggplot2::theme_minimal()
     })
     
     output$output_honey_plot <- renderPlot({
@@ -670,7 +673,10 @@ mod_beehave_server <- function(id, r) {
       ggplot2::ggplot(r_beehave$output_data) +
         ggplot2::geom_line(ggplot2::aes(x = `X.step.`,
                       y = `X.honeyEnergyStore.....ENERGY_HONEY_per_g...1000...`,
-                      color = WeatherFile))
+                      color = WeatherFile)) +
+        ggplot2::xlab("Honey Energy Store") +
+        ggplot2::ylab("Timestep") +
+        ggplot2::theme_minimal()
     })
     
     output$output_map_plot <- renderPlot({
