@@ -18,15 +18,15 @@
 ## either re-run this function, call golem::set_golem_name(), or don't forget
 ## to change the name in the app_sys() function in app_config.R /!\
 ##
-golem::fill_desc(
-  pkg_name = "BioDTShiny", # The Name of the package containing the App
-  pkg_title = "BioDT Shiny App", # The Title of the package containing the App
-  pkg_description = "This app is for the interaction with BioDT.", # The Description of the package containing the App
-  author_first_name = "AUTHOR_FIRST", # Your First Name
-  author_last_name = "AUTHOR_LAST", # Your Last Name
-  author_email = "AUTHOR@MAIL.COM", # Your Email
-  repo_url = NULL # The URL of the GitHub Repo (optional)
-)
+# golem::fill_desc(
+#   pkg_name = "BioDTShiny", # The Name of the package containing the App
+#   pkg_title = "BioDT Shiny App", # The Title of the package containing the App
+#   pkg_description = "This app is for the interaction with BioDT.", # The Description of the package containing the App
+#   author_first_name = c("Tomas", "Simon", "Allan"), # Your First Name
+#   author_last_name = c("Martinovic", "Rolph", "Souza"), # Your Last Name
+#   author_email = c("tomas.martinovic@vsb.cz", "SimRol@ceh.ac.uk", "allan.souza@helsinki.fi"), # Your Email
+#   repo_url = NULL # The URL of the GitHub Repo (optional)
+# )
 
 ## Set {golem} options ----
 golem::set_golem_options()
