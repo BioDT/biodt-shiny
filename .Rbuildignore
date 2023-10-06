@@ -10,3 +10,5 @@ $run_dev.*
 ^app\.R$
 ^rsconnect$
 ^deploy$
+^Dockerfile$
+^\.dockerignore$
