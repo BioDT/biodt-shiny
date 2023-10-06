@@ -988,10 +988,13 @@
     "r4lexis": {
       "Package": "r4lexis",
       "Version": "0.0.1",
-      "Source": "Git",
-      "RemoteType": "xgit",
-      "RemoteUrl": "https://github.com/It4innovations/r4lexis",
-      "RemoteSha": "a559ea3739403ad6c0bd2b525831a07ea357f6b0",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "r4lexis",
+      "RemoteUsername": "it4innovations",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "870f891351e78fddf23457dbd2b0311972c9d715",
       "Requirements": [
         "curl",
         "fs",
@@ -1003,7 +1006,7 @@
         "stringr",
         "tibble"
       ],
-      "Hash": "cf6ee2ab0a90c9b7f0a582259d98f82a"
+      "Hash": "8c4ac6aba01b8b586cdfc7e5262ecc18"
     },
     "rappdirs": {
       "Package": "rappdirs",
@@ -1114,9 +1117,12 @@
     "rtus": {
       "Package": "rtus",
       "Version": "0.1.0",
-      "Source": "Git",
-      "RemoteType": "xgit",
-      "RemoteUrl": "https://github.com/It4innovations/rtus",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "rtus",
+      "RemoteUsername": "it4innovations",
+      "RemoteRef": "HEAD",
       "RemoteSha": "3d48e00e7fe572d53f963a70f7736bb17549f7bc",
       "Requirements": [
         "R6",
@@ -1125,7 +1131,7 @@
         "httr2",
         "stringr"
       ],
-      "Hash": "3b31877a6f27fbbff80a2728d9644d2e"
+      "Hash": "707bf378d775c187f8b99f4747da7804"
     },
     "sass": {
       "Package": "sass",
