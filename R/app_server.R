@@ -35,7 +35,15 @@ app_server <- function(input, output, session) {
   # Auth logic ----
   observeEvent(input$login_button,
                {
-                 r$lexis_token <- r4lexis::get_lexis_oauth_token()
+                 if (golem.app.prod = TRUE) {
+                   r$lexis_token <- r4lexis::get_lexis_oauth_token(
+                     host_name = "128.214.253.47",
+                     host_ip = "128.214.253.47",
+                     port = 443
+                   )
+                 } else {
+                    r$lexis_token <- r4lexis::get_lexis_oauth_token()
+                 }
                  req(r$lexis_token)
                  # Get list of available datasets to the user for biodt_development project
                  r$lexis_dataset_list <- r4lexis::get_dataset_list(
