@@ -38,5 +38,6 @@ golem::add_dockerfile_with_renv()
 ## If you want to deploy to ShinyProxy
 golem::add_dockerfile_with_renv_shinyproxy(output_dir = "deploy",
                                            document = FALSE,
-                                           from = "rocker/r-ver")
+                                           from = "rocker/r-ver",
+                                           extra_sysreqs = "libxt6")
 
