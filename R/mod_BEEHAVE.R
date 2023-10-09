@@ -181,13 +181,13 @@ mod_beehave_server <- function(id, r) {
                    req(r$lexis_token,
                        r$lexis_dataset_list)
                    
-                   
                    r_beehave$map_ds <-
                      r4lexis::extract_dataset(r$lexis_dataset_list,
                                               "Beehave Input Maps",
                                               "metadata",
                                               "title")
                    
+                   golem::print_dev("Getting Beehave Map dataset file list.")
                    r_beehave$map_files <-
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
@@ -225,6 +225,7 @@ mod_beehave_server <- function(id, r) {
                                               "metadata",
                                               "title")
                    
+                   golem::print_dev("Getting Beehave Lookup table file list.")
                    r_beehave$lookup_files <-
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
@@ -280,7 +281,7 @@ mod_beehave_server <- function(id, r) {
           purrr::pluck("location",
                        "internalID")
         
-        
+        golem::print_dev("Getting Beehave Output dataset file list.")
         r_beehave$output_files <-
           r4lexis::get_dataset_file_list(
             r$lexis_token,
@@ -325,6 +326,7 @@ mod_beehave_server <- function(id, r) {
           file.remove(list.files(beehave_output_dir,
                                  full.names = TRUE))
           
+          golem::print_dev("Donwloading Beehave Output dataset files.")
           r4lexis::download_file_from_dataset(
             r$lexis_token,
             r_beehave$output_ds,
@@ -368,7 +370,7 @@ mod_beehave_server <- function(id, r) {
                    
                    req(non_dev,
                        cancelOutput = TRUE)
-                   golem::print_dev("Input maps button pressed.")
+                   golem::print_dev("Downloading Beehave Map files.")
                    r4lexis::download_file_from_dataset(
                      r$lexis_token,
                      r_beehave$map_ds,
@@ -377,7 +379,7 @@ mod_beehave_server <- function(id, r) {
                    )
                    
                    if (length(list.files(beehave_maps_dir)) > 0) {
-                     golem::print_dev("Input maps downloaded.")
+                     golem::print_dev("Beehave Map files downloaded.")
                      r_beehave$maps_loaded <- TRUE
                      shinyjs::showElement("input_map_plot")
                    } else {
@@ -386,6 +388,7 @@ mod_beehave_server <- function(id, r) {
                    
                    # Lookup part ----
                    
+                   golem::print_dev("Downloading Beehave Lookup table files.")
                    r4lexis::download_file_from_dataset(
                      r$lexis_token,
                      r_beehave$lookup_ds,
@@ -394,7 +397,7 @@ mod_beehave_server <- function(id, r) {
                    )
                    
                    if (length(list.files(beehave_lookup_dir)) > 0) {
-                     golem::print_dev("Input lookup tables downloaded.")
+                     golem::print_dev("Beehave Lookup tables downloaded.")
                      shinyjs::showElement("lookup_table")
                      r_beehave$lookup_loaded <- TRUE
                      shinyjs::hideElement("load_resources")
@@ -555,6 +558,7 @@ mod_beehave_server <- function(id, r) {
         )
       )
       
+      golem::print_dev("Uploading Beehave Workflow dataset.")
       r4lexis::upload_dataset(
         file_path = tar_file,
         lexis_oauth_token = r$lexis_token,
@@ -578,6 +582,7 @@ mod_beehave_server <- function(id, r) {
         sep = ""
       )
       
+      golem::print_dev("Getting Beehave workflow default parameters.")
       input_defaults <-
         r4lexis::get_workflow_default_parameters(r$lexis_token,
                                                  "biodt_beehave_karolina",
@@ -616,6 +621,7 @@ mod_beehave_server <- function(id, r) {
           run_id
         ))
       
+      golem::print_dev("Executing Beehave Workflow.")
       resp <- r4lexis::execute_workflow(
         r$lexis_token,
         "biodt_beehave_karolina",
