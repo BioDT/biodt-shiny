@@ -362,7 +362,7 @@
     },
     "fansi": {
       "Package": "fansi",
-      "Version": "1.0.4",
+      "Version": "1.0.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -370,7 +370,7 @@
         "grDevices",
         "utils"
       ],
-      "Hash": "1d9e7ad3c8312a192dea7d3db0274fde"
+      "Hash": "3e8583a60163b4bc1a80016e63b9959e"
     },
     "farver": {
       "Package": "farver",
@@ -992,9 +992,9 @@
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "r4lexis",
-      "RemoteUsername": "it4innovations",
+      "RemoteUsername": "It4innovations",
       "RemoteRef": "HEAD",
-      "RemoteSha": "870f891351e78fddf23457dbd2b0311972c9d715",
+      "RemoteSha": "63a33e61aac8e3e0153ba46fe5b6501072767ef9",
       "Requirements": [
         "curl",
         "fs",
@@ -1006,7 +1006,7 @@
         "stringr",
         "tibble"
       ],
-      "Hash": "8c4ac6aba01b8b586cdfc7e5262ecc18"
+      "Hash": "49aa7ecb7a5f3d7e8299c90f18b0e527"
     },
     "rappdirs": {
       "Package": "rappdirs",
