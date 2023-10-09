@@ -13,7 +13,8 @@ app_server <- function(input, output, session) {
     lexis_token = NULL,
     lexis_dataset_list = NULL,
     page_name = NULL,
-    user_info = NULL
+    user_info = NULL,
+    show_login = TRUE
   )
   
   # Info module ----
@@ -33,44 +34,55 @@ app_server <- function(input, output, session) {
   
   
   # Auth logic ----
-  observeEvent(input$login_button,
-               {
-                 if (golem::app_prod()) {
-                   r$lexis_token <- r4lexis::get_lexis_oauth_token(
-                     host_name = "128.214.253.47",
-                     host_ip = "128.214.253.47",
-                     port = 443
-                   )
-                 } else {
-                    r$lexis_token <- r4lexis::get_lexis_oauth_token()
-                 }
-                 req(r$lexis_token)
-                 # Get list of available datasets to the user for biodt_development project
-                 r$lexis_dataset_list <- r4lexis::get_dataset_list(
-                   r$lexis_token,
-                   project = "biodt_development")
-
-                 r$user_info <- r4lexis::get_lexis_user_info(r$lexis_token)
-               })
-  
-  mod_login_server("login",
-                   r)
-  
-  # observeEvent(r$lexis_token,
+  # Redirect part is not working right now, it should be looked into in the future
+  # observeEvent(input$login_button,
   #              {
+  #                if (golem::app_prod()) {
+  #                  r$lexis_token <- r4lexis::get_lexis_oauth_token(
+  #                    host_name = "128.214.253.47",
+  #                    host_ip = "128.214.253.47"
+  #                  )
+  #                } else {
+  #                   r$lexis_token <- r4lexis::get_lexis_oauth_token()
+  #                }
   #                req(r$lexis_token)
   #                # Get list of available datasets to the user for biodt_development project
-  #                r$lexis_dataset_list <-
-  #                  r4lexis::get_dataset_list(r$lexis_token,
-  #                                            project = "biodt_development")
-  #                
-  #                r$user_info <-
-  #                  r4lexis::get_lexis_user_info(r$lexis_token)
+  #                golem::print_dev("Getting available dataset list.")
+  #                r$lexis_dataset_list <- r4lexis::get_dataset_list(
+  #                  r$lexis_token,
+  #                  project = "biodt_development")
+  #
+  #                r$user_info <- r4lexis::get_lexis_user_info(r$lexis_token)
   #              })
+  
+  # This is a backup method with login directly in a shiny app.
+  mod_login_server("login_pass",
+                   r)
+  
+  observeEvent(r$lexis_token,
+               priority = 100,
+               {
+                 req(r$lexis_token)
+                 # Get list of available datasets to the user for biodt_development project
+                 golem::print_dev("Getting available dataset list.")
+                 r$lexis_dataset_list <-
+                   r4lexis::get_dataset_list(r$lexis_token,
+                                             project = "biodt_development")
+                 
+                 r$user_info <-
+                   r4lexis::get_lexis_user_info(r$lexis_token)
+               })
   
   # Page navigation reactive event that can be passed to modules ----
   observeEvent(input$navbar,
                {
                  r$page_name <- input$navbar
+               })
+  
+  # Hide login button after user logged in ----
+  observeEvent(r$show_login,
+               {
+                 golem::print_dev("Hiding login navigation.")
+                 shinyjs::hide("nav_login")
                })
 }

@@ -50,32 +50,34 @@ app_ui <- function(request) {
       ),
       nav_panel(title = "Computations",
                 mod_computations_ui("computations")),
-      nav_menu(
-        title = "User",
-        icon = icon("user"),
-        # nav_panel(title = "Login",
-        #           mod_login_ui("login_pass")),
-        nav_item(
-          actionButton(
-            "login_button",
-            "Login",
-            width = "100%",
-            icon = icon("arrow-right-to-bracket"),
-            class = "btn-navbar"
-          )
-        ),
-        shinyjs::hidden(
-          nav_item(
-            actionButton(
-              "logout_button",
-              "Logout",
-              width = "100%",
-              icon = icon("arrow-right-from-bracket"),
-              class = "btn-navbar"
-            )
-          )
-        )
-      )
+      # nav_menu(
+      #   title = "User",
+      #   icon = icon("user"),
+        nav_panel(title = "Login",
+                  id = "nav_login",
+                  icon = icon("arrow-right-to-bracket"),
+                  mod_login_ui("login_pass"))
+        # nav_item(
+        #   actionButton(
+        #     "login_button",
+        #     "Login",
+        #     width = "100%",
+        #     icon = icon("arrow-right-to-bracket"),
+        #     class = "btn-navbar"
+        #   )
+        # ),
+        # shinyjs::hidden(
+        #   nav_item(
+        #     actionButton(
+        #       "logout_button",
+        #       "Logout",
+        #       width = "100%",
+        #       icon = icon("arrow-right-from-bracket"),
+        #       class = "btn-navbar"
+        #     )
+        #   )
+        # )
+      # )
     )
   )
 }
@@ -100,7 +102,6 @@ golem_add_external_resources <- function() {
                      app_title = "BioDTShiny"),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
-    shinyjs::useShinyjs()
     
   )
   
