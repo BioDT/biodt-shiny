@@ -53,6 +53,8 @@ app_ui <- function(request) {
       nav_menu(
         title = "User",
         icon = icon("user"),
+        # nav_panel(title = "Login",
+        #           mod_login_ui("login_pass")),
         nav_item(
           actionButton(
             "login_button",
@@ -62,13 +64,15 @@ app_ui <- function(request) {
             class = "btn-navbar"
           )
         ),
-        nav_item(
-          actionButton(
-            "logout_button",
-            "Logout",
-            width = "100%",
-            icon = icon("arrow-right-from-bracket"),
-            class = "btn-navbar"
+        shinyjs::hidden(
+          nav_item(
+            actionButton(
+              "logout_button",
+              "Logout",
+              width = "100%",
+              icon = icon("arrow-right-from-bracket"),
+              class = "btn-navbar"
+            )
           )
         )
       )
