@@ -32,6 +32,10 @@ app_server <- function(input, output, session) {
   # cultural ecosystem services module ---
   mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1")
   
+  # cultural ecosystem services module ---
+  mod_grassland_server("grassland",
+                       r)
+  
   
   # Auth logic ----
   # Redirect part is not working right now, it should be looked into in the future

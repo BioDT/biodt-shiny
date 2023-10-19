@@ -29,6 +29,8 @@ app_ui <- function(request) {
       nav_menu(
         title = "Species response to environmental change",
         nav_panel(title = "Biodiversity dynamics"),
+        nav_panel(title = "Grassland dynamics",
+                  mod_grassland_ui("grassland")),
         nav_panel(
           title = "Ecosystem services",
           mod_cultural_ecosystem_services_ui("cultural_ecosystem_services_1")
@@ -102,6 +104,7 @@ golem_add_external_resources <- function() {
                      app_title = "BioDTShiny"),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
+    shinyjs::useShinyjs()
     
   )
   
