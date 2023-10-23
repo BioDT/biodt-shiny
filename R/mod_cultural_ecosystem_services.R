@@ -33,7 +33,16 @@ mod_cultural_ecosystem_services_ui <- function(id){
                   title = "rec_pot_map",
                   full_screen = TRUE,
                   card_title("Recreation potential mapping"),
-                  card_body(leafletOutput(ns("rec_pot_map"), height = 400))
+                  card_body(
+                    selectInput("persona",
+                                "Recreation potential persona",
+                                c("
+                                  Hard recreationalist",
+                                  "Soft recreationalist"
+                                  )
+                                ),
+                    leafletOutput(ns("rec_pot_map"), height = 600),
+                    )
                 )
       ),
       
@@ -42,7 +51,7 @@ mod_cultural_ecosystem_services_ui <- function(id){
                   title = "biodiversity_map",
                   full_screen = TRUE,
                   card_title("Biodiversity mapping"),
-                  card_body(leafletOutput(ns("sp_map"), height = 400))
+                  card_body(leafletOutput(ns("sp_map"), height = 600))
                 )
       ),
       
@@ -84,7 +93,8 @@ mod_cultural_ecosystem_services_server <- function(id){
     }) 
     
     #species list table
-    sp_list_table <- data.frame(species = c("Toad","Frog"),
+    sp_list_table <- data.frame(species = c("Bufo bufo","Froggus froggus") ,
+                                common_name = c("Toad","Frog"),
                                 last_run= c("2023-04-23","2023-04-25"),
                                 n_records = c(2042,4320),
                                 view_report=rep("View report",2),
@@ -93,7 +103,7 @@ mod_cultural_ecosystem_services_server <- function(id){
     output$sp_tbl = renderDT(
       sp_list_table, 
       options = list(lengthChange = FALSE),
-      colnames = c('Species', 'Last run', 'Number of records', '',   ''), 
+      colnames = c('Species',"Common name", "Last run", 'Number of records', '',   ''), 
     )
  
   })
