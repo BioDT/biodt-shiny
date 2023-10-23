@@ -10,28 +10,54 @@
 #' @import leaflet
 mod_cultural_ecosystem_services_ui <- function(id){
   ns <- NS(id)
-  tagList(
-    fluidPage(
-      titlePanel("Cultural Ecosystem Services Prototype Digital Twin"),
+  
+  tagList(bslib::page_fluid(
+    class = "p-0",
+    bslib::page_navbar(
+      #border = FALSE,
+      # bslib::page_fluid(
+      # theme = biodt_theme,
       
-      sidebarLayout(
-        
-        sidebarPanel(
-          h3("Controls"),
-          selectInput("location", "Location", "Cairngorms National Park"),
-          selectInput("taxon", "Species group", c("Birds","Plants")),
-          selectInput("layer", "Layer", c("Recreation potential","Biodiversity")),
-        ),
-        
-        mainPanel(
-          h1("Map"),
-          leafletOutput(ns("map"), height = 400)
-          
-        )
+      sidebar = bslib::sidebar(
+        shiny::h3("Location"),
+        shiny::selectInput(ns("site_list"),
+                           label = "Choose location",
+                           choices = "Cairngorms National Park"),
+        # shiny::h3("Workflow"),
+        # shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
+        #                                       label = "Run Workflow")),
+      ),
+      
+      nav_panel("Recreation potential",
+                bslib::card(
+                  title = "rec_pot_map",
+                  full_screen = TRUE,
+                  card_title("Recreation potential mapping"),
+                  card_body(leafletOutput(ns("rec_pot_map"), height = 400))
+                )
+      ),
+      
+      nav_panel("Biodiversity",
+                bslib::card(
+                  title = "biodiversity_map",
+                  full_screen = TRUE,
+                  card_title("Biodiversity mapping"),
+                  card_body(leafletOutput(ns("sp_map"), height = 400))
+                )
+      ),
+      
+      nav_panel("Species distribution models",
+                bslib::card(
+                  title = "sdm_table",
+                  full_screen = TRUE,
+                  card_title("Species distribution models"),
+                  card_body(DT::DTOutput(ns('sp_tbl')))
+                )
       )
+      
     )
- 
-  )
+  ))
+  
 }
     
 #' cultural_ecosystem_services Server Functions
@@ -41,10 +67,34 @@ mod_cultural_ecosystem_services_server <- function(id){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
     
-    output$map <- renderLeaflet({
+    #recreation potential map
+    output$rec_pot_map <- renderLeaflet({
       leaflet() %>% 
-        addTiles()
-    })
+        addTiles() %>%
+        leaflet::setView( lng = -3.5616, lat = 57.0492, zoom = 9 )
+    })  
+    
+    #species map
+    output$sp_map <- renderLeaflet({
+      leaflet() %>% 
+        addTiles() %>%
+        addTiles(urlTemplate="https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+                 attribution ="GBIF") %>%
+        leaflet::setView( lng = -3.5616, lat = 57.0492, zoom = 9 )
+    }) 
+    
+    #species list table
+    sp_list_table <- data.frame(species = c("Toad","Frog"),
+                                last_run= c("2023-04-23","2023-04-25"),
+                                n_records = c(2042,4320),
+                                view_report=rep("View report",2),
+                                rerun_model = rep("Rerun model",2))
+    
+    output$sp_tbl = renderDT(
+      sp_list_table, 
+      options = list(lengthChange = FALSE),
+      colnames = c('Species', 'Last run', 'Number of records', '',   ''), 
+    )
  
   })
 }
