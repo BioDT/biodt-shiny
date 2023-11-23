@@ -195,9 +195,9 @@ mod_beehave_server <- function(id, r) {
                                               r$beehave_map_dataset,
                                               "metadata",
                                               "title")
+                   r_beehave$map_ds <- r_beehave$map_ds[[1]]
                    
                    golem::print_dev("Getting Beehave Map dataset file list.")
-                   golem::print_dev(r_beehave$map_ds$location$internalID)
                    r_beehave$map_files <-
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
@@ -234,6 +234,7 @@ mod_beehave_server <- function(id, r) {
                                               r$beehave_lookup_dataset,
                                               "metadata",
                                               "title")
+                   r_beehave$lookup_ds <- r_beehave$lookup_ds[[1]]
                    
                    golem::print_dev("Getting Beehave Lookup table file list.")
                    r_beehave$lookup_files <-
