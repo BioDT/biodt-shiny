@@ -15,36 +15,35 @@
 #' @importFrom ggplot2 ggplot geom_line aes
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
-  tagList(
-    bslib::page_fluid(
-      class = "p-0",
+  tagList(bslib::page_fluid(
+    class = "p-0",
     bslib::layout_sidebar(
       border = FALSE,
-    # bslib::page_fluid(
+      # bslib::page_fluid(
       # theme = biodt_theme,
       sidebar = bslib::sidebar(
-      div(shinyjs::hidden(
-        shiny::actionButton(
-          ns("load_resources"),
-          label = "Load beehave resources",
-          width = "100%",
-          class = "btn-primary"
-        )
-      )),
-      shiny::h3("Map"),
-      shiny::selectInput(ns("map_list"),
-                         label = "Choose input map",
-                         choices = NULL),
-      shiny::fileInput(ns("upload_dbf"),
-                       label = "Upload dbf locations file",
-                       accept = ".dbf"),
-      shiny::h3("Lookup table"),
-      shiny::selectInput(ns("lookup_list"),
-                         label = "Choose input lookup table",
-                         choices = NULL),
-      shiny::h3("Workflow"),
-      shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
-                                            label = "Run Workflow")),
+        div(shinyjs::hidden(
+          shiny::actionButton(
+            ns("load_resources"),
+            label = "Load beehave resources",
+            width = "100%",
+            class = "btn-primary"
+          )
+        )),
+        shiny::h3("Map"),
+        shiny::selectInput(ns("map_list"),
+                           label = "Choose input map",
+                           choices = NULL),
+        shiny::fileInput(ns("upload_dbf"),
+                         label = "Upload dbf locations file",
+                         accept = ".dbf"),
+        shiny::h3("Lookup table"),
+        shiny::selectInput(ns("lookup_list"),
+                           label = "Choose input lookup table",
+                           choices = NULL),
+        shiny::h3("Workflow"),
+        shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
+                                              label = "Run Workflow")),
       ),
       bslib::card(
         title = "input_map",
@@ -58,7 +57,9 @@ mod_beehave_ui <- function(id) {
         title = "lookup_table",
         full_screen = TRUE,
         card_title("Lookup Table"),
-        card_body(shinyjs::hidden(DTOutput(ns("lookup_table"))))
+        card_body(shinyjs::hidden(DTOutput(
+          ns("lookup_table")
+        )))
       ),
       bslib::card(
         title = "parameters_table",
@@ -73,16 +74,18 @@ mod_beehave_ui <- function(id) {
         full_screen = TRUE,
         card_title("Output Bees Plot"),
         bslib::layout_column_wrap(
-          width = 1/3,
-        shiny::selectInput(ns("output_list"),
-                           label = "Choose output dataset",
-                           choices = NULL),
-        shiny::selectInput(ns("output_files_list"),
-                           label = "Choose output files",
-                           choices = NULL,
-                           multiple = TRUE),
-        shinyjs::disabled(shiny::actionButton(ns("update_output"),
-                                              label = "Show results"))
+          width = 1 / 3,
+          shiny::selectInput(ns("output_list"),
+                             label = "Choose output dataset",
+                             choices = NULL),
+          shiny::selectInput(
+            ns("output_files_list"),
+            label = "Choose output files",
+            choices = NULL,
+            multiple = TRUE
+          ),
+          shinyjs::disabled(shiny::actionButton(ns("update_output"),
+                                                label = "Show results"))
         ),
         plotOutput(ns("output_bees_plot"))
       ),
@@ -103,8 +106,7 @@ mod_beehave_ui <- function(id) {
       #   )))
       # )
     )
-  )
-  )
+  ))
 }
 
 #' beehave Server Functions
@@ -143,11 +145,7 @@ mod_beehave_server <- function(id, r) {
       output_datasets_names = NULL,
       output_ds = NULL,
       output_data = NULL,
-      output_last_dataset = "",
-      user_project = NULL,
-      workflow_id = NULL,
-      map_dataset = NULL,
-      lookup_dataset = NULL
+      output_last_dataset = ""
     )
     
     # Define beehave variables ----
@@ -192,34 +190,19 @@ mod_beehave_server <- function(id, r) {
                        r$lexis_dataset_list,
                        r$page_name == "Pollinators")
                    
-                   if ("biodt_development" %in% r$lexis_projects) {
-                     golem::print_dev("Activating BioDT Development project")
-                     r_beehave$user_project <- "biodt_development"
-                     r_beehave$workflow_id <- "biodt_beehave_karolina"
-                     r_beehave$map_dataset <- "Beehave Input Maps"
-                     r_beehave$lookup_dataset <- "Beehave Input Lookup"
-                   } else if ("biodt_leip_hack" %in% r$lexis_projects) {
-                     golem::print_dev("Activating BioDT Leipzig project")
-                     r_beehave$user_project <- "biodt_leip_hack"
-                     r_beehave$workflow_id <- "biodt_beehave_karolina_leip"
-                     r_beehave$map_dataset <- "Beehave Input Maps Leipzig"
-                     r_beehave$lookup_dataset <- "Beehave Input Lookup Leipzig"
-                   }
-                   
-                  
                    r_beehave$map_ds <-
                      r4lexis::extract_dataset(r$lexis_dataset_list,
-                                              r_beehave$map_dataset,
+                                              r$beehave_map_dataset,
                                               "metadata",
                                               "title")
-    
+                   
                    golem::print_dev("Getting Beehave Map dataset file list.")
                    golem::print_dev(r_beehave$map_ds$location$internalID)
                    r_beehave$map_files <-
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
                        internalID = r_beehave$map_ds$location$internalID,
-                       project = r_beehave$user_project
+                       project = r$beehave_user_project
                      )
                    
                    beehave_map_list <-
@@ -248,7 +231,7 @@ mod_beehave_server <- function(id, r) {
                    
                    r_beehave$lookup_ds <-
                      r4lexis::extract_dataset(r$lexis_dataset_list,
-                                              r_beehave$lookup_dataset,
+                                              r$beehave_lookup_dataset,
                                               "metadata",
                                               "title")
                    
@@ -257,7 +240,7 @@ mod_beehave_server <- function(id, r) {
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
                        internalID = r_beehave$lookup_ds$location$internalID,
-                       project = r_beehave$user_project
+                       project = r$beehave_user_project
                      )
                    
                    beehave_lookup_list <-
@@ -277,12 +260,14 @@ mod_beehave_server <- function(id, r) {
                    
                    # Update result datasets ----
                    
-                   r_beehave$output_datasets_list <- r4lexis::extract_dataset(r$lexis_dataset_list,
-                                                   "Beehave WF Output ",
-                                                   "metadata",
-                                                   "title")
+                   r_beehave$output_datasets_list <-
+                     r4lexis::extract_dataset(r$lexis_dataset_list,
+                                              "Beehave WF Output ",
+                                              "metadata",
+                                              "title")
                    
-                   r_beehave$output_datasets_names <- r_beehave$output_datasets_list |>
+                   r_beehave$output_datasets_names <-
+                     r_beehave$output_datasets_list |>
                      purrr::map(purrr::pluck, "metadata", "title") |>
                      unlist()
                    
@@ -296,81 +281,79 @@ mod_beehave_server <- function(id, r) {
                  })
     # Output dataset logic ----
     
-    observeEvent(
-      input$output_list,
-      {
-        req(r_beehave$output_datasets_list,
-            r_beehave$output_datasets_names)
-        output_ind <- which(r_beehave$output_datasets_names == input$output_list)
-        
-        r_beehave$output_ds <- r_beehave$output_datasets_list[[output_ind]]
-        output_uuid <- r_beehave$output_datasets_list[[output_ind]] |>
-          purrr::pluck("location",
-                       "internalID")
-        
-        golem::print_dev("Getting Beehave Output dataset file list.")
-        r_beehave$output_files <-
-          r4lexis::get_dataset_file_list(
-            r$lexis_token,
-            internalID = output_uuid,
-            project = r_beehave$user_project
-          )
-        
-        r_beehave$output_list <-
-          r_beehave$output_files$contents |>
-          purrr::map_chr(purrr::pluck, "name")
-        
-        updateSelectInput(
-          session = session,
-          inputId = "output_files_list",
-          selected = r_beehave$output_list[1],
-          choices = r_beehave$output_list
-        )
-      },
-      ignoreInit = TRUE
-    )
+    observeEvent(input$output_list,
+                 {
+                   req(r_beehave$output_datasets_list,
+                       r_beehave$output_datasets_names)
+                   output_ind <-
+                     which(r_beehave$output_datasets_names == input$output_list)
+                   
+                   r_beehave$output_ds <-
+                     r_beehave$output_datasets_list[[output_ind]]
+                   output_uuid <-
+                     r_beehave$output_datasets_list[[output_ind]] |>
+                     purrr::pluck("location",
+                                  "internalID")
+                   
+                   golem::print_dev("Getting Beehave Output dataset file list.")
+                   r_beehave$output_files <-
+                     r4lexis::get_dataset_file_list(
+                       r$lexis_token,
+                       internalID = output_uuid,
+                       project = r$beehave_user_project
+                     )
+                   
+                   r_beehave$output_list <-
+                     r_beehave$output_files$contents |>
+                     purrr::map_chr(purrr::pluck, "name")
+                   
+                   updateSelectInput(
+                     session = session,
+                     inputId = "output_files_list",
+                     selected = r_beehave$output_list[1],
+                     choices = r_beehave$output_list
+                   )
+                 },
+                 ignoreInit = TRUE)
     
-    observeEvent(
-      input$output_files_list,
-      {
-        if (length(input$output_files_list) > 0) {
-          shinyjs::enable("update_output")
-        } else {
-          shinyjs::disable("update_output")
-        }
-      }
-    )
+    observeEvent(input$output_files_list,
+                 {
+                   if (length(input$output_files_list) > 0) {
+                     shinyjs::enable("update_output")
+                   } else {
+                     shinyjs::disable("update_output")
+                   }
+                 })
     
-    observeEvent(
-      input$update_output,
-      {
-        req(input$output_files_list,
-            input$output_list)
-        
-        golem::print_dev("Update outputs button pressed.")
-        # Delete files if dataset changed and download new ones
-        if (r_beehave$output_last_dataset != input$output_list) {
-          file.remove(list.files(beehave_output_dir,
-                                 full.names = TRUE))
-          
-          golem::print_dev("Donwloading Beehave Output dataset files.")
-          r4lexis::download_file_from_dataset(
-            r$lexis_token,
-            r_beehave$output_ds,
-            destination_path = beehave_output_dir,
-            extract = TRUE
-          )
-        }
-        
-        print(input$output_files_list)
-        r_beehave$output_data <- purrr::map_dfr(file.path(beehave_output_dir,
-                             input$output_files_list),
-                   read.csv) |>
-          tibble::as_tibble()
-        
-        r_beehave$output_last_dataset <- input$output_list
-      }
-    )
+    observeEvent(input$update_output,
+                 {
+                   req(input$output_files_list,
+                       input$output_list)
+                   
+                   golem::print_dev("Update outputs button pressed.")
+                   # Delete files if dataset changed and download new ones
+                   if (r_beehave$output_last_dataset != input$output_list) {
+                     file.remove(list.files(beehave_output_dir,
+                                            full.names = TRUE))
+                     
+                     golem::print_dev("Donwloading Beehave Output dataset files.")
+                     r4lexis::download_file_from_dataset(
+                       r$lexis_token,
+                       r_beehave$output_ds,
+                       destination_path = beehave_output_dir,
+                       extract = TRUE
+                     )
+                   }
+                   
+                   print(input$output_files_list)
+                   r_beehave$output_data <-
+                     purrr::map_dfr(file.path(beehave_output_dir,
+                                              input$output_files_list),
+                                    read.csv) |>
+                     tibble::as_tibble()
+                   
+                   r_beehave$output_last_dataset <- input$output_list
+                 })
     
     # Download maps from Lexis DDI ----
     
@@ -512,11 +495,10 @@ mod_beehave_server <- function(id, r) {
     })
     
     observeEvent(input$run_workflow, {
-      
-      req(r_beehave$user_project)
+      req(r$beehave_user_project)
       
       project_ddi_id <- paste0("proj",
-                               cli::hash_md5(r_beehave$user_project))
+                               cli::hash_md5(r$beehave_user_project))
       
       original_wd <- getwd()
       setwd(temp_dir)
@@ -574,7 +556,7 @@ mod_beehave_server <- function(id, r) {
         filename = basename(tar_file),
         user = r$user_info$preferred_username,
         # actually username is needed only for user access data and should be removed in future version of lexis altogether since it knows the username from token... implemented if needed in the meantime
-        project = r_beehave$user_project,
+        project = r$beehave_user_project,
         access = 'project',
         expand = 'yes',
         encryption = 'no',
@@ -618,7 +600,7 @@ mod_beehave_server <- function(id, r) {
       golem::print_dev("Getting Beehave workflow default parameters.")
       input_defaults <-
         r4lexis::get_workflow_default_parameters(r$lexis_token,
-                                                 r_beehave$workflow_id,
+                                                 r$beehave_workflow_id,
                                                  verbosity = 0)
       
       golem::print_dev("Read default workflow inputs.")
@@ -631,7 +613,7 @@ mod_beehave_server <- function(id, r) {
         paste0("/beehave-input/",
                ds_workflow_input_id,
                "/locations.dbf")
-      input_defaults$input_dataset_path <- 
+      input_defaults$input_dataset_path <-
         paste0("project/",
                project_ddi_id,
                "/",
@@ -643,12 +625,12 @@ mod_beehave_server <- function(id, r) {
           run_id
         ))
       
-
+      
       
       golem::print_dev("Executing Beehave Workflow.")
       resp <- r4lexis::execute_workflow(
         r$lexis_token,
-        "biodt_beehave_karolina",
+        r$beehave_workflow_id,
         input_defaults,
         paste0(
           "BeehaveShiny",
@@ -690,9 +672,11 @@ mod_beehave_server <- function(id, r) {
     output$output_bees_plot <- renderPlot({
       req(r_beehave$output_data)
       ggplot2::ggplot(r_beehave$output_data) +
-        ggplot2::geom_line(ggplot2::aes(x = `X.step.`,
-                      y = `TotalIHbees...TotalForagers`,
-                      color = WeatherFile)) +
+        ggplot2::geom_line(
+          ggplot2::aes(x = `X.step.`,
+                       y = `TotalIHbees...TotalForagers`,
+                       color = WeatherFile)
+        ) +
         ggplot2::xlab("Total Bees + Foragers") +
         ggplot2::ylab("Timestep") +
         ggplot2::theme_minimal()
@@ -701,9 +685,11 @@ mod_beehave_server <- function(id, r) {
     output$output_honey_plot <- renderPlot({
       req(r_beehave$output_data)
       ggplot2::ggplot(r_beehave$output_data) +
-        ggplot2::geom_line(ggplot2::aes(x = `X.step.`,
-                      y = `X.honeyEnergyStore.....ENERGY_HONEY_per_g...1000...`,
-                      color = WeatherFile)) +
+        ggplot2::geom_line(
+          ggplot2::aes(x = `X.step.`,
+                       y = `X.honeyEnergyStore.....ENERGY_HONEY_per_g...1000...`,
+                       color = WeatherFile)
+        ) +
         ggplot2::xlab("Honey Energy Store") +
         ggplot2::ylab("Timestep") +
         ggplot2::theme_minimal()

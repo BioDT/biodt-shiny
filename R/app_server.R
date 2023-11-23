@@ -15,7 +15,11 @@ app_server <- function(input, output, session) {
     page_name = NULL,
     user_info = NULL,
     show_login = TRUE,
-    lexis_projects = NULL
+    lexis_projects = NULL,
+    beehave_user_project = NULL,
+    beehave_workflow_id = NULL,
+    beehave_map_dataset = NULL,
+    beehave_lookup_dataset = NULL
   )
   
   # Info module ----
@@ -69,20 +73,42 @@ app_server <- function(input, output, session) {
                {
                  req(r$lexis_token)
                  
-                 # Get user info
+                 # Get user info ----
                  r$user_info <-
                    r4lexis::get_lexis_user_info(r$lexis_token)
                  
-                 # Get list of user projects
-                 r$lexis_projects <- purrr::map_chr(r$user_info$attributes$prj_list,
-                                                      purrr::pluck,
-                                                      "PRJ")
-          
+                 # Get list of user projects ----
+                 r$lexis_projects <-
+                   purrr::map_chr(r$user_info$attributes$prj_list,
+                                  purrr::pluck,
+                                  "PRJ")
                  
-                 # Get list of available datasets to the user for biodt_development project
+                 
+                 # Get list of available datasets to the user for biodt_development project ----
                  golem::print_dev("Getting available dataset list.")
                  r$lexis_dataset_list <-
                    r4lexis::get_dataset_list(r$lexis_token)
+                 
+                 
+                 # Set Beehave variables based on user permissions ----
+                 if ("biodt_development" %in% r$lexis_projects) {
+                   golem::print_dev("Activating BioDT Development project")
+                   r$beehave_user_project <- "biodt_development"
+                   r$beehave_workflow_id <- "biodt_beehave_karolina"
+                   r$beehave_map_dataset <- "Beehave Input Maps"
+                   r$beehave_lookup_dataset <-
+                     "Beehave Input Lookup"
+                 } else if ("biodt_leip_hack" %in% r$lexis_projects) {
+                   golem::print_dev("Activating BioDT Leipzig project")
+                   r$beehave_user_project <- "biodt_leip_hack"
+                   r$beehave_workflow_id <-
+                     "biodt_beehave_karolina_leip"
+                   r$beehave_map_dataset <-
+                     "Beehave Input Maps Leipzig"
+                   r$beehave_lookup_dataset <-
+                     "Beehave Input Lookup Leipzig"
+                 }
+                 
                })
   
   # Page navigation reactive event that can be passed to modules ----
