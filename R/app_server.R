@@ -14,7 +14,8 @@ app_server <- function(input, output, session) {
     lexis_dataset_list = NULL,
     page_name = NULL,
     user_info = NULL,
-    show_login = TRUE
+    show_login = TRUE,
+    lexis_projects = NULL
   )
   
   # Info module ----
@@ -67,14 +68,21 @@ app_server <- function(input, output, session) {
                priority = 100,
                {
                  req(r$lexis_token)
+                 
+                 # Get user info
+                 r$user_info <-
+                   r4lexis::get_lexis_user_info(r$lexis_token)
+                 
+                 # Get list of user projects
+                 r$lexis_projects <- purrr::map_chr(r$user_info$attributes$prj_list,
+                                                      purrr::pluck,
+                                                      "PRJ")
+          
+                 
                  # Get list of available datasets to the user for biodt_development project
                  golem::print_dev("Getting available dataset list.")
                  r$lexis_dataset_list <-
-                   r4lexis::get_dataset_list(r$lexis_token,
-                                             project = "biodt_development")
-                 
-                 r$user_info <-
-                   r4lexis::get_lexis_user_info(r$lexis_token)
+                   r4lexis::get_dataset_list(r$lexis_token)
                })
   
   # Page navigation reactive event that can be passed to modules ----

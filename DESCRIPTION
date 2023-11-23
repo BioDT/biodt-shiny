@@ -24,7 +24,8 @@ Imports:
     shinyjs,
     stringi,
     stringr,
-    terra
+    terra,
+    cli
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

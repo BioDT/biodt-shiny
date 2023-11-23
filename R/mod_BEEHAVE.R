@@ -115,6 +115,7 @@ mod_beehave_ui <- function(id) {
 #' @importFrom r4lexis download_file_from_dataset extract_dataset get_dataset_file_list
 #' @importFrom terra rast plet
 #' @importFrom purrr map_chr pluck
+#' @importFrom cli hash_md5
 #' @importFrom leaflet renderLeaflet
 #' @importFrom golem print_dev
 #'
@@ -142,7 +143,11 @@ mod_beehave_server <- function(id, r) {
       output_datasets_names = NULL,
       output_ds = NULL,
       output_data = NULL,
-      output_last_dataset = ""
+      output_last_dataset = "",
+      user_project = NULL,
+      workflow_id = NULL,
+      map_dataset = NULL,
+      lookup_dataset = NULL
     )
     
     # Define beehave variables ----
@@ -176,23 +181,45 @@ mod_beehave_server <- function(id, r) {
     # constant_defaults <- init_const()
     
     # Load maps and lookup table list ----
-    observeEvent(r$lexis_token,
+    # Helper function to observe multiple events
+    listen_maps_input <- reactive({
+      list(r$page_name)
+    })
+    
+    observeEvent(r$page_name,
                  {
                    req(r$lexis_token,
-                       r$lexis_dataset_list)
+                       r$lexis_dataset_list,
+                       r$page_name == "Pollinators")
                    
+                   if ("biodt_development" %in% r$lexis_projects) {
+                     golem::print_dev("Activating BioDT Development project")
+                     r_beehave$user_project <- "biodt_development"
+                     r_beehave$workflow_id <- "biodt_beehave_karolina"
+                     r_beehave$map_dataset <- "Beehave Input Maps"
+                     r_beehave$lookup_dataset <- "Beehave Input Lookup"
+                   } else if ("biodt_leip_hack" %in% r$lexis_projects) {
+                     golem::print_dev("Activating BioDT Leipzig project")
+                     r_beehave$user_project <- "biodt_leip_hack"
+                     r_beehave$workflow_id <- "biodt_beehave_karolina_leip"
+                     r_beehave$map_dataset <- "Beehave Input Maps Leipzig"
+                     r_beehave$lookup_dataset <- "Beehave Input Lookup Leipzig"
+                   }
+                   
+                  
                    r_beehave$map_ds <-
                      r4lexis::extract_dataset(r$lexis_dataset_list,
-                                              "Beehave Input Maps",
+                                              r_beehave$map_dataset,
                                               "metadata",
                                               "title")
-                   
+    
                    golem::print_dev("Getting Beehave Map dataset file list.")
+                   golem::print_dev(r_beehave$map_ds$location$internalID)
                    r_beehave$map_files <-
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
                        internalID = r_beehave$map_ds$location$internalID,
-                       project = "biodt_development"
+                       project = r_beehave$user_project
                      )
                    
                    beehave_map_list <-
@@ -221,7 +248,7 @@ mod_beehave_server <- function(id, r) {
                    
                    r_beehave$lookup_ds <-
                      r4lexis::extract_dataset(r$lexis_dataset_list,
-                                              "Beehave Input Lookup",
+                                              r_beehave$lookup_dataset,
                                               "metadata",
                                               "title")
                    
@@ -230,7 +257,7 @@ mod_beehave_server <- function(id, r) {
                      r4lexis::get_dataset_file_list(
                        r$lexis_token,
                        internalID = r_beehave$lookup_ds$location$internalID,
-                       project = "biodt_development"
+                       project = r_beehave$user_project
                      )
                    
                    beehave_lookup_list <-
@@ -286,7 +313,7 @@ mod_beehave_server <- function(id, r) {
           r4lexis::get_dataset_file_list(
             r$lexis_token,
             internalID = output_uuid,
-            project = "biodt_development"
+            project = r_beehave$user_project
           )
         
         r_beehave$output_list <-
@@ -485,6 +512,12 @@ mod_beehave_server <- function(id, r) {
     })
     
     observeEvent(input$run_workflow, {
+      
+      req(r_beehave$user_project)
+      
+      project_ddi_id <- paste0("proj",
+                               cli::hash_md5(r_beehave$user_project))
+      
       original_wd <- getwd()
       setwd(temp_dir)
       
@@ -541,7 +574,7 @@ mod_beehave_server <- function(id, r) {
         filename = basename(tar_file),
         user = r$user_info$preferred_username,
         # actually username is needed only for user access data and should be removed in future version of lexis altogether since it knows the username from token... implemented if needed in the meantime
-        project = 'biodt_development',
+        project = r_beehave$user_project,
         access = 'project',
         expand = 'yes',
         encryption = 'no',
@@ -585,7 +618,7 @@ mod_beehave_server <- function(id, r) {
       golem::print_dev("Getting Beehave workflow default parameters.")
       input_defaults <-
         r4lexis::get_workflow_default_parameters(r$lexis_token,
-                                                 "biodt_beehave_karolina",
+                                                 r_beehave$workflow_id,
                                                  verbosity = 0)
       
       golem::print_dev("Read default workflow inputs.")
@@ -593,33 +626,24 @@ mod_beehave_server <- function(id, r) {
       input_defaults$cloud_image <-
         "nithador/biodt-beehave-data:v0.1.18"
       input_defaults$input_dataset_id <-
-        stringr::str_replace(
-          input_defaults$input_dataset_id,
-          "6cb904b4-4195-11ee-9dd3-fa163e515f81",
-          ds_workflow_input_id
-        )
-      input_defaults$input_dataset_path <-
-        stringr::str_replace(
-          input_defaults$input_dataset_path,
-          "6cb904b4-4195-11ee-9dd3-fa163e515f81",
-          ds_workflow_input_id
-        )
+        ds_workflow_input_id
       input_defaults$input_locations <-
-        stringr::str_replace(
-          input_defaults$input_locations,
-          "6cb904b4-4195-11ee-9dd3-fa163e515f81",
-          ds_workflow_input_id
-        )
-      input_defaults$input_locations <-
-        stringr::str_replace(input_defaults$input_locations,
-                             "20lines",
-                             "locations")
+        paste0("/beehave-input/",
+               ds_workflow_input_id,
+               "/locations.dbf")
+      input_defaults$input_dataset_path <- 
+        paste0("project/",
+               project_ddi_id,
+               "/",
+               ds_workflow_input_id)
       input_defaults$output_dataset_ddi_metadata$title <-
         paste0(paste(
           'Beehave WF Output ',
           format(Sys.time(), "%Y%m%d%H%M%S "),
           run_id
         ))
+      
+
       
       golem::print_dev("Executing Beehave Workflow.")
       resp <- r4lexis::execute_workflow(
