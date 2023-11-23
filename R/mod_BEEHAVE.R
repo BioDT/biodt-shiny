@@ -195,7 +195,9 @@ mod_beehave_server <- function(id, r) {
                                               r$beehave_map_dataset,
                                               "metadata",
                                               "title")
-                   r_beehave$map_ds <- r_beehave$map_ds[[1]]
+                   if ("lexis_ds_list" %in% class(r_beehave$map_ds)) {
+                     r_beehave$map_ds <- r_beehave$map_ds[[1]]
+                   }
                    
                    golem::print_dev("Getting Beehave Map dataset file list.")
                    r_beehave$map_files <-
@@ -234,7 +236,10 @@ mod_beehave_server <- function(id, r) {
                                               r$beehave_lookup_dataset,
                                               "metadata",
                                               "title")
-                   r_beehave$lookup_ds <- r_beehave$lookup_ds[[1]]
+                   
+                   if ("lexis_ds_list" %in% class(r_beehave$lookup_ds)) {
+                     r_beehave$lookup_ds <- r_beehave$lookup_ds[[1]]
+                   }
                    
                    golem::print_dev("Getting Beehave Lookup table file list.")
                    r_beehave$lookup_files <-
@@ -353,7 +358,8 @@ mod_beehave_server <- function(id, r) {
                                     read.csv) |>
                      tibble::as_tibble()
                    
-                   r_beehave$output_last_dataset <- input$output_list
+                   r_beehave$output_last_dataset <-
+                     input$output_list
                  })
     
     # Download maps from Lexis DDI ----
