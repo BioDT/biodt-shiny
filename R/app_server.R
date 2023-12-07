@@ -41,6 +41,9 @@ app_server <- function(input, output, session) {
   mod_grassland_server("grassland",
                        r)
   
+  # cultural invasive alien species module ---
+  mod_grassland_server("ias",
+                       r)
   
   # Auth logic ----
   # Redirect part is not working right now, it should be looked into in the future

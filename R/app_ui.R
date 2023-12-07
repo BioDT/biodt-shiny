@@ -42,7 +42,9 @@ app_ui <- function(request) {
         nav_panel(title = "DNA detected biodiversity, poorly known habitats")
       ),
       nav_menu(title = "Dynamics and threats from and for species of policy concern",
-               nav_panel(title = "Invasive Species")),
+               nav_panel(title = "Invasive Species",
+                         class = "p-0",
+                         mod_ias_ui("ias"))),
       nav_menu(
         title = "Species interactions with each other and with humans",
         nav_panel(title = "Pollinators",
