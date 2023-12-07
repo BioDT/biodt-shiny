@@ -281,9 +281,9 @@ mod_beehave_ui <- function(id) {
         )
       ),
       # Grass Cutting Case ----
-      bslib::nav_panel(title = "Grass Cutting"),
+      # bslib::nav_panel(title = "Grass Cutting"),
       # Urban Planning Case ----
-      bslib::nav_panel(title = "Urban Planninng")
+      # bslib::nav_panel(title = "Urban Planninng")
     )
   ))
 }
@@ -719,6 +719,7 @@ mod_beehave_server <- function(id, r) {
                 file = parameters_file,
                 row.names = FALSE)
       
+      # Compress everything into tar that can be uploaded to LEXIS DDI
       tar(
         tar_file,
         files = c(
@@ -733,6 +734,7 @@ mod_beehave_server <- function(id, r) {
       
       req(r$lexis_token)
       
+      # Prepare variables for LEXIS Workflow
       run_id <- stringi::stri_rand_strings(1, 5)
       dataset_name <-
         paste('Beehave WF Input ',
@@ -771,6 +773,7 @@ mod_beehave_server <- function(id, r) {
       
       Sys.sleep(5)
       
+      # These lines are used to get the uploaded dataset UUID
       new_ds_list <- r4lexis::get_dataset_list(r$lexis_token)
       ds_data <-
         r4lexis::extract_dataset(new_ds_list, dataset_name, "metadata", "title")
