@@ -996,7 +996,7 @@
       "RemoteRepo": "r4lexis",
       "RemoteUsername": "It4innovations",
       "RemoteRef": "HEAD",
-      "RemoteSha": "63a33e61aac8e3e0153ba46fe5b6501072767ef9",
+      "RemoteSha": "af3a84a79af214de1d0d3d9003e86cf5235ce1fd",
       "Requirements": [
         "curl",
         "fs",
@@ -1008,7 +1008,7 @@
         "stringr",
         "tibble"
       ],
-      "Hash": "49aa7ecb7a5f3d7e8299c90f18b0e527"
+      "Hash": "e453d1971d0e65bb5e163b6870a69a38"
     },
     "rappdirs": {
       "Package": "rappdirs",

@@ -45,6 +45,10 @@ app_server <- function(input, output, session) {
   mod_grassland_server("ias",
                        r)
   
+  # crop wild relatives module ---
+  mod_cwr_server("cwr",
+                 r)
+  
   # Auth logic ----
   # Redirect part is not working right now, it should be looked into in the future
   # observeEvent(input$login_button,

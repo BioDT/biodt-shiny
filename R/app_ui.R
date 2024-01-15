@@ -38,7 +38,8 @@ app_ui <- function(request) {
       ),
       nav_menu(
         title = "Genetically detected biodiversity",
-        nav_panel(title = "Crop wild relatives and genetic resources for food security"),
+        nav_panel(title = "Crop wild relatives and genetic resources for food security",
+                  mod_cwr_ui("cwr")),
         nav_panel(title = "DNA detected biodiversity, poorly known habitats")
       ),
       nav_menu(title = "Dynamics and threats from and for species of policy concern",

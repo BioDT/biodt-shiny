@@ -24,6 +24,7 @@ golem::add_module(name = "beehave", with_test = TRUE) # Name of the module
 golem::add_module(name = "grassland", with_test = TRUE) # Name of the module
 golem::add_module(name = "computations", with_test = TRUE)
 golem::add_module(name = "ias", with_test = TRUE)
+golem::add_module(name = "cwr", with_test = TRUE)
 golem::add_module(name = "info", with_test = TRUE)
 
 ## Add helper functions ----
