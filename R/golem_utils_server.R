@@ -61,3 +61,12 @@ drop_nulls <- function(x) {
 #' @noRd
 rv <- function(...) shiny::reactiveValues(...)
 rvtl <- function(...) shiny::reactiveValuesToList(...)
+
+
+biodtshiny_example <- function(path = NULL) {
+  if (is.null(path)) {
+    dir(system.file("extdata", package = "BioDTShiny"))
+  } else {
+    system.file("extdata", path, package = "BioDTShiny", mustWork = TRUE)
+  }
+}

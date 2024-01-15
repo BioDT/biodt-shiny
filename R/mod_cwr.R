@@ -51,9 +51,13 @@ mod_cwr_server <- function(id,
     
     # For now there is a CWR variable available which contains and example data for Lathyrus Sativus
     
+    CWR <- terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
+                       drivers = "NETCDF") |>
+      leaflet::projectRasterForLeaflet(method = "bilinear")
+    
+    
     r_cwr <- shiny::reactiveValues(map = leaflet::leaflet() |> leaflet::addTiles(),
                                    data = CWR)
-    
     shiny::observeEvent(input$recompute,
                         ignoreInit = TRUE,
                         {
