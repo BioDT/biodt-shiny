@@ -30,10 +30,8 @@ mod_cwr_ui <- function(id) {
       max = 1,
       value = c(0, 1)
     ),
-    shiny::actionButton(
-      ns("recompute"),
-      label = "Recompute"
-    ),
+    shiny::actionButton(ns("recompute"),
+                        label = "Recompute"),
     leaflet::leafletOutput(ns("map"))
   )
 }
@@ -50,12 +48,13 @@ mod_cwr_server <- function(id,
     ns <- session$ns
     
     # Initialize reactiveValues for CWR pDT ----
-    r_cwr <- shiny::reactiveValues(map = leaflet::leaflet() |> leaflet::addTiles(),
-                                   modelled_ras = NULL)
+    r_cwr <-
+      shiny::reactiveValues(map = leaflet::leaflet() |> leaflet::addTiles(),
+                            modelled_ras = NULL)
     
     # For now there is a CWR variable available which contains and example data for Lathyrus Sativus
     
-
+    
     # Load data when CWR page opens ----
     observeEvent(r$page_name,
                  {
@@ -63,13 +62,14 @@ mod_cwr_server <- function(id,
                      golem::print_dev("Loading data for CWR")
                      load(biodtshiny_example("CWR_demo.RData"),
                           .GlobalEnv)
-                     r_cwr$modelled_ras <- terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
-                                        drivers = "NETCDF") |>
+                     r_cwr$modelled_ras <-
+                       terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
+                                   drivers = "NETCDF") |>
                        leaflet::projectRasterForLeaflet(method = "bilinear")
                    }
                  })
     
-
+    
     shiny::observeEvent(input$recompute,
                         ignoreInit = TRUE,
                         {
@@ -82,47 +82,65 @@ mod_cwr_server <- function(id,
                           )
                           if (input$species == "lathyrus_sativus") {
                             icon.red <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
-                            icon.green <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
+                            icon.green <-
+                              leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
                             
-                            layer_names <- c("Suitability",
-                                             "Predicted Presence/Absence",
-                                             "Presences",
-                                             "Absences",
-                                             "Buffer")
+                            layer_names <- c(
+                              "Suitability",
+                              "Predicted Presence/Absence",
+                              "Presences",
+                              "Absences",
+                              "Buffer"
+                            )
+                            titles <- c(
+                              "Suitability",
+                              "Predicted<br>Presence/Absence"
+                            )
                             
                             modelled_ras_sub <- r_cwr$modelled_ras
                             r_cwr$map <- leaflet::leaflet() |>
                               leaflet::addTiles()
                             # Specific part for the current example ----
-                            modelled_ras_sub[[1]] <- modelled_ras_sub |>
+                            modelled_ras_sub[[1]] <-
+                              modelled_ras_sub |>
                               terra::subset(1) |>
-                              terra::clamp(lower = input$suitability[1],
-                                           upper = input$suitability[2],
-                                           values = FALSE)
-                            modelled_ras_sub[[2]] <- modelled_ras_sub |>
+                              terra::clamp(
+                                lower = input$suitability[1],
+                                upper = input$suitability[2],
+                                values = FALSE
+                              )
+                            modelled_ras_sub[[2]] <-
+                              modelled_ras_sub |>
                               terra::subset(2) |>
-                              terra::clamp(lower = input$predicted_presence[1],
-                                           upper = input$predicted_presence[2],
-                                           values = FALSE)
+                              terra::clamp(
+                                lower = input$predicted_presence[1],
+                                upper = input$predicted_presence[2],
+                                values = FALSE
+                              )
                             
-                            # This could be probably generic ----
+                            # This could be probably quite generic ----
                             n_layers <- dim(modelled_ras_sub)[3]
                             for (i in seq_len(n_layers)) {
                               golem::cat_dev("\nLayer ", i, " is being computed.\n")
-                              layer <- modelled_ras_sub |> terra::subset(i)
+                              layer <-
+                                modelled_ras_sub |> terra::subset(i)
                               layer_range <-
                                 r_cwr$modelled_ras |> terra::minmax() |> range()
-                              layer_range[1] <- floor(layer_range[1])
-                              layer_range[2] <- ceiling(layer_range[2])
+                              layer_range[1] <-
+                                floor(layer_range[1])
+                              layer_range[2] <-
+                                ceiling(layer_range[2])
                               layer_bins <-
                                 layer |> as.vector() |> unique() |> length()
                               
                               # Setup color palette
                               if (layer_bins > 5) {
-                                pal <- leaflet::colorNumeric("viridis",
-                                                             domain = layer_range,
-                                                             reverse = TRUE,
-                                                             na.color = NA)
+                                pal <- leaflet::colorNumeric(
+                                  "magma",
+                                  domain = layer_range,
+                                  # reverse = TRUE,
+                                  na.color = NA
+                                )
                               } else {
                                 pal <- leaflet::colorFactor(
                                   "RdYlBu",
@@ -142,20 +160,33 @@ mod_cwr_server <- function(id,
                                   opacity = max((1 - (i /
                                                         5)), 0.2)
                                 ) |>
-                                leaflet::addLegend(pal = pal,
-                                                   values = layer_range,
-                                                   group = layer_names[i],
-                                                   labels = layer_names[i])
+                                leaflet::addLegend(
+                                  pal = pal,
+                                  values = layer_range,
+                                  group = layer_names[i],
+                                  title = titles[i]
+                                )
                             }
                             if (exists("absences_sf")) {
                               golem::print_dev("Adding absences in CWR.")
                               r_cwr$map <- r_cwr$map |>
                                 leaflet::addAwesomeMarkers(
                                   data = absences_sf,
-                                  clusterOptions = leaflet::markerClusterOptions(),
-                                  group = "Absences",
-                                  icon = icon.red,
-                                  label = ~species
+                                  clusterOptions = leaflet::markerClusterOptions(
+                                    iconCreateFunction = leaflet::JS(
+                                      "function (cluster) {
+    var childCount = cluster.getChildCount();
+    return new L.DivIcon({ html: '<div><span>'
+    + childCount + '</span></div>',
+    className: 'marker-cluster marker-cluster-red', iconSize: new L.Point(40, 40) });
+
+  }"
+  
+                                    )
+                                  ),
+  group = "Absences",
+  icon = icon.red,
+  label = ~ species
                                 )
                             }
                             if (exists("presences_sf")) {
@@ -163,19 +194,26 @@ mod_cwr_server <- function(id,
                               r_cwr$map <- r_cwr$map |>
                                 leaflet::addAwesomeMarkers(
                                   data = presences_sf,
-                                  clusterOptions = leaflet::markerClusterOptions(),
-                                  group = "Presences",
-                                  icon = icon.red,
-                                  label = ~species
+                                  clusterOptions = leaflet::markerClusterOptions(
+                                    iconCreateFunction = leaflet::JS(
+                                      "function (cluster) {
+    var childCount = cluster.getChildCount();
+    return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
+    className: 'marker-cluster marker-cluster-small', iconSize: new L.Point(40, 40) });
+
+  }"
+                                    )
+                                  ),
+  group = "Presences",
+  icon = icon.green,
+  label = ~ species
                                 )
                             }
                             if (exists("buffer_sf")) {
                               golem::print_dev("Adding buffer in CWR.")
                               r_cwr$map <- r_cwr$map |>
-                                leaflet::addPolygons(
-                                  data = buffer_sf,
-                                  group = "Buffer"
-                                )
+                                leaflet::addPolygons(data = buffer_sf,
+                                                     group = "Buffer")
                             }
                             r_cwr$map <- r_cwr$map |>
                               leaflet::addLayersControl(position = "topleft",

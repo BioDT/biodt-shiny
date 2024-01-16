@@ -24,3 +24,11 @@
   padding-left: 10px;
   padding-right: 10px;
 }
+
+.marker-cluster-red {
+	background-color: rgba(253, 60, 115, 0.5);
+	}
+.marker-cluster-red div {
+	background-color: rgba(241, 40, 70, 0.6);
+	color: rgb(235,235,235)
+	}
