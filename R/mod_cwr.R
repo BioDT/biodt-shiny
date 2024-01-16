@@ -81,8 +81,14 @@ mod_cwr_server <- function(id,
                             r$page_name == "Crop wild relatives and genetic resources for food security"
                           )
                           if (input$species == "lathyrus_sativus") {
+                            icon.red <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
+                            icon.green <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
+                            
                             layer_names <- c("Suitability",
-                                             "Predicted Presence/Absence")
+                                             "Predicted Presence/Absence",
+                                             "Presences",
+                                             "Absences",
+                                             "Buffer")
                             
                             modelled_ras_sub <- r_cwr$modelled_ras
                             r_cwr$map <- leaflet::leaflet() |>
@@ -142,11 +148,35 @@ mod_cwr_server <- function(id,
                                                    labels = layer_names[i])
                             }
                             if (exists("absences_sf")) {
-                              r_cwr$map <- r_cwr$map 
-                                
+                              golem::print_dev("Adding absences in CWR.")
+                              r_cwr$map <- r_cwr$map |>
+                                leaflet::addAwesomeMarkers(
+                                  data = absences_sf,
+                                  clusterOptions = leaflet::markerClusterOptions(),
+                                  group = "Absences",
+                                  icon = icon.red,
+                                  label = ~species
+                                )
                             }
-                            
-                            
+                            if (exists("presences_sf")) {
+                              golem::print_dev("Adding presences in CWR.")
+                              r_cwr$map <- r_cwr$map |>
+                                leaflet::addAwesomeMarkers(
+                                  data = presences_sf,
+                                  clusterOptions = leaflet::markerClusterOptions(),
+                                  group = "Presences",
+                                  icon = icon.red,
+                                  label = ~species
+                                )
+                            }
+                            if (exists("buffer_sf")) {
+                              golem::print_dev("Adding buffer in CWR.")
+                              r_cwr$map <- r_cwr$map |>
+                                leaflet::addPolygons(
+                                  data = buffer_sf,
+                                  group = "Buffer"
+                                )
+                            }
                             r_cwr$map <- r_cwr$map |>
                               leaflet::addLayersControl(position = "topleft",
                                                         overlayGroups = layer_names)
@@ -154,7 +184,6 @@ mod_cwr_server <- function(id,
                         })
     
     output$map <- leaflet::renderLeaflet(r_cwr$map)
-    
     
   })
 }
