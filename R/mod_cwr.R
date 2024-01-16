@@ -96,6 +96,10 @@ mod_cwr_server <- function(id,
                               "Suitability",
                               "Predicted<br>Presence/Absence"
                             )
+                            palettes <- c(
+                              "viridis",
+                              "RdYlGn"
+                            )
                             
                             modelled_ras_sub <- r_cwr$modelled_ras
                             r_cwr$map <- leaflet::leaflet() |>
@@ -125,7 +129,7 @@ mod_cwr_server <- function(id,
                               layer <-
                                 modelled_ras_sub |> terra::subset(i)
                               layer_range <-
-                                r_cwr$modelled_ras |> terra::minmax() |> range()
+                                r_cwr$modelled_ras |> terra::subset(i) |> terra::minmax() |> range()
                               layer_range[1] <-
                                 floor(layer_range[1])
                               layer_range[2] <-
@@ -136,17 +140,16 @@ mod_cwr_server <- function(id,
                               # Setup color palette
                               if (layer_bins > 5) {
                                 pal <- leaflet::colorNumeric(
-                                  "magma",
+                                  palettes[i],
                                   domain = layer_range,
                                   # reverse = TRUE,
                                   na.color = NA
                                 )
                               } else {
                                 pal <- leaflet::colorFactor(
-                                  "RdYlBu",
+                                  "Set1",
                                   domain = layer_range,
                                   levels = layer_bins,
-                                  reverse = TRUE,
                                   na.color = NA
                                 )
                               }
@@ -157,8 +160,8 @@ mod_cwr_server <- function(id,
                                   layer,
                                   project = FALSE,
                                   group = layer_names[i],
-                                  opacity = max((1 - (i /
-                                                        5)), 0.2)
+                                  opacity = 0.7,
+                                  colors = pal
                                 ) |>
                                 leaflet::addLegend(
                                   pal = pal,
