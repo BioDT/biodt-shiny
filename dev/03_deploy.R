@@ -39,6 +39,7 @@ golem::add_dockerfile_with_renv()
 golem::add_dockerfile_with_renv_shinyproxy(output_dir = "deploy",
                                            document = FALSE,
                                            from = "rocker/r-ver",
-                                           extra_sysreqs = "libxt6",
+                                           extra_sysreqs = c("libxt6",
+                                                             "libudunits2-dev"),
                                            open = FALSE)
 
