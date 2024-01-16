@@ -18,6 +18,7 @@ Imports:
     purrr,
     r4lexis,
     readr,
+    sf,
     shinipsum,
     shiny (>= 1.7.4),
     shinycssloaders,
