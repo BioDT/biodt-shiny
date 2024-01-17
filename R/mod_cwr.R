@@ -11,11 +11,25 @@
 mod_cwr_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
+    shiny::div(
+      bslib::layout_column_wrap(
+        width = "300px",
+        fixed_width = TRUE,
+    shiny::selectizeInput(
+      ns("genus"),
+      label = "Choose genus",
+      choices = list("Lathyrus" = "lathyrus")
+    ),
     shiny::selectizeInput(
       ns("species"),
-      label = "Choose species (In the future family and species)",
-      choices = list("Lathyrus Sativus" = "lathyrus_sativus")
+      label = "Choose species ",
+      choices = list("Sativus" = "sativus")
     ),
+      )),
+    shiny::div(
+      bslib::layout_column_wrap(
+        width = "400px",
+        fixed_width = TRUE,
     shiny::sliderInput(
       ns("suitability"),
       label = "Select suitability range",
@@ -29,10 +43,12 @@ mod_cwr_ui <- function(id) {
       min = 0,
       max = 1,
       value = c(0, 1)
-    ),
+    ))),
     shiny::actionButton(ns("recompute"),
-                        label = "Recompute"),
-    leaflet::leafletOutput(ns("map"))
+                        label = "Recompute",
+                        width = "130px"),
+    leaflet::leafletOutput(ns("map"),
+                           height = "500px")
   )
 }
 
@@ -74,13 +90,15 @@ mod_cwr_server <- function(id,
                         ignoreInit = TRUE,
                         {
                           shiny::req(
+                            input$genus,
                             input$species,
                             input$predicted_presence,
                             input$suitability,
                             r_cwr$modelled_ras,
                             r$page_name == "Crop wild relatives and genetic resources for food security"
                           )
-                          if (input$species == "lathyrus_sativus") {
+                          if (input$genus == "lathyrus" &
+                              input$species == "sativus") {
                             icon.red <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
                             icon.green <-
                               leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
