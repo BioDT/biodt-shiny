@@ -15,35 +15,38 @@ mod_cwr_ui <- function(id) {
       bslib::layout_column_wrap(
         width = "300px",
         fixed_width = TRUE,
-    shiny::selectizeInput(
-      ns("genus"),
-      label = "Choose genus",
-      choices = list("Lathyrus" = "lathyrus")
+        shiny::selectizeInput(
+          ns("genus"),
+          label = "Choose genus",
+          choices = list("Lathyrus" = "lathyrus")
+        ),
+        shiny::selectizeInput(
+          ns("species"),
+          label = "Choose species ",
+          choices = list("Sativus" = "sativus")
+        ),
+      )
     ),
-    shiny::selectizeInput(
-      ns("species"),
-      label = "Choose species ",
-      choices = list("Sativus" = "sativus")
-    ),
-      )),
     shiny::div(
       bslib::layout_column_wrap(
         width = "400px",
         fixed_width = TRUE,
-    shiny::sliderInput(
-      ns("suitability"),
-      label = "Select suitability range",
-      min = 0,
-      max = 500,
-      value = c(0, 500)
+        shiny::sliderInput(
+          ns("suitability"),
+          label = "Select suitability range",
+          min = 0,
+          max = 500,
+          value = c(0, 500)
+        ),
+        shiny::sliderInput(
+          ns("predicted_presence"),
+          label = "Select predicted presence/absence range",
+          min = 0,
+          max = 1,
+          value = c(0, 1)
+        )
+      )
     ),
-    shiny::sliderInput(
-      ns("predicted_presence"),
-      label = "Select predicted presence/absence range",
-      min = 0,
-      max = 1,
-      value = c(0, 1)
-    ))),
     shiny::actionButton(ns("recompute"),
                         label = "Recompute",
                         width = "130px"),
@@ -98,78 +101,73 @@ mod_cwr_server <- function(id,
                             r$page_name == "Crop wild relatives and genetic resources for food security"
                           )
                           # if (input$genus == "lathyrus" &
-                              # input$species == "sativus") {
-                            icon.red <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
-                            icon.green <-
-                              leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
+                          # input$species == "sativus") {
+                          icon.red <-
+                            leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
+                          icon.green <-
+                            leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
+                          
+                          layer_names <- c(
+                            "Suitability",
+                            "Predicted Presence/Absence",
+                            "Presences",
+                            "Absences",
+                            "Buffer"
+                          )
+                          titles <- c("Suitability",
+                                      "Predicted<br>Presence/Absence")
+                          palettes <- c("viridis",
+                                        "RdYlGn")
+                          
+                          modelled_ras_sub <- r_cwr$modelled_ras
+                          r_cwr$map <- leaflet::leaflet() |>
+                            leaflet::addTiles()
+                          # Specific part for the current example ----
+                          modelled_ras_sub[[1]] <-
+                            modelled_ras_sub |>
+                            terra::subset(1) |>
+                            terra::clamp(
+                              lower = input$suitability[1],
+                              upper = input$suitability[2],
+                              values = FALSE
+                            )
+                          modelled_ras_sub[[2]] <-
+                            modelled_ras_sub |>
+                            terra::subset(2) |>
+                            terra::clamp(
+                              lower = input$predicted_presence[1],
+                              upper = input$predicted_presence[2],
+                              values = FALSE
+                            )
+                          
+                          # This could be probably quite generic ----
+                          n_layers <- dim(modelled_ras_sub)[3]
+                          for (i in seq_len(n_layers)) {
+                            golem::cat_dev("\nLayer ", i, " is being computed.\n")
+                            layer <-
+                              modelled_ras_sub |> terra::subset(i)
+                            layer_range <-
+                              r_cwr$modelled_ras |> terra::subset(i) |> terra::minmax() |> range()
+                            layer_range[1] <-
+                              floor(layer_range[1])
+                            layer_range[2] <-
+                              ceiling(layer_range[2])
+                            layer_bins <-
+                              layer |> as.vector() |> unique() |> length()
                             
-                            layer_names <- c(
-                              "Suitability",
-                              "Predicted Presence/Absence",
-                              "Presences",
-                              "Absences",
-                              "Buffer"
-                            )
-                            titles <- c(
-                              "Suitability",
-                              "Predicted<br>Presence/Absence"
-                            )
-                            palettes <- c(
-                              "viridis",
-                              "RdYlGn"
-                            )
-                            
-                            modelled_ras_sub <- r_cwr$modelled_ras
-                            r_cwr$map <- leaflet::leaflet() |>
-                              leaflet::addTiles()
-                            # Specific part for the current example ----
-                            modelled_ras_sub[[1]] <-
-                              modelled_ras_sub |>
-                              terra::subset(1) |>
-                              terra::clamp(
-                                lower = input$suitability[1],
-                                upper = input$suitability[2],
-                                values = FALSE
+                            # Setup color palette
+                            if (layer_bins > 5) {
+                              pal <- leaflet::colorNumeric(palettes[i],
+                                                           domain = layer_range,
+                                                           # reverse = TRUE,
+                                                           na.color = NA)
+                            } else {
+                              pal <- leaflet::colorFactor(
+                                "Set1",
+                                domain = layer_range,
+                                levels = layer_bins,
+                                na.color = NA
                               )
-                            modelled_ras_sub[[2]] <-
-                              modelled_ras_sub |>
-                              terra::subset(2) |>
-                              terra::clamp(
-                                lower = input$predicted_presence[1],
-                                upper = input$predicted_presence[2],
-                                values = FALSE
-                              )
-                            
-                            # This could be probably quite generic ----
-                            n_layers <- dim(modelled_ras_sub)[3]
-                            for (i in seq_len(n_layers)) {
-                              golem::cat_dev("\nLayer ", i, " is being computed.\n")
-                              layer <-
-                                modelled_ras_sub |> terra::subset(i)
-                              layer_range <-
-                                r_cwr$modelled_ras |> terra::subset(i) |> terra::minmax() |> range()
-                              layer_range[1] <-
-                                floor(layer_range[1])
-                              layer_range[2] <-
-                                ceiling(layer_range[2])
-                              layer_bins <-
-                                layer |> as.vector() |> unique() |> length()
-                              
-                              # Setup color palette
-                              if (layer_bins > 5) {
-                                pal <- leaflet::colorNumeric(
-                                  palettes[i],
-                                  domain = layer_range,
-                                  # reverse = TRUE,
-                                  na.color = NA
-                                )
-                              } else {
-                                pal <- leaflet::colorFactor(
-                                  "Set1",
-                                  domain = layer_range,
-                                  levels = layer_bins,
-                                  na.color = NA
-                                )
                               # }
                               
                               # Plot layer
@@ -188,14 +186,15 @@ mod_cwr_server <- function(id,
                                   title = titles[i]
                                 )
                             }
-                            if (exists("absences_sf")) {
-                              golem::print_dev("Adding absences in CWR.")
-                              r_cwr$map <- r_cwr$map |>
-                                leaflet::addAwesomeMarkers(
-                                  data = absences_sf,
-                                  clusterOptions = leaflet::markerClusterOptions(
-                                    iconCreateFunction = leaflet::JS(
-                                      "function (cluster) {
+                          }
+                          if (exists("absences_sf")) {
+                            golem::print_dev("Adding absences in CWR.")
+                            r_cwr$map <- r_cwr$map |>
+                              leaflet::addAwesomeMarkers(
+                                data = absences_sf,
+                                clusterOptions = leaflet::markerClusterOptions(
+                                  iconCreateFunction = leaflet::JS(
+                                    "function (cluster) {
     var childCount = cluster.getChildCount();
     return new L.DivIcon({ html: '<div><span>'
     + childCount + '</span></div>',
@@ -203,43 +202,43 @@ mod_cwr_server <- function(id,
 
   }"
   
-                                    )
-                                  ),
+                                  )
+                                ),
   group = "Absences",
   icon = icon.red,
   label = ~ species
-                                )
-                            }
-                            if (exists("presences_sf")) {
-                              golem::print_dev("Adding presences in CWR.")
-                              r_cwr$map <- r_cwr$map |>
-                                leaflet::addAwesomeMarkers(
-                                  data = presences_sf,
-                                  clusterOptions = leaflet::markerClusterOptions(
-                                    iconCreateFunction = leaflet::JS(
-                                      "function (cluster) {
+                              )
+                          }
+                          if (exists("presences_sf")) {
+                            golem::print_dev("Adding presences in CWR.")
+                            r_cwr$map <- r_cwr$map |>
+                              leaflet::addAwesomeMarkers(
+                                data = presences_sf,
+                                clusterOptions = leaflet::markerClusterOptions(
+                                  iconCreateFunction = leaflet::JS(
+                                    "function (cluster) {
     var childCount = cluster.getChildCount();
     return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
     className: 'marker-cluster marker-cluster-small', iconSize: new L.Point(40, 40) });
 
   }"
-                                    )
-                                  ),
+                                  )
+                                ),
   group = "Presences",
   icon = icon.green,
   label = ~ species
-                                )
-                            }
-                            if (exists("buffer_sf")) {
-                              golem::print_dev("Adding buffer in CWR.")
-                              r_cwr$map <- r_cwr$map |>
-                                leaflet::addPolygons(data = buffer_sf,
-                                                     group = "Buffer")
-                            }
-                            r_cwr$map <- r_cwr$map |>
-                              leaflet::addLayersControl(position = "topleft",
-                                                        overlayGroups = layer_names)
+                              )
                           }
+                          if (exists("buffer_sf")) {
+                            golem::print_dev("Adding buffer in CWR.")
+                            r_cwr$map <- r_cwr$map |>
+                              leaflet::addPolygons(data = buffer_sf,
+                                                   group = "Buffer")
+                          }
+                          r_cwr$map <- r_cwr$map |>
+                            leaflet::addLayersControl(position = "topleft",
+                                                      overlayGroups = layer_names)
+                          
                         })
     
     output$map <- leaflet::renderLeaflet(r_cwr$map)
