@@ -97,8 +97,8 @@ mod_cwr_server <- function(id,
                             r_cwr$modelled_ras,
                             r$page_name == "Crop wild relatives and genetic resources for food security"
                           )
-                          if (input$genus == "lathyrus" &
-                              input$species == "sativus") {
+                          # if (input$genus == "lathyrus" &
+                              # input$species == "sativus") {
                             icon.red <- leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
                             icon.green <-
                               leaflet::makeAwesomeIcon(icon = NA, markerColor = 'green')
@@ -170,7 +170,7 @@ mod_cwr_server <- function(id,
                                   levels = layer_bins,
                                   na.color = NA
                                 )
-                              }
+                              # }
                               
                               # Plot layer
                               r_cwr$map <- r_cwr$map |>
