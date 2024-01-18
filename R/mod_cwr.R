@@ -64,6 +64,20 @@ mod_cwr_ui <- function(id) {
         )
       )
     ),
+    shiny::div(
+      shiny::HTML("<h2>Abiotic factors</h2>"),
+      bslib::layout_column_wrap(
+        width = "400px",
+        fixed_width = TRUE,
+        shiny::sliderInput(
+          ns("acidity"),
+          label = "Select acidity range",
+          min = 1,
+          max = 12,
+          value = c(1, 12)
+        )
+      )
+    ),
     shiny::actionButton(ns("recompute"),
                         label = "Recompute",
                         width = "130px"),
