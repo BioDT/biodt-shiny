@@ -8,26 +8,43 @@
 #'
 #' @importFrom shiny NS tagList selectizeInput sliderInput
 #' @importFrom leaflet leafletOutput
+#' @importFrom shinyWidgets pickerInput
 mod_cwr_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::div(
+      shiny::HTML("<h2>Genus and species</h2>"),
       bslib::layout_column_wrap(
         width = "300px",
         fixed_width = TRUE,
         shiny::selectizeInput(
           ns("genus"),
           label = "Choose genus",
-          choices = list("Lathyrus" = "lathyrus")
+          choices = list("Lathyrus")
         ),
         shiny::selectizeInput(
           ns("species"),
           label = "Choose species ",
-          choices = list("Sativus" = "sativus")
-        ),
+          choices = list("Sativus")
+        )
+      ),
+    ),
+    shiny::div(
+      shiny::HTML("<h2>Presence/Absence observation options</h2>"),
+      bslib::layout_column_wrap(
+        width = "300px",
+        fixed_width = TRUE,
+        shinyWidgets::pickerInput(
+          ns("abs_pres_filter"),
+          label = "Choose species for the presence/absence observation visualization",
+          choices = list("Lathyrus Sativus"),
+          multiple = TRUE,
+          options = list(`actions-box` = TRUE)
+        )
       )
     ),
     shiny::div(
+      shiny::HTML("<h2>Raster filters</h2>"),
       bslib::layout_column_wrap(
         width = "400px",
         fixed_width = TRUE,
@@ -85,6 +102,12 @@ mod_cwr_server <- function(id,
                        terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
                                    drivers = "NETCDF") |>
                        leaflet::projectRasterForLeaflet(method = "bilinear")
+                   
+                   shinyWidgets::updatePickerInput(inputId = "abs_pres_filter",
+                                               choices = unique(c(
+                                                 presences_sf$species, absences_sf$species
+                                               )),
+                                               selected = c("Lathyrus sativus"))
                    }
                  })
     
@@ -139,7 +162,7 @@ mod_cwr_server <- function(id,
                               upper = input$predicted_presence[2],
                               values = FALSE
                             )
-                          
+
                           # This could be probably quite generic ----
                           n_layers <- dim(modelled_ras_sub)[3]
                           for (i in seq_len(n_layers)) {
@@ -154,7 +177,6 @@ mod_cwr_server <- function(id,
                               ceiling(layer_range[2])
                             layer_bins <-
                               layer |> as.vector() |> unique() |> length()
-                            
                             # Setup color palette
                             if (layer_bins > 5) {
                               pal <- leaflet::colorNumeric(palettes[i],
@@ -168,33 +190,35 @@ mod_cwr_server <- function(id,
                                 levels = layer_bins,
                                 na.color = NA
                               )
-                              # }
-                              
-                              # Plot layer
-                              r_cwr$map <- r_cwr$map |>
-                                leaflet::addRasterImage(
-                                  layer,
-                                  project = FALSE,
-                                  group = layer_names[i],
-                                  opacity = 0.7,
-                                  colors = pal
-                                ) |>
-                                leaflet::addLegend(
-                                  pal = pal,
-                                  values = layer_range,
-                                  group = layer_names[i],
-                                  title = titles[i]
-                                )
                             }
+
+                            # Plot layer
+                            r_cwr$map <- r_cwr$map |>
+                              leaflet::addRasterImage(
+                                layer,
+                                project = FALSE,
+                                group = layer_names[i],
+                                opacity = 0.7,
+                                colors = pal
+                              ) |>
+                              leaflet::addLegend(
+                                pal = pal,
+                                values = layer_range,
+                                group = layer_names[i],
+                                title = titles[i]
+                              )
                           }
                           if (exists("absences_sf")) {
-                            golem::print_dev("Adding absences in CWR.")
-                            r_cwr$map <- r_cwr$map |>
-                              leaflet::addAwesomeMarkers(
-                                data = absences_sf,
-                                clusterOptions = leaflet::markerClusterOptions(
-                                  iconCreateFunction = leaflet::JS(
-                                    "function (cluster) {
+                            temp_data <- absences_sf |>
+                             dplyr::filter(species %in% input$abs_pres_filter)
+                            if (nrow(temp_data) > 0) {
+                              golem::print_dev("Adding absences in CWR.")
+                              r_cwr$map <- r_cwr$map |>
+                                leaflet::addAwesomeMarkers(
+                                  data = temp_data,
+                                  clusterOptions = leaflet::markerClusterOptions(
+                                    iconCreateFunction = leaflet::JS(
+                                      "function (cluster) {
     var childCount = cluster.getChildCount();
     return new L.DivIcon({ html: '<div><span>'
     + childCount + '</span></div>',
@@ -202,32 +226,37 @@ mod_cwr_server <- function(id,
 
   }"
   
-                                  )
-                                ),
+                                    )
+                                  ),
   group = "Absences",
   icon = icon.red,
   label = ~ species
-                              )
+                                )
+                            }
                           }
                           if (exists("presences_sf")) {
-                            golem::print_dev("Adding presences in CWR.")
-                            r_cwr$map <- r_cwr$map |>
-                              leaflet::addAwesomeMarkers(
-                                data = presences_sf,
-                                clusterOptions = leaflet::markerClusterOptions(
-                                  iconCreateFunction = leaflet::JS(
-                                    "function (cluster) {
+                            temp_data <- presences_sf |>
+                              dplyr::filter(species %in% input$abs_pres_filter)
+                            if (nrow(temp_data) > 0) {
+                              golem::print_dev("Adding presences in CWR.")
+                              r_cwr$map <- r_cwr$map |>
+                                leaflet::addAwesomeMarkers(
+                                  data = temp_data,
+                                  clusterOptions = leaflet::markerClusterOptions(
+                                    iconCreateFunction = leaflet::JS(
+                                      "function (cluster) {
     var childCount = cluster.getChildCount();
     return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
     className: 'marker-cluster marker-cluster-small', iconSize: new L.Point(40, 40) });
 
   }"
-                                  )
-                                ),
+                                    )
+                                  ),
   group = "Presences",
   icon = icon.green,
   label = ~ species
-                              )
+                                )
+                            }
                           }
                           if (exists("buffer_sf")) {
                             golem::print_dev("Adding buffer in CWR.")
