@@ -40,7 +40,9 @@ mod_cwr_ui <- function(id) {
           label = "Choose species for the presence/absence observation visualization",
           choices = list("Lathyrus Sativus"),
           multiple = TRUE,
-          options = list(`actions-box` = TRUE)
+          options = list(`actions-box` = TRUE,
+                         `live-search` = TRUE,
+                         container = "body")
         )
       )
     ),
@@ -82,8 +84,11 @@ mod_cwr_ui <- function(id) {
     shiny::actionButton(ns("recompute"),
                         label = "Recompute",
                         width = "130px"),
+    shiny::div(
+      style = "min-height = 500px",
     leaflet::leafletOutput(ns("map"),
                            height = "500px")
+    )
   )
 }
 
@@ -123,8 +128,8 @@ mod_cwr_server <- function(id,
     golem::print_dev("Hostess setup. Setting up waiter.")
     waiter <- waiter::Waiter$new(
       html = hostess$get_loader(),
-      color = "#FFFFFF",
-      fadeout = 100
+      color = "rgba(256,256,256,0.9)",
+      fadeout = 200
     )
     
     # Load data when CWR page opens ----
@@ -268,10 +273,8 @@ mod_cwr_server <- function(id,
                             
                             hostess$inc(15)
                           }
-                          if (exists("absences_tbl")) {
+                          if (exists("absences_df")) {
                             golem::print_dev("Adding absences in CWR.")
-                            
-                            print(class(absences_tbl))
                             temp_data <- absences_df[absences_df$species %in% input$abs_pres_filter, ]
                             golem::print_dev("Subsetted absences in CWR.")
                             if (nrow(temp_data) > 0) {
@@ -299,7 +302,7 @@ mod_cwr_server <- function(id,
                             
                             hostess$inc(15)
                           }
-                          if (exists("presences_tbl")) {
+                          if (exists("presences_df")) {
                             golem::print_dev("Adding presences in CWR.")
                             temp_data <- presences_df[presences_df$species %in% input$abs_pres_filter, ]
                             print(temp_data)
