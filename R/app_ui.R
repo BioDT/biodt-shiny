@@ -4,6 +4,7 @@
 #'     DO NOT REMOVE.
 #' @import shiny
 #' @import bslib
+#' @importFrom waiter autoWaiter
 #' @noRd
 app_ui <- function(request) {
   tagList(
@@ -95,6 +96,7 @@ app_ui <- function(request) {
 #' @import shiny
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @importFrom shinyjs useShinyjs
+#' @importFrom waiter useWaiter useHostess
 #' @import bslib
 #' @noRd
 golem_add_external_resources <- function() {
@@ -107,7 +109,9 @@ golem_add_external_resources <- function() {
                      app_title = "BioDTShiny"),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
-    shinyjs::useShinyjs()
+    shinyjs::useShinyjs(),
+    waiter::useWaiter(),
+    waiter::useHostess()
     
   )
   

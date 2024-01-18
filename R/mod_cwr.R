@@ -9,6 +9,7 @@
 #' @importFrom shiny NS tagList selectizeInput sliderInput
 #' @importFrom leaflet leafletOutput
 #' @importFrom shinyWidgets pickerInput
+#' @importFrom leaflegend addLegendNumeric
 mod_cwr_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -103,25 +104,54 @@ mod_cwr_server <- function(id,
                             modelled_ras = NULL)
     
     # For now there is a CWR variable available which contains and example data for Lathyrus Sativus
+    # Loaders ----
+    golem::print_dev("Setting up loaders.")
+    hostess <- waiter::Hostess$new()
+    hostess$set_loader(
+      waiter::hostess_loader(
+        progress_type = "fill",
+        preset = "circle",
+        center_page = TRUE,
+        min = 1,
+        max = 100,
+        fill_color = waiter::hostess_stripe(color1 = "#414f2f",
+                                            color2 = "#bc6c25"),
+        text_color = "#414f2f"
+      )
+    )
     
+    golem::print_dev("Hostess setup. Setting up waiter.")
+    waiter <- waiter::Waiter$new(
+      html = hostess$get_loader(),
+      color = "#FFFFFF",
+      fadeout = 100
+    )
     
     # Load data when CWR page opens ----
     observeEvent(r$page_name,
                  {
                    if (r$page_name == "Crop wild relatives and genetic resources for food security") {
+                    
+                     waiter$show()
+                     hostess$set(0)
                      golem::print_dev("Loading data for CWR")
                      load(biodtshiny_example("CWR_demo.RData"),
                           .GlobalEnv)
+                     hostess$set(30)
                      r_cwr$modelled_ras <-
                        terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
                                    drivers = "NETCDF") |>
                        leaflet::projectRasterForLeaflet(method = "bilinear")
-                   
-                   shinyWidgets::updatePickerInput(inputId = "abs_pres_filter",
-                                               choices = unique(c(
-                                                 presences_sf$species, absences_sf$species
-                                               )),
-                                               selected = c("Lathyrus sativus"))
+                     hostess$set(50)
+                     shinyWidgets::updatePickerInput(
+                       inputId = "abs_pres_filter",
+                       choices = unique(c(
+                         presences_sf$species, absences_sf$species
+                       )),
+                       selected = c("Lathyrus sativus")
+                     )
+                     hostess$set(100)
+                     waiter$hide()
                    }
                  })
     
@@ -137,8 +167,17 @@ mod_cwr_server <- function(id,
                             r_cwr$modelled_ras,
                             r$page_name == "Crop wild relatives and genetic resources for food security"
                           )
+                          
                           # if (input$genus == "lathyrus" &
                           # input$species == "sativus") {
+                         
+                          
+                          golem::print_dev("Showing waiter.")
+                          waiter$show()
+                          hostess$set(0)
+                          # Predefine variables ----
+                          
+                          golem::print_dev("Setting up variables.")
                           icon.red <-
                             leaflet::makeAwesomeIcon(icon = NA, markerColor = 'red')
                           icon.green <-
@@ -152,7 +191,7 @@ mod_cwr_server <- function(id,
                             "Buffer"
                           )
                           titles <- c("Suitability",
-                                      "Predicted<br>Presence/Absence")
+                                      "Predicted \nPresence/Absence")
                           palettes <- c("viridis",
                                         "RdYlGn")
                           
@@ -176,7 +215,8 @@ mod_cwr_server <- function(id,
                               upper = input$predicted_presence[2],
                               values = FALSE
                             )
-
+                          
+                          hostess$inc(15)
                           # This could be probably quite generic ----
                           n_layers <- dim(modelled_ras_sub)[3]
                           for (i in seq_len(n_layers)) {
@@ -205,7 +245,7 @@ mod_cwr_server <- function(id,
                                 na.color = NA
                               )
                             }
-
+                            
                             # Plot layer
                             r_cwr$map <- r_cwr$map |>
                               leaflet::addRasterImage(
@@ -215,62 +255,75 @@ mod_cwr_server <- function(id,
                                 opacity = 0.7,
                                 colors = pal
                               ) |>
-                              leaflet::addLegend(
+                              leaflegend::addLegendNumeric(
                                 pal = pal,
                                 values = layer_range,
                                 group = layer_names[i],
-                                title = titles[i]
+                                title = titles[i],
+                                width = 150,
+                                height = 20,
+                                orientation = "horizontal",
+                                position = "bottomright"
                               )
+                            
+                            hostess$inc(15)
                           }
-                          if (exists("absences_sf")) {
-                            temp_data <- absences_sf |>
-                             dplyr::filter(species %in% input$abs_pres_filter)
+                          if (exists("absences_tbl")) {
+                            golem::print_dev("Adding absences in CWR.")
+                            
+                            print(class(absences_tbl))
+                            temp_data <- absences_df[absences_df$species %in% input$abs_pres_filter, ]
+                            golem::print_dev("Subsetted absences in CWR.")
                             if (nrow(temp_data) > 0) {
-                              golem::print_dev("Adding absences in CWR.")
+                              golem::print_dev("Adding absences in CWR. [leaflet]")
                               r_cwr$map <- r_cwr$map |>
                                 leaflet::addAwesomeMarkers(
                                   data = temp_data,
+                                  lng = ~ lon,
+                                  lat = ~ lat,
                                   clusterOptions = leaflet::markerClusterOptions(
                                     iconCreateFunction = leaflet::JS(
                                       "function (cluster) {
-    var childCount = cluster.getChildCount();
-    return new L.DivIcon({ html: '<div><span>'
-    + childCount + '</span></div>',
-    className: 'marker-cluster marker-cluster-red', iconSize: new L.Point(40, 40) });
-
-  }"
-  
+                                        var childCount = cluster.getChildCount();
+                                        return new L.DivIcon({ html: '<div><span>'
+                                        + childCount + '</span></div>',
+                                        className: 'marker-cluster marker-cluster-red', iconSize: new L.Point(40, 40) });}"
+                                      
                                     )
                                   ),
-  group = "Absences",
-  icon = icon.red,
-  label = ~ species
+                                  group = "Absences",
+                                  icon = icon.red,
+                                  label = ~ species
                                 )
                             }
+                            
+                            hostess$inc(15)
                           }
-                          if (exists("presences_sf")) {
-                            temp_data <- presences_sf |>
-                              dplyr::filter(species %in% input$abs_pres_filter)
+                          if (exists("presences_tbl")) {
+                            golem::print_dev("Adding presences in CWR.")
+                            temp_data <- presences_df[presences_df$species %in% input$abs_pres_filter, ]
+                            print(temp_data)
                             if (nrow(temp_data) > 0) {
-                              golem::print_dev("Adding presences in CWR.")
                               r_cwr$map <- r_cwr$map |>
                                 leaflet::addAwesomeMarkers(
                                   data = temp_data,
+                                  lng = ~ lon,
+                                  lat = ~ lat,
                                   clusterOptions = leaflet::markerClusterOptions(
                                     iconCreateFunction = leaflet::JS(
                                       "function (cluster) {
-    var childCount = cluster.getChildCount();
-    return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
-    className: 'marker-cluster marker-cluster-small', iconSize: new L.Point(40, 40) });
-
-  }"
+                                       var childCount = cluster.getChildCount();
+                                       return new L.DivIcon({ html: '<div><span>' + childCount + '</span></div>',
+                                       className: 'marker-cluster marker-cluster-small', iconSize: new L.Point(40, 40) });}"
                                     )
                                   ),
-  group = "Presences",
-  icon = icon.green,
-  label = ~ species
+                                  group = "Presences",
+                                  icon = icon.green,
+                                  label = ~ species
                                 )
                             }
+                            
+                            hostess$inc(15)
                           }
                           if (exists("buffer_sf")) {
                             golem::print_dev("Adding buffer in CWR.")
@@ -282,6 +335,11 @@ mod_cwr_server <- function(id,
                             leaflet::addLayersControl(position = "topleft",
                                                       overlayGroups = layer_names)
                           
+                          
+                          hostess$set(100)
+                          
+                          golem::print_dev("Hiding waiter.")
+                          waiter$hide()
                         })
     
     output$map <- leaflet::renderLeaflet(r_cwr$map)

@@ -32,3 +32,11 @@
 	background-color: rgba(241, 40, 70, 0.6);
 	color: rgb(235,235,235)
 	}
+
+.waiter-fullscreen{
+  background-image: url("forest2.png");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: bottom;
+  display: flex;
+}
