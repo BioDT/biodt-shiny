@@ -26,7 +26,7 @@ mod_cwr_ui <- function(id) {
             shinyWidgets::pickerInput(
               ns("genus"),
               label = "Choose genus",
-              choices = list("Lathyrus"),
+              choices = list(""),
               multiple = FALSE,
               options = list(
                 `actions-box` = NULL,
@@ -37,7 +37,7 @@ mod_cwr_ui <- function(id) {
             shinyWidgets::pickerInput(
               ns("species"),
               label = "Choose species",
-              choices = list("Sativus"),
+              choices = list(""),
               multiple = FALSE,
               selected = c("Sativus"),
               options = list(
@@ -284,12 +284,14 @@ mod_cwr_server <- function(id,
     # Sync genus and genus_response_curves ----
     
     observeEvent(input$genus,
+                 ignoreInit = TRUE,
                  {
                    shinyWidgets::updatePickerInput(inputId = "genus_reponse_curves",
                                                    selected = input$genus)
                  })
     
     observeEvent(input$genus_reponse_curves,
+                 ignoreInit = TRUE,
                  {
                    shinyWidgets::updatePickerInput(inputId = "genus",
                                                    selected = input$genus_reponse_curves)
@@ -299,6 +301,7 @@ mod_cwr_server <- function(id,
     
     # Since genus and genus_response_curves are synced we do it just for one and set them on both pages
     observeEvent(input$genus,
+                 ignoreInit = TRUE,
                  {
                    species_list <- list.files(file.path(cwr_path, input$genus))
                    
@@ -316,6 +319,7 @@ mod_cwr_server <- function(id,
     
     # Abiotic factor type change----
     shiny::observeEvent(input$abiotic_factor_type,
+                        ignoreInit = TRUE,
                         {
                           golem::print_dev("changig abiotic factor type")
                           abiotic_factor_list <-
@@ -331,24 +335,28 @@ mod_cwr_server <- function(id,
     # Connected change in sliders ----
     
     observeEvent(input$suitability,
+                 ignoreInit = TRUE,
                  {
                    shiny::updateSliderInput(inputId = "suitability_response_curves",
                                             value = input$suitability)
                  })
     
     observeEvent(input$suitability_response_curves,
+                 ignoreInit = TRUE,
                  {
                    shiny::updateSliderInput(inputId = "suitability",
                                             value = input$suitability_response_curves)
                  })
     
     observeEvent(input$predicted_presence,
+                 ignoreInit = TRUE,
                  {
                    shiny::updateSliderInput(inputId = "predicted_presence_response_curves",
                                             value = input$predicted_presence)
                  })
     
     observeEvent(input$predicted_presence_response_curves,
+                 ignoreInit = TRUE,
                  {
                    shiny::updateSliderInput(inputId = "predicted_presence",
                                             value = input$predicted_presence_response_curves)
