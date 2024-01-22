@@ -12,6 +12,7 @@ golem::detach_all_attached()
 golem::document_and_reload()
 
 # Run the application
-run_app(golem.app.prod = FALSE)
+run_app(golem.app.prod = FALSE,
+        cwr_path = "~/Downloads/Exports/")
 
 

@@ -8,9 +8,8 @@
 app_server <- function(input, output, session) {
   # Your application server logic
   
-  # Setup common loaders for all
   
-  # Define common interactive variables
+  # Define common interactive variables ----
   r <- reactiveValues(
     lexis_token = NULL,
     lexis_dataset_list = NULL,
@@ -156,7 +155,13 @@ app_server <- function(input, output, session) {
   # Hide login button after user logged in ----
   observeEvent(r$show_login,
                {
-                 golem::print_dev("Hiding login navigation.")
-                 shinyjs::hide("nav_login")
+                 if (r$show_login == FALSE) {
+                   golem::print_dev("Hiding login navigation.")
+                   # shinyjs::hide("nav_login")
+                   bslib::nav_select(id = "navbar",
+                                     selected = "info")
+                   bslib::nav_hide(id = "navbar",
+                                   target = "nav_login")
+                 }
                })
 }

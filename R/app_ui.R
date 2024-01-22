@@ -25,6 +25,7 @@ app_ui <- function(request) {
       bg = "#fff",
       fillable = TRUE,
       nav_panel(title = "Info",
+                value = "info",
                 class = "container-fluid info",
                 mod_info_ui("info")),
       nav_menu(
@@ -60,7 +61,7 @@ app_ui <- function(request) {
       #   title = "User",
       #   icon = icon("user"),
         nav_panel(title = "Login",
-                  id = "nav_login",
+                  value = "nav_login",
                   icon = icon("arrow-right-to-bracket"),
                   mod_login_ui("login_pass"))
         # nav_item(
