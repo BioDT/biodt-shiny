@@ -85,9 +85,9 @@ mod_cwr_ui <- function(id) {
                         label = "Recompute",
                         width = "130px"),
     shiny::div(
-      style = "min-height = 500px",
-    leaflet::leafletOutput(ns("map"),
-                           height = "500px")
+      style = "min-height: 500px !important",
+      class = "html-fill-container html-fill-item",
+    leaflet::leafletOutput(ns("map"))
     )
   )
 }
@@ -99,7 +99,8 @@ mod_cwr_ui <- function(id) {
 #'
 #' @noRd
 mod_cwr_server <- function(id,
-                           r) {
+                           r,
+                           loaders) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -109,45 +110,43 @@ mod_cwr_server <- function(id,
                             modelled_ras = NULL)
     
     # For now there is a CWR variable available which contains and example data for Lathyrus Sativus
-    # Loaders ----
-    golem::print_dev("Setting up loaders.")
-    hostess <- waiter::Hostess$new()
-    hostess$set_loader(
-      waiter::hostess_loader(
-        progress_type = "fill",
-        preset = "circle",
-        center_page = TRUE,
-        min = 1,
-        max = 100,
-        fill_color = waiter::hostess_stripe(color1 = "#414f2f",
-                                            color2 = "#bc6c25"),
-        text_color = "#414f2f"
-      )
-    )
-    
-    golem::print_dev("Hostess setup. Setting up waiter.")
-    waiter <- waiter::Waiter$new(
-      html = hostess$get_loader(),
-      color = "rgba(256,256,256,0.9)",
-      fadeout = 200
-    )
     
     # Load data when CWR page opens ----
     observeEvent(r$page_name,
                  {
                    if (r$page_name == "Crop wild relatives and genetic resources for food security") {
                     
-                     waiter$show()
-                     hostess$set(0)
+                     loaders$waiter$show()
+                     loaders$hostess$set(0)
                      golem::print_dev("Loading data for CWR")
+                     
+                     # Vector of objects we expect to load
+                     stored_objects <- c("absences_sf",
+                                       "absences_df", 
+                                       "buffer_sf",
+                                       "presences_sf",
+                                       "presences_df")
+                     
+                     # Check if all the objects are loaded
+                     objects_loaded <- purrr::map_lgl(stored_objects,
+                                    exists) |>
+                       all()
+                     
+                     # If not load them
+                     if (objects_loaded) {
                      load(biodtshiny_example("CWR_demo.RData"),
                           .GlobalEnv)
-                     hostess$set(30)
-                     r_cwr$modelled_ras <-
-                       terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
-                                   drivers = "NETCDF") |>
-                       leaflet::projectRasterForLeaflet(method = "bilinear")
-                     hostess$set(50)
+                     }
+                     loaders$hostess$set(30)
+                     
+                     # Check if modeled raster is loaded and load it if not.
+                     if (is.null(r_cwr$modelled_ras)) {
+                       r_cwr$modelled_ras <-
+                         terra::rast(biodtshiny_example("Lathyrus_sativus-Outputs.nc"),
+                                     drivers = "NETCDF") |>
+                         leaflet::projectRasterForLeaflet(method = "bilinear")
+                     }
+                     loaders$hostess$set(50)
                      shinyWidgets::updatePickerInput(
                        inputId = "abs_pres_filter",
                        choices = unique(c(
@@ -155,8 +154,8 @@ mod_cwr_server <- function(id,
                        )),
                        selected = c("Lathyrus sativus")
                      )
-                     hostess$set(100)
-                     waiter$hide()
+                     loaders$hostess$set(100)
+                     loaders$waiter$hide()
                    }
                  })
     
@@ -178,8 +177,8 @@ mod_cwr_server <- function(id,
                          
                           
                           golem::print_dev("Showing waiter.")
-                          waiter$show()
-                          hostess$set(0)
+                          loaders$waiter$show()
+                          loaders$hostess$set(0)
                           # Predefine variables ----
                           
                           golem::print_dev("Setting up variables.")
@@ -221,7 +220,7 @@ mod_cwr_server <- function(id,
                               values = FALSE
                             )
                           
-                          hostess$inc(15)
+                          loaders$hostess$inc(15)
                           # This could be probably quite generic ----
                           n_layers <- dim(modelled_ras_sub)[3]
                           for (i in seq_len(n_layers)) {
@@ -271,7 +270,7 @@ mod_cwr_server <- function(id,
                                 position = "bottomright"
                               )
                             
-                            hostess$inc(15)
+                            loaders$hostess$inc(15)
                           }
                           if (exists("absences_df")) {
                             golem::print_dev("Adding absences in CWR.")
@@ -300,7 +299,7 @@ mod_cwr_server <- function(id,
                                 )
                             }
                             
-                            hostess$inc(15)
+                            loaders$hostess$inc(15)
                           }
                           if (exists("presences_df")) {
                             golem::print_dev("Adding presences in CWR.")
@@ -326,7 +325,7 @@ mod_cwr_server <- function(id,
                                 )
                             }
                             
-                            hostess$inc(15)
+                            loaders$hostess$inc(15)
                           }
                           if (exists("buffer_sf")) {
                             golem::print_dev("Adding buffer in CWR.")
@@ -339,10 +338,10 @@ mod_cwr_server <- function(id,
                                                       overlayGroups = layer_names)
                           
                           
-                          hostess$set(100)
+                          loaders$hostess$set(100)
                           
                           golem::print_dev("Hiding waiter.")
-                          waiter$hide()
+                          loaders$waiter$hide()
                         })
     
     output$map <- leaflet::renderLeaflet(r_cwr$map)

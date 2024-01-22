@@ -8,6 +8,8 @@
 app_server <- function(input, output, session) {
   # Your application server logic
   
+  # Setup common loaders for all
+  
   # Define common interactive variables
   r <- reactiveValues(
     lexis_token = NULL,
@@ -21,6 +23,32 @@ app_server <- function(input, output, session) {
     beehave_map_dataset = NULL,
     beehave_lookup_dataset = NULL
   )
+  
+  # Loaders ----
+  loaders <- list()
+  golem::print_dev("Setting up loaders.")
+  loaders$hostess <- waiter::Hostess$new()
+  loaders$hostess$set_loader(
+    waiter::hostess_loader(
+      progress_type = "fill",
+      preset = "circle",
+      center_page = TRUE,
+      min = 1,
+      max = 100,
+      fill_color = waiter::hostess_stripe(color1 = "#414f2f",
+                                          color2 = "#bc6c25"),
+      text_color = "#414f2f"
+    )
+  )
+  
+  golem::print_dev("Hostess setup. Setting up waiter.")
+  loaders$waiter <- waiter::Waiter$new(
+    html = loaders$hostess$get_loader(),
+    color = "rgba(256,256,256,0.9)",
+    fadeout = 200
+  )
+  
+  
   
   # Info module ----
   mod_info_server("info",
@@ -47,7 +75,8 @@ app_server <- function(input, output, session) {
   
   # crop wild relatives module ---
   mod_cwr_server("cwr",
-                 r)
+                 r,
+                 loaders)
   
   # Auth logic ----
   # Redirect part is not working right now, it should be looked into in the future

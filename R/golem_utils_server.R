@@ -62,7 +62,11 @@ drop_nulls <- function(x) {
 rv <- function(...) shiny::reactiveValues(...)
 rvtl <- function(...) shiny::reactiveValuesToList(...)
 
-
+#' Get path to raw data
+#' 
+#' @param path library path
+#'
+#' @export
 biodtshiny_example <- function(path = NULL) {
   if (is.null(path)) {
     dir(system.file("extdata", package = "BioDTShiny"))
