@@ -261,7 +261,7 @@ mod_cwr_server <- function(id,
     # Set pickers when CWR page opens ----
     observeEvent(r$page_name,
                  {
-                   if (r$page_name == "Crop wild relatives and genetic resources for food security") {
+                   req(r$page_name == "Crop wild relatives and genetic resources for food security") 
                      golem::print_dev("Loading data for CWR")
                      
                      # Get available datasets ----
@@ -279,7 +279,7 @@ mod_cwr_server <- function(id,
                                                      choices = list_genus,
                                                      selected = list_genus[1])
                     
-                   }
+                   
                  })
     # Sync genus and genus_response_curves ----
     
@@ -359,6 +359,8 @@ mod_cwr_server <- function(id,
                  ignoreInit = TRUE,
                  ignoreNULL = TRUE,
                  {
+                   
+                   req(r$page_name == "Crop wild relatives and genetic resources for food security") 
                    if (exists("Shiny_ls")) {
                     rm(Shiny_ls)
                    }
