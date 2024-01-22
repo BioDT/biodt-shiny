@@ -555,8 +555,7 @@ mod_cwr_server <- function(id,
                                     )
                                   ),
                                   group = "Absences",
-                                  icon = icon.red,
-                                  label = ~ species
+                                  icon = icon.red
                                 )
                             
                             loaders$hostess$inc(15)
@@ -578,8 +577,7 @@ mod_cwr_server <- function(id,
                                     )
                                   ),
                                   group = "Presences",
-                                  icon = icon.green,
-                                  label = ~ species
+                                  icon = icon.green
                                 )
                             
                             loaders$hostess$inc(15)
