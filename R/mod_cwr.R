@@ -300,7 +300,7 @@ mod_cwr_server <- function(id,
     # Since genus and genus_response_curves are synced we do it just for one and set them on both pages
     observeEvent(input$genus,
                  {
-                   species_list <- list.files(paste0(cwr_path, input$genus))
+                   species_list <- list.files(file.path(cwr_path, input$genus))
                    
                    shinyWidgets::updatePickerInput(inputId = "species",
                                                    choices = species_list,
