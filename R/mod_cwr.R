@@ -354,7 +354,7 @@ mod_cwr_server <- function(id,
                                             value = input$predicted_presence_response_curves)
                  })
     
-    # Null data on species change ----
+    # Species change logic ----
     observeEvent(input$species,
                  ignoreInit = TRUE,
                  ignoreNULL = TRUE,
@@ -362,6 +362,10 @@ mod_cwr_server <- function(id,
                    if (exists("Shiny_ls")) {
                     rm(Shiny_ls)
                    }
+                   
+                   
+                   loaders$waiter$show()
+                   loaders$hostess$set(0)
                    
                    species_path <- file.path(cwr_path,
                                              input$genus,
@@ -376,6 +380,7 @@ mod_cwr_server <- function(id,
                    }
                    
                    
+                   loaders$hostess$inc(40)
                    suitability_range <- r_cwr$rasters[[input$species]] |>
                      terra::subset(1) |>
                      terra::minmax() |>
@@ -391,6 +396,7 @@ mod_cwr_server <- function(id,
                      
                    )
                    
+                   loaders$hostess$inc(40)
                    shiny::updateSliderInput(
                      inputId = "suitability_response_curves",
                      min = floor(suitability_range[1]),
@@ -400,6 +406,8 @@ mod_cwr_server <- function(id,
                      
                    )
                    
+                   loaders$hostess$set(100)
+                   loaders$waiter$hide()
                  })
     
     
