@@ -12,84 +12,204 @@
 #' @importFrom leaflegend addLegendNumeric
 mod_cwr_ui <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::div(
-      shiny::HTML("<h2>Genus and species</h2>"),
-      bslib::layout_column_wrap(
-        width = "300px",
-        fixed_width = TRUE,
-        shiny::selectizeInput(
-          ns("genus"),
-          label = "Choose genus",
-          choices = list("Lathyrus")
+  shiny::tagList(bslib::page_fluid(
+    class = "p-0",
+    bslib::navset_tab(
+      # Map ----
+      bslib::nav_panel(
+        title = "Map",
+        shiny::div(
+          shiny::HTML("<h2>Genus and species</h2>"),
+          bslib::layout_column_wrap(
+            width = "300px",
+            fixed_width = TRUE,
+            shinyWidgets::pickerInput(
+              ns("genus"),
+              label = "Choose genus",
+              choices = list("Lathyrus"),
+              multiple = FALSE,
+              options = list(
+                `actions-box` = NULL,
+                `live-search` = TRUE,
+                container = "body"
+              )
+            ),
+            shinyWidgets::pickerInput(
+              ns("species"),
+              label = "Choose species",
+              choices = list("Sativus"),
+              multiple = FALSE,
+              selected = c("Sativus"),
+              options = list(
+                `actions-box` = NULL,
+                `live-search` = TRUE,
+                container = "body"
+              )
+            )
+          ),
         ),
-        shiny::selectizeInput(
-          ns("species"),
-          label = "Choose species ",
-          choices = list("Sativus")
+        #shiny::div(
+        #  shiny::HTML("<h2>Presence/Absence observation options</h2>"),
+        #  bslib::layout_column_wrap(
+        #    width = "300px",
+        #    fixed_width = TRUE,
+        #    shinyWidgets::pickerInput(
+        #      ns("abs_pres_filter"),
+        #      label = "Choose species for the presence/absence observation visualization",
+        #      choices = list("Lathyrus Sativus"),
+        #      multiple = TRUE,
+        #      options = list(`actions-box` = TRUE,
+        #                     `live-search` = TRUE,
+        #                     container = "body")
+        #    )
+        #  )
+        #),
+        shiny::div(
+          shiny::HTML("<h2>Raster filters</h2>"),
+          bslib::layout_column_wrap(
+            width = "400px",
+            fixed_width = TRUE,
+            shiny::sliderInput(
+              ns("suitability"),
+              label = "Select suitability range",
+              min = 0,
+              max = 500,
+              value = c(0, 500)
+            ),
+            shiny::sliderInput(
+              ns("predicted_presence"),
+              label = "Select predicted presence/absence range",
+              min = 0,
+              max = 1,
+              value = c(0, 1)
+            )
+          )
+        ),
+        shiny::div(
+          shiny::HTML("<h2>Abiotic factors</h2>"),
+          bslib::layout_column_wrap(
+            width = "400px",
+            fixed_width = TRUE,
+            shinyWidgets::pickerInput(
+              ns("abiotic_factor_type"),
+              label = "Select type of abiotic factor",
+              choices = c("type_a", "type_b", "acidity"),
+              multiple = TRUE
+            ),
+            shinyjs::hidden(
+              shiny::sliderInput(
+                ns("type_a"),
+                label = "Select ...",
+                min = 1,
+                max = 12,
+                value = c(1, 12)
+              )
+            ),shinyjs::hidden(
+              shiny::sliderInput(
+                ns("type_b"),
+                label = "Select ...",
+                min = 1,
+                max = 12,
+                value = c(1, 12)
+              )
+            ),shinyjs::hidden(
+              shiny::sliderInput(
+                ns("acidity"),
+                label = "Select acidity range",
+                min = 1,
+                max = 12,
+                value = c(1, 12)
+              )
+            )
+          )
+        ),
+        shiny::actionButton(ns("recompute"),
+                            label = "Recompute",
+                            width = "130px"),
+        shiny::div(
+          style = "min-height: 500px !important",
+          class = "html-fill-container html-fill-item",
+          leaflet::leafletOutput(ns("map"))
         )
       ),
-    ),
-    shiny::div(
-      shiny::HTML("<h2>Presence/Absence observation options</h2>"),
-      bslib::layout_column_wrap(
-        width = "300px",
-        fixed_width = TRUE,
-        shinyWidgets::pickerInput(
-          ns("abs_pres_filter"),
-          label = "Choose species for the presence/absence observation visualization",
-          choices = list("Lathyrus Sativus"),
-          multiple = TRUE,
-          options = list(`actions-box` = TRUE,
-                         `live-search` = TRUE,
-                         container = "body")
-        )
-      )
-    ),
-    shiny::div(
-      shiny::HTML("<h2>Raster filters</h2>"),
-      bslib::layout_column_wrap(
-        width = "400px",
-        fixed_width = TRUE,
-        shiny::sliderInput(
-          ns("suitability"),
-          label = "Select suitability range",
-          min = 0,
-          max = 500,
-          value = c(0, 500)
+      
+      # Response Curves ----
+      bslib::nav_panel(
+        title = "Response Curves",
+        shiny::div(
+          shiny::HTML("<h2>Genus and species</h2>"),
+          bslib::layout_column_wrap(
+            width = "300px",
+            fixed_width = TRUE,
+            shinyWidgets::pickerInput(
+              ns("genus_response_curves"),
+              label = "Choose genus",
+              choices = list("Lathyrus"),
+              multiple = FALSE,
+              options = list(
+                `actions-box` = NULL,
+                `live-search` = TRUE,
+                container = "body"
+              )
+            ),
+            shinyWidgets::pickerInput(
+              ns("species_response_curves"),
+              label = "Choose species",
+              choices = list("Sativus"),
+              multiple = TRUE,
+              selected = c("Sativus"),
+              options = list(
+                `actions-box` = TRUE,
+                `live-search` = TRUE,
+                container = "body"
+              )
+            )
+          ),
         ),
-        shiny::sliderInput(
-          ns("predicted_presence"),
-          label = "Select predicted presence/absence range",
-          min = 0,
-          max = 1,
-          value = c(0, 1)
-        )
-      )
-    ),
-    shiny::div(
-      shiny::HTML("<h2>Abiotic factors</h2>"),
-      bslib::layout_column_wrap(
-        width = "400px",
-        fixed_width = TRUE,
-        shiny::sliderInput(
-          ns("acidity"),
-          label = "Select acidity range",
-          min = 1,
-          max = 12,
-          value = c(1, 12)
-        )
-      )
-    ),
-    shiny::actionButton(ns("recompute"),
-                        label = "Recompute",
-                        width = "130px"),
-    shiny::div(
-      style = "min-height: 500px !important",
-      class = "html-fill-container html-fill-item",
-    leaflet::leafletOutput(ns("map"))
+        shiny::div(
+          shiny::HTML("<h2>Raster filters</h2>"),
+          bslib::layout_column_wrap(
+            width = "400px",
+            fixed_width = TRUE,
+            shiny::sliderInput(
+              ns("suitability_response_curves"),
+              label = "Select suitability range",
+              min = 0,
+              max = 500,
+              value = c(0, 500)
+            ),
+            shiny::sliderInput(
+              ns("predicted_presence_response_curves"),
+              label = "Select predicted presence/absence range",
+              min = 0,
+              max = 1,
+              value = c(0, 1)
+            )
+          )
+        ),
+        # shiny::div(
+        #   shiny::HTML("<h2>Abiotic factors</h2>"),
+        #   bslib::layout_column_wrap(
+        #     width = "400px",
+        #     fixed_width = TRUE,
+        #     shiny::sliderInput(
+        #       ns("acidity_response_curves"),
+        #       label = "Select acidity range",
+        #       min = 1,
+        #       max = 12,
+        #       value = c(1, 12)
+        #     )
+        #   )
+        # ),
+        shiny::actionButton(
+          ns("recompute_response_curves"),
+          label = "Recompute",
+          width = "130px"
+        ),
+      ),
+      
     )
-  )
+  ))
 }
 
 #' cwr Server Functions
@@ -115,27 +235,27 @@ mod_cwr_server <- function(id,
     observeEvent(r$page_name,
                  {
                    if (r$page_name == "Crop wild relatives and genetic resources for food security") {
-                    
                      loaders$waiter$show()
                      loaders$hostess$set(0)
                      golem::print_dev("Loading data for CWR")
                      
                      # Vector of objects we expect to load
                      stored_objects <- c("absences_sf",
-                                       "absences_df", 
-                                       "buffer_sf",
-                                       "presences_sf",
-                                       "presences_df")
+                                         "absences_df",
+                                         "buffer_sf",
+                                         "presences_sf",
+                                         "presences_df")
                      
                      # Check if all the objects are loaded
-                     objects_loaded <- purrr::map_lgl(stored_objects,
-                                    exists) |>
+                     objects_loaded <-
+                       purrr::map_lgl(stored_objects,
+                                      exists) |>
                        all()
                      
                      # If not load them
                      if (objects_loaded) {
-                     load(biodtshiny_example("CWR_demo.RData"),
-                          .GlobalEnv)
+                       load(biodtshiny_example("CWR_demo.RData"),
+                            .GlobalEnv)
                      }
                      loaders$hostess$set(30)
                      
@@ -147,19 +267,66 @@ mod_cwr_server <- function(id,
                          leaflet::projectRasterForLeaflet(method = "bilinear")
                      }
                      loaders$hostess$set(50)
-                     shinyWidgets::updatePickerInput(
-                       inputId = "abs_pres_filter",
-                       choices = unique(c(
-                         presences_sf$species, absences_sf$species
-                       )),
-                       selected = c("Lathyrus sativus")
-                     )
+                     # shinyWidgets::updatePickerInput(
+                     #   inputId = "abs_pres_filter",
+                     #   choices = unique(c(
+                     #     presences_sf$species, absences_sf$species
+                     #   )),
+                     #   selected = c("Lathyrus sativus")
+                     # )
                      loaders$hostess$set(100)
                      loaders$waiter$hide()
                    }
                  })
+    # Abiotic factor type change----
+    shiny::observeEvent(input$abiotic_factor_type,
+                        {
+                          golem::print_dev("changig abiotic factor type")
+                          abiotic_factor_list <-
+                            c("type_a", "type_b", "acidity")
+                          
+                          for (abiotic_factor in abiotic_factor_list) {
+                            golem::print_dev(abiotic_factor)
+                            shinyjs::toggle(abiotic_factor,
+                                            condition = abiotic_factor %in% input$abiotic_factor_type)
+                          }
+                        })
     
+    # Connected change in sliders
     
+    observeEvent(input$suitability,
+                 {
+                   shiny::updateSliderInput(
+                     inputId = "suitability_response_curves",
+                     value = input$suitability
+                   )
+                 })
+    
+    observeEvent(input$suitability_response_curves,
+                 {
+                   shiny::updateSliderInput(
+                     inputId = "suitability",
+                     value = input$suitability_response_curves
+                   )
+                 })
+    
+    observeEvent(input$predicted_presence,
+                 {
+                   shiny::updateSliderInput(
+                     inputId = "predicted_presence_response_curves",
+                     value = input$predicted_presence
+                   )
+                 })
+    
+    observeEvent(input$predicted_presence_response_curves,
+                 {
+                   shiny::updateSliderInput(
+                     inputId = "predicted_presence",
+                     value = input$predicted_presence_response_curves
+                   )
+                 })
+    
+    # Prepare map after clicking recompute ----
     shiny::observeEvent(input$recompute,
                         ignoreInit = TRUE,
                         {
@@ -174,7 +341,6 @@ mod_cwr_server <- function(id,
                           
                           # if (input$genus == "lathyrus" &
                           # input$species == "sativus") {
-                         
                           
                           golem::print_dev("Showing waiter.")
                           loaders$waiter$show()
@@ -274,7 +440,8 @@ mod_cwr_server <- function(id,
                           }
                           if (exists("absences_df")) {
                             golem::print_dev("Adding absences in CWR.")
-                            temp_data <- absences_df[absences_df$species %in% input$abs_pres_filter, ]
+                            temp_data <-
+                              absences_df #[absences_df$species %in% input$abs_pres_filter, ]
                             golem::print_dev("Subsetted absences in CWR.")
                             if (nrow(temp_data) > 0) {
                               golem::print_dev("Adding absences in CWR. [leaflet]")
@@ -303,7 +470,8 @@ mod_cwr_server <- function(id,
                           }
                           if (exists("presences_df")) {
                             golem::print_dev("Adding presences in CWR.")
-                            temp_data <- presences_df[presences_df$species %in% input$abs_pres_filter, ]
+                            temp_data <-
+                              presences_df #[presences_df$species %in% input$abs_pres_filter, ]
                             print(temp_data)
                             if (nrow(temp_data) > 0) {
                               r_cwr$map <- r_cwr$map |>
