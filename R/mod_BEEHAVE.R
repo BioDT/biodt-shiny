@@ -18,7 +18,8 @@ mod_beehave_ui <- function(id) {
   tagList(bslib::page_fluid(
     class = "p-0",
     bslib::navset_tab(
-      # Beekeper Case ----
+      
+    # Beekeper Case ----
       bslib::nav_panel(
         title = "Beekeper",
         bslib::layout_sidebar(
@@ -27,6 +28,7 @@ mod_beehave_ui <- function(id) {
           # theme = biodt_theme,
           # Beekeper Sidebar ----
           sidebar = bslib::sidebar(
+            id = ns("sidebar"),
             div(shinyjs::hidden(
               shiny::actionButton(
                 ns("load_resources"),
@@ -35,7 +37,10 @@ mod_beehave_ui <- function(id) {
                 class = "btn-primary"
               )
             )),
-            shiny::h3("Map"),
+            shiny::h3(
+              id = ns("map_input"),
+              "Map")
+            ,
             shiny::selectInput(ns("map_list"),
                                label = "Choose input map",
                                choices = NULL),
@@ -49,6 +54,11 @@ mod_beehave_ui <- function(id) {
             shiny::h3("Workflow"),
             shinyjs::disabled(shiny::actionButton(ns("run_workflow"),
                                                   label = "Run Workflow")),
+            shiny::h4("Instructions"),
+            shiny::actionButton(
+              ns("walkthrough"),
+              "Run guided walkthrough",
+            )
           ),
           
           # Beekeeper Main page ----
@@ -116,6 +126,7 @@ mod_beehave_ui <- function(id) {
           # )
         )
       ),
+      
       # Expert Case ----
       bslib::nav_panel(
         title = "Expert",
@@ -299,6 +310,7 @@ mod_beehave_ui <- function(id) {
 #' @importFrom cli hash_md5
 #' @importFrom leaflet renderLeaflet
 #' @importFrom golem print_dev
+#' @importFrom cicerone Cicerone
 #'
 #' @noRd
 mod_beehave_server <- function(id, r) {
@@ -1017,6 +1029,29 @@ mod_beehave_server <- function(id, r) {
                      condition = !is.null(r_beehave$expert_param_table)
                    )
                  })
+    
+    # Set up Cicerone library for walkthrough----
+    guide <- cicerone::Cicerone$
+      new(allow_close = TRUE)$
+      step(
+        ns("sidebar"),
+        "Beehave Sidebar Controls",
+        "Ok, friends, let's see what we have here. In the begining you'll probably want to set up these control(s)...",
+        position = "right"
+      )$
+      step(
+        ns("map_input"),
+        "Input Map",
+        "For example, choosing input map via select input below...",
+        position = "right"
+      )
+    
+    # Run walkthrough via action button "Instructions"----
+    observeEvent(
+      input$walkthrough,
+      guide$init(session = session)$start()  
+    )
+    
   })
 }
 
