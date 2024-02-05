@@ -18,17 +18,19 @@ mod_beehave_ui <- function(id) {
   ns <- NS(id)
   tagList(
     bslib::page_fluid(
+      id = ns("page"),
       class = "p-0",
       bslib::navset_tab(
-
+        
         bslib::nav_panel(
           # Beekeper Case ----
           title = "Beekeper",
           bslib::card(
             # Beekeper Input Map ----
             title = "input_map",
+            id = ns("input_map"),
             full_screen = TRUE,
-            card_title("Input Map"),
+            #card_title("Input Map"),
             card_body(
               shiny::h3(
                 id = ns("map_input"),
@@ -38,6 +40,9 @@ mod_beehave_ui <- function(id) {
                 ns("map_list"),
                 label = "Choose input map",
                 choices = NULL
+              ),
+              shiny::textOutput(
+                ns("map_coordinates"),
               ),
               leaflet::leafletOutput(
                 ns("input_map_plot")
@@ -541,6 +546,11 @@ mod_beehave_server <- function(id, r) {
       r_beehave$feature <- input$input_map_plot_draw_new_feature
       # print(r_beehave$feature)
     })
+    
+    observeEvent(r_beehave$feature, {
+      renderText(input$map_coordinates)
+    })
+    #input$input_map_coordinates <- renderText("blabla")
     
     # Output dataset logic ----
     observeEvent(input$output_list,
@@ -1098,16 +1108,16 @@ mod_beehave_server <- function(id, r) {
     guide <- cicerone::Cicerone$
       new(allow_close = TRUE)$
       step(
-        ns("sidebar"),
+        ns("page"),
         "Beehave Sidebar Controls",
-        "Ok, friends, let's see what we have here. In the begining you'll probably want to set up these control(s)...",
+        "Ok, friends, let's see what we have here. In the begining you'll probably need to choose a map...",
         position = "right"
       )$
       step(
         ns("map_input"),
         "Input Map",
-        "For example, choosing input map via select input below...",
-        position = "right"
+        "For example, it can be done by choosing input map via select input below...",
+        position = "bottom"
       )
     
     # Run walkthrough via action button "Instructions"----
