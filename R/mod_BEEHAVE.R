@@ -546,11 +546,10 @@ mod_beehave_server <- function(id, r) {
       r_beehave$feature <- input$input_map_plot_draw_new_feature
       # print(r_beehave$feature)
     })
-    
-    observeEvent(r_beehave$feature, {
-      renderText(input$map_coordinates)
-    })
-    #input$input_map_coordinates <- renderText("blabla")
+
+    # Leaflet map - render coordinates
+    output$map_coordinates <-
+      renderPrint(r_beehave$feature$geometry$coordinates)
     
     # Output dataset logic ----
     observeEvent(input$output_list,
