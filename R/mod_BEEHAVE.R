@@ -20,47 +20,44 @@ mod_beehave_ui <- function(id) {
     bslib::page_fluid(
       class = "p-0",
       bslib::navset_tab(
-          # title = "Beekeper",
-          # bslib::page_fluid(
-          # theme = biodt_theme,
-          #  id = ns("sidebar"),
-          # ^^^ used to belong to smt like navSidebar or so
-          
+
+        bslib::nav_panel(
           # Beekeper Case ----
-          bslib::nav_panel(
-            title = "Beekeper",
-            bslib::card(
-              title = "input_map",
-              full_screen = TRUE,
-              card_title("Input Map"),
-              card_body(
-                shiny::h3(
-                  id = ns("map_input"),
-                  "Map"
-                ),
-                shiny::selectInput(
-                  ns("map_list"),
-                  label = "Choose input map",
-                  choices = NULL
-                ),
-                leaflet::leafletOutput(
-                  ns("input_map_plot")
-                ),
-                bslib::layout_columns(
-                  col_widths = c(3, 9),
-                  shinyjs::disabled(
-                    shiny::actionButton(
-                      ns("load_resources"),
-                      label = "Load beehave resources",
-                      width = "100%",
-                      class = "btn-primary"
-                    )
+          title = "Beekeper",
+          bslib::card(
+            # Beekeper Input Map ----
+            title = "input_map",
+            full_screen = TRUE,
+            card_title("Input Map"),
+            card_body(
+              shiny::h3(
+                id = ns("map_input"),
+                "Map"
+              ),
+              shiny::selectInput(
+                ns("map_list"),
+                label = "Choose input map",
+                choices = NULL
+              ),
+              leaflet::leafletOutput(
+                ns("input_map_plot")
+              ),
+              bslib::layout_columns(
+                col_widths = c(3, 9),
+                shinyjs::disabled(
+                  shiny::actionButton(
+                    ns("load_resources"),
+                    label = "Load beehave resources",
+                    width = "100%",
+                    class = "btn-primary"
                   )
                 )
-              ),
+              )
             ),
+          ),
 
-        # Lookup Table----
+        
+            # Lookup Table----
           bslib::card(
             title = "lookup_table",
             full_screen = TRUE,
@@ -81,64 +78,60 @@ mod_beehave_ui <- function(id) {
             )
           ),
         
-        
-        # Parameters Table----
-        bslib::card(
-          title = "parameters_table",
-          full_screen = TRUE,
-          bslib::card_body(
-            shiny::h3("Parameters Table"),
-            DT::DTOutput(
-              ns("parameters_table")
-            )
-          )
-        ),
-        
-        
-        
-        
-        # Output Bees Plot----
-        bslib::card(
-          title = "output_bees",
-          full_screen = TRUE,
-          card_title("Output Bees Plot"),
-          bslib::layout_column_wrap(
-            width = 1 / 3,
-            shiny::selectInput(ns("output_list"),
-                               label = "Choose output dataset",
-                               choices = NULL),
-            shiny::selectInput(
-              ns("output_files_list"),
-              label = "Choose output files",
-              choices = NULL,
-              multiple = TRUE
-            ),
-            shinyjs::disabled(
-              shiny::actionButton(
-                ns("update_output"),
-                label = "Show results"
+            # Parameters Table----
+          # bslib::card(
+          #   title = "parameters_table",
+          #   full_screen = TRUE,
+          #   bslib::card_body(
+          #     shiny::h3("Parameters Table"),
+          #     DT::DTOutput(
+          #       ns("parameters_table")
+          #     )
+          #   )
+          # ),
+
+            # Output Bees Plot----
+          bslib::card(
+            title = "output_bees",
+            full_screen = TRUE,
+            card_title("Output Bees Plot"),
+            bslib::layout_column_wrap(
+              width = 1 / 3,
+              shiny::selectInput(ns("output_list"),
+                                 label = "Choose output dataset",
+                                 choices = NULL),
+              shiny::selectInput(
+                ns("output_files_list"),
+                label = "Choose output files",
+                choices = NULL,
+                multiple = TRUE
+              ),
+              shinyjs::disabled(
+                shiny::actionButton(
+                  ns("update_output"),
+                  label = "Show results"
+                )
+              ),
+              plotOutput(
+                ns("output_bees_plot")
               )
-            ),
-            plotOutput(
-              ns("output_bees_plot")
             )
-          )
-        ),
+          ),
         
-        # Output Honey Plot----
-        bslib::card(
-          title = "output_honey",
-          full_screen = TRUE,
-          card_title("Output Honey Plot"),
-          card_body(
-            plotOutput(
-              ns("output_honey_plot")
+            # Output Honey Plot----
+          bslib::card(
+            title = "output_honey",
+            full_screen = TRUE,
+            card_title("Output Honey Plot"),
+            card_body(
+              plotOutput(
+                ns("output_honey_plot")
+              )
             )
-          )
-        ),
+          ),
         
         
-          # h4 run wrf action btn----
+            # h4 run wrf action btn----
           bslib::card(
             bslib::layout_columns(
               div(
@@ -156,19 +149,17 @@ mod_beehave_ui <- function(id) {
                 ),
               )
             )
-          ),
-          
+          )
         ),
-      ),
+
+          # Expert Case ----
+    bslib::nav_panel(
+      title = "Expert",
+      bslib::navset_underline(
+        id = ns("expert_wizard"),
+        bslib::nav_spacer(),
       
-      # Expert Case ----
-      bslib::nav_panel(
-        title = "Expert",
-        bslib::navset_underline(
-          id = ns("expert_wizard"),
-          bslib::nav_spacer(),
-        
-        # Expert Model ----
+          # Expert Model ----
         bslib::nav_panel(
           title = "1 - Model",
           bslib::card(
@@ -180,160 +171,155 @@ mod_beehave_ui <- function(id) {
               inputId = ns("expert_model_select"),
               label = "Select model",
               choices = ""
+            ),
+            shiny::actionButton(
+              inputId = ns("expert_model_param"),
+              label = "Next"
             )
           ),
-          shiny::actionButton(
-            inputId = ns("expert_model_param"),
-            label = "Next"
+        ),
+          # Expert Parameter Space ----
+        bslib::nav_panel(
+          title = "2 - Parameters",
+          bslib::card(
+            bslib::card_body(
+              shiny::actionButton(
+                inputId = ns("expert_parameter_load"),
+                label = "Load default parameters"
+              ),
+              shiny::fileInput(
+                inputId = ns("expert_parameter_file"),
+                label = "Upload parameter file"
+              ),
+              shinyjs::disabled(
+                DT::DTOutput(
+                  ns("expert_parameter_table")
+                )
+              ),
+              bslib::layout_column_wrap(
+                width = 1 / 2,
+                shiny::actionButton(
+                  inputId = ns("expert_param_model"),
+                  label = "Back"
+                ),
+                shiny::actionButton(
+                  inputId = ns("expert_param_location"),
+                  label = "Next"
+                )
+              )
+            )
           )
         ),
-        
-        
-        # Expert Parameter Space ----
-          bslib::nav_panel(
-            title = "2 - Parameters",
-            bslib::card(
-              bslib::card_body(
-                shiny::actionButton(
-                  inputId = ns("expert_parameter_load"),
-                  label = "Load default parameters"
+          # Expert Locations ----
+        bslib::nav_panel(
+          title = "3 - Locations",
+          bslib::card(
+            shiny::radioButtons(
+              ns("expert_locations_type"),
+              label = "Choose location type",
+              choices = list(
+                `Latitude, Longitude` = "latlon",
+                `CSV file` = "csv",
+                `Custom input file` = "custom"
+              ),
+              selected = "latlon"
+            ),
+            shiny::div(
+              id = ns("expert_locations_latlon"),
+              bslib::layout_column_wrap(
+                width = 1 / 3,
+                shiny::numericInput(
+                  ns("lat"),
+                  label = "Latitude",
+                  value = 51.3919
                 ),
-                shiny::fileInput(
-                  inputId = ns("expert_parameter_file"),
-                  label = "Upload parameter file"
-                ),
-                shinyjs::disabled(
-                  DT::DTOutput(ns("expert_parameter_table"))
+                shiny::numericInput(
+                  ns("lon"),
+                  label = "Longitude",
+                  value = 11.8787
                 )
               )
             ),
-            bslib::layout_column_wrap(
-              width = 1 / 2,
-              shiny::actionButton(
-                inputId = ns("expert_param_model"),
-                label = "Back"
-              ),
-              shiny::actionButton(
-                inputId = ns("expert_param_location"),
-                label = "Next"
+            shinyjs::disabled(
+              shiny::fileInput(
+                inputId = ns("expert_locations_file"),
+                label = "Upload locations file"
               )
             )
-          )
-        
-        )
-      ),
-    
-      
-      # Expert Locations ----
-      bslib::nav_panel(
-        title = "3 - Locations",
-        bslib::card(
-          shiny::radioButtons(
-            ns("expert_locations_type"),
-            label = "Choose location type",
-            choices = list(
-              `Latitude, Longitude` = "latlon",
-              `CSV file` = "csv",
-              `Custom input file` = "custom"
+          ), 
+          bslib::card(
+            title = "expert_locations_map",
+            full_screen = TRUE,
+            card_title("Locations Map"),
+            card_body(
+              leaflet::leafletOutput(
+                ns("expert_locations_map_plot")
+              )
+            )
+          ),
+          bslib::layout_column_wrap(
+            width = 1 / 2,
+            shiny::actionButton(
+              inputId = ns("expert_location_param"),
+              label = "Back"
             ),
-            selected = "latlon"
-          ),
-          shiny::div(
-            id = ns("expert_locations_latlon"),
-            bslib::layout_column_wrap(
-              width = 1 / 3,
-              shiny::numericInput(ns("lat"),
-                                  label = "Latitude",
-                                  value = 51.3919),
-              shiny::numericInput(ns("lon"),
-                                  label = "Longitude",
-                                  value = 11.8787)
-            )
-          ),
-          shinyjs::disabled(
-            shiny::fileInput(
-              inputId = ns("expert_locations_file"),
-              label = "Upload locations file"
-            )
-          )
-        ), 
-        bslib::card(
-          title = "expert_locations_map",
-          full_screen = TRUE,
-          card_title("Locations Map"),
-          card_body(
-            leaflet::leafletOutput(
-              ns("expert_locations_map_plot")
+            shiny::actionButton(
+              inputId = ns("expert_location_weather"),
+              label = "Next"
             )
           )
         ),
-        bslib::layout_column_wrap(
-          width = 1 / 2,
-          shiny::actionButton(
-            inputId = ns("expert_location_param"),
-            label = "Back"
+          # Expert Weather ----
+        bslib::nav_panel(
+          title = "4 - Weather",
+          bslib::card(
+            shiny::radioButtons(
+              ns("expert_weather_provider"),
+              label = "Choose weather provider",
+              choices = list(
+                "RDWD", "Custom file"
+             ),
+              selected = "RDWD"
+            ),
+            shinyjs::disabled(
+              shiny::fileInput(
+              inputId = ns("expert_weather_file"),
+              label = "Upload weather file"
+              )
+            )
           ),
-          shiny::actionButton(
-            inputId = ns("expert_location_weather"),
-            label = "Next"
-          )
-        )
-      ),
-    
-      
-      # Expert Weather ----
-      bslib::nav_panel(
-        title = "4 - Weather",
-        bslib::card(
-          shiny::radioButtons(
-            ns("expert_weather_provider"),
-            label = "Choose weather provider",
-            choices = list("RDWD",
-                           "Custom file"),
-            selected = "RDWD"
-          ),
-          shinyjs::disabled(
-            shiny::fileInput(
-            inputId = ns("expert_weather_file"),
-            label = "Upload weather file"
+          bslib::layout_column_wrap(
+            width = 1 / 2,
+            shiny::actionButton(
+              inputId = ns("expert_weather_location"),
+              label = "Back"
+            ),
+            shiny::actionButton(
+              inputId = ns("expert_weather_execution"),
+              label = "Next"
             )
           )
         ),
-        bslib::layout_column_wrap(
-          width = 1 / 2,
-          shiny::actionButton(
-            inputId = ns("expert_weather_location"),
-            label = "Back"
-          ),
-          shiny::actionButton(
-            inputId = ns("expert_weather_execution"),
-            label = "Next"
-          )
-        )
-      ),
-    
-      
-      # Expert Execution ----
+          # Expert Execution ----
         bslib::nav_panel(
           title = "5 - Execution",
           bslib::card(
-              bslib::card_body(
-                shiny::uiOutput(
-                  outputId = ns("expert_execution_summary"),
-                  class = "p-1"
-                ),
-                shinyjs::disabled(
-                  DT::DTOutput(
-                    ns("expert_execution_table")
-                  )
-                ),
-
-                shinyjs::disabled(
-                  shiny::actionButton(
-                    inputId = ns("expert_execution_run"),
-                    label = "Run Workflow"
-                  )
-                ),
+            bslib::card_body(
+              shiny::uiOutput(
+                outputId = ns("expert_execution_summary"),
+                class = "p-1"
+              ),
+              shinyjs::disabled(
+                DT::DTOutput(
+                  ns("expert_execution_table")
+                )
+              ),
+              shinyjs::disabled(
+                shiny::actionButton(
+                  inputId = ns("expert_execution_run"),
+                  label = "Run Workflow"
+                )
+              ),
               shiny::actionButton(
                 inputId = ns("expert_execution_weather"),
                 label = "Back"
@@ -342,15 +328,20 @@ mod_beehave_ui <- function(id) {
           ),
           bslib::nav_spacer()
         )
-      
-      
-
     
-      # Grass Cutting Case ----
-      # bslib::nav_panel(title = "Grass Cutting"),
-      # Urban Planning Case ----
-      # bslib::nav_panel(title = "Urban Planninng")
-  ))
+
+
+  
+        # Grass Cutting Case ----
+          # bslib::nav_panel(title = "Grass Cutting"),
+          # Urban Planning Case ----
+          # bslib::nav_panel(title = "Urban Planninng")
+      )
+    )
+    
+      ) ### END navset_tab
+    )   ### END page_fluid
+  )     ### END tagList
 }
 
 #' beehave Server Functions
