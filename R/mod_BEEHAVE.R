@@ -42,8 +42,8 @@ mod_beehave_ui <- function(id) {
               leaflet::leafletOutput(
                 ns("input_map_plot")
               ),
-              bslib::layout_columns(
-                col_widths = c(3, 9),
+              bslib::layout_column_wrap(
+                width = 1,
                 shinyjs::disabled(
                   shiny::actionButton(
                     ns("load_resources"),
@@ -133,7 +133,8 @@ mod_beehave_ui <- function(id) {
         
             # h4 run wrf action btn----
           bslib::card(
-            bslib::layout_columns(
+            bslib::layout_column_wrap(
+              width = 1 / 2,
               div(
                 shiny::h4("Workflow"),
                 shiny::actionButton(
