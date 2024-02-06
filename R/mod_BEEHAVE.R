@@ -41,7 +41,7 @@ mod_beehave_ui <- function(id) {
                 label = "Choose input map",
                 choices = NULL
               ),
-              shiny::textOutput(
+              shiny::uiOutput(
                 ns("map_coordinates"),
               ),
               leaflet::leafletOutput(
@@ -390,7 +390,8 @@ mod_beehave_server <- function(id, r) {
       output_data = NULL,
       output_last_dataset = "",
       expert_param_table = NULL,
-      feature = NULL
+      feature = NULL,
+      coordinates_text = HTML('<p style = "color: red">No place selected.<br>Use point selector in the map below.</p>')
     )
     
     # Define beehave variables ----
@@ -547,9 +548,26 @@ mod_beehave_server <- function(id, r) {
       # print(r_beehave$feature)
     })
 
-    # Leaflet map - render coordinates
+    # Leaflet map - render coordinates ----
     output$map_coordinates <-
-      renderPrint(r_beehave$feature$geometry$coordinates)
+      shiny::renderUI(r_beehave$coordinates_text)
+    
+    shiny::observeEvent(r_beehave$feature,
+                        {
+                          shiny::req(r_beehave$feature)
+                          golem::print_dev(class(r_beehave$feature$geometry$coordinates))
+                          
+                          if (is.null(r_beehave$feature)) {
+                            r_beehave$coordinates_text <- "No place selected."
+                          } else {
+                            r_beehave$coordinates_text  <- HTML(paste(
+                              "Selected coordinates are: <br>",
+                              "Latitude: ", r_beehave$feature$geometry$coordinates[[2]], "<br>",
+                              "Longitude: ", r_beehave$feature$geometry$coordinates[[1]], "<br>"
+                              ))
+                          }
+                        })
+    
     
     # Output dataset logic ----
     observeEvent(input$output_list,
