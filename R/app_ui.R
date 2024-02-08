@@ -5,65 +5,144 @@
 #' @import shiny
 #' @import bslib
 #' @importFrom waiter autoWaiter
+#' @importFrom htmltools css
 #' @noRd
+
+
+
+
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
     
+    # Main (page) navbar----
     bslib::page_navbar(
       window_title = "BioDT",
-      title = div(shiny::a(
-        href = "https://www.biodt.eu",
-        img(src = "www/logo.svg",
-                      height = "80px",
-                      style = "padding-right: 20px"),
-                  width = "500px")),
+      title = div(
+        shiny::a(
+          href = "https://www.biodt.eu",
+          img(src = "www/logo.svg",
+            height = "80px",
+            style = "padding-right: 20px"
+          ),
+        )
+      ),
       id = "navbar",
       theme = biodt_theme,
       bg = "#fff",
-      fillable = TRUE,
+      fillable = TRUE, # must be true
+      collapsible = TRUE,
+      fluid = TRUE,
+      
+      ## Info - main menu item ----
       nav_panel(title = "Info",
                 value = "info",
+                icon = shiny::icon("circle-info"),
                 class = "container-fluid info",
                 mod_info_ui("info")),
+      
+      ## Digital Twins - main menu item ----
       nav_menu(
-        title = "Species response to environmental change",
+        title = "Digital Twins",
+        align = "left",
+        icon = shiny::icon("people-group"),
+
+        ### Species response to environment - menu subitem ----
+        nav_item(
+          div(
+            class = "p-2",
+            icon("bugs"),
+            strong(
+              "Species response to environmental change"
+            ),
+            hr()
+          )
+        ),
         nav_panel(title = "Biodiversity dynamics"),
         nav_panel(title = "Grassland dynamics",
                   mod_grassland_ui("grassland")),
         nav_panel(
           title = "Ecosystem services",
           mod_cultural_ecosystem_services_ui("cultural_ecosystem_services_1")
-        )
-      ),
-      nav_menu(
-        title = "Genetically detected biodiversity",
-        nav_panel(title = "Crop wild relatives and genetic resources for food security",
-                  mod_cwr_ui("cwr")),
-        nav_panel(title = "DNA detected biodiversity, poorly known habitats")
-      ),
-      nav_menu(title = "Dynamics and threats from and for species of policy concern",
-               nav_panel(title = "Invasive Species",
-                         class = "p-0",
-                         mod_ias_ui("ias"))),
-      nav_menu(
-        title = "Species interactions with each other and with humans",
+        ),
+
+        ### Biodiversity - menu subitem ----
+        nav_item(
+          div(
+            div(
+              class = "p-2",
+              hr(),
+              icon("seedling"),
+              strong(
+                "Genetically detected biodiversity"
+              ),
+              hr()
+            )
+          )
+        ),
+        nav_panel(
+          title = "Crop wild relatives and genetic resources for food security",
+          mod_cwr_ui("cwr")),
+        nav_panel(title = "DNA detected biodiversity, poorly known habitats"),
+
+        ### Species of policy concern - menu subitem ----
+        nav_item(
+          div(
+            class = "p-2",
+            hr(),
+            icon("bowl-food"),
+            strong(
+              "Threats from and for species of policy concern"
+            ),
+            hr()
+          )
+        ),
+        nav_panel(title = "Invasive Species",
+                   class = "p-0",
+                   mod_ias_ui("ias")),
+        
+        ### Species interactions (themselves, human) - menu subitem ----
+        nav_item(
+          div(
+            class = "p-2",
+            hr(),
+            icon("wheat-awn-circle-exclamation"),
+            strong(
+              "Species interactions with each other and with humans"
+            ),
+            hr()
+          )
+        ),
         nav_panel(title = "Pollinators",
                   class = "p-0",
                   mod_beehave_ui("beehave")),
         nav_panel(title = "Disease Outbreaks")
       ),
-      nav_panel(title = "Computations",
-                mod_computations_ui("computations")),
+      bslib::nav_spacer(),
+      
+      ## User (+ computations) - main menu item ----
+      nav_menu(
+        title = "User",
+        align = "right",
+        icon = icon("user"),
+        nav_panel(
+          title = "Computations",
+          icon = shiny::icon("microchip"),
+          mod_computations_ui("computations")),
+        bslib::nav_spacer(),
+        nav_panel(
+          title = "Login",
+          value = "nav_login",
+          icon = shiny::icon("arrow-right-to-bracket"),
+          mod_login_ui("login_pass")),
+        bslib::nav_spacer(),
+      )
+
       # nav_menu(
       #   title = "User",
       #   icon = icon("user"),
-        nav_panel(title = "Login",
-                  value = "nav_login",
-                  icon = icon("arrow-right-to-bracket"),
-                  mod_login_ui("login_pass"))
         # nav_item(
         #   actionButton(
         #     "login_button",
