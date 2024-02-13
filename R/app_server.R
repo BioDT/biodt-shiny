@@ -11,7 +11,7 @@ app_server <- function(input, output, session) {
   
   # Define common interactive variables ----
   r <- reactiveValues(
-    lexis_token = NULL,
+    lexis_token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJmWXJvQlFEeWd4eTJLbTl6bGsyZ2MySDJwRDhfdnp6LVV5NHRDTV95STR3In0.eyJleHAiOjE3MDc4MjYyMzgsImlhdCI6MTcwNzgxNTQzOCwiYXV0aF90aW1lIjoxNzA3ODE1MzU3LCJqdGkiOiIwYTZlYTFmYi0yMzk3LTRmMjMtOTA2NC1kMTdiZDZmNDI5ODYiLCJpc3MiOiJodHRwczovL2FhaS5sZXhpcy50ZWNoL2F1dGgvcmVhbG1zL0xFWElTX0FBSSIsImF1ZCI6WyJMRVhJU19QWTRMRVhJUyIsIkxFWElTX09SQ0hFU1RSQVRPUl9BNEMiLCJMRVhJU19PUkNIRVNUUkFUT1JfQlVTSU5FU1NfTE9HSUMiLCJMRVhJU19ERElfU1RBR0lOR19BUEkiLCJMRVhJU19PUkNIRVNUUkFUT1JfWU9SQyIsIkxFWElTX1BPUlRBTF9TRVJWSUNFIiwiTEVYSVNfRERJX0lST0RTX0FQSSIsIkxFWElTX0hQQ19TRVJWSUNFIiwiTEVYSVNfQUlSRkxPV19TRVJWSUNFIiwiTEVYSVNfTU9OSVRPUklORyIsIkxFWElTX1I0TEVYSVMiXSwic3ViIjoiYTFmYTZmYzMtYjljZS00NWY4LTg4MTYtMWQ2YzM4MDhiZWNiIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiTEVYSVNfUE9SVEFMX1NFUlZJQ0UiLCJzZXNzaW9uX3N0YXRlIjoiMWU4NzMzODAtYzkwOC00NTVkLWFmMWUtNzM0MzgxMGM0MGJjIiwic2NvcGUiOiJvcGVuaWQgZXhjaGFuZ2Utc2VydmljZSBwcm9maWxlIGVtYWlsIiwic2lkIjoiMWU4NzMzODAtYzkwOC00NTVkLWFmMWUtNzM0MzgxMGM0MGJjIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJTaW1vbiBSb2xwaCIsInByZWZlcnJlZF91c2VybmFtZSI6InNpbW9ucm8iLCJnaXZlbl9uYW1lIjoiU2ltb24iLCJmYW1pbHlfbmFtZSI6IlJvbHBoIiwiZW1haWwiOiJzaW1yb2xAY2VoLmFjLnVrIn0.PAOt3YkKbYohuP_ngJhg7WsTqO_2e-tsygQg5oiw0mjLV3yz1MohPelgfj-VpmLe16tRmJ8W_7hGEIr0nvt3WEcvdrO5TGG2pC1kCOw0-cztLAB13gPMxPb2xOOkbJ4CtIMHwTq6LjtW4FQNT8AKHU6xEBMZTAIjgPJaZKyF18zIw5w6Pt1JOUPLeEt3Nqg4emSZgM4Z6-0ph1B_9R8TRZUMrqZSFjZ33xm1SBhCvsWg8M-u1yoLX-s6vHIppT41YtIzMsYH9Qya7d514R3f6tKdTn7zD3cnHtp8KNN2uUhiVOgxrgKWiGxuhgxHs0b4HT5WvC4uiidoidXw7SitRQ",
     lexis_dataset_list = NULL,
     page_name = NULL,
     user_info = NULL,
@@ -62,7 +62,7 @@ app_server <- function(input, output, session) {
                      r)
   
   # cultural ecosystem services module ---
-  mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1")
+  mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1",r)
   
   # cultural ecosystem services module ---
   mod_grassland_server("grassland",
@@ -108,11 +108,14 @@ app_server <- function(input, output, session) {
                {
                  req(r$lexis_token)
                  
+                 
                  # Get user info ----
+                 print("getting user info")
                  r$user_info <-
                    r4lexis::get_lexis_user_info(r$lexis_token)
                  
                  # Get list of user projects ----
+                 print("getting user projects")
                  r$lexis_projects <-
                    purrr::map_chr(r$user_info$attributes$prj_list,
                                   purrr::pluck,
