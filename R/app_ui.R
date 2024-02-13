@@ -37,6 +37,8 @@ app_ui <- function(request) {
       fluid = TRUE,
       
       ## Info - main menu item ----
+      
+        
       nav_panel(title = "Info",
                 value = "info",
                 icon = shiny::icon("circle-info"),
@@ -48,16 +50,19 @@ app_ui <- function(request) {
         title = "Digital Twins",
         align = "left",
         icon = shiny::icon("people-group"),
+        #class = "nav_menu_dts",
+        
 
+        
         ### Species response to environment - menu subitem ----
         nav_item(
+
           div(
             class = "p-2",
             icon("bugs"),
             strong(
               "Species response to environmental change"
             ),
-            hr()
           )
         ),
         nav_panel(title = "Biodiversity dynamics"),
@@ -78,7 +83,6 @@ app_ui <- function(request) {
               strong(
                 "Genetically detected biodiversity"
               ),
-              hr()
             )
           )
         ),
@@ -96,7 +100,6 @@ app_ui <- function(request) {
             strong(
               "Threats from and for species of policy concern"
             ),
-            hr()
           )
         ),
         nav_panel(title = "Invasive Species",
@@ -112,15 +115,16 @@ app_ui <- function(request) {
             strong(
               "Species interactions with each other and with humans"
             ),
-            hr()
           )
         ),
         nav_panel(title = "Pollinators",
                   class = "p-0",
                   mod_beehave_ui("beehave")),
         nav_panel(title = "Disease Outbreaks")
+    
       ),
       bslib::nav_spacer(),
+      
       
       ## User (+ computations) - main menu item ----
       nav_menu(
