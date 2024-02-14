@@ -14,6 +14,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
   tagList(bslib::page_fluid(
     class = "p-0",
     bslib::navset_tab(
+      bslib::nav_panel("Information"),
       bslib::nav_panel(
         "Recreation potential",
         bslib::card(
@@ -23,9 +24,8 @@ mod_cultural_ecosystem_services_ui <- function(id) {
           card_body(
             selectInput(
               "persona",
-              "Recreation potential persona",
-              c("
-                                  Hard recreationalist",
+              "Please select you a recreation potential persona",
+              c("Hard recreationalist",
                 "Soft recreationalist")
             ),
             leafletOutput(ns("rec_pot_map"), height = 600),
@@ -42,7 +42,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
           card_title("What sort of biodiversity do I want to experience?"),
           card_body(
             radioButtons(
-              "radio_group_select",
+              ns("radio_group_select"),
               "I'm interested in",
               c(
                 "  All biodiversity" = "all",
@@ -50,10 +50,10 @@ mod_cultural_ecosystem_services_ui <- function(id) {
                 "  Mammals" = "mammals",
                 "  Birds" = "birds",
                 "  Plants" = "plants",
-                "  Amphibians and reptiles" = "herptiles",
                 "  Insects" = "insects"
               ),
-              inline = T
+              inline = T,
+              selected = "all",
             )
           )
         ),
@@ -91,90 +91,83 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Define reactive variables ----
-    # r_culteco <- reactiveValues(
-    #   name = "value"
-    # )
-    
-    # wrap the whole thing in a observe page
-    observeEvent(r$page_name,
-                 {
-                   #RECREATION POTENTIAL MAP
-                   #recreation potential map
-                   output$rec_pot_map <- renderLeaflet({
-                     leaflet() %>%
-                       addTiles() %>%
-                       leaflet::setView(lng = -3.5616,
-                                        lat = 57.0492,
-                                        zoom = 9)
-                   })
-                   
-                   #SPECIES MAP
-                   #get species data table
-                   cairngorms_sp_list <-
-                     read.csv("data/uc-ces/biodiversity/cairngorms_sp_list.csv")
-                   
-                   #species_table
-                   output$sp_tbl = renderDT(
-                     cairngorms_sp_list,
-                     options = list(lengthChange = FALSE),
-                     colnames = c('Key', "Count", "Common name", 'Scientific name'),
-                   )
-                   
-                   #get raster files
-                   all_sdm_files <-
-                     list.files("data/uc-ces/biodiversity/sdms", full.names = T)
-                   taxon_ids_from_file_names <-
-                     list.files("data/uc-ces/biodiversity/sdms", full.names = F) |>
-                     lapply(
-                       FUN = function(x) {
-                         gsub("prediction_(\\d+)_.*", "\\1", x)
-                       }
-                     ) |>
-                     unlist()
-                   sdm_rasts <- terra::rast(all_sdm_files)
-                   sdm_rasts <-
-                     sdm_rasts[[names(sdm_rasts) == "constrained"]]
-                   names(sdm_rasts) <- taxon_ids_from_file_names
-                   
-                   #calculate biodiversity layer which is shown to the user
-                   mean_biodiversity <-
-                     sdm_rasts |> terra::app(mean)
-                   terra::values(mean_biodiversity)[terra::values(mean_biodiversity) <
-                                                      0.1] <- NA
-                   
-                   
-                   
-                   #species map
-                   output$sp_map <- renderLeaflet({
-                     leaflet() %>%
-                       addTiles() %>%
-                       addRasterImage(
-                         mean_biodiversity,
-                         group = "Biodiversity Model",
-                         opacity = 0.4,
-                         colors = "viridis"
-                       ) %>%
-                       addTiles(
-                         urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
-                         attribution = "GBIF",
-                         group = "Biodiversity Data"
-                       ) %>%
-                       leaflet::setView(lng = -3.5616,
-                                        lat = 57.0492,
-                                        zoom = 9) %>%
-                       addLayersControl(
-                         baseGroups = c("Open Street Map"),
-                         overlayGroups = c("Biodiversity Model", "Biodiversity Data"),
-                         options = layersControlOptions(collapsed = FALSE)
-                       ) %>%
-                       hideGroup("Biodiversity Data")
-                   })
-                   
-
-                 })
+    observe({
+      print("Running ecosystem services page")
+      
+      observeEvent(r$page_name, {
+        # RECREATION POTENTIAL MAP
+        output$rec_pot_map <- renderLeaflet({
+          leaflet() %>%
+            addTiles() %>%
+            leaflet::setView(lng = -3.5616,
+                             lat = 57.0492,
+                             zoom = 9)
+        })
+        
+        # SPECIES MAP
+        cairngorms_sp_list <- read.csv("data/uc-ces/biodiversity/cairngorms_sp_list.csv")
+        
+        files_and_ids <- data.frame(files = all_sdm_files,
+                                    ids = taxon_ids_from_file_names)
+        
+        selected_species <- reactive({
+          ids <- cairngorms_sp_list[cairngorms_sp_list[,input$radio_group_select] == T,]
+        })
+        
+        sdm_rasts <- reactive({#
+          ids <- selected_species()$speciesKey
+          sdm_files <- files_and_ids$files[files_and_ids$ids %in% ids]
+          sdm_ids <- files_and_ids$ids[files_and_ids$ids %in% ids]
+          
+          sdm_rasts <- terra::rast(sdm_files)
+          sdm_rasts <- sdm_rasts[[names(sdm_rasts) == "constrained"]]
+          names(sdm_rasts) <- sdm_ids
+          
+          print(sdm_rasts)
+          
+          sdm_rasts |> terra::app(mean)
+        })
+        
+        
+        
+        # SPECIES MAP
+        output$sp_map <- renderLeaflet({
+          
+          mean_biodiversity <- sdm_rasts()
+          terra::values(mean_biodiversity)[terra::values(mean_biodiversity) < 0.1] <- NA
+          
+          leaflet() %>%
+            addTiles() %>%
+            addRasterImage(
+              mean_biodiversity,
+              group = "Biodiversity Model",
+              opacity = 0.4,
+              colors = "viridis"
+            ) %>%
+            addTiles(
+              urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+              attribution = "GBIF",
+              group = "Biodiversity Data"
+            ) %>%
+            leaflet::setView(lng = -3.5616,
+                             lat = 57.0492,
+                             zoom = 9) %>%
+            addLayersControl(
+              baseGroups = c("Open Street Map"),
+              overlayGroups = c("Biodiversity Model", "Biodiversity Data"),
+              options = layersControlOptions(collapsed = FALSE)
+            ) %>%
+            hideGroup("Biodiversity Data")
+        })
+        
+        output$sp_tbl <- renderDT(
+          selected_species()
+        )
+      })
+    })
   })
 }
+
 
 ## To be copied in the UI
 # mod_cultural_ecosystem_services_ui("cultural_ecosystem_services_1")
