@@ -31,6 +31,6 @@ vignettes/*.pdf
 .DS_Store
 renv
 # Dev experiments not needed in the main branch
-R/app_ui-experimenting-toBeRemoved.R
+app_ui-experimenting-toBeRemoved.R
 
 
