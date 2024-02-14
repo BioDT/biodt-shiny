@@ -95,14 +95,13 @@ mod_beehave_ui <- function(id) {
           #   )
           # ),
           
-          # Selected (additional) Parameters for the Beekeeper demo example----
-          # TODO FIXME----
+          # Parameters for the Beekeeper Simulation----
           bslib::card(
             title = "params_table",
             full_screen = TRUE,
-            card_title("Selected Parameters for the “Beekeeper” simulation/demonstration"),
+            card_title("Parameters for the Beekeeper Simulation"),
             bslib::card_body(
-              shinyWidgets::numericInputIcon(
+              shiny::sliderInput(
                 ns("N_INITIAL_BEES"),
                 label = "Number of adult bees at the beginning of the simulation",
                 value = 10000,
@@ -110,7 +109,7 @@ mod_beehave_ui <- function(id) {
                 max = 30000,
                 step = 100
               ),
-              shinyWidgets::numericInputIcon(
+              shiny::sliderInput(
                 ns("N_INITIAL_MITES_HEALTHY"),
                 label = "Number of Mites at the beginning of the simulation",
                 value = 33,
@@ -118,7 +117,7 @@ mod_beehave_ui <- function(id) {
                 max = 100,
                 step = 1
               ),
-              shinyWidgets::numericInputIcon(
+              shiny::sliderInput(
                 ns("N_INITIAL_MITES_INFECTED"),
                 label = "Number of infected Mites at the beginning of the simulation",
                 value = 1,
@@ -126,31 +125,30 @@ mod_beehave_ui <- function(id) {
                 max = 33,
                 step = 1
               ),
-              shinyWidgets::awesomeCheckbox(
+              shinyWidgets::prettyCheckbox(
                 ns("HoneyHarvesting"),
-                label = "Honey Harvest", 
-                status = "primary",
-                value = TRUE
+                label = "Honey Harvest",
+                value = TRUE,
+                icon = icon("check"),
+                status = "success",
+                animation = "smooth"
               ),
-              shinyWidgets::awesomeCheckbox(
+              shinyWidgets::prettyCheckbox(
                 ns("VarroaTreatment"),
-                label = "Varroa treatment with arcaricide", 
-                status = "primary",
-                value = FALSE
+                label = "Varroa treatment with arcaricide",
+                value = FALSE,
+                icon = icon("check"),
+                status = "success",
+                animation = "smooth"
               ),
-              shinyWidgets::awesomeCheckbox(
+              shinyWidgets::prettyCheckbox(
                 ns("DroneBroodRemoval"),
-                label = "Drone Brood Removal", 
-                status = "primary",
-                value = TRUE
-              ),              
-      
-              
-              
-              
-              
-              shiny::uiOutput(ns("show_n_initial_bees")),
-              shiny::uiOutput(ns("show_dronebroodremoval")),
+                label = "Drone Brood Removal",
+                value = TRUE,
+                icon = icon("check"),
+                status = "success",
+                animation = "smooth"
+              ),
             ),
           ),
 
@@ -804,7 +802,6 @@ mod_beehave_server <- function(id, r) {
                  })
     
     # Lookup table edit logic ----
-    
     observeEvent(input$lookup_table_cell_edit, {
       r_beehave$lookup_table[input$lookup_table_cell_edit$row,
                              input$lookup_table_cell_edit$col] <-
@@ -812,26 +809,40 @@ mod_beehave_server <- function(id, r) {
       
     })
     
-    # Parameters (new) ----
-    # TODO FIXME----
-    observeEvent(input$DroneBroodRemoval,
-      {
-        req(input$DroneBroodRemoval)
-        golem::print_dev(input$DroneBroodRemoval)
-      }
-    )
-    #output$show_dronebroodremoval <- shiny::renderUI({r_beehave$DroneBroodRemoval})
-    
-    
+    # Logic of Parameters for the Beekeeper Simulation----
     observeEvent(input$N_INITIAL_BEES,
       {
         req(input$N_INITIAL_BEES)
-        golem::print_dev(input$N_INITIAL_BEES)
-        
+        golem::print_dev(paste0("N_INITIAL_BEES: ", input$N_INITIAL_BEES))
       }
     )
-    #output$show_n_initial_bees <- shiny::renderUI({r_beehave$N_INITIAL_BEES})
-    
+    observeEvent(input$N_INITIAL_MITES_HEALTHY,
+      {
+        req(input$N_INITIAL_MITES_HEALTHY)
+        golem::print_dev(paste0("N_INITIAL_MITES_HEALTHY: ", input$N_INITIAL_MITES_HEALTHY))
+      }
+    )
+    observeEvent(input$N_INITIAL_MITES_INFECTED,
+      {
+        req(input$N_INITIAL_MITES_INFECTED)
+        golem::print_dev(paste0("N_INITIAL_MITES_INFECTED: ", input$N_INITIAL_MITES_INFECTED))
+      }
+    )
+    observeEvent(input$HoneyHarvesting,
+      {
+        golem::print_dev(paste0("HoneyHarvesting: ", input$HoneyHarvesting))
+      }
+    )
+    observeEvent(input$VarroaTreatment,
+      {
+        golem::print_dev(paste0("VarroaTreatment: ", input$VarroaTreatment))
+      }
+    )
+    observeEvent(input$DroneBroodRemoval,
+      {
+        golem::print_dev(paste0("DroneBroodRemoval: ", input$DroneBroodRemoval))
+      }
+    )
     
     # Editing
     observeEvent(input$parameters_table_cell_edit, {
