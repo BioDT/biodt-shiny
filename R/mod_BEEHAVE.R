@@ -94,6 +94,65 @@ mod_beehave_ui <- function(id) {
           #     )
           #   )
           # ),
+          
+          # Selected (additional) Parameters for the Beekeeper demo example----
+          # TODO FIXME----
+          bslib::card(
+            title = "params_table",
+            full_screen = TRUE,
+            card_title("Selected Parameters for the “Beekeeper” simulation/demonstration"),
+            bslib::card_body(
+              shinyWidgets::numericInputIcon(
+                ns("N_INITIAL_BEES"),
+                label = "Number of adult bees at the beginning of the simulation",
+                value = 10000,
+                min = 0,
+                max = 30000,
+                step = 100
+              ),
+              shinyWidgets::numericInputIcon(
+                ns("N_INITIAL_MITES_HEALTHY"),
+                label = "Number of Mites at the beginning of the simulation",
+                value = 33,
+                min = 0,
+                max = 100,
+                step = 1
+              ),
+              shinyWidgets::numericInputIcon(
+                ns("N_INITIAL_MITES_INFECTED"),
+                label = "Number of infected Mites at the beginning of the simulation",
+                value = 1,
+                min = 0,
+                max = 33,
+                step = 1
+              ),
+              shinyWidgets::awesomeCheckbox(
+                ns("HoneyHarvesting"),
+                label = "Honey Harvest", 
+                status = "primary",
+                value = TRUE
+              ),
+              shinyWidgets::awesomeCheckbox(
+                ns("VarroaTreatment"),
+                label = "Varroa treatment with arcaricide", 
+                status = "primary",
+                value = FALSE
+              ),
+              shinyWidgets::awesomeCheckbox(
+                ns("DroneBroodRemoval"),
+                label = "Drone Brood Removal", 
+                status = "primary",
+                value = TRUE
+              ),              
+      
+              
+              
+              
+              
+              shiny::uiOutput(ns("show_n_initial_bees")),
+              shiny::uiOutput(ns("show_dronebroodremoval")),
+            ),
+          ),
 
             # Output Bees Plot----
           bslib::card(
@@ -134,8 +193,7 @@ mod_beehave_ui <- function(id) {
               )
             )
           ),
-        
-        
+          
             # h4 run wrf action btn----
           bslib::card(
             bslib::layout_column_wrap(
@@ -391,7 +449,9 @@ mod_beehave_server <- function(id, r) {
       output_last_dataset = "",
       expert_param_table = NULL,
       feature = NULL,
-      coordinates_text = HTML('<p style = "color: red">No place selected.<br>Use point selector in the map below.</p>')
+      coordinates_text = HTML('<p style = "color: red">No place selected.<br>Use point selector in the map below.</p>'),
+      N_INITIAL_BEES = NULL,
+      DroneBroodRemoval = TRUE
     )
     
     # Define beehave variables ----
@@ -752,7 +812,26 @@ mod_beehave_server <- function(id, r) {
       
     })
     
-    # Parameters table logic ----
+    # Parameters (new) ----
+    # TODO FIXME----
+    observeEvent(input$DroneBroodRemoval,
+      {
+        req(input$DroneBroodRemoval)
+        golem::print_dev(input$DroneBroodRemoval)
+      }
+    )
+    #output$show_dronebroodremoval <- shiny::renderUI({r_beehave$DroneBroodRemoval})
+    
+    
+    observeEvent(input$N_INITIAL_BEES,
+      {
+        req(input$N_INITIAL_BEES)
+        golem::print_dev(input$N_INITIAL_BEES)
+        
+      }
+    )
+    #output$show_n_initial_bees <- shiny::renderUI({r_beehave$N_INITIAL_BEES})
+    
     
     # Editing
     observeEvent(input$parameters_table_cell_edit, {
