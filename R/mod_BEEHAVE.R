@@ -117,23 +117,29 @@ mod_beehave_ui <- function(id) {
                   label = "Show results"
                 )
               ),
-              plotOutput(
-                ns("output_bees_plot")
-              )
+              # plotOutput(
+              #   ns("output_bees_plot")
+              # )
+            ),
+            
+            echarty::ecs.output(
+              ns("echart_pollinators_output"),
+              width = "100%",
+              height = "500px"
             )
           ),
         
-            # Output Honey Plot----
-          bslib::card(
-            title = "output_honey",
-            full_screen = TRUE,
-            card_title("Output Honey Plot"),
-            card_body(
-              plotOutput(
-                ns("output_honey_plot")
-              )
-            )
-          ),
+          #   # Output Honey Plot----
+          # bslib::card(
+          #   title = "output_honey",
+          #   full_screen = TRUE,
+          #   card_title("Output Honey Plot"),
+          #   card_body(
+          #     plotOutput(
+          #       ns("output_honey_plot")
+          #     )
+          #   )
+          # ),
         
         
             # h4 run wrf action btn----
@@ -424,11 +430,43 @@ mod_beehave_server <- function(id, r) {
     }
     # constant_defaults <- init_const()
     
+    # Path to stored files (should be set for where the files are stored)
+    pollinators_path <- golem::get_golem_options("pollinators_path")
+    
     # Load maps and lookup table list ----
     # Helper function to observe multiple events
     listen_maps_input <- reactive({
       list(r$page_name)
     })
+    
+    # Load offline data ----
+    observeEvent(r$page_name,
+                 {
+                   req(r$page_name == "Pollinators")
+                   
+                   if (is.null(r_beehave$input_rast_map)) {
+                     r_beehave$input_rast_map <-
+                       terra::rast(file.path(pollinators_path, "map.tif"))
+                     r_beehave$input_leaflet_map <-
+                       terra::plet(r_beehave$input_rast_map,
+                                   tiles = "Streets",
+                                   alpha = 0.4)
+                   }
+                   
+                   if (is.null(r_beehave$lookup_table)) {
+                     r_beehave$lookup_table <-
+                       readr::read_csv(file.path(pollinators_path, "lookup_table.csv"),
+                                       show_col_types = FALSE)
+                   }
+                   
+                   output$echart_pollinators_output <- 
+                     echarty::ecs.render(
+                       beekeeper_output_plot(
+                         file.path(pollinators_path, "output_example/Result_table_original.csv"),
+                         file.path(pollinators_path, "output_example/weather_412.txt"),
+                       )
+                     )
+                 })
     
     observeEvent(r$page_name,
                  {
