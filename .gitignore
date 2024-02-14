@@ -31,3 +31,5 @@ vignettes/*.pdf
 .DS_Store
 renv
 
+# Data for pDTs
+local_data
