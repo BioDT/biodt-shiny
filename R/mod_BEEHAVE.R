@@ -104,17 +104,17 @@ mod_beehave_ui <- function(id) {
               shiny::sliderInput(
                 ns("N_INITIAL_BEES"),
                 label = "Number of adult bees at the beginning of the simulation",
-                value = 10000,
                 min = 0,
                 max = 30000,
+                value = 10000,
                 step = 100
               ),
               shiny::sliderInput(
                 ns("N_INITIAL_MITES_HEALTHY"),
                 label = "Number of Mites at the beginning of the simulation",
-                value = 33,
                 min = 0,
                 max = 100,
+                value = 33,
                 step = 1
               ),
               shiny::sliderInput(
@@ -448,8 +448,13 @@ mod_beehave_server <- function(id, r) {
       expert_param_table = NULL,
       feature = NULL,
       coordinates_text = HTML('<p style = "color: red">No place selected.<br>Use point selector in the map below.</p>'),
-      N_INITIAL_BEES = NULL,
-      DroneBroodRemoval = TRUE
+      # TODO or not??? commented lines below ----
+      # N_INITIAL_BEES = 10000,
+      # N_INITIAL_MITES_HEALTHY = 33,
+      # N_INITIAL_MITES_INFECTED = 32,
+      # HoneyHarvesting = TRUE,
+      # VarroaTreatment = FALSE,
+      # DroneBroodRemoval = TRUE
     )
     
     # Define beehave variables ----
@@ -810,6 +815,7 @@ mod_beehave_server <- function(id, r) {
     })
     
     # Logic of Parameters for the Beekeeper Simulation----
+    ## numeric inputs presented as sliders
     observeEvent(input$N_INITIAL_BEES,
       {
         req(input$N_INITIAL_BEES)
@@ -828,6 +834,22 @@ mod_beehave_server <- function(id, r) {
         golem::print_dev(paste0("N_INITIAL_MITES_INFECTED: ", input$N_INITIAL_MITES_INFECTED))
       }
     )
+
+    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED" 
+    ## when value of sliderInput "N_INITIAL_MITES_HEALTHY" changes
+    observeEvent(input$N_INITIAL_MITES_INFECTED,
+      {
+        updateSliderInput(
+          session = session,
+          input$N_INITIAL_MITES_INFECTED,
+          min = 0,
+          max = input$N_INITIAL_MITES_HEALTHY,
+        )
+        golem::print_dev(paste0("changed max to: ", input$N_INITIAL_MITES_HEALTHY))
+      }
+    )
+    
+    ## checkboxes (TRUE/FALSE)
     observeEvent(input$HoneyHarvesting,
       {
         golem::print_dev(paste0("HoneyHarvesting: ", input$HoneyHarvesting))
