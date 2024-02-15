@@ -61,7 +61,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
           title = "biodiversity_map",
           full_screen = TRUE,
           card_title("Where can I find biodiversity?"),
-          card_body(leafletOutput(ns("sp_map"), height = 600))
+          card_body(leafletOutput(ns("sp_map"), height = 400,width = "100%"))
         ),
         bslib::card(
           title = "sdm_table",
@@ -110,10 +110,14 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         files_and_ids <- data.frame(files = all_sdm_files,
                                     ids = taxon_ids_from_file_names)
         
+        #which species are selected?
         selected_species <- reactive({
+          #ids <- cairngorms_sp_list$speciesKey
           ids <- cairngorms_sp_list[cairngorms_sp_list[,input$radio_group_select] == T,]
         })
         
+        
+        #create the raster for that group/species
         sdm_rasts <- reactive({#
           ids <- selected_species()$speciesKey
           sdm_files <- files_and_ids$files[files_and_ids$ids %in% ids]
@@ -122,10 +126,22 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
           sdm_rasts <- terra::rast(sdm_files)
           sdm_rasts <- sdm_rasts[[names(sdm_rasts) == "constrained"]]
           names(sdm_rasts) <- sdm_ids
-          
-          print(sdm_rasts)
-          
-          sdm_rasts |> terra::app(mean)
+          sdm_rasts
+        })
+        
+        sdm_rast_total <- reactive({
+          sdm_rasts() |> terra::app(mean)
+        })
+        
+        #ordered list of species you might observe
+        species_arranged <- reactive({
+          sdm_rasts_used <- sdm_rasts()
+          data.frame( 
+            speciesKey = as.integer(names(sdm_rasts_used)),
+            mean_prob = sdm_rasts_used |> lapply(FUN=function(x){terra::values(x) |> mean(na.rm =T)}) |> unlist()
+          ) |> 
+            dplyr::arrange(-mean_prob) |> 
+            dplyr::left_join(cairngorms_sp_list)
         })
         
         
@@ -161,7 +177,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         })
         
         output$sp_tbl <- renderDT(
-          selected_species()
+          species_arranged() |> dplyr::select(common_name,sci_name,count,mean_prob)
         )
       })
     })
