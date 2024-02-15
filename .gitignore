@@ -30,3 +30,8 @@ vignettes/*.pdf
 # System files
 .DS_Store
 renv
+
+# Data for pDTs
+local_data
+# Testing script
+R/test.R

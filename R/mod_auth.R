@@ -52,6 +52,8 @@ mod_login_ui <- function(id,
       
       additional_ui,
       
+      shiny::uiOutput(ns("external_button_div")),
+      
       uiOutput(ns("error_message"))
     )
   )
@@ -110,6 +112,26 @@ mod_login_server <- function(id,
                                          r$show_login <- FALSE
                                        }
                                      })
+                 
+                 
+                 output$external_button_div <- shiny::renderUI(
+                   if (golem::app_prod()) {
+                     return(NULL)
+                   } else {
+                     shiny::div(style = "text-align: center;",
+                                br(),
+                                actionButton(ns("button_ext"),
+                                             "Login with external service"),
+                                class = "primary")
+                   }
+                 )
+                 
+                 shiny::observeEvent(input$button_ext,
+                                     {
+                                      r$lexis_token <- r4lexis::get_lexis_oauth_token()
+                                      })
+                 
+                 
                  #r_login$error_msg <- 
                  output$error_message <- renderUI({
                    r_login$error_msg
