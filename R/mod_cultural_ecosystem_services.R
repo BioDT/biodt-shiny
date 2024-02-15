@@ -53,7 +53,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
                 "  Insects" = "insects"
               ),
               inline = T,
-              selected = "all",
+              selected = character(0),
             )
           )
         ),
@@ -124,6 +124,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         #which species are selected?
         selected_species <- reactive({
           #ids <- cairngorms_sp_list$speciesKey
+          req(input$radio_group_select)
           ids <- cairngorms_sp_list[cairngorms_sp_list[,input$radio_group_select] == T,]
         })
         
@@ -141,10 +142,14 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         })
         
         sdm_rast_total <- reactive({
-          sdm_rasts() |> terra::app(mean)
+          req(input$radio_group_select)
+          rast_out <- sdm_rasts() |> terra::app(mean) 
+          terra::values(rast_out)[terra::values(rast_out) < 0.1] <- NA
+          rast_out
         })
         
         bounding_box <- reactive({
+          req(input$radio_group_select)
           print("Map bounds changed")
           bounds <- input$sp_map_bounds
           req(bounds)
@@ -154,6 +159,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         
         #ordered list of species you might observe
         species_arranged <- reactive({
+          req(input$radio_group_select)
           print("Generating ordered list of species")
           sdm_rasts_used <- sdm_rasts() |> terra::crop(bounding_box())
           data.frame( 
@@ -168,33 +174,39 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         
         # SPECIES MAP
         output$sp_map <- renderLeaflet({
-          
-          mean_biodiversity <- sdm_rasts()
-          terra::values(mean_biodiversity)[terra::values(mean_biodiversity) < 0.1] <- NA
-          
           leaflet() %>%
             addTiles() %>%
+            leaflet::setView(lng = -3.5616,
+                             lat = 57.0492,
+                             zoom = 9) # %>%
+            # addTiles(
+            #   urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+            #   attribution = "GBIF",
+            #   group = "Biodiversity Data"
+            # )  %>%
+            # addLayersControl(
+            #   baseGroups = c("Open Street Map"),
+            #   overlayGroups = c("Biodiversity Model", "Biodiversity Data"),
+            #   options = layersControlOptions(collapsed = FALSE)
+            # ) %>%
+            # hideGroup("Biodiversity Data")
+        })
+        
+        observe({
+          req(input$radio_group_select)
+          print("Adding layer to leaflet proxy")
+          leafletProxy(ns("sp_map")) %>%
+            clearGroup("Biodiversity Model") %>%
             addRasterImage(
-              mean_biodiversity,
+              sdm_rast_total(),
               group = "Biodiversity Model",
               opacity = 0.4,
               colors = "viridis"
-            ) %>%
-            addTiles(
-              urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
-              attribution = "GBIF",
-              group = "Biodiversity Data"
-            ) %>%
-            leaflet::setView(lng = -3.5616,
-                             lat = 57.0492,
-                             zoom = 9) %>%
-            addLayersControl(
-              baseGroups = c("Open Street Map"),
-              overlayGroups = c("Biodiversity Model", "Biodiversity Data"),
-              options = layersControlOptions(collapsed = FALSE)
-            ) %>%
-            hideGroup("Biodiversity Data")
+            )
         })
+        
+        
+            
         
         output$sp_tbl <- renderDT(
           species_arranged() |> dplyr::select(common_name,sci_name,count,mean_prob)
