@@ -25,41 +25,100 @@ mod_beehave_ui <- function(id) {
         bslib::nav_panel(
           # Beekeper Case ----
           title = "Beekeper",
-          bslib::card(
+          bslib::layout_column_wrap(
+            width = NULL, 
+            height = 800, 
+            fill = FALSE,
+            style = htmltools::css(grid_template_columns = "1fr 2fr"),
+            # Parameters for the Beekeeper Simulation----
+            bslib::card(
+              title = "params_simulation",
+              full_screen = TRUE,
+              class = "p-3",
+              card_header(
+                "Parameters for the Beekeeper Simulation",
+                class = "h-5"  
+              ),
+              bslib::card_body(
+                shiny::sliderInput(
+                  ns("N_INITIAL_BEES"),
+                  label = "Number of adult bees at the beginning of the simulation",
+                  min = 0,
+                  max = 30000,
+                  value = 10000,
+                  step = 100
+                ),
+                shiny::sliderInput(
+                  ns("N_INITIAL_MITES_HEALTHY"),
+                  label = "Number of Mites at the beginning of the simulation",
+                  value = 100,
+                  min = 0,
+                  max = 100,
+                  step = 1
+                ),
+                shiny::sliderInput(
+                  ns("N_INITIAL_MITES_INFECTED"),
+                  label = "Number of infected Mites at the beginning of the simulation",
+                  value = 100,
+                  min = 0,
+                  max = 100,
+                  step = 1
+                ),
+                shinyWidgets::prettyCheckbox(
+                  ns("HoneyHarvesting"),
+                  label = "Honey Harvest",
+                  value = TRUE,
+                  icon = icon("check"),
+                  status = "success",
+                  animation = "smooth"
+                ),
+                shinyWidgets::prettyCheckbox(
+                  ns("VarroaTreatment"),
+                  label = "Varroa treatment with arcaricide",
+                  value = FALSE,
+                  icon = icon("check"),
+                  status = "success",
+                  animation = "smooth"
+                ),
+                shinyWidgets::prettyCheckbox(
+                  ns("DroneBroodRemoval"),
+                  label = "Drone Brood Removal",
+                  value = TRUE,
+                  icon = icon("check"),
+                  status = "success",
+                  animation = "smooth"
+                ),
+              ),
+            ),
             # Beekeper Input Map ----
-            title = "input_map",
-            id = ns("input_map"),
-            full_screen = TRUE,
-            #card_title("Input Map"),
-            card_body(
-              shiny::h3(
-                id = ns("map_input"),
-                "Map"
+            bslib::card(
+              title = "input_map",
+              id = ns("input_map"),
+              full_screen = TRUE,
+              class = "p-3",
+              card_header(
+                "Input Map",
+                class = "h-5"
               ),
-              shiny::selectInput(
-                ns("map_list"),
-                label = "Choose input map",
-                choices = NULL
-              ),
-              shiny::uiOutput(
-                ns("map_coordinates"),
-              ),
-              leaflet::leafletOutput(
-                ns("input_map_plot")
-              ),
-              bslib::layout_column_wrap(
-                width = 1,
-                shinyjs::disabled(
-                  shiny::actionButton(
-                    ns("load_resources"),
-                    label = "Load beehave resources",
-                    width = "100%",
-                    class = "btn-primary"
-                  )
-                )
+              bslib::card_body(
+                shiny::selectInput(ns("map_list"),
+                                   label = "Choose input map",
+                                   choices = NULL),
+                shiny::uiOutput(ns("map_coordinates"),),
+                leaflet::leafletOutput(ns("input_map_plot")),
+                bslib::layout_column_wrap(width = 1,
+                                          shinyjs::disabled(
+                                            shiny::actionButton(
+                                              ns("load_resources"),
+                                              label = "Load beehave resources",
+                                              width = "100%",
+                                              class = "btn-primary"
+                                            )
+                                          ))
               )
             ),
-          ),
+          ), 
+          
 
         
             # Lookup Table----
@@ -94,65 +153,8 @@ mod_beehave_ui <- function(id) {
           #     )
           #   )
           # ),
-          
-          # Parameters for the Beekeeper Simulation----
-          bslib::card(
-            title = "params_table",
-            full_screen = TRUE,
-            card_title("Parameters for the Beekeeper Simulation"),
-            bslib::card_body(
-              shiny::sliderInput(
-                ns("N_INITIAL_BEES"),
-                label = "Number of adult bees at the beginning of the simulation",
-                min = 0,
-                max = 30000,
-                value = 10000,
-                step = 100
-              ),
-              shiny::sliderInput(
-                ns("N_INITIAL_MITES_HEALTHY"),
-                label = "Number of Mites at the beginning of the simulation",
-                min = 0,
-                max = 100,
-                value = 33,
-                step = 1
-              ),
-              shiny::sliderInput(
-                ns("N_INITIAL_MITES_INFECTED"),
-                label = "Number of infected Mites at the beginning of the simulation",
-                value = 1,
-                min = 0,
-                max = 33,
-                step = 1
-              ),
-              shinyWidgets::prettyCheckbox(
-                ns("HoneyHarvesting"),
-                label = "Honey Harvest",
-                value = TRUE,
-                icon = icon("check"),
-                status = "success",
-                animation = "smooth"
-              ),
-              shinyWidgets::prettyCheckbox(
-                ns("VarroaTreatment"),
-                label = "Varroa treatment with arcaricide",
-                value = FALSE,
-                icon = icon("check"),
-                status = "success",
-                animation = "smooth"
-              ),
-              shinyWidgets::prettyCheckbox(
-                ns("DroneBroodRemoval"),
-                label = "Drone Brood Removal",
-                value = TRUE,
-                icon = icon("check"),
-                status = "success",
-                animation = "smooth"
-              ),
-            ),
-          ),
 
-            # Output Bees Plot----
+          # Output Bees Plot----
           bslib::card(
             title = "output_bees",
             full_screen = TRUE,
@@ -815,63 +817,43 @@ mod_beehave_server <- function(id, r) {
     })
     
     # Logic of Parameters for the Beekeeper Simulation----
-    ## numeric inputs presented as sliders
+    ## Numeric inputs presented as sliders
     observeEvent(input$N_INITIAL_BEES,
-      {
-        req(input$N_INITIAL_BEES)
-        golem::print_dev(paste0("N_INITIAL_BEES: ", input$N_INITIAL_BEES))
-      }
-    )
-    observeEvent(input$N_INITIAL_MITES_HEALTHY,
-      {
-        req(input$N_INITIAL_MITES_HEALTHY)
-        golem::print_dev(paste0("N_INITIAL_MITES_HEALTHY: ", input$N_INITIAL_MITES_HEALTHY))
-      }
-    )
-    observeEvent(input$N_INITIAL_MITES_INFECTED,
-      {
-        req(input$N_INITIAL_MITES_INFECTED)
-        golem::print_dev(paste0("N_INITIAL_MITES_INFECTED: ", input$N_INITIAL_MITES_INFECTED))
-      }
-    )
-
-    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED" 
-    ## when value of sliderInput "N_INITIAL_MITES_HEALTHY" changes
-    observeEvent(input$N_INITIAL_MITES_INFECTED,
-      {
-        updateSliderInput(
-          session = session,
-          input$N_INITIAL_MITES_INFECTED,
-          min = 0,
-          max = input$N_INITIAL_MITES_HEALTHY,
-        )
-        golem::print_dev(paste0("changed max to: ", input$N_INITIAL_MITES_HEALTHY))
-      }
-    )
+                 {
+                   req(input$N_INITIAL_BEES)
+                   # golem::print_dev(paste0("N_INITIAL_BEES: ", input$N_INITIAL_BEES))
+                 })
     
+    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED"
+    ## when value of sliderInput "N_INITIAL_MITES_HEALTHY" changes
+    observeEvent(input$N_INITIAL_MITES_HEALTHY,
+                 ignoreInit = TRUE,
+                 {
+                   shiny::updateSliderInput(
+                     inputId = "N_INITIAL_MITES_INFECTED",
+                     value = input$N_INITIAL_MITES_HEALTHY,
+                     max = input$N_INITIAL_MITES_HEALTHY
+                   )
+                 })
     ## checkboxes (TRUE/FALSE)
     observeEvent(input$HoneyHarvesting,
-      {
-        golem::print_dev(paste0("HoneyHarvesting: ", input$HoneyHarvesting))
-      }
-    )
+                 {
+                   # golem::print_dev(paste0("HoneyHarvesting: ", input$HoneyHarvesting))
+                 })
     observeEvent(input$VarroaTreatment,
-      {
-        golem::print_dev(paste0("VarroaTreatment: ", input$VarroaTreatment))
-      }
-    )
+                 {
+                   # golem::print_dev(paste0("VarroaTreatment: ", input$VarroaTreatment))
+                 })
     observeEvent(input$DroneBroodRemoval,
-      {
-        golem::print_dev(paste0("DroneBroodRemoval: ", input$DroneBroodRemoval))
-      }
-    )
+                 {
+                   # golem::print_dev(paste0("DroneBroodRemoval: ", input$DroneBroodRemoval))
+                 })
     
     # Editing
     observeEvent(input$parameters_table_cell_edit, {
       r_beehave$input_parameters[input$parameters_table_cell_edit$row,
                                  input$parameters_table_cell_edit$col] <-
         input$parameters_table_cell_edit$value
-      
     })
     
     # Workflow submission logic ----
