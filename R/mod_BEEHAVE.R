@@ -450,7 +450,7 @@ mod_beehave_server <- function(id, r) {
       expert_param_table = NULL,
       feature = NULL,
       coordinates_text = HTML('<p style = "color: red">No place selected.<br>Use point selector in the map below.</p>'),
-      # TODO or not??? commented lines below ----
+      # TODO for future commented lines below ----
       # N_INITIAL_BEES = 10000,
       # N_INITIAL_MITES_HEALTHY = 33,
       # N_INITIAL_MITES_INFECTED = 32,
@@ -831,7 +831,6 @@ mod_beehave_server <- function(id, r) {
                  {
                    shiny::updateSliderInput(
                      inputId = "N_INITIAL_MITES_INFECTED",
-                     value = input$N_INITIAL_MITES_HEALTHY,
                      max = input$N_INITIAL_MITES_HEALTHY
                    )
                  })
