@@ -450,7 +450,15 @@ mod_beehave_server <- function(id, r) {
                      r_beehave$input_leaflet_map <-
                        terra::plet(r_beehave$input_rast_map,
                                    tiles = "Streets",
-                                   alpha = 0.4)
+                                   alpha = 0.4) |>       
+                       leaflet.extras::addDrawToolbar(         
+                         polylineOptions = FALSE,         
+                         polygonOptions = FALSE,         
+                         circleOptions = FALSE,         
+                         rectangleOptions = FALSE,
+                         markerOptions = leaflet.extras::drawMarkerOptions(), 
+                         circleMarkerOptions = FALSE, 
+                         singleFeature = TRUE)     
                    }
                    
                    if (is.null(r_beehave$lookup_table)) {
@@ -760,7 +768,15 @@ mod_beehave_server <- function(id, r) {
                    r_beehave$input_leaflet_map <-
                      terra::plet(r_beehave$input_rast_map,
                                  tiles = "Streets",
-                                 alpha = 0.4)
+                                 alpha = 0.4) |>       
+                     leaflet.extras::addDrawToolbar(         
+                       polylineOptions = FALSE,         
+                       polygonOptions = FALSE,         
+                       circleOptions = FALSE,         
+                       rectangleOptions = FALSE,
+                       markerOptions = leaflet.extras::drawMarkerOptions(), 
+                       circleMarkerOptions = FALSE, 
+                       singleFeature = TRUE)     
                  })
     
     # Lookup tables logic ----
