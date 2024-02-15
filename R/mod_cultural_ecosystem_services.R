@@ -106,6 +106,17 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         
         # SPECIES MAP
         cairngorms_sp_list <- read.csv("data/uc-ces/biodiversity/cairngorms_sp_list.csv")
+        all_sdm_files <-
+          list.files("data/uc-ces/biodiversity/sdms", full.names = T)
+        taxon_ids_from_file_names <-
+          list.files("data/uc-ces/biodiversity/sdms", full.names = F) |>
+          lapply(
+            FUN = function(x) {
+              gsub("prediction_(\\d+)_.*", "\\1", x)
+            }
+          ) |>
+          unlist()
+        
         
         files_and_ids <- data.frame(files = all_sdm_files,
                                     ids = taxon_ids_from_file_names)
@@ -133,9 +144,18 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
           sdm_rasts() |> terra::app(mean)
         })
         
+        bounding_box <- reactive({
+          print("Map bounds changed")
+          bounds <- input$sp_map_bounds
+          req(bounds)
+          extent <- terra::ext(c(bounds$west, bounds$east, bounds$south, bounds$north))
+          terra::as.polygons(extent, crs="+proj=longlat")
+        })
+        
         #ordered list of species you might observe
         species_arranged <- reactive({
-          sdm_rasts_used <- sdm_rasts()
+          print("Generating ordered list of species")
+          sdm_rasts_used <- sdm_rasts() |> terra::crop(bounding_box())
           data.frame( 
             speciesKey = as.integer(names(sdm_rasts_used)),
             mean_prob = sdm_rasts_used |> lapply(FUN=function(x){terra::values(x) |> mean(na.rm =T)}) |> unlist()
