@@ -14,6 +14,7 @@ golem::document_and_reload()
 # Run the application
 run_app(golem.app.prod = FALSE,
         cwr_path = "local_data/cwr",
-        pollinators_path = "local_data/pollinators")
+        pollinators_path = "local_data/pollinators",
+        ces_path = "local_data/ces")
 
 
