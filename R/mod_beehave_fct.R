@@ -11,3 +11,89 @@ init_input_parameters_beehave <- function(){
 
   return(df_input_parameters)
 }
+
+
+
+beekeeper_output_plot <- function(input_filepath,
+                                  weather_filepath,
+                                  nstep = 730){
+  
+  input <- readr::read_csv(input_filepath,
+                           col_types = readr::cols())
+  
+  weather_data <- readr::read_file(weather_filepath) |>
+    stringr::str_split(" ",
+                       simplify = TRUE)
+  weather_data <- weather_data[2:length(weather_data)]
+  weather_data <- weather_data[1:(length(weather_data) - 1)]
+  
+  input <- input |>
+    dplyr::filter(`[run number]` == 1,
+                  siminputrow == 1,
+                  `[step]` %in% 1:nstep) |>
+    dplyr::rename(Step = `[step]`)
+  input$weather <- rep(weather_data, 2)
+  
+  echarty::ec.init(
+    preset = FALSE,
+    xAxis = list(type = "value",
+                 name = "Step"),
+    yAxis = list(
+      list(
+        type = "value",
+        min = 0,
+        max = max(input$`(honeyEnergyStore / ( ENERGY_HONEY_per_g * 1000 ))`) + 5,
+        name = "Honey (kg)"
+      ),
+      list(
+        type = "value",
+        min = 0,
+        max = 24,
+        show = FALSE,
+        name = "Day hours for collecting"
+      ),
+      list(
+        type = "value",
+        min = 0,
+        max = max(input$`TotalIHbees + TotalForagers` + 100),
+        name = "Bees count"
+      )
+    ),
+    series = list(
+      list(
+        type = "bar",
+        data = echarty::ec.data(input |> dplyr::select(Step,
+                                                       weather)),
+        yAxisIndex = 2,
+        color = "green",
+        itemStyle = list(opacity = 0.3),
+        barWidth = "100%",
+        name = "Collection hours"
+      ),
+      list(
+        type = "line",
+        showSymbol = FALSE,
+        name = "Honey (kg)",
+        lineStyle = list(width = 3),
+        color = "gold",
+        data = echarty::ec.data(
+          input |> dplyr::select(Step,
+                                 `Honey (kg)` = `(honeyEnergyStore / ( ENERGY_HONEY_per_g * 1000 ))`)
+        )
+      ),
+      list(
+        type = "line",
+        showSymbol = FALSE,
+        data = echarty::ec.data(input |> dplyr::select(Step,
+                                                       `TotalIHbees + TotalForagers`)),
+        yAxisIndex = 3,
+        lineStyle = list(width = 3),
+        color = "royalblue",
+        name = "Bees Count"
+      )
+    ),
+    tooltip = list(show = TRUE,
+                   trigger = "axis")
+  )
+  
+}
