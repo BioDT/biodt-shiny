@@ -102,6 +102,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
 mod_cultural_ecosystem_services_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    ces_path <- golem::get_golem_options("ces_path")
     
     observe({
       print("Running ecosystem services page")
@@ -118,12 +119,12 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         
         # SPECIES MAP
         cairngorms_sp_list <-
-          read.csv("data/uc-ces/biodiversity/cairngorms_sp_list.csv")
+          read.csv(paste0(ces_path,"/cairngorms_sp_list.csv"))
         
         all_sdm_files <-
-          list.files("data/uc-ces/biodiversity/sdms", full.names = T)
+          list.files(paste0(ces_path,"/sdms"), full.names = T)
         taxon_ids_from_file_names <-
-          list.files("data/uc-ces/biodiversity/sdms", full.names = F) |>
+          list.files(paste0(ces_path,"/sdms"), full.names = F) |>
           lapply(
             FUN = function(x) {
               gsub("prediction_(\\d+)_.*", "\\1", x)
