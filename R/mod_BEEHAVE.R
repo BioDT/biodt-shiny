@@ -21,7 +21,9 @@ mod_beehave_ui <- function(id) {
       id = ns("page"),
       class = "p-0",
       bslib::navset_tab(
-        
+        bslib::nav_panel(
+          title = "Info"
+        ),
         bslib::nav_panel(
           # Beekeper Case ----
           title = "Beekeper",
