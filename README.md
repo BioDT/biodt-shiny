@@ -1,10 +1,18 @@
 # BioDT Shiny Application
 
-This repository contains a shiny application which is intended as the simplest way of interacting with BioDT by end-users.
+This repository contains a shiny application which is intended as the simplest way of interacting with BioDT by end-users. The shiny app is built using the golem framework.
+
+[Here is a link to the figma for designing the GUI (graphical user interface).](https://www.figma.com/file/92WkNhlVG1nWI2bxBgoXzE/GUI?type=design&mode=design)
 
 ## Modules
 
-There are modules for each pDT.
+There are modules for each pDT:
+
+ * BEEHAVE: `R/mod_BEEHAVE.R`
+ * Cultural Ecosystem Services: `R/mod_cultural_ecosystem_services.R`
+ * Crop wild relatives: `R/mod_cwr.R`
+ * GRASSLAND: `R/mod_grassland`
+ * Invasive alien species: `R/mod_ias.R`
 
 ## Technicals
 
@@ -22,14 +30,56 @@ There are modules for each pDT.
 
 ## Getting started (development set up)
 
-We use {renv} for pacakge management, please see an introduction to {renv} here: https://rstudio.github.io/renv/articles/renv.html
+### Get the code
 
-Install `renv` with `install.packages("renv")`
+Clone the repository:
 
-Initalise renv with `renv::init()`
+```
+git clone git@github.com:BioDT/biodt-shiny.git
+```
 
-Restore the renv from the snapshot `renv::restore()` this will install all the required R packages
+Open the project directory in your preferred IDE (Rstudio, VS Code)
 
-Launch the app `golem::run_dev()`
+### Install required packages
 
-If you add new packages to the app requirements then update the snapshot with `renv::snapshot()`
+Install {renv} for package management, please see an introduction to {renv} here: https://rstudio.github.io/renv/articles/renv.html Install `renv` and initialise the environment
+
+```
+install.packages("renv")
+renv::init()
+```
+
+Restore the renv from the snapshot to install all the required R packages
+
+```
+renv::restore()
+```
+
+### Get local data
+
+Download any required local data, first you need to create a folder to hold this data. This folder is ignored by git so you need to create it first. You can do this manually or run in R
+
+```
+dir.create("local_data")
+```
+
+Then download the data from the
+[sharepoint](https://tt.eduuni.fi/sites/csc-rdi-fileshare/BioDT/Forms/AllItems.aspx?RootFolder=%2Fsites%2Fcsc%2Drdi%2Dfileshare%2FBioDT%2FWP7%20%2D%20Integration%20%26%20Service%20Uptake%20with%20Research%20Infrastructure%20Environments%2FShinyAppData) (authenticated access required)
+
+Each pDT's shiny module has it's own folder for local data within this which you can see specififed in this file: https://github.com/BioDT/biodt-shiny/blob/main/dev/run_dev.R therefore you need to create a folder within the `local_data` folder. The folder names are:
+
+ - Crop wild relatives: `local_data/cwr`
+ - BEEHAVE: `local_data/pollinators`
+ - Cultural ecosystem services: `local_data/ces` 
+
+### Launch the app
+
+Now you should be ready to launch the app, which you can do using this command.
+
+```
+golem::run_dev()
+```
+
+### Development
+
+Please feel free to create a branch and pull requests for making significant changes to the Shiny app. If you add new packages to the app requirements then update the snapshot with `renv::snapshot()`.
