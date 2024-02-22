@@ -22,7 +22,26 @@ mod_beehave_ui <- function(id) {
       class = "p-0",
       bslib::navset_tab(
         bslib::nav_panel(
-          title = "Info"
+          title = "Info",
+          value = "Info",
+          icon = icon("circle-info"),
+          bslib::card(
+            fill = TRUE,
+            class = "bg-light bg-gradient m-1",
+            height = "1080px",
+            htmltools::div(
+              shiny::tags$img(
+                src = "https://beehave-model.net/wp-content/uploads/2016/07/Pete-20130505_3-Honeybee-apiary.jpg",
+                #src = "https://cdn.pixabay.com/photo/2015/12/09/01/02/mandalas-1084082_960_720.jpg",
+                style = 'position: absolute',
+                height = 600,
+                # width = 1
+              ),
+              htmltools::p(
+                "bla bla kva kva"
+              )
+            )
+          )
         ),
         bslib::nav_panel(
           # Beekeper Case ----
