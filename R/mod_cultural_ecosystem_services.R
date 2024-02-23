@@ -12,6 +12,11 @@ mod_cultural_ecosystem_services_ui <- function(id) {
   ns <- NS(id)
   
   tagList(bslib::page_fluid(
+    tags$style(
+      HTML(
+        'table.dataTable tr.selected td, table.dataTable td.selected {background-color: pink !important;}'
+      )
+    ),
     class = "p-0",
     bslib::navset_tab(
       bslib::nav_panel("Information"),
@@ -36,49 +41,44 @@ mod_cultural_ecosystem_services_ui <- function(id) {
       bslib::nav_panel(
         "Biodiversity",
         
-        bslib::card(
-          title = "biodiversity_choice",
-          full_screen = TRUE,
-          card_title("What sort of biodiversity do I want to experience?"),
-          card_body(
-            radioButtons(
-              ns("radio_group_select"),
-              "I'm interested in",
-              c(
-                "  All biodiversity" = "all",
-                "  Mammals" = "mammals",
-                "  Birds" = "birds",
-                "  Plants" = "plants",
-                "  Insects" = "insects"
-              ),
-              inline = T,
-              selected = character(0),
-            )
-          )
+        tags$h2("Cultural Ecosystem Services - Biodiversity"),
+        radioButtons(
+          ns("radio_group_select"),
+          "I'm interested in",
+          c(
+            "  All biodiversity" = "all",
+            "  Mammals" = "mammals",
+            "  Birds" = "birds",
+            "  Plants" = "plants",
+            "  Insects" = "insects"
+          ),
+          inline = T,
+          selected = character(0),
         ),
         
-        bslib::layout_column_wrap(
-          width = "700px",
-          bslib::card(
-            title = "biodiversity_map",
-            full_screen = TRUE,
-            max_height = "500px",
-            card_title("Where can I find biodiversity?"),
-            card_body(leafletOutput(
-              ns("sp_map"), height = 400, width = "100%"
-            ))
+        fluidRow(
+          column(6,
+                 bslib::card(
+                   title = "biodiversity_map",
+                   full_screen = TRUE,
+                   max_height = "550px",
+                   card_title("Map"),
+                   card_body(
+                     leafletOutput(ns("sp_map"), height = 400, width = "100%"),
+                     textOutput((ns("selected_species")))
+                   )
+                 )
+                 
           ),
-          bslib::card(
-            title = "sdm_table",
-            full_screen = TRUE,
-            card_title("Species details"),
-            card_body(
-              p(
-                "Here are the species that you might see if you walk in the area shown in the map above."
-              ),
-              DT::DTOutput(ns('sp_tbl'),height=800),
-              height = 1000
-            )
+          column(6,
+                 bslib::card(
+                   title = "sdm_table",
+                   full_screen = TRUE,
+                   card_title("Species list"),
+                   card_body(DT::DTOutput(ns('sp_tbl'), height = 800),height = "900px"),
+                   
+                 )
+                 
           )
         )
       )
@@ -119,12 +119,12 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         
         # SPECIES MAP
         cairngorms_sp_list <-
-          read.csv(paste0(ces_path,"/cairngorms_sp_list.csv"))
+          read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
         
         all_sdm_files <-
-          list.files(paste0(ces_path,"/sdms"), full.names = T)
+          list.files(paste0(ces_path, "/sdms"), full.names = T)
         taxon_ids_from_file_names <-
-          list.files(paste0(ces_path,"/sdms"), full.names = F) |>
+          list.files(paste0(ces_path, "/sdms"), full.names = F) |>
           lapply(
             FUN = function(x) {
               gsub("prediction_(\\d+)_.*", "\\1", x)
@@ -141,7 +141,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
           #ids <- cairngorms_sp_list$speciesKey
           req(input$radio_group_select)
           ids <-
-            cairngorms_sp_list[cairngorms_sp_list[, input$radio_group_select] == T, ]
+            cairngorms_sp_list[cairngorms_sp_list[, input$radio_group_select] == T,]
         })
         
         
@@ -217,10 +217,15 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
             )  %>%
             addLayersControl(
               baseGroups = c("Open Street Map"),
-              overlayGroups = c("Biodiversity hotspots", "Biodiversity data"),
+              overlayGroups = c(
+                "Biodiversity hotspots",
+                "Biodiversity data",
+                "Focal species"
+              ),
               options = layersControlOptions(collapsed = FALSE)
             ) %>%
-            hideGroup("Biodiversity data")
+            hideGroup("Biodiversity data") %>%
+            hideGroup("Focal species")
         })
         
         #add the biodiversity hotspot layer
@@ -236,23 +241,6 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
               colors = "viridis"
             )
         })
-        
-        #adding a single species map
-        # observe({
-        #   req(input$radio_group_select)
-        #   print("Adding layer to leaflet proxy")
-        #   sp_range <- sdm_rasts()[["1422001"]]
-        #   terra::values(sp_range)[terra::values(sp_range) < 0.1] <- NA
-        #
-        #   leafletProxy(ns("sp_map")) %>%
-        #     clearGroup("Species models") %>%
-        #     hideGroup("Biodiversity hotspots") %>%
-        #     addRasterImage(sp_range,
-        #       group = "Species models",
-        #       opacity = 0.6,
-        #       colors = "BuPu"
-        #     )
-        # })
         
         #render the species info table
         output$sp_tbl <- renderDT(
@@ -271,10 +259,47 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
               #"Number of records" = count,
               #mean_prob
               "Observation probability" = likelihood,
-              " " = image_url
+              " " = image_url,
             ),
-          escape=FALSE
+          escape = FALSE,
+          selection = 'single',
+          class = 'compact'
         )
+        
+        # add a single species map
+        observeEvent(input$sp_tbl_rows_selected, {
+          
+          selected_species <- species_arranged()[input$sp_tbl_rows_selected,]
+          
+          sp_ids_selected <-
+            selected_species$speciesKey
+          rast_to_add <-
+            sdm_rasts()[[as.character(sp_ids_selected)]]
+          terra::values(rast_to_add)[terra::values(rast_to_add) < 0.1] <-
+            NA
+          
+          leafletProxy(ns("sp_map")) %>%
+            hideGroup("Biodiversity hotspots") %>%
+            clearGroup("Focal species") %>%
+            showGroup("Focal species") %>%
+            addRasterImage(
+              rast_to_add,
+              group = "Focal species",
+              opacity = 0.4,
+              colors = "plasma"
+            )
+          
+          output$selected_species <- renderText(
+            paste0(
+              "Selected species: ",
+              selected_species$common_name,
+              " (",
+              selected_species$sci_name,
+              ")"
+            )
+          )
+            
+        })
         
       })
     })
