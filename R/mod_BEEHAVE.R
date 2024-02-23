@@ -31,10 +31,10 @@ mod_beehave_ui <- function(id) {
             height = "1080px",
             htmltools::div(
               shiny::tags$img(
-                src = "https://beehave-model.net/wp-content/uploads/2016/07/Pete-20130505_3-Honeybee-apiary.jpg",
-                #src = "https://cdn.pixabay.com/photo/2015/12/09/01/02/mandalas-1084082_960_720.jpg",
+                # src = "https://beehave-model.net/wp-content/uploads/2016/07/Pete-20130505_3-Honeybee-apiary.jpg",
+                src = "www/images/beehave-model.net-News-background-Honeybee-apiary.jpg",
                 style = 'position: absolute',
-                height = 600,
+                # height = 600,
                 # width = 1
               ),
               htmltools::p(
