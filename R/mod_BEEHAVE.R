@@ -26,18 +26,23 @@ mod_beehave_ui <- function(id) {
           value = "Info",
           icon = icon("circle-info"),
           bslib::card(
-            fill = TRUE,
-            class = "bg-light bg-gradient m-1",
+            fill = FALSE,
+            class = "m-0 p-0 bg-light bg-gradient",
             height = "1080px",
-            htmltools::div(
-              shiny::tags$img(
-                # src = "https://beehave-model.net/wp-content/uploads/2016/07/Pete-20130505_3-Honeybee-apiary.jpg",
-                src = "www/images/beehave-model.net-News-background-Honeybee-apiary.jpg",
-                style = 'position: absolute',
-                # height = 600,
-                # width = 1
+            style = "overflow-y: hidden !important;",
+            bslib::card_body(
+              class = "row m-0 p-0",
+              style = "overflow-x: hidden !important;",
+              htmltools::div(
+                class = "col-6 m-0 p-0",
+                style = "border: 2px solid red;",
+                shiny::tags$img(
+                  style = "position: absolute; right: 940px; top: 0px; min-width: 600px;",
+                  src = "www/images/beehave-model.net-Daphne-Wong-_P3A0506-1_cropped.jpg",
+                )
               ),
-              htmltools::p(
+              htmltools::div(
+                class = "col-6",
                 "bla bla kva kva"
               )
             )
