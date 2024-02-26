@@ -130,10 +130,15 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         req(r$page_name == "Ecosystem services")
         print("Running ecosystem services page")
         
+        tryNotify <- function(x){tryCatch({x},error = function(e){showNotification(e,type="error",closeButton = T,duration = NULL)})}
+        
         # RECREATION POTENTIAL MAP
         output$rec_pot_map <- renderLeaflet({
-          hard_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
-          soft_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
+          hard_rec <- tryNotify(rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif")))
+          soft_rec <- tryNotify(rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif")))
+          
+          hard_pal <- leaflet::colorNumeric(c("#1D4F11", "#CACD68","#6F4660"), terra::values(hard_rec),na.color = "transparent")
+          soft_pal <- leaflet::colorNumeric(c("#1D4F11", "#CACD68","#6F4660"), terra::values(soft_rec),na.color = "transparent")
           
           leaflet() %>%
             addTiles() %>%
@@ -146,19 +151,22 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
                 "Hard recreationalist",
                 "Soft recreationalist"
               )
-            ) %>% addRasterImage(
+            ) %>% 
+            addRasterImage(
               hard_rec,
               group = "Hard recreationalist",
-              opacity = 0.4,
-              colors = "viridis"
-            ) %>% addRasterImage(
+              opacity = 0.75,
+              colors = hard_pal
+            ) %>% 
+            addRasterImage(
               soft_rec,
               group = "Soft recreationalist",
-              opacity = 0.4,
-              colors = "viridis"
-            ) %>%
+              opacity = 0.75,
+              colors = soft_pal
+            ) %>% 
             hideGroup("Hard recreationalist") %>%
-            hideGroup("Soft recreationalist")
+            hideGroup("Soft recreationalist") %>%
+            removeLayersControl()
                 
         })
         
@@ -178,11 +186,17 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         })
         
         # SPECIES MAP
-        cairngorms_sp_list <-
-          read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
+        if(file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))){
+          cairngorms_sp_list <-
+            read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
+        } else {
+          showNotification(paste0("File missing: ",paste0(ces_path, "/cairngorms_sp_list.csv")),type= "error",closeButton = T,duration = NULL)
+        }
+        
         
         all_sdm_files <-
           list.files(paste0(ces_path, "/sdms"), full.names = T)
+        
         taxon_ids_from_file_names <-
           list.files(paste0(ces_path, "/sdms"), full.names = F) |>
           lapply(
@@ -213,7 +227,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
             files_and_ids$files[files_and_ids$ids %in% ids]
           sdm_ids <- files_and_ids$ids[files_and_ids$ids %in% ids]
           
-          sdm_rasts <- terra::rast(sdm_files)
+          sdm_rasts <- tryNotify(terra::rast(sdm_files))
           sdm_rasts <-
             sdm_rasts[[names(sdm_rasts) == "constrained"]]
           names(sdm_rasts) <- sdm_ids
