@@ -53,6 +53,7 @@ Using a recreation potential model, we assess the cultural ecosystem services of
               selected = character(0)
             ),
             leafletOutput(ns("rec_pot_map"), height = 600),
+            p("Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterised by scoring landscape features such as water bodies, types of forest.")
           )
         )
       ),
@@ -62,28 +63,37 @@ Using a recreation potential model, we assess the cultural ecosystem services of
       bslib::nav_panel(
         "Biodiversity",
         
-        tags$h2("Cultural Ecosystem Services - Biodiversity"),
-        radioButtons(
-          ns("radio_group_select"),
-          "I'm interested in",
-          c(
-            "  All biodiversity" = "all",
-            "  Mammals" = "mammals",
-            "  Birds" = "birds",
-            "  Plants" = "plants",
-            "  Insects" = "insects"
-          ),
-          inline = T,
-          selected = character(0),
+        bslib::card(
+          title = "biodiversity_controls",
+          full_screen = TRUE,
+          max_height = "550px",
+          card_title("Biodiversity"),
+          card_body(
+            radioButtons(
+              ns("radio_group_select"),
+              "Please a species group from the list below:",
+              c(
+                "  All biodiversity" = "all",
+                "  Mammals" = "mammals",
+                "  Birds" = "birds",
+                "  Plants" = "plants",
+                "  Insects" = "insects"
+              ),
+              inline = T,
+              selected = character(0),
+            )
+          )
         ),
         
+        
+        
         fluidRow(
-          column(6,
+          column(12,
                  bslib::card(
                    title = "biodiversity_map",
                    full_screen = TRUE,
                    max_height = "550px",
-                   card_title("Map"),
+                   card_title("Biodiversity mapping"),
                    card_body(
                      leafletOutput(ns("sp_map"), height = 400, width = "100%"),
                      textOutput((ns("selected_species")))
@@ -91,16 +101,19 @@ Using a recreation potential model, we assess the cultural ecosystem services of
                  )
                  
           ),
-          column(6,
+          column(12,
                  bslib::card(
                    title = "sdm_table",
                    full_screen = TRUE,
                    card_title("Species list"),
-                   card_body(DT::DTOutput(ns('sp_tbl'), height = 800),height = "900px"),
+                   card_body(
+                     p("Click on a species in the species list to show its distribution on the map"),
+                     DT::DTOutput(ns('sp_tbl'), height = 800),height = "900px")
                    
                  )
                  
           )
+          
         )
       )
     )
@@ -130,10 +143,15 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         req(r$page_name == "Ecosystem services")
         print("Running ecosystem services page")
         
-        # RECREATION POTENTIAL MAP
+        tryNotify <- function(x){tryCatch({x},error = function(e){showNotification(e,type="error",closeButton = T,duration = NULL)})}
+        
+        ### RECREATION POTENTIAL TAB
         output$rec_pot_map <- renderLeaflet({
-          hard_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
-          soft_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
+          hard_rec <- tryNotify(rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif")))
+          soft_rec <- tryNotify(rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif")))
+          
+          hard_pal <- leaflet::colorNumeric(c("#1D4F11", "#CACD68","#6F4660"), terra::values(hard_rec),na.color = "transparent")
+          soft_pal <- leaflet::colorNumeric(c("#1D4F11", "#CACD68","#6F4660"), terra::values(soft_rec),na.color = "transparent")
           
           leaflet() %>%
             addTiles() %>%
@@ -146,19 +164,22 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
                 "Hard recreationalist",
                 "Soft recreationalist"
               )
-            ) %>% addRasterImage(
+            ) %>% 
+            addRasterImage(
               hard_rec,
               group = "Hard recreationalist",
-              opacity = 0.4,
-              colors = "viridis"
-            ) %>% addRasterImage(
+              opacity = 0.75,
+              colors = hard_pal
+            ) %>% 
+            addRasterImage(
               soft_rec,
               group = "Soft recreationalist",
-              opacity = 0.4,
-              colors = "viridis"
-            ) %>%
+              opacity = 0.75,
+              colors = soft_pal
+            ) %>% 
             hideGroup("Hard recreationalist") %>%
-            hideGroup("Soft recreationalist")
+            hideGroup("Soft recreationalist") %>%
+            removeLayersControl()
                 
         })
         
@@ -177,12 +198,22 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
           
         })
         
-        # SPECIES MAP
-        cairngorms_sp_list <-
-          read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
+        ### BIODIVERSITY/SPECIES TAB
         
+        #first check if the csv file with all the species meta data exists
+        if(file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))){
+          cairngorms_sp_list <-
+            read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
+        } else {
+          showNotification(paste0("File missing: ",paste0(ces_path, "/cairngorms_sp_list.csv")),type= "error",closeButton = T,duration = NULL)
+        }
+        
+        
+        # get all the sdm raster files
         all_sdm_files <-
           list.files(paste0(ces_path, "/sdms"), full.names = T)
+        
+        # extract the taxon ID from the raster files
         taxon_ids_from_file_names <-
           list.files(paste0(ces_path, "/sdms"), full.names = F) |>
           lapply(
@@ -200,36 +231,13 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         selected_species <- reactive({
           #ids <- cairngorms_sp_list$speciesKey
           req(input$radio_group_select)
+          waiter::waiter_show()
           ids <-
             cairngorms_sp_list[cairngorms_sp_list[, input$radio_group_select] == T,]
         })
         
-        
-        #create the raster for that group/species
-        sdm_rasts <- reactive({
-          #
-          ids <- selected_species()$speciesKey
-          sdm_files <-
-            files_and_ids$files[files_and_ids$ids %in% ids]
-          sdm_ids <- files_and_ids$ids[files_and_ids$ids %in% ids]
-          
-          sdm_rasts <- terra::rast(sdm_files)
-          sdm_rasts <-
-            sdm_rasts[[names(sdm_rasts) == "constrained"]]
-          names(sdm_rasts) <- sdm_ids
-          sdm_rasts
-        })
-        
-        sdm_rast_total <- reactive({
-          req(input$radio_group_select)
-          rast_out <- sdm_rasts() |> terra::app(mean)
-          terra::values(rast_out)[terra::values(rast_out) < 0.1] <-
-            NA
-          rast_out
-        })
-        
+        #get the map bounding box
         bounding_box <- reactive({
-          req(input$radio_group_select)
           print("Map bounds changed")
           bounds <- input$sp_map_bounds
           req(bounds)
@@ -243,13 +251,69 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
           terra::as.polygons(extent, crs = "+proj=longlat")
         })
         
+        #create the raster for that group/species
+        sdm_rasts <- reactive({
+          #
+          ids <- selected_species()$speciesKey
+          sdm_files <-
+            files_and_ids$files[files_and_ids$ids %in% ids]
+          sdm_ids <- files_and_ids$ids[files_and_ids$ids %in% ids]
+          
+          sdm_rasts <- tryNotify(terra::rast(sdm_files))
+          sdm_rasts <-
+            sdm_rasts[[names(sdm_rasts) == "constrained"]]
+          names(sdm_rasts) <- sdm_ids
+          sdm_rasts
+        })
+        
+        #create the  data gap rasters per species
+        gap_rasts <- reactive({
+          #
+          ids <- selected_species()$speciesKey
+          sdm_files <-
+            files_and_ids$files[files_and_ids$ids %in% ids]
+          sdm_ids <- files_and_ids$ids[files_and_ids$ids %in% ids]
+          
+          gap_rasts <- tryNotify(terra::rast(sdm_files))
+          gap_rasts <-
+            gap_rasts[[names(gap_rasts) == "suitable_unrecorded"]]
+          names(gap_rasts) <- sdm_ids
+          gap_rasts
+        })
+        
+        sdm_rast_total <- reactive({
+          req(input$radio_group_select)
+          rast_out <- sdm_rasts()  |> terra::app(mean)
+          terra::values(rast_out)[terra::values(rast_out) < 0.1] <-
+            NA
+          rast_out
+        })
+        
+        #ordered list of priority species
+        species_gap_arranged <- reactive({
+          req(input$radio_group_select)
+          gap_rasts_used <-
+            gap_rasts() |> terra::crop(bounding_box())
+          out <- data.frame(
+            speciesKey = as.integer(names(gap_rasts_used)),
+            max_priority = gap_rasts_used |> lapply(
+              FUN = function(x) {
+                terra::values(x) |> max(na.rm = T)
+              }
+            ) |> unlist()
+          ) |>
+            dplyr::arrange(-max_priority)
+
+          out
+        })
+        
         #ordered list of species you might observe
         species_arranged <- reactive({
           req(input$radio_group_select)
           print("Generating ordered list of species")
           sdm_rasts_used <-
             sdm_rasts() |> terra::crop(bounding_box())
-          data.frame(
+          out <- data.frame(
             speciesKey = as.integer(names(sdm_rasts_used)),
             mean_prob = sdm_rasts_used |> lapply(
               FUN = function(x) {
@@ -258,10 +322,12 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
             ) |> unlist()
           ) |>
             dplyr::arrange(-mean_prob) |>
-            dplyr::left_join(cairngorms_sp_list)
+            dplyr::left_join(cairngorms_sp_list) |>
+            dplyr::left_join(species_gap_arranged())
+          
+          waiter::waiter_hide()
+          out
         })
-        
-        
         
         # SPECIES MAP
         output$sp_map <- renderLeaflet({
@@ -311,6 +377,11 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
                 breaks = c(0, 0.25, 0.5, 0.75, 1),
                 labels = c("Very unlikely", "Unlikely", "Likely", "Very likely")
               ),
+              priority = cut(
+                max_priority,
+                breaks = c(0, 0.25, 0.5, 0.75, 1),
+                labels = c("Very low", "Low", "High", "Very high")
+              ),
               image_url = paste0("<img src='", image_url, "' height='60'></img>")
             ) |>
             dplyr::select(
@@ -319,16 +390,17 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
               #"Number of records" = count,
               #mean_prob
               "Observation probability" = likelihood,
+              "Recording priority" = priority,
               " " = image_url,
             ),
           escape = FALSE,
           selection = 'single',
           class = 'compact'
         )
+  
         
         # add a single species map
         observeEvent(input$sp_tbl_rows_selected, {
-          
           selected_species <- species_arranged()[input$sp_tbl_rows_selected,]
           
           sp_ids_selected <-
