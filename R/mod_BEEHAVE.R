@@ -52,7 +52,10 @@ mod_beehave_ui <- function(id) {
                 class = "col-5",
                 tags$div(
                   class = "greeting col-sm-8 text-center m-auto font-weight-bold align-items-center align-self-center align-middle pt-5 mt-5",
-                  tags$p(pollinatorsInfoText[1]),
+                  tags$p(
+                    class = "pt-5 mt-5",
+                    pollinatorsInfoText[1]
+                  ),
                   tags$br(),
                   tags$p(pollinatorsInfoText[2]),
                   tags$br(),
@@ -64,10 +67,10 @@ mod_beehave_ui <- function(id) {
         ),
         bslib::nav_panel(
           # Beekeper Case ----
-          title = "Beekeper",
+          title = "Beekeeper",
           bslib::layout_column_wrap(
-            width = NULL, 
-            height = 800, 
+            width = NULL,
+            height = 800,
             fill = FALSE,
             style = htmltools::css(grid_template_columns = "1fr 2fr"),
             # Parameters for the Beekeeper Simulation----
@@ -225,18 +228,6 @@ mod_beehave_ui <- function(id) {
               ns("echart_pollinators_output"),
               width = "100%",
               height = "500px"
-            )
-          ),
-        
-            # Output Honey Plot----
-          bslib::card(
-            title = "output_honey",
-            full_screen = TRUE,
-            card_title("Output Honey Plot"),
-            card_body(
-              plotOutput(
-                ns("output_honey_plot")
-              )
             )
           ),
           
