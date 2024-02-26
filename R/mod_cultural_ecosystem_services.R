@@ -19,7 +19,23 @@ mod_cultural_ecosystem_services_ui <- function(id) {
     ),
     class = "p-0",
     bslib::navset_tab(
-      bslib::nav_panel("Information"),
+      
+      # The information tab
+      bslib::nav_panel("Information",
+                       bslib::card(
+                         title = "info_page",
+                         full_screen = TRUE,
+                         card_title("Information about this prototype Digital Twin"),
+                         card_body(
+                           p("Explore the Digital Twin for Cultural Ecosystems! Our digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
+Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect."),
+                           img(src='https://upload.wikimedia.org/wikipedia/commons/d/d7/The_Cairngorms_-_geograph.org.uk_-_1766434.jpg', align = "right")
+                         )
+                       )
+                     ),
+      
+      
+      # the recreation potential tab
       bslib::nav_panel(
         "Recreation potential",
         bslib::card(
@@ -27,17 +43,22 @@ mod_cultural_ecosystem_services_ui <- function(id) {
           full_screen = TRUE,
           card_title("Recreation potential mapping"),
           card_body(
-            selectInput(
-              "persona",
-              "Please select you a recreation potential persona",
-              c("Hard recreationalist",
-                "Soft recreationalist")
+            radioButtons(
+              ns("persona"),
+              "Please a recreation potential persona from the list below:",
+              choiceNames = c("Hard recreationalist - visitors who prefer high-adrenaline activities that require a high level of fitness",
+                "Soft recreationalist - who prefer “calmer” activities that do not require a high fitness level"),
+              choiceValues = c("hard","soft"),
+              width = "100%",
+              selected = character(0)
             ),
             leafletOutput(ns("rec_pot_map"), height = 600),
           )
         )
       ),
       
+      
+      # the biodiversity tab
       bslib::nav_panel(
         "Biodiversity",
         
@@ -105,16 +126,55 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
     ces_path <- golem::get_golem_options("ces_path")
     
     observe({
-      print("Running ecosystem services page")
-      
       observeEvent(r$page_name, {
+        req(r$page_name == "Ecosystem services")
+        print("Running ecosystem services page")
+        
         # RECREATION POTENTIAL MAP
         output$rec_pot_map <- renderLeaflet({
+          hard_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
+          soft_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
+          
           leaflet() %>%
             addTiles() %>%
             leaflet::setView(lng = -3.5616,
                              lat = 57.0492,
-                             zoom = 9)
+                             zoom = 9) %>%
+            addLayersControl(
+              baseGroups = c("Open Street Map"),
+              overlayGroups = c(
+                "Hard recreationalist",
+                "Soft recreationalist"
+              )
+            ) %>% addRasterImage(
+              hard_rec,
+              group = "Hard recreationalist",
+              opacity = 0.4,
+              colors = "viridis"
+            ) %>% addRasterImage(
+              soft_rec,
+              group = "Soft recreationalist",
+              opacity = 0.4,
+              colors = "viridis"
+            ) %>%
+            hideGroup("Hard recreationalist") %>%
+            hideGroup("Soft recreationalist")
+                
+        })
+        
+        observeEvent(input$persona, {
+          if(input$persona == "hard"){
+            #remove previous layers
+            # add hard to map
+            leafletProxy(ns("rec_pot_map")) %>%
+              hideGroup("Soft recreationalist") %>%
+              showGroup("Hard recreationalist")
+          } else {
+            leafletProxy(ns("rec_pot_map")) %>%
+              hideGroup("Hard recreationalist") %>%
+              showGroup("Soft recreationalist")
+          }
+          
         })
         
         # SPECIES MAP
