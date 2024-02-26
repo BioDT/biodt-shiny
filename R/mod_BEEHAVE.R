@@ -42,7 +42,7 @@ mod_beehave_ui <- function(id) {
                   style = "position: absolute; top: 0px; z-index: 0;", #right: 940px; 
                   src = "www/images/beehave-model.net-Daphne-Wong-_P3A0506-1_cropped.jpg",
                 ),
-                tags$h3(
+                tags$h2(
                   "BEEHAVE",
                   class = "greeting col-sm-5 text-center m-auto display-1 font-weight-bold align-items-center align-self-center align-middle text-light text-decoration-underline",
                   style = "position: absolute; top: 300px; z-index: 3;"
@@ -68,19 +68,70 @@ mod_beehave_ui <- function(id) {
         bslib::nav_panel(
           # Beekeper Case ----
           title = "Beekeeper",
+          icon = icon("forumbee"),
+          bslib::card(
+            class = "mt-3 py-2",
+            bslib::layout_column_wrap(
+              width = 1 / 4,
+              tags$div(
+                tags$h3("BeeKeeper - INPUT")
+              ),
+              tags$div(), # Empty div for layout purposes
+              tags$div(), # Empty div for layout purposes
+              # run workflow action btn----
+              tags$div(
+                shiny::actionButton(
+                  ns("run_workflow"),
+                  label = "Run Workflow"
+                ),
+              )
+            )
+          ),
           bslib::layout_column_wrap(
             width = NULL,
-            height = 800,
+            height = 700,
             fill = FALSE,
-            style = htmltools::css(grid_template_columns = "1fr 2fr"),
+            style = htmltools::css(grid_template_columns = "3fr 1fr"),
+            # Beekeper Input Map ----
+            bslib::card(
+              title = "input_map",
+              id = ns("input_map"),
+              full_screen = TRUE,
+              class = "p-3",
+              card_header(
+                tags$h5("Input Map"),
+              ),
+              bslib::card_body(
+                bslib::layout_column_wrap(
+                  width = 1 / 2,
+                  shiny::selectInput(
+                    ns("map_list"),
+                    label = "Choose input map",
+                    choices = NULL
+                  ),
+                  shiny::uiOutput(ns("map_coordinates"),),
+                ),
+                leaflet::leafletOutput(ns("input_map_plot")),
+                bslib::layout_column_wrap(
+                  width = 1,
+                  shinyjs::disabled(
+                    shiny::actionButton(
+                      ns("load_resources"),
+                      label = "Load beehave resources",
+                      width = "100%",
+                      class = "btn-primary"
+                    )
+                  )
+                )
+              )
+            ),
             # Parameters for the Beekeeper Simulation----
             bslib::card(
               title = "params_simulation",
               full_screen = TRUE,
               class = "p-3",
               card_header(
-                "Parameters for the Beekeeper Simulation",
-                class = "h-5"  
+                tags$h5("Parameters for the Beekeeper Simulation"),
               ),
               bslib::card_body(
                 shiny::sliderInput(
@@ -107,69 +158,36 @@ mod_beehave_ui <- function(id) {
                   max = 100,
                   step = 1
                 ),
-                shinyWidgets::prettyCheckbox(
+                shinyWidgets::awesomeCheckbox(
                   ns("HoneyHarvesting"),
                   label = "Honey Harvest",
                   value = TRUE,
-                  icon = icon("check"),
-                  status = "success",
-                  animation = "smooth"
+                  status = "info",
                 ),
-                shinyWidgets::prettyCheckbox(
+                shinyWidgets::awesomeCheckbox(
                   ns("VarroaTreatment"),
                   label = "Varroa treatment with arcaricide",
                   value = FALSE,
-                  icon = icon("check"),
-                  status = "success",
-                  animation = "smooth"
+                  status = "info",
                 ),
-                shinyWidgets::prettyCheckbox(
+                shinyWidgets::awesomeCheckbox(
                   ns("DroneBroodRemoval"),
                   label = "Drone Brood Removal",
                   value = TRUE,
-                  icon = icon("check"),
-                  status = "success",
-                  animation = "smooth"
+                  status = "info",
                 ),
               ),
             ),
-            # Beekeper Input Map ----
-            bslib::card(
-              title = "input_map",
-              id = ns("input_map"),
-              full_screen = TRUE,
-              class = "p-3",
-              card_header(
-                "Input Map",
-                class = "h-5"
-              ),
-              bslib::card_body(
-                shiny::selectInput(ns("map_list"),
-                                   label = "Choose input map",
-                                   choices = NULL),
-                shiny::uiOutput(ns("map_coordinates"),),
-                leaflet::leafletOutput(ns("input_map_plot")),
-                bslib::layout_column_wrap(width = 1,
-                                          shinyjs::disabled(
-                                            shiny::actionButton(
-                                              ns("load_resources"),
-                                              label = "Load beehave resources",
-                                              width = "100%",
-                                              class = "btn-primary"
-                                            )
-                                          ))
-              )
-            ),
-          ), 
-          
-
+          ),
         
             # Lookup Table----
           bslib::card(
             title = "lookup_table",
             full_screen = TRUE,
+            card_header(
+              tags$h5("Lookup Table"),
+            ),
             card_body(
-              shiny::h3("Lookup table"),
               shiny::selectInput(
                 ns("lookup_list"),
                 label = "Choose input lookup table",
@@ -223,7 +241,6 @@ mod_beehave_ui <- function(id) {
               #   ns("output_bees_plot")
               # )
             ),
-            
             echarty::ecs.output(
               ns("echart_pollinators_output"),
               width = "100%",
@@ -231,17 +248,16 @@ mod_beehave_ui <- function(id) {
             )
           ),
           
-            # h4 run wrf action btn----
           bslib::card(
             bslib::layout_column_wrap(
               width = 1 / 2,
-              div(
-                shiny::h4("Workflow"),
-                shiny::actionButton(
-                  ns("run_workflow"),
-                  label = "Run Workflow"
-                ),
-              ),
+              # div(
+              #   shiny::h4("Workflow"),
+              #   shiny::actionButton(
+              #     ns("run_workflow"),
+              #     label = "Run Workflow"
+              #   ),
+              # ),
               div(
                 shiny::h4("Instructions"),
                 shiny::actionButton(

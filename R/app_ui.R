@@ -8,9 +8,6 @@
 #' @importFrom htmltools css
 #' @noRd
 
-
-
-
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
@@ -52,14 +49,12 @@ app_ui <- function(request) {
         icon = shiny::icon("people-group"),
         #class = "nav_menu_dts",
         
-
-        
         ### Species response to environment - menu subitem ----
         nav_item(
 
           div(
             class = "p-2",
-            icon("bugs"),
+            icon("temperature-arrow-up"),
             strong(
               "Species response to environmental change"
             ),
@@ -79,7 +74,7 @@ app_ui <- function(request) {
             div(
               class = "p-2",
               hr(),
-              icon("seedling"),
+              icon("wheat-awn-circle-exclamation"),
               strong(
                 "Genetically detected biodiversity"
               ),
@@ -111,7 +106,7 @@ app_ui <- function(request) {
           div(
             class = "p-2",
             hr(),
-            icon("wheat-awn-circle-exclamation"),
+            icon("bugs"),
             strong(
               "Species interactions with each other and with humans"
             ),
