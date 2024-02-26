@@ -14,6 +14,9 @@
 #' @importFrom shinyjs hidden
 #' @importFrom ggplot2 ggplot geom_line aes
 
+pollinatorsInfoText <- c('The pollinators prototype Digtial Twin is based on the mechanistic simulation model BEEHAVE (Becher et al. 2014, https://doi.org/10.1111/1365-2664.12222).', 'Model descriptions and additional information can be found on https://beehave-model.net/.', 'The pollinator prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020, https://doi.org/10.1594/PANGAEA.910837).')
+
+
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
   tagList(
@@ -31,19 +34,30 @@ mod_beehave_ui <- function(id) {
             height = "1080px",
             style = "overflow-y: hidden !important;",
             bslib::card_body(
-              class = "row m-0 p-0",
+              class = "row m-0 p-0 d-flex flex-row",
               style = "overflow-x: hidden !important;",
-              htmltools::div(
-                class = "col-6 m-0 p-0",
-                style = "border: 2px solid red;",
-                shiny::tags$img(
-                  style = "position: absolute; right: 940px; top: 0px; min-width: 600px;",
+              tags$div(
+                class = "col-6 m-0 p-0 d-none d-xxl-block",
+                tags$img(
+                  style = "position: absolute; top: 0px; z-index: 0;", #right: 940px; 
                   src = "www/images/beehave-model.net-Daphne-Wong-_P3A0506-1_cropped.jpg",
+                ),
+                tags$h3(
+                  "BEEHAVE",
+                  class = "greeting col-sm-5 text-center m-auto display-1 font-weight-bold align-items-center align-self-center align-middle text-light text-decoration-underline",
+                  style = "position: absolute; top: 300px; z-index: 3;"
                 )
               ),
-              htmltools::div(
-                class = "col-6",
-                "bla bla kva kva"
+              tags$div(
+                class = "col-5",
+                tags$div(
+                  class = "greeting col-sm-8 text-center m-auto font-weight-bold align-items-center align-self-center align-middle pt-5 mt-5",
+                  tags$p(pollinatorsInfoText[1]),
+                  tags$br(),
+                  tags$p(pollinatorsInfoText[2]),
+                  tags$br(),
+                  tags$p(pollinatorsInfoText[3])
+                )
               )
             )
           )
