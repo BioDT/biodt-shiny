@@ -128,7 +128,7 @@ mod_beehave_ui <- function(id) {
             # Parameters for the Beekeeper Simulation----
             bslib::card(
               title = "params_simulation",
-              full_screen = TRUE,
+              full_screen = FALSE,
               class = "p-3",
               card_header(
                 tags$h5("Parameters for the Beekeeper Simulation"),
@@ -258,12 +258,27 @@ mod_beehave_ui <- function(id) {
               #     label = "Run Workflow"
               #   ),
               # ),
-              div(
-                shiny::h4("Instructions"),
+              # div(
+              #   shiny::h4("Instructions"),
+              #   shiny::actionButton(
+              #     ns("walkthrough"),
+              #     "Run guided walkthrough",
+              #   ),
+              # )
+            )
+          ),
+          
+          # WALKTHROUGH aka HELP button (fab = floating action button) ----
+          tags$div(
+            class = "fab-container",
+            tags$div(
+              class = "fab shadow",
+              tags$div(
+                class = "fab-content",
                 shiny::actionButton(
                   ns("walkthrough"),
-                  "Run guided walkthrough",
-                ),
+                  "HELP"
+                )
               )
             )
           )

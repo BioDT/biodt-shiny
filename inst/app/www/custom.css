@@ -40,3 +40,47 @@
   background-position: bottom;
   display: flex;
 }
+
+/* START help button */
+.fab-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  user-select: none;
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+}
+.fab-container:hover {
+  height: 100%;
+}
+.fab-container .fab {
+  position: relative;
+  height: 70px;
+  width: 70px;
+  border-radius: 50%;
+  z-index: 2;
+}
+.fab-container .fab::before {
+  content: " ";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  height: 35px;
+  width: 35px;
+  background-color: inherit;
+  border-radius: 0 0 10px 0;
+  z-index: -1;
+}
+.fab-container .fab .fab-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+}
+/* END help button */
+
+
