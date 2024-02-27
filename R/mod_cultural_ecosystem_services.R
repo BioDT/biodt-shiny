@@ -14,106 +14,122 @@ mod_cultural_ecosystem_services_ui <- function(id) {
   tagList(bslib::page_fluid(
     tags$style(
       HTML(
-        'table.dataTable tr.selected td, table.dataTable td.selected {background-color: pink !important;}'
+        'table.dataTable tr.selected td, table.dataTable td.selected {
+          background-color: rgb(188,108,37) !important;
+          box-shadow: inset 0 0 0 9999px rgb(188,108,37);
+        }
+        .container{
+                    width: 100%;
+                    margin: 0 auto;
+                    padding: 0;
+                }
+         @media screen and (min-width: 1366px){
+          .container{
+              width: 1366px;
+          }
+        }'
       )
     ),
     class = "p-0",
-    bslib::navset_tab(
-      
-      # The information tab
-      bslib::nav_panel("Information",
-                       bslib::card(
-                         title = "info_page",
-                         full_screen = TRUE,
-                         card_title("Information about this prototype Digital Twin"),
-                         card_body(
-                           p("Explore the Digital Twin for Cultural Ecosystems! Our digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
-Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect."),
-                           img(src='https://upload.wikimedia.org/wikipedia/commons/d/d7/The_Cairngorms_-_geograph.org.uk_-_1766434.jpg', align = "right")
-                         )
-                       )
-                     ),
-      
-      
-      # the recreation potential tab
-      bslib::nav_panel(
-        "Recreation potential",
-        bslib::card(
-          title = "rec_pot_map",
-          full_screen = TRUE,
-          card_title("Recreation potential mapping"),
-          card_body(
-            radioButtons(
-              ns("persona"),
-              "Please a recreation potential persona from the list below:",
-              choiceNames = c("Hard recreationalist - visitors who prefer high-adrenaline activities that require a high level of fitness",
-                "Soft recreationalist - who prefer “calmer” activities that do not require a high fitness level"),
-              choiceValues = c("hard","soft"),
-              width = "100%",
-              selected = character(0)
-            ),
-            leafletOutput(ns("rec_pot_map"), height = 600),
-            p("Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterised by scoring landscape features such as water bodies, types of forest.")
-          )
-        )
-      ),
-      
-      
-      # the biodiversity tab
-      bslib::nav_panel(
-        "Biodiversity",
+    
+    tags$div(class="container",
+      bslib::navset_tab(
         
-        bslib::card(
-          title = "biodiversity_controls",
-          full_screen = TRUE,
-          max_height = "550px",
-          card_title("Biodiversity"),
-          card_body(
-            radioButtons(
-              ns("radio_group_select"),
-              "Please a species group from the list below:",
-              c(
-                "  All biodiversity" = "all",
-                "  Mammals" = "mammals",
-                "  Birds" = "birds",
-                "  Plants" = "plants",
-                "  Insects" = "insects"
+        # The information tab
+        bslib::nav_panel("Information",
+                         bslib::card(
+                           title = "info_page",
+                           full_screen = TRUE,
+                           card_title("Information about this prototype Digital Twin"),
+                           card_body(
+                             p("Explore the Digital Twin for Cultural Ecosystems! Our digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
+  Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect."),
+                             img(src='https://upload.wikimedia.org/wikipedia/commons/d/d7/The_Cairngorms_-_geograph.org.uk_-_1766434.jpg', align = "right")
+                           )
+                         )
+                       ),
+        
+        
+        # the recreation potential tab
+        bslib::nav_panel(
+          "Recreation potential",
+          bslib::card(
+            title = "rec_pot_map",
+            full_screen = TRUE,
+            card_title("Recreation potential mapping"),
+            card_body(
+              radioButtons(
+                ns("persona"),
+                "Please a recreation potential persona from the list below:",
+                choiceNames = c("Hard recreationalist - visitors who prefer high-adrenaline activities that require a high level of fitness",
+                  "Soft recreationalist - who prefer “calmer” activities that do not require a high fitness level"),
+                choiceValues = c("hard","soft"),
+                width = "100%",
+                selected = character(0)
               ),
-              inline = T,
-              selected = character(0),
+              leafletOutput(ns("rec_pot_map"), height = 600),
+              p("Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterised by scoring landscape features such as water bodies, types of forest.")
             )
           )
         ),
         
         
-        
-        fluidRow(
-          column(12,
-                 bslib::card(
-                   title = "biodiversity_map",
-                   full_screen = TRUE,
-                   max_height = "550px",
-                   card_title("Biodiversity mapping"),
-                   card_body(
-                     leafletOutput(ns("sp_map"), height = 400, width = "100%"),
-                     textOutput((ns("selected_species")))
-                   )
-                 )
-                 
-          ),
-          column(12,
-                 bslib::card(
-                   title = "sdm_table",
-                   full_screen = TRUE,
-                   card_title("Species list"),
-                   card_body(
-                     p("Click on a species in the species list to show its distribution on the map"),
-                     DT::DTOutput(ns('sp_tbl'), height = 800),height = "900px")
-                   
-                 )
-                 
-          )
+        # the biodiversity tab
+        bslib::nav_panel(
+          "Biodiversity",
           
+          bslib::card(
+            title = "biodiversity_controls",
+            full_screen = TRUE,
+            max_height = "550px",
+            card_title("Biodiversity"),
+            card_body(
+              radioButtons(
+                ns("radio_group_select"),
+                "Please a species group from the list below:",
+                c(
+                  "  All biodiversity" = "all",
+                  "  Mammals" = "mammals",
+                  "  Birds" = "birds",
+                  "  Plants" = "plants",
+                  "  Insects" = "insects"
+                ),
+                inline = T,
+                selected = character(0),
+              )
+            )
+          ),
+          
+          
+          
+          fluidRow(
+            column(12,
+                   bslib::card(
+                     title = "biodiversity_map",
+                     full_screen = TRUE,
+                     max_height = "550px",
+                     card_title("Biodiversity mapping"),
+                     card_body(
+                       leafletOutput(ns("sp_map"), height = 400, width = "100%"),
+                       textOutput((ns("selected_species")))
+                     )
+                   )
+                   
+            ),
+            column(12,
+                   bslib::card(
+                     title = "sdm_table",
+                     full_screen = TRUE,
+                     card_title("Species list"),
+                     card_body(
+                       p("Click on a species in the species list to show its distribution on the map"),
+                       DT::DTOutput(ns('sp_tbl'), height = 800),height = "900px")
+                     
+                   )
+                   
+            )
+            
+          )
         )
       )
     )
