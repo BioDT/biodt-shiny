@@ -68,6 +68,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
                 selected = character(0)
               ),
               leafletOutput(ns("rec_pot_map"), height = 600),
+              HTML('<p><span style="background-color: #1D4F11; color: white;">Low recreation potential</span> → <span style="background-color: #6F4660; color: white;">High recreation potential</span></p>'),
               p("Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterised by scoring landscape features such as water bodies, types of forest.")
             )
           )
@@ -80,7 +81,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
           
           bslib::card(
             title = "biodiversity_controls",
-            full_screen = TRUE,
+            full_screen = F,
             max_height = "550px",
             card_title("Biodiversity"),
             card_body(
@@ -111,6 +112,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
                      card_title("Biodiversity mapping"),
                      card_body(
                        leafletOutput(ns("sp_map"), height = 400, width = "100%"),
+                       HTML('<p><span style="background-color: #460F5D; color: white;">Low biodiversity</span> → <span style="background-color: #FDE725">High biodiversity</span></p>'),
                        textOutput((ns("selected_species")))
                      )
                    )
@@ -123,7 +125,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
                      card_title("Species list"),
                      card_body(
                        p("Click on a species in the species list to show its distribution on the map"),
-                       DT::DTOutput(ns('sp_tbl'), height = 800),height = "900px")
+                       DT::DTOutput(ns('sp_tbl'), height = 800),height = "1000px")
                      
                    )
                    
@@ -196,7 +198,6 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
             hideGroup("Hard recreationalist") %>%
             hideGroup("Soft recreationalist") %>%
             removeLayersControl()
-                
         })
         
         observeEvent(input$persona, {
