@@ -62,7 +62,7 @@ app_server <- function(input, output, session) {
                      r)
   
   # cultural ecosystem services module ---
-  mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1",r)
+  mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1",r,loaders)
   
   # cultural ecosystem services module ---
   mod_grassland_server("grassland",

@@ -151,7 +151,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
 #' @importFrom cicerone Cicerone
 #'
 #' @noRd
-mod_cultural_ecosystem_services_server <- function(id, r) {
+mod_cultural_ecosystem_services_server <- function(id, r,loaders) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- golem::get_golem_options("ces_path")
@@ -159,7 +159,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
     observe({
       observeEvent(r$page_name, {
         req(r$page_name == "Ecosystem services")
-        print("Running ecosystem services page")
+        golem::print_dev("Running ecosystem services page")
         
         tryNotify <- function(x){tryCatch({x},error = function(e){showNotification(e,type="error",closeButton = T,duration = NULL)})}
         
@@ -248,14 +248,15 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         selected_species <- reactive({
           #ids <- cairngorms_sp_list$speciesKey
           req(input$radio_group_select)
-          waiter::waiter_show()
+          loaders$waiter$show()
+          loaders$hostess$set(0)
           ids <-
             cairngorms_sp_list[cairngorms_sp_list[, input$radio_group_select] == T,]
         })
         
         #get the map bounding box
         bounding_box <- reactive({
-          print("Map bounds changed")
+          golem::print_dev("Map bounds changed")
           bounds <- input$sp_map_bounds
           req(bounds)
           extent <-
@@ -280,6 +281,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
           sdm_rasts <-
             sdm_rasts[[names(sdm_rasts) == "constrained"]]
           names(sdm_rasts) <- sdm_ids
+          loaders$hostess$set(42)
           sdm_rasts
         })
         
@@ -327,9 +329,10 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         #ordered list of species you might observe
         species_arranged <- reactive({
           req(input$radio_group_select)
-          print("Generating ordered list of species")
+          golem::print_dev("Generating ordered list of species")
           sdm_rasts_used <-
             sdm_rasts() |> terra::crop(bounding_box())
+          loaders$hostess$set(89)
           out <- data.frame(
             speciesKey = as.integer(names(sdm_rasts_used)),
             mean_prob = sdm_rasts_used |> lapply(
@@ -342,7 +345,8 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
             dplyr::left_join(cairngorms_sp_list) |>
             dplyr::left_join(species_gap_arranged())
           
-          waiter::waiter_hide()
+          loaders$hostess$set(100)
+          loaders$waiter$hide()
           out
         })
         
@@ -374,7 +378,7 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
         #add the biodiversity hotspot layer
         observe({
           req(input$radio_group_select)
-          print("Adding layer to leaflet proxy")
+          golem::print_dev("Adding layer to leaflet proxy")
           leafletProxy(ns("sp_map")) %>%
             clearGroup("Biodiversity hotspots") %>%
             addRasterImage(
@@ -399,10 +403,15 @@ mod_cultural_ecosystem_services_server <- function(id, r) {
                 breaks = c(0, 0.25, 0.5, 0.75, 1),
                 labels = c("Very low", "Low", "High", "Very high")
               ),
-              image_url = paste0("<img src='", image_url, "' height='60'></img>")
+              image_url = paste0("<img src='", image_url, "' height='60'></img>"),
+              sci_name= paste0("<a target='_blank' href='https://www.gbif.org/species/",
+                               speciesKey,
+                               "'><i>",
+                               sci_name,
+                               "</i></a>")
             ) |>
             dplyr::select(
-              "Common name" = common_name,
+              "Vernacular name" = common_name,
               "Scientific name" = sci_name,
               #"Number of records" = count,
               #mean_prob
