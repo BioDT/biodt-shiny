@@ -28,6 +28,28 @@ There are modules for each pDT:
 
 🌍 Maps are rendered using {leaflet}: https://rstudio.github.io/leaflet/.
 
+### Loading screens with {waiter}
+
+If you have computations that take a long time then use the implemented waiter functionality. This will not make the app load faster but make it feel faster as it induces patience in your users and make the app feel slicker. To set this up go to `R/app_server.R` and ensure that the loaders are passed as an argument to your module. For example:
+
+```mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1",r,loaders)```
+
+Then in your module's server ensure that loaders is an argument: 
+
+```mod_cultural_ecosystem_services_server <- function(id, r,loaders) {``` 
+
+You can then use the following lines within your shiny code:
+
+ * `loaders$waiter$show()` to show a loading screen
+ * `loaders$waiter$hide()` to hide a loading screen
+ * `loaders$hostess$set(x)` to update the progress % in the loading screen (x between 0 and 100)
+
+See https://waiter.john-coene.com/ for more info
+
+### Tutorials with {cicerone}
+
+We use cicerone to create guided tours of your shiny module to help users understand how to use the app. See https://cicerone.john-coene.com/ for more info
+
 ## Getting started (development set up)
 
 ### Get the code
