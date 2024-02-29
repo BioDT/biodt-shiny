@@ -248,7 +248,7 @@ mod_beehave_ui <- function(id) {
             )
           ),
 
-          # BUTTON for WALKTHROUGH/TOUR aka Help button ----
+          # Help button for WALKTHROUGH/TOUR ----
           tags$div(
             class = "d-flex flex-row-reverse position-sticky bottom-0 end-0 z-2",
             shiny::actionLink(
@@ -258,10 +258,8 @@ mod_beehave_ui <- function(id) {
             )
           ),
         ),
-        
 
-
-          # Expert Case ----
+    # Expert Case ----
     bslib::nav_panel(
       title = "Expert",
       bslib::navset_underline(
