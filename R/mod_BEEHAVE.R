@@ -30,30 +30,22 @@ mod_beehave_ui <- function(id) {
           icon = icon("circle-info"),
           bslib::card(
             fill = FALSE,
-            class = "m-0 p-0 bg-light bg-gradient",
+            class = "m-0 p-0 bg-white",
             height = "1080px",
             style = "overflow-y: hidden !important;",
             bslib::card_body(
               class = "row m-0 p-0 d-flex flex-row",
               style = "overflow-x: hidden !important;",
               tags$div(
-                class = "col-6 m-0 p-0 d-none d-xxl-block",
-                tags$img(
-                  style = "position: absolute; top: 0px; z-index: 0;", #right: 940px; 
-                  src = "www/images/beehave-model.net-Daphne-Wong-_P3A0506-1_cropped.jpg",
-                ),
-                tags$h2(
-                  "BEEHAVE",
-                  class = "greeting col-sm-5 text-center m-auto display-1 font-weight-bold align-items-center align-self-center align-middle text-light text-decoration-underline",
-                  style = "position: absolute; top: 300px; z-index: 3;"
-                )
-              ),
-              tags$div(
-                class = "col-5",
+                class = "col-xs-12 col-xl-5",
                 tags$div(
-                  class = "greeting col-sm-8 text-center m-auto font-weight-bold align-items-center align-self-center align-middle pt-5 mt-5",
+                  class = "greeting text-left m-auto font-weight-bold align-self-stretch",
+                  tags$h2(
+                    class = "greeting pt-5 display-1 font-weight-bold align-items-left text-decoration-underline", # col-sm-5
+                    "BEEHAVE"
+                  ),
                   tags$p(
-                    class = "pt-5 mt-5",
+                    class = "pt-3", #"pt-5 mt-5", align-middle
                     pollinatorsInfoText[1]
                   ),
                   tags$br(),
@@ -61,6 +53,14 @@ mod_beehave_ui <- function(id) {
                   tags$br(),
                   tags$p(pollinatorsInfoText[3])
                 )
+              ),
+              tags$div(
+                class = "col-7 m-0 p-0 d-none d-xl-block",
+                style = "background: pink solid 2px;",
+                tags$img(
+                  style = "position: absolute; top: 0px; right: -250px; z-index: 0; height: 1080px;",
+                  src = "www/images/HONEYCOMB-boba-jaglicic-Mkk_9x42Sbg-unsplash-min-scaled.jpg",
+                ),
               )
             )
           )
@@ -180,7 +180,7 @@ mod_beehave_ui <- function(id) {
             ),
           ),
         
-            # Lookup Table----
+          # Lookup Table----
           bslib::card(
             title = "lookup_table",
             full_screen = TRUE,
@@ -247,42 +247,19 @@ mod_beehave_ui <- function(id) {
               height = "500px"
             )
           ),
-          
-          bslib::card(
-            bslib::layout_column_wrap(
-              width = 1 / 2,
-              # div(
-              #   shiny::h4("Workflow"),
-              #   shiny::actionButton(
-              #     ns("run_workflow"),
-              #     label = "Run Workflow"
-              #   ),
-              # ),
-              # div(
-              #   shiny::h4("Instructions"),
-              #   shiny::actionButton(
-              #     ns("walkthrough"),
-              #     "Run guided walkthrough",
-              #   ),
-              # )
+
+          # BUTTON for WALKTHROUGH/TOUR aka Help button ----
+          tags$div(
+            class = "d-flex flex-row-reverse position-sticky bottom-0 end-0 z-2",
+            shiny::actionLink(
+              ns("walkthrough"),
+              class = "help-button rounded-circle badge text-bg-primary text-secondary text-decoration-none mb-3 me-3",
+              tags$span("Help")
             )
           ),
-          
-          # WALKTHROUGH aka HELP button (fab = floating action button) ----
-          tags$div(
-            class = "fab-container",
-            tags$div(
-              class = "fab shadow",
-              tags$div(
-                class = "fab-content",
-                shiny::actionButton(
-                  ns("walkthrough"),
-                  "HELP"
-                )
-              )
-            )
-          )
         ),
+        
+
 
           # Expert Case ----
     bslib::nav_panel(
