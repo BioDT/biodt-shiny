@@ -217,17 +217,20 @@ mod_beehave_ui <- function(id) {
 
           # Output Bees Plot----
           bslib::card(
+            id = ns("output_bees_plot"),
             title = "output_bees",
             full_screen = TRUE,
             card_title("Output Bees Plot"),
             bslib::layout_column_wrap(
               width = 1 / 3,
               shiny::selectInput(ns("output_list"),
-                                 label = "Choose output dataset",
-                                 choices = NULL),
+                                 label = "Choose output dataset:",
+                                 choices = NULL,
+                                 # style = "align-items: flex-start !important; display: flex; flex-wrap: wrap; text-align: center !important;"
+              ),
               shiny::selectInput(
                 ns("output_files_list"),
-                label = "Choose output files",
+                label = "Choose output files:",
                 choices = NULL,
                 multiple = TRUE
               ),

@@ -55,5 +55,40 @@
 .help-button span {
   margin: -1rem -1rem;
 }
-
 /* END help button */
+
+/* selection inputs on the same line */
+#beehave-output_bees_plot .shiny-input-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: center;
+}
+
+#beehave-output_bees_plot .shiny-input-container > label {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+#beehave-output_bees_plot .shiny-input-container > div {
+    min-width: 250px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+#beehave-output_bees_plot .shiny-input-container > div > .selectize-control {
+    padding: 0;
+    width: 250px;
+    margin-left: 1rem;
+}
+
+#beehave-update_output {
+    margin-left: 3rem;
+    margin-right: 3rem;
+    max-width: 18rem;
+} /* for better look of "Show results" button */
+
+
