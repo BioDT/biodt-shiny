@@ -39,13 +39,13 @@ mod_beehave_ui <- function(id) {
               tags$div(
                 class = "col-xs-12 col-xl-5",
                 tags$div(
-                  class = "greeting text-left m-auto font-weight-bold align-self-stretch",
+                  class = "greeting text-left m-auto font-weight-bold align-self-stretch p-1",
                   tags$h2(
-                    class = "greeting pt-5 display-1 font-weight-bold align-items-left text-decoration-underline", # col-sm-5
+                    class = "greeting pt-5 display-4 font-weight-bold align-items-left text-decoration-underline",
                     "BEEHAVE"
                   ),
                   tags$p(
-                    class = "pt-3", #"pt-5 mt-5", align-middle
+                    class = "pt-3",
                     pollinatorsInfoText[1]
                   ),
                   tags$br(),
@@ -58,7 +58,7 @@ mod_beehave_ui <- function(id) {
                 class = "col-7 m-0 p-0 d-none d-xl-block",
                 style = "background: pink solid 2px;",
                 tags$img(
-                  style = "position: absolute; top: 0px; right: -250px; z-index: 0; height: 1080px;",
+                  style = "position: absolute; top: 0px; right: -300px; z-index: 0; height: 1080px;",
                   src = "www/images/HONEYCOMB-boba-jaglicic-Mkk_9x42Sbg-unsplash-min-scaled.jpg",
                 ),
               )
@@ -176,6 +176,18 @@ mod_beehave_ui <- function(id) {
                   value = TRUE,
                   status = "info",
                 ),
+                shinyWidgets::airDatepickerInput(
+                  inputId = ns("SimulationDateStart"),
+                  label = "From which day the simulation should start?",
+                  value = "2016-01-01",
+                  multiple = FALSE,
+                  placeholder = "What starting date of your simulation run do you want to?",
+                  minDate = "2016-01-01",
+                  startView = "2020-01-01",
+                  clearButton = TRUE,
+                  update_on = "close",
+                  
+                )
               ),
             ),
           ),
@@ -910,7 +922,7 @@ mod_beehave_server <- function(id, r) {
       
     })
     
-    # Logic of Parameters for the Beekeeper Simulation----
+    # Parameters for the Beekeeper Simulation----
     ## Numeric inputs presented as sliders
     observeEvent(input$N_INITIAL_BEES,
                  {
@@ -918,7 +930,7 @@ mod_beehave_server <- function(id, r) {
                    # golem::print_dev(paste0("N_INITIAL_BEES: ", input$N_INITIAL_BEES))
                  })
     
-    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED"
+    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED" ----
     ## when value of sliderInput "N_INITIAL_MITES_HEALTHY" changes
     observeEvent(input$N_INITIAL_MITES_HEALTHY,
                  ignoreInit = TRUE,
@@ -941,6 +953,14 @@ mod_beehave_server <- function(id, r) {
                  {
                    # golem::print_dev(paste0("DroneBroodRemoval: ", input$DroneBroodRemoval))
                  })
+    
+    ## date selected in calendar picker
+    observeEvent(
+      input$SimulationDateStart,
+      {
+        golem::print_dev(paste0("Simulation - starting date selected by user: ", input$SimulationDateStart))
+      }
+    )
     
     # Editing
     observeEvent(input$parameters_table_cell_edit, {
