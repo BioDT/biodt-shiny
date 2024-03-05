@@ -200,10 +200,20 @@ mod_beehave_ui <- function(id) {
               tags$h5("Lookup Table"),
             ),
             card_body(
-              shiny::selectInput(
-                ns("lookup_list"),
-                label = "Choose input lookup table",
-                choices = NULL
+              tags$div(
+                class = "row d-flex align-items-start",
+                tags$div(
+                  class = "col-3",
+                  tags$p("Choose input lookup table:")
+                ),
+                tags$div(
+                  class = "col-4 mb-0",
+                  shiny::selectInput(
+                    ns("lookup_list"),
+                    label = NULL,
+                    choices = NULL,
+                  ), 
+                ),
               ),
               shinyjs::disabled(
                 div(

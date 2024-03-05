@@ -91,4 +91,12 @@
     max-width: 18rem;
 } /* for better look of "Show results" button */
 
+/* fix width of the row for on one line inputs - select */
+.form-group.shiny-input-container {
+  margin-bottom: 0rem;
+}
 
+.shiny-input-container:not(.shiny-input-container-inline) {
+    width: 100%;
+    max-width: 100%;
+}
