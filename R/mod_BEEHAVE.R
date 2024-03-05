@@ -30,7 +30,7 @@ mod_beehave_ui <- function(id) {
           icon = icon("circle-info"),
           bslib::card(
             fill = FALSE,
-            class = "m-0 p-0 bg-white",
+            class = "m-0 p-0 bg-light",
             height = "1080px",
             style = "overflow-y: hidden !important;",
             bslib::card_body(
@@ -56,7 +56,6 @@ mod_beehave_ui <- function(id) {
               ),
               tags$div(
                 class = "col-7 m-0 p-0 d-none d-xl-block",
-                style = "background: pink solid 2px;",
                 tags$img(
                   style = "position: absolute; top: 0px; right: -300px; z-index: 0; height: 1080px;",
                   src = "www/images/HONEYCOMB-boba-jaglicic-Mkk_9x42Sbg-unsplash-min-scaled.jpg",
@@ -69,27 +68,40 @@ mod_beehave_ui <- function(id) {
           # Beekeper Case ----
           title = "Beekeeper",
           icon = icon("forumbee"),
+          class = "bg-light",
           bslib::card(
-            class = "mt-3 py-2",
-            bslib::layout_column_wrap(
-              width = 1 / 4,
+            class = "mt-3 bg-light",
+            tags$div(
+              class = "row d-flex justify-content-end",
               tags$div(
-                tags$h3("BeeKeeper - INPUT")
+                class = "col-6",
+                tags$h3("BeeKeeper")
               ),
-              tags$div(), # Empty div for layout purposes
-              tags$div(), # Empty div for layout purposes
-              # run workflow action btn----
               tags$div(
+                class = "col-3",
                 shiny::actionButton(
                   ns("run_workflow"),
-                  label = "Run Workflow"
+                  label = "Run Workflow",
+                  width = "100%",
+                  class = "btn-secondary"
                 ),
+              ),
+              tags$div(
+                class = "col-3",
+                shinyjs::disabled(
+                  shiny::actionButton(
+                    ns("load_resources"),
+                    label = "Update resources",
+                    width = "100%",
+                    class = "btn-secondary"
+                  )
+                )
               )
             )
           ),
           bslib::layout_column_wrap(
             width = NULL,
-            height = 700,
+            height = 750,
             fill = FALSE,
             style = htmltools::css(grid_template_columns = "3fr 1fr"),
             # Beekeper Input Map ----
@@ -97,9 +109,9 @@ mod_beehave_ui <- function(id) {
               title = "input_map",
               id = ns("input_map"),
               full_screen = TRUE,
-              class = "p-3",
               card_header(
                 tags$h5("Input Map"),
+                class = "bg-light",
               ),
               bslib::card_body(
                 bslib::layout_column_wrap(
@@ -114,14 +126,7 @@ mod_beehave_ui <- function(id) {
                 leaflet::leafletOutput(ns("input_map_plot")),
                 bslib::layout_column_wrap(
                   width = 1,
-                  shinyjs::disabled(
-                    shiny::actionButton(
-                      ns("load_resources"),
-                      label = "Load beehave resources",
-                      width = "100%",
-                      class = "btn-primary"
-                    )
-                  )
+
                 )
               )
             ),
@@ -129,9 +134,10 @@ mod_beehave_ui <- function(id) {
             bslib::card(
               title = "params_simulation",
               full_screen = FALSE,
-              class = "p-3",
+              class = "bg-light",
               card_header(
                 tags$h5("Parameters for the Beekeeper Simulation"),
+                class = "bg-light",
               ),
               bslib::card_body(
                 shiny::sliderInput(
@@ -178,7 +184,7 @@ mod_beehave_ui <- function(id) {
                 ),
                 shinyWidgets::airDatepickerInput(
                   inputId = ns("SimulationDateStart"),
-                  label = "From which day the simulation should start?",
+                  label = "Start the simulation from",
                   value = "2016-01-01",
                   multiple = FALSE,
                   placeholder = "What starting date of your simulation run do you want to?",
@@ -186,7 +192,6 @@ mod_beehave_ui <- function(id) {
                   startView = "2020-01-01",
                   clearButton = TRUE,
                   update_on = "close",
-                  
                 )
               ),
             ),
@@ -201,13 +206,15 @@ mod_beehave_ui <- function(id) {
             ),
             card_body(
               tags$div(
-                class = "row d-flex align-items-start",
+                class = "row d-flex align-items-center",
                 tags$div(
-                  class = "col-3",
-                  tags$p("Choose input lookup table:")
+                  class = "col-lg-2 col-sm-6 text-center",
+                  tags$p(
+                    "Choose input lookup table:"
+                  )
                 ),
                 tags$div(
-                  class = "col-4 mb-0",
+                  class = "col-lg-4 col-sm-6",
                   shiny::selectInput(
                     ns("lookup_list"),
                     label = NULL,
@@ -236,31 +243,46 @@ mod_beehave_ui <- function(id) {
           #     )
           #   )
           # ),
-
           # Output Bees Plot----
           bslib::card(
             id = ns("output_bees_plot"),
             title = "output_bees",
             full_screen = TRUE,
             card_title("Output Bees Plot"),
-            bslib::layout_column_wrap(
-              width = 1 / 3,
-              shiny::selectInput(ns("output_list"),
-                                 label = "Choose output dataset:",
-                                 choices = NULL,
-                                 # style = "align-items: flex-start !important; display: flex; flex-wrap: wrap; text-align: center !important;"
+            tags$div(
+              class = "row d-flex align-items-start",
+              tags$div(
+                class = "col-lg-2 col-sm-6 text-center",
+                tags$p("Choose output dataset:")
               ),
-              shiny::selectInput(
-                ns("output_files_list"),
-                label = "Choose output files:",
-                choices = NULL,
-                multiple = TRUE
+              tags$div(
+                class = "col-lg-2 col-sm-6",
+                shiny::selectInput(ns("output_list"),
+                                   label = NULL,
+                                   choices = NULL,
+                ),
               ),
-              shinyjs::disabled(
-                shiny::actionButton(
-                  ns("update_output"),
-                  label = "Show results"
-                )
+              tags$div(
+                class = "col-lg-2 col-sm-6 text-center",
+                tags$p("Choose output files:")
+              ),
+              tags$div(
+                class = "col-lg-2 col-sm-6",
+                shiny::selectInput(
+                  ns("output_files_list"),
+                  label = NULL,
+                  choices = NULL,
+                  multiple = TRUE
+                ),
+              ),
+              tags$div(
+                class = "col-lg-4 col-sm-6",
+                shinyjs::disabled(
+                  shiny::actionButton(
+                    ns("update_output"),
+                    label = "Show results"
+                  )
+                ),
               ),
               # plotOutput(
               #   ns("output_bees_plot")
@@ -278,7 +300,7 @@ mod_beehave_ui <- function(id) {
             class = "d-flex flex-row-reverse position-sticky bottom-0 end-0 z-2",
             shiny::actionLink(
               ns("walkthrough"),
-              class = "help-button rounded-circle badge text-bg-primary text-secondary text-decoration-none mb-3 me-3",
+              class = "help-button rounded-circle badge text-bg-primary text-white text-decoration-none mb-3 me-3",
               tags$span("Help")
             )
           ),
