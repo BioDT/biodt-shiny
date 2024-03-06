@@ -111,7 +111,6 @@ mod_beehave_ui <- function(id) {
               full_screen = TRUE,
               card_header(
                 tags$h5("Input Map"),
-                # class = "bg-light",
               ),
               bslib::card_body(
                 bslib::layout_column_wrap(
@@ -136,8 +135,7 @@ mod_beehave_ui <- function(id) {
               full_screen = FALSE,
               # class = "bg-light",
               card_header(
-                tags$h5("Parameters for the Beekeeper Simulation"),
-                # class = "bg-light",
+                tags$h5("Parameters for the Beekeeper Simulation")
               ),
               bslib::card_body(
                 shiny::sliderInput(
@@ -248,6 +246,7 @@ mod_beehave_ui <- function(id) {
             id = ns("output_bees_plot"),
             title = "output_bees",
             full_screen = TRUE,
+            class = "bg-success",
             card_title("Output Bees Plot"),
             tags$div(
               class = "row d-flex align-items-start",
@@ -301,7 +300,7 @@ mod_beehave_ui <- function(id) {
             shiny::actionLink(
               ns("walkthrough"),
               class = "help-button rounded-circle badge text-bg-primary text-white text-decoration-none mb-3 me-3",
-              tags$span("Help")
+              tags$span("HELP")
             )
           ),
         ),

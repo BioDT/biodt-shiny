@@ -206,6 +206,7 @@ biodt_theme <- bslib::bs_theme(
   secondary = "#414f2f",
   info = "#DDA15E",
   warning = "#6E3E18",
+  success = "#f8f2e4",
   bg = "#fff",
   fg = "#414f2f",
   version = 5,
