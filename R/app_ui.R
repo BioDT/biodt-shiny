@@ -202,13 +202,12 @@ golem_add_external_resources <- function() {
 
 # App theme ----
 biodt_theme <- bslib::bs_theme(
-  primary = "#DDA15E", 
-  secondary = "#353F26",
-  success = "#BC6C25",
-  info = "#414f2f",
+  primary = "#bc6c25",
+  secondary = "#414f2f",
+  info = "#DDA15E",
   warning = "#6E3E18",
-  bg = "#F5F5F5",
-  fg = "#5E7043",
+  bg = "#fff",
+  fg = "#414f2f",
   version = 5,
   bootswatch = "bootstrap"
 )
