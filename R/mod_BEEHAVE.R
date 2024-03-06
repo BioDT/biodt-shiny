@@ -24,20 +24,25 @@ mod_beehave_ui <- function(id) {
       id = ns("page"),
       class = "p-0",
       bslib::navset_tab(
+        # Info page ----
         bslib::nav_panel(
           title = "Info",
           value = "Info",
           icon = icon("circle-info"),
-          bslib::card(
-            fill = FALSE,
-            class = "m-0 p-0",
-            height = "1080px",
-            style = "overflow: hidden !important;",
-            bslib::card_body(
-              class = "row m-0 p-0 d-flex flex-row",
-              style = "overflow-x: hidden !important;",
+          style = "overflow: hidden;",
+          # bslib::card(
+          #   fill = FALSE,
+          #   class = "m-0 p-0",
+          #   height = "1080px",
+          #   style = "overflow: hidden !important;",
+          #   bslib::card_body(
+          #     class = "row m-0 p-0 d-flex flex-row",
+          #     style = "overflow-x: hidden !important;",
+          shiny::fluidRow(
+            shiny::column(
+              width = 6,
               tags$div(
-                class = "col-xs-12 col-xl-5",
+                # class = "col-xs-12 col-xl-5",
                 tags$div(
                   class = "greeting text-left m-auto font-weight-bold align-self-stretch p-1",
                   tags$h2(
@@ -54,15 +59,20 @@ mod_beehave_ui <- function(id) {
                   tags$p(pollinatorsInfoText[3])
                 )
               ),
+            ),
+            shiny::column(
+              width = 6,
               tags$div(
                 class = "col-7 m-0 p-0 d-none d-xl-block",
                 tags$img(
-                  style = "position: absolute; top: 0px; right: -300px; z-index: 0; height: 1080px;",
+                  # style = "position: absolute; top: 0px; right: -300px; z-index: 0; height: 1080px;",
                   src = "www/images/HONEYCOMB-boba-jaglicic-Mkk_9x42Sbg-unsplash-min-scaled.jpg",
                 ),
               )
             )
           )
+          #   )
+          # )
         ),
         bslib::nav_panel(
           # Beekeper Case ----
