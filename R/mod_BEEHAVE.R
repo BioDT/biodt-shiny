@@ -30,9 +30,9 @@ mod_beehave_ui <- function(id) {
           icon = icon("circle-info"),
           bslib::card(
             fill = FALSE,
-            class = "m-0 p-0 bg-light",
+            class = "m-0 p-0",
             height = "1080px",
-            style = "overflow-y: hidden !important;",
+            style = "overflow: hidden !important;",
             bslib::card_body(
               class = "row m-0 p-0 d-flex flex-row",
               style = "overflow-x: hidden !important;",
@@ -68,9 +68,9 @@ mod_beehave_ui <- function(id) {
           # Beekeper Case ----
           title = "Beekeeper",
           icon = icon("forumbee"),
-          class = "bg-light",
+          # class = "bg-whi",
           bslib::card(
-            class = "mt-3 bg-light",
+            class = "mt-3",
             tags$div(
               class = "row d-flex justify-content-end",
               tags$div(
@@ -111,7 +111,7 @@ mod_beehave_ui <- function(id) {
               full_screen = TRUE,
               card_header(
                 tags$h5("Input Map"),
-                class = "bg-light",
+                # class = "bg-light",
               ),
               bslib::card_body(
                 bslib::layout_column_wrap(
@@ -134,10 +134,10 @@ mod_beehave_ui <- function(id) {
             bslib::card(
               title = "params_simulation",
               full_screen = FALSE,
-              class = "bg-light",
+              # class = "bg-light",
               card_header(
                 tags$h5("Parameters for the Beekeeper Simulation"),
-                class = "bg-light",
+                # class = "bg-light",
               ),
               bslib::card_body(
                 shiny::sliderInput(
