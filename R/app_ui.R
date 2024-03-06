@@ -212,3 +212,8 @@ biodt_theme <- bslib::bs_theme(
   version = 5,
   bootswatch = "bootstrap"
 )
+
+# NOTE! BG COLOR OF PAGES WITH CARDS----
+# Please use this color as a background color on every page where the UI layout 
+# is defined by use of bslib::card(...), (inside) bslib::card_body(...), etc...
+### "background-color: #eeefec;", ###----

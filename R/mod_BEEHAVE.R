@@ -78,7 +78,7 @@ mod_beehave_ui <- function(id) {
           # Beekeper Case ----
           title = "Beekeeper",
           icon = icon("forumbee"),
-          style = "background-color: #ddd;",
+          style = "background-color: #eeefec;",
           shiny::tags$div(
             bslib::card(
               class = "mt-3",
@@ -144,7 +144,6 @@ mod_beehave_ui <- function(id) {
               bslib::card(
                 title = "params_simulation",
                 full_screen = FALSE,
-                # class = "bg-light",
                 card_header(
                   tags$h5("Parameters for the Beekeeper Simulation")
                 ),
