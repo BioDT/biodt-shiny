@@ -68,6 +68,7 @@ mod_beehave_ui <- function(id) {
           style = "background-color: #eeefec;",
           shiny::tags$div(
             bslib::card(
+              id = ns("beekeeper"),
               class = "mt-2 mx-2 card-shadow",
               bslib::card_header(
                 style = "background-color: #fdfaf7; border-bottom: unset;",
@@ -75,7 +76,7 @@ mod_beehave_ui <- function(id) {
                   class = "row d-flex justify-content-between align-items-center",
                   tags$div(
                     class = "col-md-8 col-sm-12 me-auto",
-                    tags$h3("BeeKeeper"),
+                    tags$h5("Control"),
                   ),
                   tags$div(
                     class = "col-md-4 col-sm-12 d-flex flex-row",
@@ -114,6 +115,7 @@ mod_beehave_ui <- function(id) {
                   style = "background-color: #fdfaf7;"
                 ),
                 bslib::card_body(
+                  id = ns("map_input_card"),
                   tags$div(
                     class = "row d-flex justify-content-between align-items-center",
                     div(
@@ -1380,14 +1382,14 @@ mod_beehave_server <- function(id, r) {
     guide <- cicerone::Cicerone$
       new(allow_close = TRUE)$
       step(
-        ns("page"),
-        "Beehave Sidebar Controls",
+        ns("beekeeper"),
+        "Control panel",
         "Ok, friends, let's see what we have here. In the begining you'll probably need to choose a map...",
-        position = "right"
+        position = "bottom"
       )$
       step(
-        ns("map_input"),
-        "Input Map",
+        ns("map_input_card"),
+        "Map input list",
         "For example, it can be done by choosing input map via select input below...",
         position = "bottom"
       )
