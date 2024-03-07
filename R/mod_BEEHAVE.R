@@ -67,10 +67,10 @@ mod_beehave_ui <- function(id) {
           # Beekeper Case ----
           title = "Beekeeper",
           icon = icon("forumbee"),
-          style = "background-color: #eeefec;",
+          style = "background-color: #EBDDC5;",
           shiny::tags$div(
             bslib::card(
-              class = "mt-3",
+              class = "mt-3 mx-1",
               tags$div(
                 class = "row d-flex justify-content-end",
                 tags$div(
@@ -245,7 +245,7 @@ mod_beehave_ui <- function(id) {
                 id = ns("output_bees_plot"),
                 title = "output_bees",
                 full_screen = TRUE,
-                class = "bg-success",
+                class = "",
                 card_title("Output Bees Plot"),
                 tags$div(
                   class = "row d-flex align-items-start",
