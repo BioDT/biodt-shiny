@@ -34,7 +34,7 @@ mod_beehave_ui <- function(id) {
             class = "align-items-center justify-content-center",
             shiny::column(
               width = 6,
-              class = "col-sm-12 col-xl-6",
+              class = "col-sm-12 col-lg-6",
               tags$div(
                 class = "col-sm-10 offset-sm-1 text-center",
                 tags$h2(
@@ -54,10 +54,10 @@ mod_beehave_ui <- function(id) {
             shiny::column(
               width = 6,
               tags$div(
-                class = "m-0 p-0 d-none d-xl-block",
+                class = "m-0 p-0 d-none d-lg-block",
                 tags$img(
-                  src = "www/images/HONEYCOMB2-boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-                  style = "width: 800px;"
+                  src = "www/images/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
+                  style = "width: 1000px;"
                 ),
               )
             )
@@ -101,7 +101,6 @@ mod_beehave_ui <- function(id) {
             ),
             bslib::layout_column_wrap(
               width = NULL,
-              # height = 750,
               fill = FALSE,
               style = htmltools::css(grid_template_columns = "3fr 1fr"),
               # Beekeper Input Map ----
@@ -112,6 +111,7 @@ mod_beehave_ui <- function(id) {
                 full_screen = TRUE,
                 card_header(
                   tags$h5("Input Map"),
+                  style = "background-color: #fdfaf7;"
                 ),
                 bslib::card_body(
                   bslib::layout_column_wrap(
@@ -136,6 +136,7 @@ mod_beehave_ui <- function(id) {
                 title = "params_simulation",
                 full_screen = FALSE,
                 card_header(
+                  style = "background-color: #fdfaf7;",
                   tags$h5("Parameters for the Beekeeper Simulation")
                 ),
                 bslib::card_body(
@@ -202,6 +203,7 @@ mod_beehave_ui <- function(id) {
                 title = "lookup_table",
                 full_screen = TRUE,
                 card_header(
+                  style = "background-color: #fdfaf7;",
                   tags$h5("Lookup Table"),
                 ),
                 card_body(
@@ -232,7 +234,7 @@ mod_beehave_ui <- function(id) {
                 )
               ),
             
-                # Parameters Table----
+              # Parameters Table----
               # bslib::card(
               #   title = "parameters_table",
               #   full_screen = TRUE,
@@ -249,7 +251,10 @@ mod_beehave_ui <- function(id) {
                 id = ns("output_bees_plot"),
                 title = "output_bees",
                 full_screen = TRUE,
-                card_title("Output Bees Plot"),
+                card_header(
+                  style = "background-color: #fdfaf7;",
+                  tags$h5("Output Bees Plot"),
+                ),
                 tags$div(
                   class = "row d-flex align-items-start",
                   tags$div(
