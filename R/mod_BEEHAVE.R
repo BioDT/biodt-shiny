@@ -21,8 +21,6 @@ mod_beehave_ui <- function(id) {
   ns <- NS(id)
   shiny::bootstrapPage(
       theme = biodt_theme,
-      id = ns("page"),
-      class = "p-0",
       bslib::navset_tab(
         # Info page ----
         bslib::nav_panel(
