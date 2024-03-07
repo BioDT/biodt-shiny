@@ -26,9 +26,11 @@
 }
 
 .marker-cluster-red {
+	background-color: rgb(160, 50, 85);
 	background-color: rgba(253, 60, 115, 0.5);
 	}
 .marker-cluster-red div {
+	background-color: rgb(170, 20, 60);
 	background-color: rgba(241, 40, 70, 0.6);
 	color: rgb(235,235,235)
 	}
