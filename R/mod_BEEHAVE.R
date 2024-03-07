@@ -70,7 +70,7 @@ mod_beehave_ui <- function(id) {
           style = "background-color: #eeefec;",
           shiny::tags$div(
             bslib::card(
-              class = "mt-3 mx-1",
+              class = "mt-2 mx-2",
               tags$div(
                 class = "row d-flex justify-content-end",
                 tags$div(
@@ -101,11 +101,12 @@ mod_beehave_ui <- function(id) {
             ),
             bslib::layout_column_wrap(
               width = NULL,
-              height = 750,
+              # height = 750,
               fill = FALSE,
               style = htmltools::css(grid_template_columns = "3fr 1fr"),
               # Beekeper Input Map ----
               bslib::card(
+                class = "ms-2",
                 title = "input_map",
                 id = ns("input_map"),
                 full_screen = TRUE,
@@ -131,6 +132,7 @@ mod_beehave_ui <- function(id) {
               ),
               # Parameters for the Beekeeper Simulation----
               bslib::card(
+                class = "me-2",
                 title = "params_simulation",
                 full_screen = FALSE,
                 card_header(
@@ -196,6 +198,7 @@ mod_beehave_ui <- function(id) {
           
               # Lookup Table----
               bslib::card(
+                class = "mx-2",
                 title = "lookup_table",
                 full_screen = TRUE,
                 card_header(
@@ -242,10 +245,10 @@ mod_beehave_ui <- function(id) {
               # ),
               # Output Bees Plot----
               bslib::card(
+                class = "mx-2",
                 id = ns("output_bees_plot"),
                 title = "output_bees",
                 full_screen = TRUE,
-                class = "",
                 card_title("Output Bees Plot"),
                 tags$div(
                   class = "row d-flex align-items-start",
@@ -1375,10 +1378,10 @@ mod_beehave_server <- function(id, r) {
         position = "bottom"
       )
     
-    # Run walkthrough via action button "Instructions"----
+    # Run walkthrough via action button "Help"----
     observeEvent(
       input$walkthrough,
-      guide$init(session = session)$start()  
+      guide$init(session = session)$start()
     )
     
   })
