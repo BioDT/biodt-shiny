@@ -20,8 +20,6 @@ pollinatorsInfoText <- c('The pollinators prototype Digtial Twin is based on the
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
   shiny::bootstrapPage(
-    # theme = biodt_theme,
-    # bslib::page_fluid(
       theme = biodt_theme,
       id = ns("page"),
       class = "p-0",
@@ -32,49 +30,38 @@ mod_beehave_ui <- function(id) {
           value = "Info",
           icon = icon("circle-info"),
           style = "overflow: hidden;",
-          # bslib::card(
-          #   fill = FALSE,
-          #   class = "m-0 p-0",
-          #   height = "1080px",
-          #   style = "overflow: hidden !important;",
-          #   bslib::card_body(
-          #     class = "row m-0 p-0 d-flex flex-row",
-          #     style = "overflow-x: hidden !important;",
           shiny::fluidRow(
+            class = "align-items-center justify-content-center",
             shiny::column(
               width = 6,
+              class = "col-sm-12 col-xl-6",
               tags$div(
-                # class = "col-xs-12 col-xl-5",
-                tags$div(
-                  class = "greeting text-left m-auto font-weight-bold align-self-stretch p-1",
-                  tags$h2(
-                    class = "greeting pt-5 display-4 font-weight-bold align-items-left text-decoration-underline",
-                    "BEEHAVE"
-                  ),
-                  tags$p(
-                    class = "pt-3",
-                    pollinatorsInfoText[1]
-                  ),
-                  tags$br(),
-                  tags$p(pollinatorsInfoText[2]),
-                  tags$br(),
-                  tags$p(pollinatorsInfoText[3])
-                )
-              ),
+                class = "col-sm-10 offset-sm-1 text-center",
+                tags$h2(
+                  class = "greeting display-4 font-weight-bold",
+                  "BEEHAVE"
+                ),
+                tags$p(
+                  class = "pt-3",
+                  pollinatorsInfoText[1]
+                ),
+                tags$br(),
+                tags$p(pollinatorsInfoText[2]),
+                tags$br(),
+                tags$p(pollinatorsInfoText[3])
+              )
             ),
             shiny::column(
               width = 6,
               tags$div(
-                class = "col-7 m-0 p-0 d-none d-xl-block",
+                class = "m-0 p-0 d-none d-xl-block",
                 tags$img(
-                  # style = "position: absolute; top: 0px; right: -300px; z-index: 0; height: 1080px;",
-                  src = "www/images/HONEYCOMB-boba-jaglicic-Mkk_9x42Sbg-unsplash-min-scaled.jpg",
+                  src = "www/images/HONEYCOMB2-boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
+                  style = "width: 800px;"
                 ),
               )
             )
           )
-          #   )
-          # )
         ),
         bslib::nav_panel(
           # Beekeper Case ----

@@ -217,3 +217,8 @@ biodt_theme <- bslib::bs_theme(
 # Please use this color as a background color on every page where the UI layout 
 # is defined by use of bslib::card(...), (inside) bslib::card_body(...), etc...
 ### "background-color: #eeefec;", ###----
+
+# COLORS FROM biodt.eu/technical-platform ----
+# #EBDDC5 >> very light orange woody color, probably good for bg
+# #49A863 >> "glaring" green
+# #5EB0C9 >> "ocean-ish" blue
