@@ -106,3 +106,7 @@
     width: 100%;
     max-width: 100%;
 }
+
+.card-shadow {
+   box-shadow: 0 2px 2px #888888;
+}
