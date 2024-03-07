@@ -9,7 +9,8 @@
 #' @noRd
 
 app_ui <- function(request) {
-  tagList(
+  shiny::bootstrapPage(
+    theme = biodt_theme,
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
@@ -27,7 +28,7 @@ app_ui <- function(request) {
         )
       ),
       id = "navbar",
-      theme = biodt_theme,
+      #theme = biodt_theme,
       bg = "#fff",
       fillable = TRUE, # must be true
       collapsible = TRUE,
@@ -193,15 +194,15 @@ golem_add_external_resources <- function() {
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
     waiter::useHostess(),
-    cicerone::use_cicerone(),
-    
+    cicerone::use_cicerone()
   )
-  
+
 }
 
 
 # App theme ----
 biodt_theme <- bslib::bs_theme(
+  version = 5,
   primary = "#bc6c25",
   secondary = "#414f2f",
   info = "#DDA15E",
@@ -209,7 +210,6 @@ biodt_theme <- bslib::bs_theme(
   success = "#f8f2e4",
   bg = "#fff",
   fg = "#414f2f",
-  version = 5,
   bootswatch = "bootstrap"
 )
 

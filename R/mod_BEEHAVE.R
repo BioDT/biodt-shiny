@@ -19,8 +19,10 @@ pollinatorsInfoText <- c('The pollinators prototype Digtial Twin is based on the
 
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
-  tagList(
-    bslib::page_fluid(
+  shiny::bootstrapPage(
+    # theme = biodt_theme,
+    # bslib::page_fluid(
+      theme = biodt_theme,
       id = ns("page"),
       class = "p-0",
       bslib::navset_tab(
@@ -504,7 +506,7 @@ mod_beehave_ui <- function(id) {
     )
     
       ) ### END navset_tab
-    )   ### END page_fluid
+    # )   ### END page_fluid
   )     ### END tagList
 }
 
