@@ -67,7 +67,7 @@ mod_beehave_ui <- function(id) {
           # Beekeper Case ----
           title = "Beekeeper",
           icon = icon("forumbee"),
-          style = "background-color: #EBDDC5;",
+          style = "background-color: #eeefec;",
           shiny::tags$div(
             bslib::card(
               class = "mt-3 mx-1",
