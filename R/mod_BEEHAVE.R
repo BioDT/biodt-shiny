@@ -71,29 +71,31 @@ mod_beehave_ui <- function(id) {
           shiny::tags$div(
             bslib::card(
               class = "mt-2 mx-2 card-shadow",
-              tags$div(
-                class = "row d-flex justify-content-end",
+              bslib::card_header(
+                style = "background-color: #fdfaf7; border-bottom: unset;",
                 tags$div(
-                  class = "col-6",
-                  tags$h3("BeeKeeper")
-                ),
-                tags$div(
-                  class = "col-3",
-                  shiny::actionButton(
-                    ns("run_workflow"),
-                    label = "Run Workflow",
-                    width = "100%",
-                    class = "btn-secondary"
+                  class = "row d-flex justify-content-between align-items-center",
+                  tags$div(
+                    class = "col-md-8 col-sm-12 me-auto",
+                    tags$h3("BeeKeeper"),
                   ),
-                ),
-                tags$div(
-                  class = "col-3",
-                  shinyjs::disabled(
+                  tags$div(
+                    class = "col-md-4 col-sm-12 d-flex flex-row",
                     shiny::actionButton(
-                      ns("load_resources"),
-                      label = "Update resources",
+                      ns("run_workflow"),
+                      label = "Run Workflow",
                       width = "100%",
-                      class = "btn-secondary"
+                      class = "btn-secondary",
+                      style = "max-width: 200px"
+                    ),
+                    shinyjs::disabled(
+                      shiny::actionButton(
+                        ns("load_resources"),
+                        label = "Update resources",
+                        width = "100%",
+                        class = "btn-secondary ms-1",
+                        style = "max-width: 200px"
+                      )
                     )
                   )
                 )
@@ -102,7 +104,7 @@ mod_beehave_ui <- function(id) {
             bslib::layout_column_wrap(
               width = NULL,
               fill = FALSE,
-              style = htmltools::css(grid_template_columns = "3fr 1fr"),
+              style = htmltools::css(grid_template_columns = "2fr 1fr"),
               # Beekeper Input Map ----
               bslib::card(
                 class = "ms-2 card-shadow",
@@ -114,19 +116,28 @@ mod_beehave_ui <- function(id) {
                   style = "background-color: #fdfaf7;"
                 ),
                 bslib::card_body(
-                  bslib::layout_column_wrap(
-                    width = 1 / 2,
-                    shiny::selectInput(
-                      ns("map_list"),
-                      label = "Choose input map",
-                      choices = NULL
+                  tags$div(
+                    class = "row d-flex justify-content-between align-items-center",
+                    div(
+                      class = "col-lg-8 col-sm-12 d-inline-flex",
+                      tags$h5(
+                        "Choose input map",
+                        style = "width: 300px"
+                      ),
+                      shiny::selectInput(
+                        label = NULL,
+                        ns("map_list"),
+                        choices = NULL,
+                      ),
                     ),
-                    shiny::uiOutput(ns("map_coordinates"),),
+                    div(
+                      class = "col-lg-4 col-sm-12",
+                      shiny::uiOutput(ns("map_coordinates"),),
+                    )
                   ),
                   leaflet::leafletOutput(ns("input_map_plot")),
                   bslib::layout_column_wrap(
                     width = 1,
-  
                   )
                 )
               ),
@@ -137,7 +148,7 @@ mod_beehave_ui <- function(id) {
                 full_screen = FALSE,
                 card_header(
                   style = "background-color: #fdfaf7;",
-                  tags$h5("Parameters for the Beekeeper Simulation")
+                  tags$h5("Simulation Parameters")
                 ),
                 bslib::card_body(
                   shiny::sliderInput(
