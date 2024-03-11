@@ -117,12 +117,13 @@ mod_beehave_ui <- function(id) {
                 bslib::card_body(
                   id = ns("map_input_card"),
                   tags$div(
-                    class = "row d-flex justify-content-between align-items-center",
+                    class = "row d-flex justify-content-between",
                     div(
-                      class = "col-lg-8 col-sm-12 d-inline-flex",
-                      tags$h5(
-                        "Choose input map",
-                        style = "width: 300px"
+                      class = "col-lg-8 col-sm-12 d-inline-flex align-items-end",
+                      tags$p(
+                        "Choose input map:",
+                        style = "width: 300px",
+                        class = "pb-2"
                       ),
                       shiny::selectInput(
                         label = NULL,
@@ -219,15 +220,15 @@ mod_beehave_ui <- function(id) {
                 ),
                 card_body(
                   tags$div(
-                    class = "row d-flex align-items-center",
+                    class = "row d-flex justify-content-start",
                     tags$div(
-                      class = "col-lg-2 col-sm-6 text-center",
+                      class = "col-xl-3 col-md-6 col-sm-11 align-self-start pt-2",
                       tags$p(
                         "Choose input lookup table:"
                       )
                     ),
                     tags$div(
-                      class = "col-lg-4 col-sm-6",
+                      class = "col-xl-4 col-md-6 col-sm-11 align-self-start",
                       shiny::selectInput(
                         ns("lookup_list"),
                         label = NULL,
@@ -267,24 +268,24 @@ mod_beehave_ui <- function(id) {
                   tags$h5("Output Bees Plot"),
                 ),
                 tags$div(
-                  class = "row d-flex align-items-start",
+                  class = "row d-flex align-items-end justify-content-beetween",
                   tags$div(
-                    class = "col-lg-2 col-sm-6 text-center",
-                    tags$p("Choose output dataset:")
-                  ),
-                  tags$div(
-                    class = "col-lg-2 col-sm-6",
+                    class = "col-xl-5 col-lg-6 col-sm-12 d-flex align-items-end px-0 justify-content-between",
+                    tags$p(
+                      class = "text-start text-nowrap pb-2",
+                      "Choose output dataset:"
+                    ),
                     shiny::selectInput(ns("output_list"),
                                        label = NULL,
                                        choices = NULL,
                     ),
                   ),
                   tags$div(
-                    class = "col-lg-2 col-sm-6 text-center",
-                    tags$p("Choose output files:")
-                  ),
-                  tags$div(
-                    class = "col-lg-2 col-sm-6",
+                    class = "col-xl-5 col-lg-6 col-sm-12 d-flex align-items-end px-0 justify-content-between",
+                    tags$p(
+                      class = "text-start text-nowrap pb-2",
+                      "Choose output files:"
+                    ),
                     shiny::selectInput(
                       ns("output_files_list"),
                       label = NULL,
@@ -293,11 +294,11 @@ mod_beehave_ui <- function(id) {
                     ),
                   ),
                   tags$div(
-                    class = "col-lg-4 col-sm-6",
+                    class = "col-xl-2 col-lg-4 col-sm-12 col-md-6 px-0 align-items-start pb-3 justify-content-start",
                     shinyjs::disabled(
                       shiny::actionButton(
                         ns("update_output"),
-                        label = "Show results"
+                        label = "Show results",
                       )
                     ),
                   ),
