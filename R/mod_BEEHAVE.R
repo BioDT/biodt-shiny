@@ -71,7 +71,7 @@ mod_beehave_ui <- function(id) {
               id = ns("beekeeper"),
               class = "mt-2 mx-2 card-shadow",
               bslib::card_header(
-                style = "background-color: #fdfaf7; border-bottom: unset;",
+                style = "border-bottom: unset;",
                 tags$div(
                   class = "row d-flex justify-content-between align-items-center",
                   tags$div(
@@ -112,7 +112,7 @@ mod_beehave_ui <- function(id) {
                 full_screen = TRUE,
                 card_header(
                   tags$h5("Input Map"),
-                  style = "background-color: #fdfaf7;"
+                  # style = "background-color: #fff;"
                 ),
                 bslib::card_body(
                   id = ns("map_input_card"),
@@ -148,7 +148,7 @@ mod_beehave_ui <- function(id) {
                 title = "params_simulation",
                 full_screen = FALSE,
                 card_header(
-                  style = "background-color: #fdfaf7;",
+                  # style = "background-color: #fff;",
                   tags$h5("Simulation Parameters")
                 ),
                 bslib::card_body(
@@ -215,7 +215,7 @@ mod_beehave_ui <- function(id) {
                 title = "lookup_table",
                 full_screen = TRUE,
                 card_header(
-                  style = "background-color: #fdfaf7;",
+                  # style = "background-color: #fdfaf7;",
                   tags$h5("Lookup Table"),
                 ),
                 card_body(
