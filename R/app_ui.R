@@ -14,7 +14,6 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    
     # Main (page) navbar----
     bslib::page_navbar(
       window_title = "BioDT",
@@ -28,7 +27,7 @@ app_ui <- function(request) {
         )
       ),
       id = "navbar",
-      #theme = biodt_theme,
+      theme = biodt_theme,
       bg = "#fff",
       fillable = TRUE, # must be true
       collapsible = TRUE,

@@ -24,11 +24,13 @@ mod_beehave_ui <- function(id) {
       bslib::navset_tab(
         # Info page ----
         bslib::nav_panel(
+          theme = biodt_theme,
           title = "Info",
           value = "Info",
           icon = icon("circle-info"),
           style = "overflow: hidden;",
           shiny::fluidRow(
+            theme = biodt_theme,
             class = "align-items-center justify-content-center",
             shiny::column(
               width = 6,
@@ -78,7 +80,7 @@ mod_beehave_ui <- function(id) {
                     tags$h5("Control"),
                   ),
                   tags$div(
-                    class = "col-md-4 col-sm-12 d-flex flex-row",
+                    class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
                     shiny::actionButton(
                       ns("run_workflow"),
                       label = "Run Workflow",

@@ -12,11 +12,12 @@ mod_cultural_ecosystem_services_ui <- function(id){
   ns <- NS(id)
   
   tagList(bslib::page_fluid(
+    theme = biodt_theme,
     class = "p-0",
     bslib::page_navbar(
       #border = FALSE,
       # bslib::page_fluid(
-      # theme = biodt_theme,
+      theme = biodt_theme,
       
       sidebar = bslib::sidebar(
         shiny::h3("Location"),

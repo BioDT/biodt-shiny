@@ -110,3 +110,27 @@
 .card-shadow {
    box-shadow: 0 2px 2px #888888;
 }
+
+/* slider inputs color fix */
+.irs .irs-bar, .irs-shadow {
+  background: #DDA15E;
+  border-color: #DDA15E;
+  color: #DDA15E;
+}
+
+.irs .irs-handle {
+  background: #DDA15E;
+  border-color: #DDA15E;
+  color: #DDA15E;
+}
+
+.irs .irs-single {
+  background: #DDA15E;
+  border-color: #DDA15E;
+}
+
+.irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {
+  background: #bc6c25;
+}
+
+

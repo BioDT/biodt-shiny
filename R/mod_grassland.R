@@ -16,6 +16,7 @@
 mod_grassland_ui <- function(id) {
   ns <- NS(id)
   tagList(bslib::page_fluid(
+    theme = biodt_theme,
     class = "p-0",
     bslib::layout_sidebar(
       border = FALSE,
