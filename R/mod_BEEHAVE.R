@@ -14,215 +14,324 @@
 #' @importFrom shinyjs hidden
 #' @importFrom ggplot2 ggplot geom_line aes
 
+pollinatorsInfoText <- c('The pollinators prototype Digtial Twin is based on the mechanistic simulation model BEEHAVE (Becher et al. 2014, https://doi.org/10.1111/1365-2664.12222).', 'Model descriptions and additional information can be found on https://beehave-model.net/.', 'The pollinator prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020, https://doi.org/10.1594/PANGAEA.910837).')
+
+
 mod_beehave_ui <- function(id) {
   ns <- NS(id)
-  tagList(
-    bslib::page_fluid(
-      id = ns("page"),
-      class = "p-0",
+  shiny::bootstrapPage(
+      theme = biodt_theme,
       bslib::navset_tab(
-        
+        # Info page ----
         bslib::nav_panel(
-          # Beekeper Case ----
-          title = "Beekeper",
-          bslib::layout_column_wrap(
-            width = NULL, 
-            height = 800, 
-            fill = FALSE,
-            style = htmltools::css(grid_template_columns = "1fr 2fr"),
-            # Parameters for the Beekeeper Simulation----
-            bslib::card(
-              title = "params_simulation",
-              full_screen = TRUE,
-              class = "p-3",
-              card_header(
-                "Parameters for the Beekeeper Simulation",
-                class = "h-5"  
-              ),
-              bslib::card_body(
-                shiny::sliderInput(
-                  ns("N_INITIAL_BEES"),
-                  label = "Number of adult bees at the beginning of the simulation",
-                  min = 0,
-                  max = 30000,
-                  value = 10000,
-                  step = 100
+          theme = biodt_theme,
+          title = "Info",
+          value = "Info",
+          icon = icon("circle-info"),
+          style = "overflow: hidden;",
+          shiny::fluidRow(
+            theme = biodt_theme,
+            class = "align-items-center justify-content-center",
+            shiny::column(
+              width = 6,
+              class = "col-sm-12 col-lg-6",
+              tags$div(
+                class = "col-sm-10 offset-sm-1 text-center",
+                tags$h2(
+                  class = "greeting display-4 font-weight-bold",
+                  "BEEHAVE"
                 ),
-                shiny::sliderInput(
-                  ns("N_INITIAL_MITES_HEALTHY"),
-                  label = "Number of Mites at the beginning of the simulation",
-                  value = 100,
-                  min = 0,
-                  max = 100,
-                  step = 1
+                tags$p(
+                  class = "pt-3",
+                  pollinatorsInfoText[1]
                 ),
-                shiny::sliderInput(
-                  ns("N_INITIAL_MITES_INFECTED"),
-                  label = "Number of infected Mites at the beginning of the simulation",
-                  value = 100,
-                  min = 0,
-                  max = 100,
-                  step = 1
-                ),
-                shinyWidgets::prettyCheckbox(
-                  ns("HoneyHarvesting"),
-                  label = "Honey Harvest",
-                  value = TRUE,
-                  icon = icon("check"),
-                  status = "success",
-                  animation = "smooth"
-                ),
-                shinyWidgets::prettyCheckbox(
-                  ns("VarroaTreatment"),
-                  label = "Varroa treatment with arcaricide",
-                  value = FALSE,
-                  icon = icon("check"),
-                  status = "success",
-                  animation = "smooth"
-                ),
-                shinyWidgets::prettyCheckbox(
-                  ns("DroneBroodRemoval"),
-                  label = "Drone Brood Removal",
-                  value = TRUE,
-                  icon = icon("check"),
-                  status = "success",
-                  animation = "smooth"
-                ),
-              ),
-            ),
-            # Beekeper Input Map ----
-            bslib::card(
-              title = "input_map",
-              id = ns("input_map"),
-              full_screen = TRUE,
-              class = "p-3",
-              card_header(
-                "Input Map",
-                class = "h-5"
-              ),
-              bslib::card_body(
-                shiny::selectInput(ns("map_list"),
-                                   label = "Choose input map",
-                                   choices = NULL),
-                shiny::uiOutput(ns("map_coordinates"),),
-                leaflet::leafletOutput(ns("input_map_plot")),
-                bslib::layout_column_wrap(width = 1,
-                                          shinyjs::disabled(
-                                            shiny::actionButton(
-                                              ns("load_resources"),
-                                              label = "Load beehave resources",
-                                              width = "100%",
-                                              class = "btn-primary"
-                                            )
-                                          ))
+                tags$br(),
+                tags$p(pollinatorsInfoText[2]),
+                tags$br(),
+                tags$p(pollinatorsInfoText[3])
               )
             ),
-          ), 
-          
-
-        
-            # Lookup Table----
-          bslib::card(
-            title = "lookup_table",
-            full_screen = TRUE,
-            card_body(
-              shiny::h3("Lookup table"),
-              shiny::selectInput(
-                ns("lookup_list"),
-                label = "Choose input lookup table",
-                choices = NULL
-              ),
-              shinyjs::disabled(
-                div(
-                  DTOutput(
-                    ns("lookup_table")
-                  )
-                )
-              )
-            )
-          ),
-        
-            # Parameters Table----
-          # bslib::card(
-          #   title = "parameters_table",
-          #   full_screen = TRUE,
-          #   bslib::card_body(
-          #     shiny::h3("Parameters Table"),
-          #     DT::DTOutput(
-          #       ns("parameters_table")
-          #     )
-          #   )
-          # ),
-
-          # Output Bees Plot----
-          bslib::card(
-            title = "output_bees",
-            full_screen = TRUE,
-            card_title("Output Bees Plot"),
-            bslib::layout_column_wrap(
-              width = 1 / 3,
-              shiny::selectInput(ns("output_list"),
-                                 label = "Choose output dataset",
-                                 choices = NULL),
-              shiny::selectInput(
-                ns("output_files_list"),
-                label = "Choose output files",
-                choices = NULL,
-                multiple = TRUE
-              ),
-              shinyjs::disabled(
-                shiny::actionButton(
-                  ns("update_output"),
-                  label = "Show results"
-                )
-              ),
-              # plotOutput(
-              #   ns("output_bees_plot")
-              # )
-            ),
-            
-            echarty::ecs.output(
-              ns("echart_pollinators_output"),
-              width = "100%",
-              height = "500px"
-            )
-          ),
-        
-            # Output Honey Plot----
-          bslib::card(
-            title = "output_honey",
-            full_screen = TRUE,
-            card_title("Output Honey Plot"),
-            card_body(
-              plotOutput(
-                ns("output_honey_plot")
-              )
-            )
-          ),
-          
-            # h4 run wrf action btn----
-          bslib::card(
-            bslib::layout_column_wrap(
-              width = 1 / 2,
-              div(
-                shiny::h4("Workflow"),
-                shiny::actionButton(
-                  ns("run_workflow"),
-                  label = "Run Workflow"
-                ),
-              ),
-              div(
-                shiny::h4("Instructions"),
-                shiny::actionButton(
-                  ns("walkthrough"),
-                  "Run guided walkthrough",
+            shiny::column(
+              width = 6,
+              tags$div(
+                class = "m-0 p-0 d-none d-lg-block",
+                tags$img(
+                  src = "www/images/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
+                  style = "width: 1000px;"
                 ),
               )
             )
           )
         ),
-
-          # Expert Case ----
+        bslib::nav_panel(
+          # Beekeper Case ----
+          title = "Beekeeper",
+          icon = icon("forumbee"),
+          style = "background-color: #eeefec;",
+          shiny::tags$div(
+            bslib::card(
+              id = ns("beekeeper"),
+              class = "mt-2 mx-md-3 card-shadow",
+              bslib::card_header(
+                tags$div(
+                  class = "row d-flex justify-content-between align-items-center my-1",
+                  tags$div(
+                    class = "col-md-8 col-sm-12 me-auto",
+                    tags$h5("Control"),
+                  ),
+                  tags$div(
+                    class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
+                    shiny::actionButton(
+                      ns("run_workflow"),
+                      label = "Run Workflow",
+                      width = "100%",
+                      class = "btn-secondary",
+                      style = "max-width: 200px"
+                    ),
+                    shinyjs::disabled(
+                      shiny::actionButton(
+                        ns("load_resources"),
+                        label = "Update resources",
+                        width = "100%",
+                        class = "btn-secondary ms-1",
+                        style = "max-width: 200px"
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            bslib::layout_column_wrap(
+              width = NULL,
+              fill = FALSE,
+              style = htmltools::css(grid_template_columns = "2fr 1fr"),
+              # Beekeper Input Map ----
+              bslib::card(
+                class = "ms-md-3 card-shadow",
+                title = "input_map",
+                id = ns("input_map"),
+                full_screen = TRUE,
+                card_header(
+                  tags$h5("Input Map"),
+                ),
+                bslib::card_body(
+                  id = ns("map_input_card"),
+                  tags$div(
+                    class = "row d-flex justify-content-between",
+                    div(
+                      class = "col-lg-8 col-sm-12 d-inline-flex align-items-end",
+                      tags$p(
+                        "Choose input map:",
+                        style = "width: 300px",
+                        class = "pb-2"
+                      ),
+                      shiny::selectInput(
+                        label = NULL,
+                        ns("map_list"),
+                        choices = NULL,
+                      ),
+                    ),
+                    div(
+                      class = "col-lg-4 col-sm-12",
+                      shiny::uiOutput(ns("map_coordinates"),),
+                    )
+                  ),
+                  leaflet::leafletOutput(ns("input_map_plot")),
+                  bslib::layout_column_wrap(
+                    width = 1,
+                  )
+                )
+              ),
+              # Parameters for the Beekeeper Simulation----
+              bslib::card(
+                class = "me-md-3 card-shadow",
+                title = "params_simulation",
+                full_screen = FALSE,
+                card_header(
+                  tags$h5("Simulation Parameters")
+                ),
+                bslib::card_body(
+                  shiny::sliderInput(
+                    ns("N_INITIAL_BEES"),
+                    label = "Number of adult bees at the beginning of the simulation",
+                    min = 0,
+                    max = 30000,
+                    value = 10000,
+                    step = 100
+                  ),
+                  shiny::sliderInput(
+                    ns("N_INITIAL_MITES_HEALTHY"),
+                    label = "Number of Mites at the beginning of the simulation",
+                    value = 100,
+                    min = 0,
+                    max = 100,
+                    step = 1
+                  ),
+                  shiny::sliderInput(
+                    ns("N_INITIAL_MITES_INFECTED"),
+                    label = "Number of infected Mites at the beginning of the simulation",
+                    value = 100,
+                    min = 0,
+                    max = 100,
+                    step = 1
+                  ),
+                  shinyWidgets::awesomeCheckbox(
+                    ns("HoneyHarvesting"),
+                    label = "Honey Harvest",
+                    value = TRUE,
+                    status = "info",
+                  ),
+                  shinyWidgets::awesomeCheckbox(
+                    ns("VarroaTreatment"),
+                    label = "Varroa treatment with arcaricide",
+                    value = FALSE,
+                    status = "info",
+                  ),
+                  shinyWidgets::awesomeCheckbox(
+                    ns("DroneBroodRemoval"),
+                    label = "Drone Brood Removal",
+                    value = TRUE,
+                    status = "info",
+                  ),
+                  shinyWidgets::airDatepickerInput(
+                    inputId = ns("SimulationDateStart"),
+                    label = "Start the simulation from:",
+                    value = "2016-01-01",
+                    multiple = FALSE,
+                    placeholder = "What starting date of your simulation run do you want to?",
+                    minDate = "2016-01-01",
+                    startView = "2020-01-01",
+                    clearButton = TRUE,
+                    update_on = "close",
+                    addon = "none"
+                  ),
+                  shiny::numericInput(
+                    inputId = ns("SimulationDays"),
+                    label = "For how many days:",
+                    value = 365,
+                    min = 365,
+                    max = 3650,
+                    step = 365
+                  )
+                ),
+              ),
+            ),
+          
+              # Lookup Table----
+              bslib::card(
+                class = "mx-md-3 card-shadow",
+                title = "lookup_table",
+                full_screen = TRUE,
+                card_header(
+                  tags$h5("Lookup Table"),
+                ),
+                card_body(
+                  tags$div(
+                    class = "row d-flex justify-content-start",
+                    tags$div(
+                      class = "col-xl-3 col-md-6 col-sm-11 align-self-start pt-2",
+                      tags$p(
+                        "Choose input lookup table:"
+                      )
+                    ),
+                    tags$div(
+                      class = "col-xl-4 col-md-6 col-sm-11 align-self-start",
+                      shiny::selectInput(
+                        ns("lookup_list"),
+                        label = NULL,
+                        choices = NULL,
+                      ), 
+                    ),
+                  ),
+                  shinyjs::disabled(
+                    div(
+                      DTOutput(
+                        ns("lookup_table")
+                      )
+                    )
+                  )
+                )
+              ),
+            
+              # Parameters Table----
+              # bslib::card(
+              #   title = "parameters_table",
+              #   full_screen = TRUE,
+              #   bslib::card_body(
+              #     shiny::h3("Parameters Table"),
+              #     DT::DTOutput(
+              #       ns("parameters_table")
+              #     )
+              #   )
+              # ),
+              # Output Bees Plot----
+              bslib::card(
+                class = "mx-md-3 card-shadow",
+                id = ns("output_bees_plot"),
+                title = "output_bees",
+                full_screen = TRUE,
+                card_header(
+                  tags$h5("Output Bees Plot"),
+                ),
+                tags$div(
+                  class = "row d-flex align-items-end justify-content-beetween",
+                  tags$div(
+                    class = "col-xl-5 col-lg-6 col-sm-12 d-flex align-items-end px-0 justify-content-between",
+                    tags$p(
+                      class = "text-start text-nowrap pb-2",
+                      "Choose output dataset:"
+                    ),
+                    shiny::selectInput(ns("output_list"),
+                                       label = NULL,
+                                       choices = NULL,
+                    ),
+                  ),
+                  tags$div(
+                    class = "col-xl-5 col-lg-6 col-sm-12 d-flex align-items-end px-0 justify-content-between",
+                    tags$p(
+                      class = "text-start text-nowrap pb-2",
+                      "Choose output files:"
+                    ),
+                    shiny::selectInput(
+                      ns("output_files_list"),
+                      label = NULL,
+                      choices = NULL,
+                      multiple = TRUE
+                    ),
+                  ),
+                  tags$div(
+                    class = "col-xl-2 col-lg-4 col-sm-12 col-md-6 px-0 align-items-start pb-3 justify-content-start",
+                    shinyjs::disabled(
+                      shiny::actionButton(
+                        ns("update_output"),
+                        label = "Show results",
+                      )
+                    ),
+                  ),
+                  # plotOutput(
+                  #   ns("output_bees_plot")
+                  # )
+                ),
+                echarty::ecs.output(
+                  ns("echart_pollinators_output"),
+                  width = "100%",
+                  height = "500px"
+                )
+              ),
+  
+              # Help button for WALKTHROUGH/TOUR ----
+              tags$div(
+                class = "d-flex flex-row-reverse position-sticky bottom-0 end-0 z-2",
+                shiny::actionLink(
+                  ns("walkthrough"),
+                  class = "help-button rounded-circle badge text-bg-primary text-white text-decoration-none mb-3 me-3",
+                  tags$span("HELP")
+                )
+              ),
+            ),
+    
+        ),
+    # Expert Case ----
     bslib::nav_panel(
       title = "Expert",
       bslib::navset_underline(
@@ -410,7 +519,7 @@ mod_beehave_ui <- function(id) {
     )
     
       ) ### END navset_tab
-    )   ### END page_fluid
+    # )   ### END page_fluid
   )     ### END tagList
 }
 
@@ -870,7 +979,7 @@ mod_beehave_server <- function(id, r) {
       
     })
     
-    # Logic of Parameters for the Beekeeper Simulation----
+    # Parameters for the Beekeeper Simulation----
     ## Numeric inputs presented as sliders
     observeEvent(input$N_INITIAL_BEES,
                  {
@@ -878,7 +987,7 @@ mod_beehave_server <- function(id, r) {
                    # golem::print_dev(paste0("N_INITIAL_BEES: ", input$N_INITIAL_BEES))
                  })
     
-    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED"
+    ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED" ----
     ## when value of sliderInput "N_INITIAL_MITES_HEALTHY" changes
     observeEvent(input$N_INITIAL_MITES_HEALTHY,
                  ignoreInit = TRUE,
@@ -901,6 +1010,21 @@ mod_beehave_server <- function(id, r) {
                  {
                    # golem::print_dev(paste0("DroneBroodRemoval: ", input$DroneBroodRemoval))
                  })
+    
+    ## date selected in CALENDAR PICKER & NUMERIC INPUT of how many days it should run ----
+    observeEvent(
+      input$SimulationDateStart,
+      {
+        # golem::print_dev(paste0("Simulation - starting date selected by user: ", input$SimulationDateStart))
+      }
+    )
+    
+    observeEvent(
+      input$SimulationDays,
+      {
+        # golem::print_dev(paste0("Simulation - how many days it runs: ", input$SimulationDays))
+      }
+    )
     
     # Editing
     observeEvent(input$parameters_table_cell_edit, {
@@ -1272,22 +1396,22 @@ mod_beehave_server <- function(id, r) {
     guide <- cicerone::Cicerone$
       new(allow_close = TRUE)$
       step(
-        ns("page"),
-        "Beehave Sidebar Controls",
+        ns("beekeeper"),
+        "Control panel",
         "Ok, friends, let's see what we have here. In the begining you'll probably need to choose a map...",
-        position = "right"
+        position = "bottom"
       )$
       step(
-        ns("map_input"),
-        "Input Map",
+        ns("map_input_card"),
+        "Map input list",
         "For example, it can be done by choosing input map via select input below...",
         position = "bottom"
       )
     
-    # Run walkthrough via action button "Instructions"----
+    # Run walkthrough via action button "Help"----
     observeEvent(
       input$walkthrough,
-      guide$init(session = session)$start()  
+      guide$init(session = session)$start()
     )
     
   })

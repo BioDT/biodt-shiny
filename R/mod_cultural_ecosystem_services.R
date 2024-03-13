@@ -30,6 +30,7 @@ mod_cultural_ecosystem_services_ui <- function(id) {
         }'
       )
     ),
+    theme = biodt_theme,
     class = "p-0",
     
     tags$div(class="container",

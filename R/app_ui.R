@@ -8,15 +8,12 @@
 #' @importFrom htmltools css
 #' @noRd
 
-
-
-
 app_ui <- function(request) {
-  tagList(
+  shiny::bootstrapPage(
+    theme = biodt_theme,
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    
     # Main (page) navbar----
     bslib::page_navbar(
       window_title = "BioDT",
@@ -52,14 +49,12 @@ app_ui <- function(request) {
         icon = shiny::icon("people-group"),
         #class = "nav_menu_dts",
         
-
-        
         ### Species response to environment - menu subitem ----
         nav_item(
 
           div(
             class = "p-2",
-            icon("bugs"),
+            icon("temperature-arrow-up"),
             strong(
               "Species response to environmental change"
             ),
@@ -79,7 +74,7 @@ app_ui <- function(request) {
             div(
               class = "p-2",
               hr(),
-              icon("seedling"),
+              icon("wheat-awn-circle-exclamation"),
               strong(
                 "Genetically detected biodiversity"
               ),
@@ -111,7 +106,7 @@ app_ui <- function(request) {
           div(
             class = "p-2",
             hr(),
-            icon("wheat-awn-circle-exclamation"),
+            icon("bugs"),
             strong(
               "Species interactions with each other and with humans"
             ),
@@ -198,19 +193,31 @@ golem_add_external_resources <- function() {
     shinyjs::useShinyjs(),
     waiter::useWaiter(),
     waiter::useHostess(),
-    cicerone::use_cicerone(),
-    
+    cicerone::use_cicerone()
   )
-  
+
 }
 
 
 # App theme ----
 biodt_theme <- bslib::bs_theme(
+  version = 5,
   primary = "#bc6c25",
   secondary = "#414f2f",
+  info = "#DDA15E",
+  warning = "#6E3E18",
+  success = "#f8f2e4",
   bg = "#fff",
   fg = "#414f2f",
-  version = 5,
   bootswatch = "bootstrap"
 )
+
+# NOTE! BG COLOR OF PAGES WITH CARDS----
+# Please use this color as a background color on every page where the UI layout 
+# is defined by use of bslib::card(...), (inside) bslib::card_body(...), etc...
+### "background-color: #eeefec;", ###----
+
+# COLORS FROM biodt.eu/technical-platform ----
+# #EBDDC5 >> very light orange woody color, probably good for bg
+# #49A863 >> "glaring" green
+# #5EB0C9 >> "ocean-ish" blue
