@@ -62,7 +62,7 @@ app_server <- function(input, output, session) {
                      r)
   
   # cultural ecosystem services module ---
-  mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1")
+  mod_cultural_ecosystem_services_server("cultural_ecosystem_services_1",r,loaders)
   
   # cultural ecosystem services module ---
   mod_grassland_server("grassland",
@@ -108,11 +108,14 @@ app_server <- function(input, output, session) {
                {
                  req(r$lexis_token)
                  
+                 
                  # Get user info ----
+                 print("getting user info")
                  r$user_info <-
                    r4lexis::get_lexis_user_info(r$lexis_token)
                  
                  # Get list of user projects ----
+                 print("getting user projects")
                  r$lexis_projects <-
                    purrr::map_chr(r$user_info$attributes$prj_list,
                                   purrr::pluck,
