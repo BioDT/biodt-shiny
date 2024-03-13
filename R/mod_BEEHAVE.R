@@ -71,7 +71,7 @@ mod_beehave_ui <- function(id) {
           shiny::tags$div(
             bslib::card(
               id = ns("beekeeper"),
-              class = "mt-2 mx-2 card-shadow",
+              class = "mt-2 mx-3 card-shadow",
               bslib::card_header(
                 tags$div(
                   class = "row d-flex justify-content-between align-items-center my-1",
@@ -107,7 +107,7 @@ mod_beehave_ui <- function(id) {
               style = htmltools::css(grid_template_columns = "2fr 1fr"),
               # Beekeper Input Map ----
               bslib::card(
-                class = "ms-2 card-shadow",
+                class = "mx-3 card-shadow",
                 title = "input_map",
                 id = ns("input_map"),
                 full_screen = TRUE,
@@ -144,7 +144,7 @@ mod_beehave_ui <- function(id) {
               ),
               # Parameters for the Beekeeper Simulation----
               bslib::card(
-                class = "me-2 card-shadow",
+                class = "mx-3 card-shadow",
                 title = "params_simulation",
                 full_screen = FALSE,
                 card_header(
@@ -219,7 +219,7 @@ mod_beehave_ui <- function(id) {
           
               # Lookup Table----
               bslib::card(
-                class = "mx-2 card-shadow",
+                class = "mx-3 card-shadow",
                 title = "lookup_table",
                 full_screen = TRUE,
                 card_header(
@@ -266,7 +266,7 @@ mod_beehave_ui <- function(id) {
               # ),
               # Output Bees Plot----
               bslib::card(
-                class = "mx-2 card-shadow",
+                class = "mx-3 card-shadow",
                 id = ns("output_bees_plot"),
                 title = "output_bees",
                 full_screen = TRUE,
