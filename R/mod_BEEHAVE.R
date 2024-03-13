@@ -1015,14 +1015,14 @@ mod_beehave_server <- function(id, r) {
     observeEvent(
       input$SimulationDateStart,
       {
-        golem::print_dev(paste0("Simulation - starting date selected by user: ", input$SimulationDateStart))
+        # golem::print_dev(paste0("Simulation - starting date selected by user: ", input$SimulationDateStart))
       }
     )
     
     observeEvent(
       input$SimulationDays,
       {
-        golem::print_dev(paste0("Simulation - how many days it runs: ", input$SimulationDays))
+        # golem::print_dev(paste0("Simulation - how many days it runs: ", input$SimulationDays))
       }
     )
     
