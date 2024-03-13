@@ -195,7 +195,7 @@ mod_beehave_ui <- function(id) {
                   ),
                   shinyWidgets::airDatepickerInput(
                     inputId = ns("SimulationDateStart"),
-                    label = "Start the simulation from",
+                    label = "Start the simulation from:",
                     value = "2016-01-01",
                     multiple = FALSE,
                     placeholder = "What starting date of your simulation run do you want to?",
@@ -204,6 +204,14 @@ mod_beehave_ui <- function(id) {
                     clearButton = TRUE,
                     update_on = "close",
                     addon = "none"
+                  ),
+                  shiny::numericInput(
+                    inputId = ns("SimulationDays"),
+                    label = "For how many days:",
+                    value = 365,
+                    min = 365,
+                    max = 3650,
+                    step = 365
                   )
                 ),
               ),
@@ -1003,11 +1011,18 @@ mod_beehave_server <- function(id, r) {
                    # golem::print_dev(paste0("DroneBroodRemoval: ", input$DroneBroodRemoval))
                  })
     
-    ## date selected in calendar picker
+    ## date selected in CALENDAR PICKER & NUMERIC INPUT of how many days it should run ----
     observeEvent(
       input$SimulationDateStart,
       {
         golem::print_dev(paste0("Simulation - starting date selected by user: ", input$SimulationDateStart))
+      }
+    )
+    
+    observeEvent(
+      input$SimulationDays,
+      {
+        golem::print_dev(paste0("Simulation - how many days it runs: ", input$SimulationDays))
       }
     )
     
