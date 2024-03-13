@@ -20,7 +20,8 @@ app_server <- function(input, output, session) {
     beehave_user_project = NULL,
     beehave_workflow_id = NULL,
     beehave_map_dataset = NULL,
-    beehave_lookup_dataset = NULL
+    beehave_lookup_dataset = NULL,
+    color_pallette = viridisLite::magma()
   )
   
   # Loaders ----
