@@ -203,6 +203,7 @@ mod_beehave_ui <- function(id) {
                     startView = "2020-01-01",
                     clearButton = TRUE,
                     update_on = "close",
+                    addon = "none"
                   )
                 ),
               ),
