@@ -4,6 +4,20 @@ This repository contains a shiny application which is intended as the simplest w
 
 [Here is a link to the figma for designing the GUI (graphical user interface).](https://www.figma.com/file/92WkNhlVG1nWI2bxBgoXzE/GUI?type=design&mode=design)
 
+## Code style preferences
+
+Please style the files according to `grkstyle::grk_style_transformer()`
+
+```{r}
+# If you work in RStudio
+options(styler.addins_style_transformer = "grkstyle::grk_style_transformer()")
+
+# If you work in VSCode
+options(languageserver.formatting_style = function(options) {
+  grkstyle::grk_style_transformer()
+})
+```
+
 ## Modules
 
 There are modules for each pDT:
