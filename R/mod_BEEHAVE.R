@@ -617,6 +617,7 @@ mod_beehave_server <- function(id, r) {
     observeEvent(r$page_name,
                  {
                    req(r$page_name == "Pollinators")
+                   req(r$color_pallette)
                    
                    if (is.null(r_beehave$input_rast_map)) {
                      r_beehave$input_rast_map <-
@@ -646,6 +647,7 @@ mod_beehave_server <- function(id, r) {
                        beekeeper_output_plot(
                          file.path(pollinators_path, "output_example/Result_table_original.csv"),
                          file.path(pollinators_path, "output_example/weather_412.txt"),
+                         r$color_pallette
                        )
                      )
                  })
