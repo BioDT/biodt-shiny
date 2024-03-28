@@ -3,8 +3,10 @@ box::use(
   bslib[bs_theme],
   shiny.router[router_ui, router_server, route, route_link],
   view/info[mod_info_ui],
+  shinyjs[useShinyjs],
+  waiter[useWaiter, useHostess],
+  cicerone[use_cicerone]
 )
-
 
 # App theme ----
 biodt_theme <- bs_theme(
@@ -19,22 +21,20 @@ biodt_theme <- bs_theme(
   bootswatch = "bootstrap"
 )
 
-# Content ----
-link1 <-
-  shiny$tags$div(shiny$tags$h3("Release"))
-link2 <- shiny$tags$div(
-  style = "display: flex; justify-content: center; align-items: center; height: 100vh;",
-  shiny$tags$h1(
-    shiny$tags$a("Check out Rhino docs!", href = "https://appsilon.github.io/rhino/")
-  )
-)
-
-
 #' @export
 ui <- function(id) {
   ns <- shiny$NS(id)
   shiny$bootstrapPage(
     theme = biodt_theme,
+    # Head ----
+    shiny$tags$head(
+      shiny$tags$link(rel = "shortcut icon", href = "static/favicon.svg"),
+      useShinyjs(),
+      useWaiter(),
+      useHostess(),
+      use_cicerone()
+    ),
+    # Body ----
     shiny$tags$nav(
       class = "navbar navbar-expand-lg",
       shiny$tags$div(
@@ -47,17 +47,18 @@ ui <- function(id) {
             style = "height: 60px;"
           )
         ),
+        # pDT Navbar ----
         shiny$tags$div(
           class = "collapse navbar-collapse",
           id = "digitaltwins",
           shiny$tags$ul(
             class = "navbar-nav me-auto mb-2 mb-lg-0",
+            # Info ---
             shiny$tags$li(
               class = "nav-item",
-              shiny$tags$a(
-                class = "nav-link", href = route_link("/"), "Info"
-              )
+              shiny$tags$a(class = "nav-link", href = route_link("/"), shiny$icon("circle-info"), "Info")
             ),
+            # pDT Dropdown ----
             shiny$tags$li(
               class = "nav-item",
               shiny$tags$a(
@@ -79,10 +80,11 @@ ui <- function(id) {
                     style = "width: 500px"
                   ),
                 ),
+                # pDT Honeybee ----
                 shiny$tags$li(
                   shiny$tags$a(
                     class = "dropdown-item",
-                    href = route_link("page"),
+                    href = route_link("honeybee"),
                     "Honeybee"
                   )
                 )
@@ -92,9 +94,12 @@ ui <- function(id) {
         )
       )
     ),
+    # Router UI ----
     router_ui(
-      route("/", mod_info_ui(ns("info"))),
-      route("page", link2)
+      route("/", mod_info_ui(ns(
+        "info"
+      ))),
+      route("honeybee", shiny$div("Test"))
     )
   )
 }

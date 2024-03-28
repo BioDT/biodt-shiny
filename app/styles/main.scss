@@ -9,7 +9,7 @@
 }
 
 .info{
-  background-image: url("forest2.png");
+  background-image: url("static/background/forest2.png");
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: bottom;
@@ -62,6 +62,36 @@
   margin: -1rem -1rem;
 }
 /* END help button */
+
+/* Underline nav-item */
+
+.navbar .navbar-nav .nav-link {
+  color: #414f2f;
+  font-size: 1.1em;
+}
+.navbar .navbar-nav .nav-link:hover {
+  color: #414f2f;
+}
+.navbar .navbar-nav .nav-item {
+  position: relative;
+}
+.navbar .navbar-nav .nav-item::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background-color: #414f2f;
+  width: 0%;
+  content: "";
+  height: 2px;
+  /*transition: all 0.5s;*/
+}
+
+.navbar .navbar-nav .nav-item:hover::after {
+  width: 100%;
+}
+
 
 /* selection inputs on the same line */
 #beehave-output_bees_plot .shiny-input-container {
