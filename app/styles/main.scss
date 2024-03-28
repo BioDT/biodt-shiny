@@ -1,0 +1,136 @@
+.btn-navbar{
+  color: #414F2F;
+  background-color: #fff;
+  border-color: #fff;
+}
+
+.bslib-sidebar-layout>.sidebar{
+  background-color: #fff;
+}
+
+.info{
+  background-image: url("forest2.png");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: bottom;
+  display: flex;
+}
+
+.info-text{
+  color: #bc6c25;
+  background-color: #fff;
+  background-color: rgba(256,256,256,0.8);
+  border-radius: 25px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.marker-cluster-red {
+	background-color: rgb(160, 50, 85);
+	background-color: rgba(253, 60, 115, 0.5);
+	}
+.marker-cluster-red div {
+	background-color: rgb(170, 20, 60);
+	background-color: rgba(241, 40, 70, 0.6);
+	color: rgb(235,235,235)
+	}
+
+.waiter-fullscreen{
+  background-image: url("forest2.png");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: bottom;
+  display: flex;
+}
+
+/* START help button */
+.help-button {
+  width: 70px;
+  height: 70px;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 12px;
+  line-height: 1.428571429;
+  border-radius: 26.25px;
+  box-shadow: 0 2px 2px #888888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.help-button span {
+  margin: -1rem -1rem;
+}
+/* END help button */
+
+/* selection inputs on the same line */
+#beehave-output_bees_plot .shiny-input-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: center;
+}
+
+#beehave-output_bees_plot .shiny-input-container > label {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+#beehave-output_bees_plot .shiny-input-container > div {
+    min-width: 250px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+#beehave-output_bees_plot .shiny-input-container > div > .selectize-control {
+    padding: 0;
+    width: 250px;
+    margin-left: 1rem;
+}
+
+#beehave-update_output {
+    margin-left: 3rem;
+    margin-right: 3rem;
+    max-width: 18rem;
+} /* for better look of "Show results" button */
+
+/* fix width of the row for on one line inputs - select */
+.form-group.shiny-input-container {
+  margin-bottom: 0rem;
+}
+
+.shiny-input-container:not(.shiny-input-container-inline) {
+    width: 100%;
+    max-width: 100%;
+}
+
+.card-shadow {
+   box-shadow: 0 2px 2px #888888;
+}
+
+/* slider inputs color fix */
+.irs .irs-bar, .irs-shadow {
+  background: #DDA15E;
+  border-color: #DDA15E;
+  color: #DDA15E;
+}
+
+.irs .irs-handle {
+  background: #DDA15E;
+  border-color: #DDA15E;
+  color: #DDA15E;
+}
+
+.irs .irs-single {
+  background: #DDA15E;
+  border-color: #DDA15E;
+}
+
+.irs--shiny .irs-handle.state_hover, .irs--shiny .irs-handle:hover {
+  background: #bc6c25;
+}
+
+
