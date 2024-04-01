@@ -33,5 +33,7 @@ renv
 
 # Data for pDTs
 local_data
+app/data
+
 # Testing script
 R/test.R

@@ -1,11 +1,14 @@
 box::use(
   shiny,
-  bslib[bs_theme],
-  shiny.router[router_ui, router_server, route, route_link],
-  view/info[mod_info_ui],
+  bslib[bs_theme, page_navbar, nav_menu, nav_item, nav_panel],
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess],
-  cicerone[use_cicerone]
+  cicerone[use_cicerone],
+)
+
+box::use(
+  app/view/info[mod_info_ui],
+  app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
 )
 
 # App theme ----
@@ -28,78 +31,60 @@ ui <- function(id) {
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
-      shiny$tags$link(rel = "shortcut icon", href = "static/favicon.svg"),
+      shiny$tags$link(rel = "shortcut icon", href = "static/favicon.ico"),
       useShinyjs(),
       useWaiter(),
       useHostess(),
       use_cicerone()
     ),
     # Body ----
-    shiny$tags$nav(
-      class = "navbar navbar-expand-lg",
-      shiny$tags$div(
-        class = "container-fluid",
-        shiny$tags$a(
-          class = "navbar-brand",
-          href = route_link("/"),
-          shiny$tags$img(
-            src = "static/logo.svg",
-            style = "height: 60px;"
-          )
+    # Main navbar----
+    page_navbar(
+      window_title = "BioDT",
+      title = shiny$div(shiny$a(
+        href = "#",
+        shiny$img(
+          src = "static/logo.svg",
+          height = "70px",
+          style = "padding-right: 20px"
         ),
-        # pDT Navbar ----
-        shiny$tags$div(
-          class = "collapse navbar-collapse",
-          id = "digitaltwins",
-          shiny$tags$ul(
-            class = "navbar-nav me-auto mb-2 mb-lg-0",
-            # Info ---
-            shiny$tags$li(
-              class = "nav-item",
-              shiny$tags$a(class = "nav-link", href = route_link("/"), shiny$icon("circle-info"), "Info")
-            ),
-            # pDT Dropdown ----
-            shiny$tags$li(
-              class = "nav-item",
-              shiny$tags$a(
-                class = "nav-link dropdown-toggle",
-                href = "#",
-                role = "button",
-                `data-bs-toggle` = "dropdown",
-                `aria-expanded` = "false",
-                "Digital Twins"
-              ),
-              shiny$tags$ul(
-                class = "dropdown-menu",
-                shiny$div(
-                  class = "p-2",
-                  # hr(),
-                  shiny$div(
-                    shiny$icon("bugs", class = "p-1"),
-                    shiny$tags$strong("Species interactions with each other and with humans"),
-                    style = "width: 500px"
-                  ),
-                ),
-                # pDT Honeybee ----
-                shiny$tags$li(
-                  shiny$tags$a(
-                    class = "dropdown-item",
-                    href = route_link("honeybee"),
-                    "Honeybee"
-                  )
-                )
-              )
-            )
-          )
+      )),
+      id = "navbar",
+      theme = biodt_theme,
+      bg = "#fff",
+      fillable = TRUE,
+      # must be true
+      collapsible = TRUE,
+      fluid = TRUE,
+      ## Info - main menu item ----
+      nav_panel(
+        title = "Info",
+        value = "info",
+        icon = shiny$icon("circle-info"),
+        class = "container-fluid index-info",
+        mod_info_ui("info")
+      ),
+      ## Digital Twins - main menu item ----
+      nav_menu(
+        title = "Digital Twins",
+        align = "left",
+        icon = shiny$icon("people-group"),
+        ### Species interactions (themselves, human) - menu subitem ----
+        nav_item(shiny$div(
+          class = "p-2",
+          shiny$div(
+            shiny$icon("bugs"),
+            shiny$strong("Species interactions with each other and with humans"),
+            style = "width: 450px"
+          ),
+        )),
+        nav_panel(
+          title = "Honeybee",
+          class = "p-0",
+          honeybee_ui(ns("honeybee_main"),
+                      theme = biodt_theme)
         )
       )
-    ),
-    # Router UI ----
-    router_ui(
-      route("/", mod_info_ui(ns(
-        "info"
-      ))),
-      route("honeybee", shiny$div("Test"))
     )
   )
 }
@@ -107,6 +92,12 @@ ui <- function(id) {
 #' @export
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
-    router_server()
+    ns <- session$ns
+    
+    r <- shiny$reactiveValues(
+      biodt_theme = biodt_theme)
+    # Honeybee pDT ----
+    honeybee_server("honeybee_main",
+                    r)
   })
 }

@@ -1,3 +1,7 @@
+.bslib-page-fill{
+  overflow: auto;
+}
+
 .btn-navbar{
   color: #414F2F;
   background-color: #fff;
@@ -8,8 +12,8 @@
   background-color: #fff;
 }
 
-.info{
-  background-image: url("static/background/forest2.png");
+.index-info{
+  background-image: url("../img/forest2.png");
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: bottom;
@@ -36,7 +40,7 @@
 	}
 
 .waiter-fullscreen{
-  background-image: url("forest2.png");
+  background-image: url("static/background/forest2.png");
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: bottom;

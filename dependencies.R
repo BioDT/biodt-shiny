@@ -1,6 +1,11 @@
 # This file allows packrat (used by rsconnect during deployment) to pick up dependencies.
 library(cicerone)
+library(DT)
+library(echarty)
+library(leaflet)
+library(leaflet.extras)
+library(readr)
 library(rhino)
-library(shiny.router)
 library(shinyjs)
+library(shinyWidgets)
 library(waiter)
