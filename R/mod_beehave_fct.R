@@ -35,7 +35,7 @@ beekeeper_output_plot <- function(input_filepath,
     dplyr::rename(Step = `[step]`)
   input$weather <- rep(weather_data, 2)
   
-  pallette <- color_pallette(3)
+  pallette <- color_pallette(15)
   
   echarty::ec.init(
     preset = FALSE,
@@ -68,7 +68,7 @@ beekeeper_output_plot <- function(input_filepath,
         data = echarty::ec.data(input |> dplyr::select(Step,
                                                        weather)),
         yAxisIndex = 2,
-        color = pallette[0], # "green",
+        color = pallette[7], # "green",
         itemStyle = list(opacity = 0.3),
         barWidth = "100%",
         name = "Collection hours"
@@ -78,7 +78,7 @@ beekeeper_output_plot <- function(input_filepath,
         showSymbol = FALSE,
         name = "Honey (kg)",
         lineStyle = list(width = 3),
-        color = pallette[1], # "gold",
+        color = pallette[13], # "gold",
         data = echarty::ec.data(
           input |> dplyr::select(Step,
                                  `Honey (kg)` = `(honeyEnergyStore / ( ENERGY_HONEY_per_g * 1000 ))`)
@@ -91,7 +91,7 @@ beekeeper_output_plot <- function(input_filepath,
                                                        `TotalIHbees + TotalForagers`)),
         yAxisIndex = 3,
         lineStyle = list(width = 3),
-        color = pallette[2], # "royalblue",
+        color = pallette[4], # "royalblue",
         name = "Bees Count"
       )
     ),
