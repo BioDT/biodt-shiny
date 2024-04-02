@@ -9,9 +9,11 @@ box::use(
 box::use(
   app/view/info[mod_info_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
+  app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server]
 )
 
 # App theme ----
+#' @export
 biodt_theme <- bs_theme(
   version = 5,
   primary = "#bc6c25",
@@ -69,6 +71,15 @@ ui <- function(id) {
         title = "Digital Twins",
         align = "left",
         icon = shiny$icon("people-group"),
+        ### Species response to environment - menu subitem ----
+        nav_item(shiny$div(
+            class = "p-2",
+            shiny$icon("temperature-arrow-up"),
+            shiny$strong("Species response to environmental change")
+          )
+        ),
+        bslib::nav_panel(title = "Grassland dynamics",
+                  grassland_main_ui("grassland")),
         ### Species interactions (themselves, human) - menu subitem ----
         nav_item(shiny$div(
           class = "p-2",
@@ -99,5 +110,7 @@ server <- function(id) {
     # Honeybee pDT ----
     honeybee_server("honeybee_main",
                     r)
+    # Grassland pDT ----
+    grassland_main_server("grassland", r)
   })
 }
