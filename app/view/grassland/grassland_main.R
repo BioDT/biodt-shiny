@@ -1,5 +1,5 @@
 box::use(shiny[NS, tagList],
-         bslib[page_fluid])
+         bslib[page_fluid, layout_sidebar])
 
 box::use(
   app/main[biodt_theme],
@@ -15,7 +15,11 @@ grassland_main_ui <- function(id, theme) {
     bslib::page_fluid(
       theme = theme,
       class = "p-0",
-      mod_grassland_location_ui(ns("grassland_location")),
+      bslib::layout_sidebar(
+        border = FALSE,
+        
+          mod_grassland_location_ui(ns("grassland_location"))
+      ),
       mod_grassland_inputmap_ui(ns("grassland_inputmap")),
       mod_grassland_outputplot_ui(ns("grassland_outputplot"))
     )

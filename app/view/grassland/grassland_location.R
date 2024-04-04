@@ -1,53 +1,50 @@
 box::use(shiny[NS, actionButton, h3, radioButtons, textInput, numericInput, observeEvent],
          htmltools[div],
-         bslib[layout_sidebar, layout_column_wrap, sidebar],
+         bslib[layout_column_wrap, sidebar],
          shinyjs[hidden, disabled,toggle],
          leaflet[leafletProxy, clearMarkers, setView, addMarkers])
 
 #' @export
 mod_grassland_location_ui <- function(id) {
   ns <- NS(id)
-  bslib::layout_sidebar(
-    border = FALSE,
-    bslib::sidebar(
-      shiny::tags$h3("Location"),
-      shiny::radioButtons(
-        ns("input_type"),
-        label = "Choose location type",
-        choices = list("DEIMS.id", "Lat, Long"),
-        selected = "DEIMS.id"
-      ),
-      shiny::textInput(
-        ns("deimsid"),
-        "Input DEIMS.id",
-        value = "102ae489-04e3-481d-97df-45905837dc1a"
-      ),
-      shinyjs::hidden(
-        shiny::tags$div(
-        id = ns("latlon"),
-          bslib::layout_column_wrap(
-            width = 1 / 3,
-            shiny::numericInput(
-              ns("lat"),
-              label = "Latitude",
-              value = 51.3919),
-            shiny::numericInput(
-              ns("lon"),
-              label = "Longitude",
-              value = 11.8787)
-          )
+  bslib::sidebar(
+    shiny::tags$h3("Location"),
+    shiny::radioButtons(
+      ns("input_type"),
+      label = "Choose location type",
+      choices = list("DEIMS.id", "Lat, Long"),
+      selected = "DEIMS.id"
+    ),
+    shiny::textInput(
+      ns("deimsid"),
+      "Input DEIMS.id",
+      value = "102ae489-04e3-481d-97df-45905837dc1a"
+    ),
+    shinyjs::hidden(
+      shiny::tags$div(
+      id = ns("latlon"),
+        bslib::layout_column_wrap(
+          width = 1 / 3,
+          shiny::numericInput(
+            ns("lat"),
+            label = "Latitude",
+            value = 51.3919),
+          shiny::numericInput(
+            ns("lon"),
+            label = "Longitude",
+            value = 11.8787)
         )
-      ),
+      )
+    ),
+    shiny::actionButton(
+      ns("update_map_location"),
+      label = "Update location on map"
+    ),
+    shiny::tags$h3("Workflow"),
+    shinyjs::disabled(
       shiny::actionButton(
-        ns("update_map_location"),
-        label = "Update location on map"
-      ),
-      shiny::tags$h3("Workflow"),
-      shinyjs::disabled(
-        shiny::actionButton(
-          ns("run_workflow"),
-          label = "Run Workflow"
-        )
+        ns("run_workflow"),
+        label = "Run Workflow"
       )
     )
   )
