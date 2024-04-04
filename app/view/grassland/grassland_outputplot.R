@@ -2,7 +2,6 @@ box::use(
   shiny[NS, plotOutput, selectInput, actionButton, moduleServer, renderPlot],
   bslib[card, card_title, card_body, layout_column_wrap],
   shinyjs[disabled],
-  shinipsum[random_ggplot]
 )
 
 #' @export

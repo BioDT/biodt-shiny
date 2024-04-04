@@ -4,13 +4,12 @@ box::use(
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess],
   cicerone[use_cicerone],
-  htmltools[div, strong]
 )
 
 box::use(
-  app/view/info[mod_info_ui],
-  app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
-  app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server]
+  app / view / info[mod_info_ui],
+  app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
+  app / view / grassland / grassland_main[grassland_main_ui, grassland_main_server],
 )
 
 # App theme ----
@@ -100,7 +99,8 @@ ui <- function(id) {
           title = "Honeybee",
           class = "p-0",
           honeybee_ui(ns("honeybee_main"),
-                      theme = biodt_theme)
+            theme = biodt_theme
+          )
         )
       )
     )
@@ -111,12 +111,15 @@ ui <- function(id) {
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     r <- shiny$reactiveValues(
-      biodt_theme = biodt_theme)
+      biodt_theme = biodt_theme
+    )
     # Honeybee pDT ----
-    honeybee_server("honeybee_main",
-                    r)
+    honeybee_server(
+      "honeybee_main",
+      r
+    )
     # Grassland pDT ----
     grassland_main_server("grassland_main", r)
   })
