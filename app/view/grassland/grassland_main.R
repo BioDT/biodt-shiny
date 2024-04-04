@@ -9,25 +9,29 @@ box::use(
 )
 
 #' @export
-grassland_main_ui <- function(id) {
-  ns <- NS(id)
-  tagList(
-    page_fluid(
-      theme = biodt_theme,
+grassland_main_ui <- function(id, theme) {
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    bslib::page_fluid(
+      theme = theme,
       class = "p-0",
-      mod_grassland_location_ui,
-      mod_grassland_inputmap_ui,
-      mod_grassland_outputplot_ui
+      mod_grassland_location_ui(ns("grassland_location")),
+      mod_grassland_inputmap_ui(ns("grassland_inputmap")),
+      mod_grassland_outputplot_ui(ns("grassland_outputplot"))
     )
   )
 }
 
 #' @export
 grassland_main_server <- function(id, r) {
-  
-  mod_grassland_location_server(id, r)
-  
-  mod_grassland_inputmap_server(id, r)
-  
-  mod_grassland_outputplot_server(id, r)
+  shiny::moduleServer(
+    id,
+    function(input, output, session) {
+      ns <- session$ns
+      
+      mod_grassland_location_server(ns("grassland_location"), r)
+      mod_grassland_inputmap_server(ns("grassland_inputmap"), r)
+      mod_grassland_outputplot_server(ns("grassland_outputplot"), r)
+    }
+  )
 }

@@ -10,7 +10,7 @@ mod_grassland_location_ui <- function(id) {
   bslib::layout_sidebar(
     border = FALSE,
     bslib::sidebar(
-      shiny::h3("Location"),
+      shiny::tags$h3("Location"),
       shiny::radioButtons(
         ns("input_type"),
         label = "Choose location type",
@@ -23,7 +23,7 @@ mod_grassland_location_ui <- function(id) {
         value = "102ae489-04e3-481d-97df-45905837dc1a"
       ),
       shinyjs::hidden(
-        htmltools::div(
+        shiny::tags$div(
         id = ns("latlon"),
           bslib::layout_column_wrap(
             width = 1 / 3,
@@ -42,7 +42,7 @@ mod_grassland_location_ui <- function(id) {
         ns("update_map_location"),
         label = "Update location on map"
       ),
-      shiny::h3("Workflow"),
+      shiny::tags$h3("Workflow"),
       shinyjs::disabled(
         shiny::actionButton(
           ns("run_workflow"),

@@ -4,6 +4,7 @@ box::use(
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess],
   cicerone[use_cicerone],
+  htmltools[div, strong]
 )
 
 box::use(
@@ -72,14 +73,20 @@ ui <- function(id) {
         align = "left",
         icon = shiny$icon("people-group"),
         ### Species response to environment - menu subitem ----
-        nav_item(shiny$div(
+        nav_item(
+          shiny::tags$div(
             class = "p-2",
             shiny$icon("temperature-arrow-up"),
-            shiny$strong("Species response to environmental change")
+            shiny::tags$strong("Species response to environmental change")
           )
         ),
-        bslib::nav_panel(title = "Grassland dynamics",
-                  grassland_main_ui("grassland")),
+        bslib::nav_panel(
+          title = "Grassland dynamics",
+          grassland_main_ui(
+            ns("grassland_main"),
+            theme = biodt_theme
+          )
+        ),
         ### Species interactions (themselves, human) - menu subitem ----
         nav_item(shiny$div(
           class = "p-2",
@@ -111,6 +118,6 @@ server <- function(id) {
     honeybee_server("honeybee_main",
                     r)
     # Grassland pDT ----
-    grassland_main_server("grassland", r)
+    grassland_main_server("grassland_main", r)
   })
 }
