@@ -16,7 +16,7 @@ grassland_info_ui <- function(id) {
           class = "greeting display-4 font-weight-bold",
           "GRASSLAND"
         ),
-        tags$h6("Background - scientific breakthroughs"),
+        tags$h6("Background - scientific breakthroughs:"),
         tags$p(
           class = "pt-3",
           "Describe temporal biodiversity dynamics for different local grassland sites by a regionally transferable model (GRASSMIND), i.e. with a generic parameterization such that separate site-specific model calibration is avoided ('biodiversity' represented in the model by 4 plant functional groups: grasses, small herbs, tall herbs, legumes)."
@@ -43,6 +43,6 @@ grassland_info_ui <- function(id) {
 #' @export
 grassland_info_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
+
   })
 }

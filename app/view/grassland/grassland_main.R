@@ -1,41 +1,50 @@
-box::use(shiny[NS, tagList],
-         bslib[page_fluid, layout_sidebar])
+box::use(
+  shiny,
+  bslib[navset_tab, nav_panel]
+)
 
 box::use(
-  app/main[biodt_theme],
-  app/view/grassland/grassland_location[mod_grassland_location_ui, mod_grassland_location_server],
-  app/view/grassland/grassland_inputmap[mod_grassland_inputmap_ui, mod_grassland_inputmap_server],
-  app/view/grassland/grassland_outputplot[mod_grassland_outputplot_ui, mod_grassland_outputplot_server],
+  app/view/grassland/grassland_app[grassland_app_ui, grassland_app_server],
+  app/view/grassland/grassland_info[grassland_info_ui, grassland_info_server],
 )
 
 #' @export
-grassland_main_ui <- function(id, theme) {
+grassland_ui <- function(id, theme) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    bslib::page_fluid(
-      theme = theme,
-      class = "p-0",
-      bslib::layout_sidebar(
-        border = FALSE,
-        
-          mod_grassland_location_ui(ns("grassland_location"))
-      ),
-      mod_grassland_inputmap_ui(ns("grassland_inputmap")),
-      mod_grassland_outputplot_ui(ns("grassland_outputplot"))
+
+    shiny::tagList(
+      navset_tab(
+        # Info Page ---
+        nav_panel(
+          title = "Info",
+          value = "Info",
+          icon = shiny$icon("circle-info"),
+          grassland_info_ui(
+            ns("grassland_info")
+          )
+        ),
+        # Grassland Case ----
+        nav_panel(
+          title = "Grassland Dynamics",
+          icon = shiny$icon("leaf"),
+          grassland_app_ui(
+            ns("grassland_app"),
+            theme
+          )
+        )
+      )
     )
-  )
 }
 
 #' @export
-grassland_main_server <- function(id, r) {
+grassland_server <- function(id, r) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       
-      mod_grassland_location_server(ns("grassland_location"), r)
-      mod_grassland_inputmap_server(ns("grassland_inputmap"), r)
-      mod_grassland_outputplot_server(ns("grassland_outputplot"), r)
+      grassland_info_server("grassland_info", r)
+      grassland_app_server("grassland_app", r)
     }
   )
 }
