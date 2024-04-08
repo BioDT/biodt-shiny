@@ -1,6 +1,6 @@
 box::use(
   shiny[NS, plotOutput, selectInput, actionButton, moduleServer, renderPlot],
-  bslib[card, card_title, card_body, layout_column_wrap],
+  bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[disabled],
 )
 
@@ -8,28 +8,33 @@ box::use(
 mod_grassland_outputplot_ui <- function(id) {
   ns <- NS(id)
   bslib::card(
-    title = "output_gl",
+    class = "mx-md-3 card-shadow",
+    id = ns("output_plot"),
     full_screen = TRUE,
-    bslib::card_title("Model Output"),
-    bslib::layout_column_wrap(
-      width = 1 / 3,
-      shiny::selectInput(
-        ns("output_list"),
-        label = "Choose output dataset",
-        choices = NULL
-      ),
-      shiny::selectInput(
-        ns("output_files_list"),
-        label = "Choose output files",
-        choices = NULL,
-        multiple = TRUE
-      ),
-      shinyjs::disabled(
-        shiny::actionButton(
-          ns("update_output"),
-          label = "Show results"
+    card_header(
+      ("Model Output")
+    ),
+    card_body(
+      bslib::layout_column_wrap(
+        width = 1 / 3,
+        shiny::selectInput(
+          ns("output_list"),
+          label = "Choose output dataset",
+          choices = NULL
+        ),
+        shiny::selectInput(
+          ns("output_files_list"),
+          label = "Choose output files",
+          choices = NULL,
+          multiple = TRUE
+        ),
+        shinyjs::disabled(
+          shiny::actionButton(
+            ns("update_output"),
+            label = "Show results"
+          )
         )
-      )
+      ),
     ),
     shiny::plotOutput(
       ns("output_plot_gl")
@@ -43,7 +48,7 @@ mod_grassland_outputplot_server <- function(id, r) {
     ns <- session$ns
 
     output$output_plot_gl <- shiny::renderPlot(
-      shinipsum::random_ggplot(type = "line")
+      print("Grasslands' shiny::renderPlot run")
     )
   })
 }

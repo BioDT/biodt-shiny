@@ -1,17 +1,20 @@
 box::use(
-  shiny[NS, moduleServer],
-  bslib[card, card_title, card_body],
+  shiny[NS, moduleServer, tags],
+  bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addMarkers]
 )
 
 #' @export
 mod_grassland_inputmap_ui <- function(id) {
   ns <- NS(id)
-  bslib::card(
-    title = "input_map",
+  card(
+    class = "ms-md-3 card-shadow",
+    id = ns("input_map"),
     full_screen = TRUE,
-    bslib::card_title("Input Map"),
-    bslib::card_body(
+    card_header(
+      tags$h5("Input Map")
+    ),
+    card_body(
       leaflet::leafletOutput(
         ns("input_map_plot")
       )

@@ -96,8 +96,10 @@
   width: 100%;
 }
 
-
-/* selection inputs on the same line */
+/* 
+  NOTE: NOT WORKING BC DIFFERENT IDs!!
+  selection inputs on the same line
+*/
 #beehave-output_bees_plot .shiny-input-container {
     width: 100%;
     display: flex;

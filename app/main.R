@@ -80,7 +80,8 @@ ui <- function(id) {
           )
         ),
         nav_panel(
-          title = "Grassland dynamics",
+          class = "p-0",
+          title = "Grassland Dynamics",
           grassland_ui(
             ns("grassland"),
             theme = biodt_theme
