@@ -5,7 +5,7 @@ box::use(
 )
 
 #' @export
-mod_grassland_inputmap_ui <- function(id) {
+grassland_inputmap_ui <- function(id) {
   ns <- NS(id)
   card(
     class = "ms-md-3 card-shadow",
@@ -23,7 +23,7 @@ mod_grassland_inputmap_ui <- function(id) {
 }
 
 #' @export
-mod_grassland_inputmap_server <- function(id, r) {
+grassland_inputmap_server <- function(id, r) {
   shiny::moduleServer(
     id,
     function(input, output, session) {

@@ -5,7 +5,7 @@ box::use(shiny[NS, actionButton, h3, radioButtons, textInput, numericInput, obse
          leaflet[leafletProxy, clearMarkers, setView, addMarkers])
 
 #' @export
-mod_grassland_location_ui <- function(id) {
+grassland_location_ui <- function(id) {
   ns <- NS(id)
   card(
     class = "me-md-3 card-shadow",
@@ -51,7 +51,7 @@ mod_grassland_location_ui <- function(id) {
 }
 
 #' @export
-mod_grassland_location_server <- function(id, r) {
+grassland_location_server <- function(id, r) {
   shiny::moduleServer(
     id,
     function(input, output, session) {

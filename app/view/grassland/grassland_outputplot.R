@@ -5,7 +5,7 @@ box::use(
 )
 
 #' @export
-mod_grassland_outputplot_ui <- function(id) {
+grassland_outputplot_ui <- function(id) {
   ns <- NS(id)
   bslib::card(
     class = "mx-md-3 card-shadow",
@@ -43,7 +43,7 @@ mod_grassland_outputplot_ui <- function(id) {
 }
 
 #' @export
-mod_grassland_outputplot_server <- function(id, r) {
+grassland_outputplot_server <- function(id, r) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
