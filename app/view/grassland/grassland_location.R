@@ -15,34 +15,34 @@ grassland_location_ui <- function(id) {
       tags$h5("Select Location")
     ),
     card_body(
-      shiny::radioButtons(
+      radioButtons(
         inputId = ns("input_type"),
         label = "Choose location type:",
         choices = list("DEIMS.id", "Lat, Long"),
         selected = "DEIMS.id"
       ),
-      shiny::textInput(
+      textInput(
         inputId = ns("deimsid"),
         "Input DEIMS.id",
         value = "102ae489-04e3-481d-97df-45905837dc1a"
       ),
       shinyjs::hidden(
-        shiny::tags$div(
-        id = ns("latlon"),
-          bslib::layout_column_wrap(
+        tags$div(
+          id = ns("latlon"),
+          layout_column_wrap(
             width = 1 / 3,
-            shiny::numericInput(
+            numericInput(
               ns("lat"),
               label = "Latitude",
               value = 51.3919),
-            shiny::numericInput(
+            numericInput(
               ns("lon"),
               label = "Longitude",
               value = 11.8787)
           )
         )
       ),
-      shiny::actionButton(
+      actionButton(
         inputId = ns("update_map_location"),
         label = "Update location on map"
       ),
@@ -51,13 +51,13 @@ grassland_location_ui <- function(id) {
 }
 
 #' @export
-grassland_location_server <- function(id, r) {
+grassland_location_server <- function(id) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       
-      shiny::observeEvent(
+      observeEvent(
         input$input_type,
         ignoreInit = TRUE,
         {
@@ -72,27 +72,32 @@ grassland_location_server <- function(id, r) {
           )
         }
       )
-      
-      shiny::observeEvent(
+
+      map_defaults <- list(
+        lon = 11.8787,
+        lat = 51.3919,
+        zoom = 9
+      )
+      map_opts <- reactiveVal()
+
+      observeEvent(
         input$update_map_location,
         {
           if (input$input_type == "Lat, Long") {
-            lng <- input$lon
-            lat <- input$lat
-          } else if (input$input_type == "DEIMS.id") {
-            lng <- 0
-            lat <- 0
+            map_opts$lon <- input$lon
+            map_opts$lat <- input$lat
+          # TODO - deims, viz chat ----
+          # } else if (input$input_type == "DEIMS.id") {
+          #   map_opts$lon <- 0
+          #   map_opts$lon <- 0
+          } else {
+            map_opts$lon <- map_defaults$lon
+            map_opts$lat <- map_defaults$lat
           }
-          
-          leaflet::leafletProxy("input_map_plot") |>
-            leaflet::clearMarkers() |>
-            leaflet::setView(lng = lng,
-                             lat = lat,
-                             zoom = 9) |>
-            leaflet::addMarkers(lng = lng,
-                                lat = lat)
         }
       )
+
+      reactive(map_opts())
     }
   )
 }

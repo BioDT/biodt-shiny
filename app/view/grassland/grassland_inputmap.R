@@ -1,7 +1,7 @@
 box::use(
-  shiny[NS, moduleServer, tags],
+  shiny[NS, moduleServer, tags, observeEvent],
   bslib[card, card_header, card_body],
-  leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addMarkers]
+  leaflet[leafletOutput, renderLeaflet],
 )
 
 #' @export
@@ -15,28 +15,23 @@ grassland_inputmap_ui <- function(id) {
       tags$h5("Input Map")
     ),
     card_body(
-      leaflet::leafletOutput(
-        ns("input_map_plot")
+      id = ns("input_map_cardbody"),
+      leafletOutput(
+        ns("input_map")
       )
     )
   )
 }
 
 #' @export
-grassland_inputmap_server <- function(id, r) {
-  shiny::moduleServer(
+grassland_inputmap_server <- function(id, leaflet_map) {
+  moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       
-      output$input_map_plot <- leaflet::renderLeaflet({
-        leaflet::leaflet() |>
-          leaflet::addTiles() |>
-          leaflet::setView(lng = 11.8787,
-                           lat = 51.3919,
-                           zoom = 9) |>
-          leaflet::addMarkers(lng = 11.8787,
-                              lat = 51.3919)
+      observeEvent(leaflet_map(), {
+        output$input_map <- renderLeaflet(leaflet_map())
       })
     }
   )
