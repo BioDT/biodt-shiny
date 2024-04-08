@@ -79,7 +79,7 @@ ui <- function(id) {
             shiny::tags$strong("Species response to environmental change")
           )
         ),
-        bslib::nav_panel(
+        nav_panel(
           title = "Grassland dynamics",
           grassland_ui(
             ns("grassland"),
@@ -87,14 +87,16 @@ ui <- function(id) {
           )
         ),
         ### Species interactions (themselves, human) - menu subitem ----
-        nav_item(shiny$div(
-          class = "p-2",
+        nav_item(
           shiny$div(
-            shiny$icon("bugs"),
-            shiny$strong("Species interactions with each other and with humans"),
-            style = "width: 450px"
-          ),
-        )),
+            class = "p-2",
+            shiny$div(
+              shiny$icon("bugs"),
+              shiny$strong("Species interactions with each other and with humans"),
+              style = "width: 450px"
+            ),
+          )
+        ),
         nav_panel(
           title = "Honeybee",
           class = "p-0",
