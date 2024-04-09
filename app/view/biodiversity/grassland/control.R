@@ -4,7 +4,7 @@ box::use(
 )
 
 #' @export
-grassland_control_ui <- function(id) {
+ui <- function(id) {
   ns <- NS(id)
   card(
     id = ns("control"),
@@ -32,7 +32,7 @@ grassland_control_ui <- function(id) {
 }
 
 #' @export
-grassland_control_server <- function(id) {
+server <- function(id) {
   moduleServer(id, function(input, output, session) {
 
   })

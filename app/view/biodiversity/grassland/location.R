@@ -1,11 +1,11 @@
-box::use(shiny[NS, actionButton, h3, radioButtons, textInput, numericInput, observeEvent, tags],
-         htmltools[div],
-         bslib[card, card_header, card_body, layout_column_wrap, sidebar],
-         shinyjs[hidden, disabled,toggle],
-         leaflet[leafletProxy, clearMarkers, setView, addMarkers])
+box::use(
+  shiny[NS, actionButton, radioButtons, textInput, numericInput, observeEvent, tags, moduleServer],
+  bslib[card, card_header, card_body, layout_column_wrap],
+  shinyjs[hidden, disabled, toggle],
+)
 
 #' @export
-grassland_location_ui <- function(id) {
+ui <- function(id) {
   ns <- NS(id)
   card(
     class = "me-md-3 card-shadow",
@@ -26,7 +26,7 @@ grassland_location_ui <- function(id) {
         "Input DEIMS.id",
         value = "102ae489-04e3-481d-97df-45905837dc1a"
       ),
-      shinyjs::hidden(
+      hidden(
         tags$div(
           id = ns("latlon"),
           layout_column_wrap(
@@ -34,11 +34,13 @@ grassland_location_ui <- function(id) {
             numericInput(
               ns("lat"),
               label = "Latitude",
-              value = 51.3919),
+              value = 0
+            ), # value = 51.3919),
             numericInput(
               ns("lon"),
               label = "Longitude",
-              value = 11.8787)
+              value = 0
+            ) # value = 11.8787),
           )
         )
       ),
@@ -51,10 +53,8 @@ grassland_location_ui <- function(id) {
 }
 
 #' @export
-grassland_location_server <- function(id) {
-  shiny::moduleServer(
-    id,
-    function(input, output, session) {
+server <- function(id) {
+  moduleServer(id, function(input, output, session) {
       ns <- session$ns
       
       observeEvent(
@@ -62,42 +62,44 @@ grassland_location_server <- function(id) {
         ignoreInit = TRUE,
         {
           print("input$input_type::: ", input$input_type)
-          shinyjs::toggle(
+          toggle(
             id = "latlon",
             condition = input$input_type == "Lat, Long"
           )
-          shinyjs::toggle(
+          toggle(
             id = "deimsid",
             condition = input$input_type == "DEIMS.id"
           )
         }
       )
 
+
+      # TODO - start over
       map_defaults <- list(
         lon = 11.8787,
         lat = 51.3919,
         zoom = 9
       )
-      map_opts <- reactiveVal()
+      #map_opts <- reactiveVal()
 
-      observeEvent(
-        input$update_map_location,
-        {
-          if (input$input_type == "Lat, Long") {
-            map_opts$lon <- input$lon
-            map_opts$lat <- input$lat
-          # TODO - deims, viz chat ----
-          # } else if (input$input_type == "DEIMS.id") {
-          #   map_opts$lon <- 0
-          #   map_opts$lon <- 0
-          } else {
-            map_opts$lon <- map_defaults$lon
-            map_opts$lat <- map_defaults$lat
-          }
-        }
-      )
+      # observeEvent(
+      #   # input$update_map_location,
+      #   {
+      #     if (input$input_type == "Lat, Long") {
+      #       map_opts$lon <- input$lon
+      #       map_opts$lat <- input$lat
+      #     # TODO - deims, viz chat ----
+      #     # } else if (input$input_type == "DEIMS.id") {
+      #     #   map_opts$lon <- 0
+      #     #   map_opts$lon <- 0
+      #     } else {
+      #       map_opts$lon <- map_defaults$lon
+      #       map_opts$lat <- map_defaults$lat
+      #     }
+      #   }
+      # )
 
-      reactive(map_opts())
+      #reactive(map_opts())
     }
   )
 }

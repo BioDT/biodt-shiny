@@ -9,7 +9,7 @@ box::use(
 box::use(
   app / view / info[mod_info_ui],
   app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
-  app / view / grassland / grassland_main[grassland_ui, grassland_server],
+  app/view/biodiversity/grassland_main,
 )
 
 # App theme ----
@@ -82,9 +82,8 @@ ui <- function(id) {
         nav_panel(
           class = "p-0",
           title = "Grassland Dynamics",
-          grassland_ui(
-            ns("grassland"),
-            theme = biodt_theme
+          grassland_main$ui(
+            ns("grassland")
           )
         ),
         ### Species interactions (themselves, human) - menu subitem ----
@@ -124,6 +123,6 @@ server <- function(id) {
       r
     )
     # Grassland pDT ----
-    grassland_server("grassland", r)
+    grassland_main$server("grassland")
   })
 }

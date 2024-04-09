@@ -3,7 +3,7 @@ box::use(
 )
 
 #' @export
-grassland_info_ui <- function(id) {
+ui <- function(id) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center",
@@ -41,7 +41,7 @@ grassland_info_ui <- function(id) {
 }
 
 #' @export
-grassland_info_server <- function(id) {
+server <- function(id) {
   moduleServer(id, function(input, output, session) {
 
   })

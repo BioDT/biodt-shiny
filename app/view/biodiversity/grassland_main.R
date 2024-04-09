@@ -4,12 +4,12 @@ box::use(
 )
 
 box::use(
-  app/view/grassland/grassland_app[grassland_app_ui, grassland_app_server],
-  app/view/grassland/grassland_info[grassland_info_ui, grassland_info_server],
+  app/view/biodiversity/grassland/app,
+  app/view/biodiversity/grassland/info,
 )
 
 #' @export
-grassland_ui <- function(id, theme) {
+ui <- function(id, theme) {
   ns <- shiny::NS(id)
 
   navset_tab(
@@ -18,31 +18,30 @@ grassland_ui <- function(id, theme) {
       title = "Info",
       value = "Info",
       icon = shiny$icon("circle-info"),
-      grassland_info_ui(
-        ns("grassland_info")
+      info$ui(
+        ns("info")
       )
     ),
     # Grassland Case ----
     nav_panel(
       title = "Grassland Dynamics",
       icon = shiny$icon("leaf"),
-      grassland_app_ui(
-        ns("grassland_app"),
-        theme
+      app$ui(
+        ns("app")
       )
     )
   )
 }
 
 #' @export
-grassland_server <- function(id, r) {
+server <- function(id) {
   shiny::moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       
-      grassland_info_server("grassland_info")
-      grassland_app_server("grassland_app", r)
+      info$server(ns("info"))
+      app$server(ns("app"))
     }
   )
 }
