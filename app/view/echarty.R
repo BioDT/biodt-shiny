@@ -1,12 +1,12 @@
 box::use(
-  shiny[moduleServer, NS, tagList],
+  shiny[moduleServer, NS, tagList, tags],
   bslib[card, card_header],
   echarty[ecs.output, ecs.render],
 )
 
 #' @export
 echarty_ui <- function(id,
-                       card_header = "Output_plot",
+                       card_header = "Output plot",
                        title = "output_plot",
                        plot_width = "100%",
                        plot_height = "500px"
@@ -20,7 +20,7 @@ echarty_ui <- function(id,
       title = title,
       full_screen = TRUE,
       card_header(
-        card_header,
+        tags$h5(card_header)
       ),
       # custom_code,
       ecs.output(

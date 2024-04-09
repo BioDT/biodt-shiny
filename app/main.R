@@ -2,7 +2,7 @@ box::use(
   shiny,
   bslib[bs_theme, page_navbar, nav_menu, nav_item, nav_panel],
   shinyjs[useShinyjs],
-  waiter[useWaiter, useHostess],
+  waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
 )
 
@@ -36,6 +36,13 @@ ui <- function(id) {
       useWaiter(),
       useHostess(),
       use_cicerone()
+    ),
+    waiterShowOnLoad(
+      html = spin_loaders(
+        id = 19,
+        color = "#414f2f"
+      ),
+      color = "rgba(256,256,256,0.9)"
     ),
     # Body ----
     # Main navbar----
@@ -81,7 +88,7 @@ ui <- function(id) {
         nav_panel(
           title = "Honeybee",
           class = "p-0",
-          honeybee_ui(ns("honeybee_main"),
+          honeybee_ui(ns("honeybee-main"),
                       theme = biodt_theme)
         )
       )
@@ -97,7 +104,8 @@ server <- function(id) {
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme)
     # Honeybee pDT ----
-    honeybee_server("honeybee_main",
+    honeybee_server("honeybee-main",
                     r)
+    waiter_hide()
   })
 }

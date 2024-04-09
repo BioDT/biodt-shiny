@@ -1,7 +1,7 @@
 box::use(
   shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive],
   bslib[card, card_header, card_body],
-  leaflet[leafletOutput, renderLeaflet]
+  leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape]
 )
 
 #' @export
@@ -36,6 +36,7 @@ honeybee_map_ui <- function(id) {
 honeybee_map_server <- function(id,
                                 leaflet_map) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     coordinates_text <- reactiveVal()
     out <- reactiveVal(NULL)
     
@@ -45,6 +46,15 @@ honeybee_map_server <- function(id,
 
    observeEvent(
       input$map_plot_draw_new_feature,
+      {
+        leafletProxy("map_plot", session) |>
+        removeShape(layerId = "circle") |>
+        addCircles(
+          lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+          lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+          radius = 5000,
+          layerId = "circle"
+        )
       if (length(input$map_plot_draw_new_feature) > 0) {
         HTML(
           paste(
@@ -67,6 +77,7 @@ honeybee_map_server <- function(id,
       } else {
         coordinates_text("No location selected.")
         out(NULL)
+      }
       }
     )
 

@@ -1,11 +1,10 @@
 box::use(
-  shiny[NS, fillPage, div, p]
+  shiny[NS, fillPage, div, p, moduleServer],
 )
 
 #' @export
 mod_info_ui <- function(id) {
   ns <- NS(id)
-  fillPage(
     div(
       class = "info-text",
       p(
@@ -18,7 +17,6 @@ mod_info_ui <- function(id) {
         "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth."
       )
     )
-  )
 }
 
 #' @export
