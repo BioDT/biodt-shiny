@@ -1,7 +1,9 @@
 # This file allows packrat (used by rsconnect during deployment) to pick up dependencies.
 library(cicerone)
+library(dplyr)
 library(DT)
 library(echarty)
+library(httr2)
 library(leaflet)
 library(leaflet.extras)
 library(readr)
