@@ -1,12 +1,14 @@
 box::use(
   shiny[NS, moduleServer, tags],
   bslib[card, card_header, card_body],
-  leaflet[leafletOutput, renderLeaflet],
+  leaflet[leaflet, leafletOptions, leafletOutput, renderLeaflet, addEasyButton, easyButton, addTiles],
+  htmlwidgets[JS]
 )
 
 #' @export
 ui <- function(id) {
   ns <- NS(id)
+
   card(
     class = "ms-md-3 card-shadow",
     full_screen = TRUE,
@@ -16,24 +18,25 @@ ui <- function(id) {
     card_body(
       id = ns("leaflet_output_cardbody"),
       leafletOutput(
-        ns("leaflet_output")
+        ns("map")
       )
     )
-  )
+  )  
 }
 
 #' @export
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    # ns <- session$ns
+    ns <- session$ns
 
-    output$leaflet_output <- renderLeaflet({      
+    output$map <- renderLeaflet({      
       leaflet(
         options = leafletOptions(
           zoomControl = TRUE,
           minZoom = 2,
         )
       ) |>
+      addTiles() |>
       addEasyButton(
         easyButton(
           position = "topleft",

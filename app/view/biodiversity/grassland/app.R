@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, observeEvent],
+  shiny[NS, tagList, moduleServer, observeEvent, actionButton],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -13,17 +13,23 @@ box::use(
 )
 
 #' @export
-ui <- function(id, theme) {
+ui <- function(id) {
   ns <- NS(id)
 
   tagList(
     control$ui(ns("control")),
+    actionButton(
+      ns("update_map"),
+      label = "Update map",
+      width = "100%",
+      class = "btn-secondary px-2 mx-2",
+    ),
     layout_column_wrap(
       width = NULL,
       fill = FALSE,
       style = css(grid_template_columns = "3fr 1fr"),
       inputmap$ui(
-        ns("inputmap")
+        ns("map")
       ),
       location$ui(ns("location")),
     ),
@@ -35,18 +41,22 @@ ui <- function(id, theme) {
 server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
       ns <- session$ns     
-  
-      inputmap$server(ns("inputmap"))
 
-      location_server <- location$server(ns("location"))
-      # observeEvent(
-      #   location_server(),
-      #   print(location_server())
-      # )
+      map_defaults <- list(
+        lng = 11.8787,
+        lat = 51.3919,
+        zoom = 9
+      )
 
-      observeEvent(map_attributes(), ignoreInit = FALSE, {
-        # update_inputmap(ns("inputmap"), map_attributes())
+      inputmap$server("map")
+
+      observeEvent(input$update_map, {
+        update_inputmap(ns("map"), map_defaults)  
       })
+
+      
+      update_inputmap(ns("map"), map_defaults)  
+
 
       # grassland_outputplot_server("grassland_outputplot", r)
     }

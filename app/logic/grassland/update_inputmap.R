@@ -1,10 +1,14 @@
 box::use(
+  shiny[printStackTrace],
   leaflet[leaflet, addTiles, setView, addMarkers, leafletProxy],
 )
 
 #' export
 update_inputmap <- function(map_id, map_attributes) {
-  if (exists(map_attributes$lng) | exists(map_attributes$lat) | exists(map_attributes$lat) | exists(map_attributes$zoom)) {
+  if (
+    is.numeric(map_attributes$lng) |
+    is.numeric(map_attributes$lat)
+  ) {
     lng <- map_attributes$lng
     lat <- map_attributes$lat
     zoom <- map_attributes$zoom
@@ -14,7 +18,7 @@ update_inputmap <- function(map_id, map_attributes) {
     zoom <- 9
   }
   
-  leafletProxy(map_id) |>
+  leafletProxy(paste0(map_id, "-map")) |>
     addTiles() |>
     setView(
       lng = lng,

@@ -7,7 +7,6 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
   card(
-    id = ns("control"),
     class = "mt-2 mx-md-3 card-shadow",
     card_header(
       tags$div(
@@ -25,15 +24,22 @@ ui <- function(id) {
             class = "btn-secondary",
             style = "max-width: 200px"
           ),
+          # actionButton(
+          #   ns("update_map"),
+          #   label = "Update map",
+          #   width = "100%",
+          #   class = "btn-secondary mx-2",
+          # ),
         )
       )
     )
   )
 }
 
-#' @export
-server <- function(id) {
-  moduleServer(id, function(input, output, session) {
+# TODO
+# #' @export
+# server <- function(id) {
+#   moduleServer(id, function(input, output, session) {
 
-  })
-}
+#   })
+# }

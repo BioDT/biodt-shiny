@@ -1,5 +1,5 @@
 box::use(
-  shiny,
+  shiny[moduleServer, icon, NS],
   bslib[navset_tab, nav_panel]
 )
 
@@ -10,14 +10,14 @@ box::use(
 
 #' @export
 ui <- function(id, theme) {
-  ns <- shiny::NS(id)
+  ns <- NS(id)
 
   navset_tab(
     # Info Page ---
     nav_panel(
       title = "Info",
       value = "Info",
-      icon = shiny$icon("circle-info"),
+      icon = icon("circle-info"),
       info$ui(
         ns("info")
       )
@@ -25,7 +25,7 @@ ui <- function(id, theme) {
     # Grassland Case ----
     nav_panel(
       title = "Grassland Dynamics",
-      icon = shiny$icon("leaf"),
+      icon = icon("leaf"),
       app$ui(
         ns("app")
       )
@@ -34,14 +34,12 @@ ui <- function(id, theme) {
 }
 
 #' @export
-server <- function(id) {
-  shiny::moduleServer(
-    id,
-    function(input, output, session) {
+server <- function(id) {  
+  moduleServer(id, function(input, output, session) {
       ns <- session$ns
       
-      info$server(ns("info"))
-      app$server(ns("app"))
+      info$server("info")
+      app$server("app")
     }
   )
 }

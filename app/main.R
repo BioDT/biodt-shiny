@@ -83,7 +83,7 @@ ui <- function(id) {
           class = "p-0",
           title = "Grassland Dynamics",
           grassland_main$ui(
-            ns("grassland")
+            ns("grassland_main")
           )
         ),
         ### Species interactions (themselves, human) - menu subitem ----
@@ -123,6 +123,6 @@ server <- function(id) {
       r
     )
     # Grassland pDT ----
-    grassland_main$server("grassland")
+    grassland_main$server("grassland_main")
   })
 }
