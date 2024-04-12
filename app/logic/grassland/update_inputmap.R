@@ -1,7 +1,7 @@
 box::use(
-  shiny[printStackTrace],
   leaflet[leaflet, addTiles, setView, addMarkers, leafletProxy],
 )
+# TODO
 
 #' export
 update_inputmap <- function(map_id, map_attributes) {

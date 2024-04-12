@@ -1,7 +1,7 @@
 box::use(
-  shiny[NS, actionButton, radioButtons, textInput, numericInput, observeEvent, tags, moduleServer],
+  shiny[renderPrint, textOutput, NS, actionButton, radioButtons, textInput, numericInput, observeEvent, tags, moduleServer],
   bslib[card, card_header, card_body, layout_column_wrap],
-  shinyjs[hidden, disabled, toggle],
+  shinyjs[toggle, hidden],
 )
 
 #' @export
@@ -10,7 +10,7 @@ ui <- function(id) {
   card(
     class = "me-md-3 card-shadow",
     id = ns("location_select"),
-    full_screen = TRUE,
+    full_screen = FALSE,
     card_header(
       tags$h5("Select Location")
     ),
@@ -23,9 +23,10 @@ ui <- function(id) {
       ),
       textInput(
         inputId = ns("deimsid"),
-        "Input DEIMS.id",
+        "DEIMS.id",
         value = "102ae489-04e3-481d-97df-45905837dc1a"
       ),
+      textOutput(ns("summary")),
       hidden(
         tags$div(
           id = ns("latlon"),
@@ -35,18 +36,18 @@ ui <- function(id) {
               ns("lat"),
               label = "Latitude",
               value = 0
-            ), # value = 51.3919),
+            ),
             numericInput(
-              ns("lon"),
+              ns("lng"),
               label = "Longitude",
               value = 0
-            ) # value = 11.8787),
-          )
+            )
+          ),
         )
       ),
       actionButton(
         inputId = ns("update_map_location"),
-        label = "Update location on map"
+        label = "Update Map Location"
       ),
     )
   )
@@ -56,50 +57,42 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
       ns <- session$ns
-      
-      observeEvent(
-        input$input_type,
-        ignoreInit = TRUE,
-        {
-          print("input$input_type::: ", input$input_type)
-          toggle(
+
+      # work in progress code - TODO remove later
+      observeEvent(input$input_type, {
+        output$summary <- renderPrint("location radio btn changed")
+      })
+
+      # At UI makes visible type of location input (deims vs lat/lng) ----
+      observeEvent(input$input_type, ignoreInit = TRUE,
+        {          
+          shinyjs::toggle(
             id = "latlon",
             condition = input$input_type == "Lat, Long"
           )
-          toggle(
+          shinyjs::toggle(
             id = "deimsid",
             condition = input$input_type == "DEIMS.id"
           )
         }
       )
 
-
-      # TODO - start over
-      map_defaults <- list(
-        lon = 11.8787,
-        lat = 51.3919,
-        zoom = 9
+      # TODO!!! by pressing UI's button update_map_location make somehow working 
+      # this function: `update_inputmap(ns(x), map_defaults)` (from logic folder)
+      # with values user type here
+      observeEvent(
+        input$update_map_location,
+        {
+          if (input$input_type == "Lat, Long") {
+            lng <- input$lon
+            lat <- input$lat
+          } else if (input$input_type == "DEIMS.id") {
+            lng <- 0
+            lat <- 0
+          }
+        }
       )
-      #map_opts <- reactiveVal()
 
-      # observeEvent(
-      #   # input$update_map_location,
-      #   {
-      #     if (input$input_type == "Lat, Long") {
-      #       map_opts$lon <- input$lon
-      #       map_opts$lat <- input$lat
-      #     # TODO - deims, viz chat ----
-      #     # } else if (input$input_type == "DEIMS.id") {
-      #     #   map_opts$lon <- 0
-      #     #   map_opts$lon <- 0
-      #     } else {
-      #       map_opts$lon <- map_defaults$lon
-      #       map_opts$lat <- map_defaults$lat
-      #     }
-      #   }
-      # )
-
-      #reactive(map_opts())
     }
   )
 }
