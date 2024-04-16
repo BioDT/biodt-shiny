@@ -1,6 +1,6 @@
-library(dplyr)
-library(httr2)
-library(stringr)
+is_uuid <- function(id) {
+  uuid::UUIDvalidate(id)
+}
 
 resp_site <- function(deimsid) {
   site <- httr2::request("https://deims.org/api/sites") |>
@@ -18,16 +18,20 @@ parse_site <- function(site) {
   coords <- site$coordinates |> stringr::str_extract_all("[0-9]+\\.[0-9]+")
 
   coords_parsed <- list()
-  coords_parsed$lat <- as.numeric(coords[[1]][1])
-  coords_parsed$lng <- as.numeric(coords[[1]][2])
+  coords_parsed$lng <- as.numeric(coords[[1]][1])
+  coords_parsed$lat <- as.numeric(coords[[1]][2])
   
   return(coords_parsed)
 }
 
 #' @export
 get_coords <- function(deimsid) {
-  site <- resp_site(deimsid)
-  coordinates <- parse_site(site)
+  if (is_uuid(deimsid)) {
+    site <- resp_site(deimsid)
+    coordinates <- parse_site(site)
+  } else {
+    coordinates <- NA
+  }
 
   return(coordinates)
 }

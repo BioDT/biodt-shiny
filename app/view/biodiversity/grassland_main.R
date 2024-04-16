@@ -19,7 +19,7 @@ ui <- function(id, theme) {
       value = "Info",
       icon = icon("circle-info"),
       info$ui(
-        ns("info")
+        ns("grassland_info")
       )
     ),
     # Grassland Case ----
@@ -27,7 +27,7 @@ ui <- function(id, theme) {
       title = "Grassland Dynamics",
       icon = icon("leaf"),
       app$ui(
-        ns("app")
+        ns("grassland_app")
       )
     )
   )
@@ -35,11 +35,10 @@ ui <- function(id, theme) {
 
 #' @export
 server <- function(id) {  
-  moduleServer(id, function(input, output, session) {
+  moduleServer(id, function(input, output, session) {      
       ns <- session$ns
-      
-      info$server("info")
-      app$server("app")
+
+      app$server("grassland_app")
     }
   )
 }

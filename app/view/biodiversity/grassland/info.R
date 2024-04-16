@@ -6,6 +6,7 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
   fluidRow(
+    id = ns("welcome"),
     class = "align-items-center justify-content-center",
     column(
       width = 6,
@@ -41,8 +42,8 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function(id) {
-  moduleServer(id, function(input, output, session) {
+# server <- function(id) {
+#   moduleServer(id, function(input, output, session) {
 
-  })
-}
+#   })
+# }

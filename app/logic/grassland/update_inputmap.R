@@ -1,10 +1,13 @@
 box::use(
   leaflet[leaflet, addTiles, setView, addMarkers, leafletProxy],
 )
-# TODO
 
+# TODO make it working
 #' export
-update_inputmap <- function(map_id, map_attributes) {
+update <- function(map_id, map_attributes) {
+  print(map_id)
+  print(map_attributes)
+
   if (
     is.numeric(map_attributes$lng) |
     is.numeric(map_attributes$lat)
@@ -12,13 +15,9 @@ update_inputmap <- function(map_id, map_attributes) {
     lng <- map_attributes$lng
     lat <- map_attributes$lat
     zoom <- map_attributes$zoom
-  } else {
-    lng <- 11.8787
-    lng <- 51.3919
-    zoom <- 9
   }
   
-  leafletProxy(paste0(map_id, "-map")) |>
+  leafletProxy(map_id) |>
     addTiles() |>
     setView(
       lng = lng,

@@ -1,7 +1,7 @@
 box::use(
   shiny[NS, moduleServer, tags],
   bslib[card, card_header, card_body],
-  leaflet[leaflet, leafletOptions, leafletOutput, renderLeaflet, addEasyButton, easyButton, addTiles],
+  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
   htmlwidgets[JS]
 )
 
@@ -10,15 +10,15 @@ ui <- function(id) {
   ns <- NS(id)
 
   card(
+    id = ns("inputmap"),
     class = "ms-md-3 card-shadow",
     full_screen = TRUE,
     card_header(
       tags$h5("Input Map")
     ),
-    card_body(
-      id = ns("leaflet_output_cardbody"),
+    card_body(      
       leafletOutput(
-        ns("map")
+        ns("leaflet_output")
       )
     )
   )  
@@ -28,8 +28,8 @@ ui <- function(id) {
 server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
-    output$map <- renderLeaflet({      
+    
+    output$leaflet_output <- renderLeaflet({      
       leaflet(
         options = leafletOptions(
           zoomControl = TRUE,
@@ -37,13 +37,10 @@ server <- function(id) {
         )
       ) |>
       addTiles() |>
-      addEasyButton(
-        easyButton(
-          position = "topleft",
-          icon = "ion-arrow-shrink",
-          title = "Reset location",
-          onClick = JS("function(btn, map) {map.setView(map._initialCenter, map._initialZoom);}")
-        )
+      setView(
+        lng = 11.8787,
+        lat = 51.3919,
+        zoom = 9
       )
     })   
   })

@@ -1,7 +1,15 @@
 box::use(
-  shiny[renderPrint, textOutput, NS, actionButton, radioButtons, textInput, numericInput, observeEvent, tags, moduleServer],
+  shiny[
+    reactiveVal, renderText, verbatimTextOutput, NS, actionButton, radioButtons,
+    textInput, numericInput, observeEvent, tags, moduleServer
+  ],
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
+)
+
+box::use(
+  app/logic/deimsid_coordinates,
+  app/logic/grassland/update_inputmap
 )
 
 #' @export
@@ -25,8 +33,8 @@ ui <- function(id) {
         inputId = ns("deimsid"),
         "DEIMS.id",
         value = "102ae489-04e3-481d-97df-45905837dc1a"
+        # examples: Bily Kriz a61dd7df-5fd7-47b4-8172-b7dfaf969748, Elbe 858b9f78-889f-4acb-8a12-c3c2436d794c...
       ),
-      textOutput(ns("summary")),
       hidden(
         tags$div(
           id = ns("latlon"),
@@ -35,15 +43,18 @@ ui <- function(id) {
             numericInput(
               ns("lat"),
               label = "Latitude",
-              value = 0
+              value = 51.3919
             ),
             numericInput(
               ns("lng"),
               label = "Longitude",
-              value = 0
+              value = 11.8787
             )
           ),
         )
+      ),
+      verbatimTextOutput(
+        ns("deimsidinfo")
       ),
       actionButton(
         inputId = ns("update_map_location"),
@@ -58,41 +69,59 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
       ns <- session$ns
 
-      # work in progress code - TODO remove later
-      observeEvent(input$input_type, {
-        output$summary <- renderPrint("location radio btn changed")
-      })
-
-      # At UI makes visible type of location input (deims vs lat/lng) ----
+      # Makes visible type of location input in UI (deims vs lat/lng) ----
       observeEvent(input$input_type, ignoreInit = TRUE,
         {          
-          shinyjs::toggle(
+          toggle(
             id = "latlon",
             condition = input$input_type == "Lat, Long"
           )
-          shinyjs::toggle(
+          toggle(
             id = "deimsid",
+            condition = input$input_type == "DEIMS.id"
+          )
+          toggle(
+            id = "deimsidinfo",
             condition = input$input_type == "DEIMS.id"
           )
         }
       )
 
-      # TODO!!! by pressing UI's button update_map_location make somehow working 
-      # this function: `update_inputmap(ns(x), map_defaults)` (from logic folder)
-      # with values user type here
+      # Loads lng/lat when DEIMS.id input is set ----
+      coordinates <- reactiveVal()
+      observeEvent(input$deimsid, ignoreInit = FALSE, {      
+        input$deimsid |>
+          deimsid_coordinates$get_coords() |>
+          coordinates()
+
+        coords_outtext <- coordinates()
+        # if (coords_outtext == NA) {
+        #   output$deimsidinfo <- renderText(paste0("Coordinates for the given DEIMS.id not found"))
+        # } else {
+          if (coords_outtext$lng == 11.8787 & coords_outtext$lat == 51.3919) {
+            output$deimsidinfo <- renderText(paste0("Waiting for DEIMS.id input..."))
+          } else if (coords_outtext$lng != 11.8787 & coords_outtext$lat != 51.3919) {
+            output$deimsidinfo <- renderText(paste0("Found coordinates:\nlng = ", coords_outtext$lng, ", lat = ", coords_outtext$lat))
+          }
+        # }        
+      })
+
+      # Calls update inputmap (aka leafletProxy fn) with the given coordinates (lng/lat or by DEIMS.id) ----
       observeEvent(
         input$update_map_location,
         {
+          map_options <- list()
           if (input$input_type == "Lat, Long") {
-            lng <- input$lon
-            lat <- input$lat
+            map_options$lng <- input$lng
+            map_options$lat <- input$lat
           } else if (input$input_type == "DEIMS.id") {
-            lng <- 0
-            lat <- 0
+            map_options <- coordinates()
           }
+
+          map_options$zoom <- 9
+          update_inputmap$update(ns("leaflet_output"), map_options)
         }
       )
-
     }
   )
 }
