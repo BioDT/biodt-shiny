@@ -2,6 +2,7 @@ box::use(
   shiny[moduleServer, NS, tagList, tags, actionButton, observeEvent, reactiveVal, bootstrapPage, req],
   leaflet[leaflet, addTiles],
   bslib[layout_column_wrap],
+  htmltools[css],
   waiter[Waiter],
 )
 

@@ -7,11 +7,13 @@ box::use(
 )
 
 box::use(
-  app/view/info[mod_info_ui],
-  app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
+  app / view / info[mod_info_ui],
+  app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
+  app/view/biodiversity/grassland_main,
 )
 
 # App theme ----
+#' @export
 biodt_theme <- bs_theme(
   version = 5,
   primary = "#bc6c25",
@@ -76,20 +78,38 @@ ui <- function(id) {
         title = "Digital Twins",
         align = "left",
         icon = shiny$icon("people-group"),
+        ### Species response to environment - menu subitem ----
+        nav_item(
+          shiny::tags$div(
+            class = "p-2",
+            shiny$icon("temperature-arrow-up"),
+            shiny::tags$strong("Species response to environmental change")
+          )
+        ),
+        nav_panel(
+          class = "p-0",
+          title = "Grassland Dynamics",
+          grassland_main$ui(
+            ns("grassland_main")
+          )
+        ),
         ### Species interactions (themselves, human) - menu subitem ----
-        nav_item(shiny$div(
-          class = "p-2",
+        nav_item(
           shiny$div(
-            shiny$icon("bugs"),
-            shiny$strong("Species interactions with each other and with humans"),
-            style = "width: 450px"
-          ),
-        )),
+            class = "p-2",
+            shiny$div(
+              shiny$icon("bugs"),
+              shiny$strong("Species interactions with each other and with humans"),
+              style = "width: 450px"
+            ),
+          )
+        ),
         nav_panel(
           title = "Honeybee",
           class = "p-0",
-          honeybee_ui(ns("honeybee-main"),
-                      theme = biodt_theme)
+          honeybee_ui(ns("honeybee_main"),
+            theme = biodt_theme
+          )
         )
       )
     )
@@ -100,12 +120,18 @@ ui <- function(id) {
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     r <- shiny$reactiveValues(
-      biodt_theme = biodt_theme)
+      biodt_theme = biodt_theme
+    )
     # Honeybee pDT ----
-    honeybee_server("honeybee-main",
-                    r)
+    honeybee_server(
+      "honeybee_main",
+      r
+    )
+    # Grassland pDT ----
+    grassland_main$server("grassland_main")
+    
     waiter_hide()
   })
 }
