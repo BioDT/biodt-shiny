@@ -7,7 +7,7 @@ box::use(
 box::use(
   app/view/biodiversity/grassland/inputmap,
   app/view/biodiversity/grassland/location,
-  # app/view/biodiversity/grassland/grassland_outputplot[grassland_outputplot_ui, grassland_outputplot_server],
+  app/view/biodiversity/grassland/outputplot,
 )
 
 #' @export
@@ -19,10 +19,16 @@ ui <- function(id) {
       width = NULL,
       fill = FALSE,
       style = css(grid_template_columns = "3fr 1fr"),
-      inputmap$ui(ns("inputmap")),
-      location$ui(ns("location")),
+      inputmap$ui(
+        ns("inputmap")
+      ),
+      location$ui(
+        ns("location")
+      ),
     ),
-    # grassland_outputplot_ui(ns("grassland_outputplot"))
+    outputplot$ui(
+      ns("outputplot")
+    )
   )
 }
 
@@ -36,6 +42,9 @@ server <- function(id, r) {
       
       # MAP itself ----
       inputmap$server("inputmap", coordinates)
+
+      # Output PLOT ----
+      outputplot$server("outputplot")
     }
   )
 }
