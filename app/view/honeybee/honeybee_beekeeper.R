@@ -46,6 +46,8 @@ honeybee_beekeeper_server <- function(id,
     
     # Define waiter ----
     msg <- list(waiter_text(message = tags$h3("Loding data...",
+                                              style = "color: #414f2f;")),
+                waiter_text(message = tags$h3("Computing Beehave simulation...",
                                               style = "color: #414f2f;")))
     
     w <- Waiter$new(html = msg[[1]],
