@@ -1,6 +1,6 @@
 box::use(
   terra[rast, spatSample, deepcopy, set.values, cells],
-  leaflet[leaflet, addTiles, addRasterImage, addRasterLegend, addLayersControl, layersControlOptions],
+  leaflet[leaflet, addTiles, addRasterImage, addRasterLegend, addLayersControl, layersControlOptions, addScaleBar],
   leaflet.extras[addDrawToolbar, drawMarkerOptions],
   htmlwidgets[onRender],
 )
@@ -12,6 +12,7 @@ read_honeybee_tif <- function(map_path) {
 
 #' @export
 honeybee_leaflet_map <- function(map_raster,
+                                 lookup_table = NULL,
                                  add_control = TRUE) {
   scaled_map <- map_raster |>
     spatSample(2000000,
@@ -34,7 +35,7 @@ honeybee_leaflet_map <- function(map_raster,
     ) |>
     addRasterLegend(scaled_map,
                     opacity = 0.5,
-                    position = "topright",
+                    position = "bottomright",
                     group = "Alllayers",
                     className = "info legend Alllayers"
     ) |>  
@@ -45,12 +46,12 @@ honeybee_leaflet_map <- function(map_raster,
     ) |>  
     addRasterLegend(bee_map,
                     opacity = 0.9,
-                    position = "topright",
+                    position = "bottomright",
                     group = "Beehavelayers",
                     className = "info legend Beehavelayers"
     ) |>
-    addLayersControl(c("All layers", "Beehave layers"),
-                     position = "topleft",
+    addLayersControl(c("Beehave layers", "All layers"),
+                     position = "topright",
                      options = layersControlOptions(collapsed = FALSE)
     ) |>
     htmlwidgets::onRender("
@@ -79,7 +80,8 @@ honeybee_leaflet_map <- function(map_raster,
         markerOptions = drawMarkerOptions(),
         circleMarkerOptions = FALSE,
         singleFeature = TRUE
-      )
+      ) |>
+      addScaleBar()
   }
 
   return(leaflet_map)
