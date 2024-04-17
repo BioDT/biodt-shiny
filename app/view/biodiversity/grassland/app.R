@@ -7,9 +7,7 @@ box::use(
 box::use(
   app/view/biodiversity/grassland/inputmap,
   app/view/biodiversity/grassland/location,
-  # TODO
   # app/view/biodiversity/grassland/grassland_outputplot[grassland_outputplot_ui, grassland_outputplot_server],
-  app/logic/grassland/update_inputmap,
 )
 
 #' @export

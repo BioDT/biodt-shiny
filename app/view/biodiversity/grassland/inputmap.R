@@ -15,7 +15,7 @@ ui <- function(id) {
 
   card(
     id = ns("inputmap"),
-    class = "ms-md-3 card-shadow",
+    class = "ms-md-3 card-shadow mt-2",
     full_screen = TRUE,
     card_header(
       tags$h5("Input Map")
@@ -48,13 +48,17 @@ server <- function(id, coordinates) {
       )
     })
 
+    # Calls update inputmap (aka leafletProxy fn) with the given coordinates (lng/lat or by DEIMS.id) ----
     observeEvent(
-      coordinates(), # here put input$update_map button
+      coordinates(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        print(coordinates())
-        grassland_update_map(ns("leaflet_output"), coordinates())
-    })   
+        grassland_update_map(
+          ns("leaflet_output"), 
+          coordinates()
+        )
+      }
+    )   
   })
 }  

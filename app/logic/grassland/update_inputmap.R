@@ -10,7 +10,7 @@ grassland_update_map <- function(map_id, map_attributes) {
   ) {
     lng <- map_attributes$lng
     lat <- map_attributes$lat
-    zoom <- map_attributes$zoom
+    zoom <- 9
   }
   
   leafletProxy(map_id) |>

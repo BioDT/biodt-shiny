@@ -16,7 +16,7 @@ box::use(
 ui <- function(id) {
   ns <- NS(id)
   card(
-    class = "me-md-3 card-shadow",
+    class = "mt-2 me-md-3 card-shadow",
     id = ns("location_select"),
     full_screen = FALSE,
     card_header(
@@ -87,39 +87,45 @@ server <- function(id) {
         }
       )
 
-      # Loads lng/lat when DEIMS.id input is set ----
-      # TODO MERGE THIS PART INTO OBSERVE EVENT BELOW
+      # Sets up reactive value for map coordinates ----
+      # The variable is then pulled up to app.R, from there passed down as fn's argument
+      # into the location.R server and from there its change is observed - when the change
+      # happens, grassland_update_map function (in logic dir) is called
       coordinates <- reactiveVal()
-      observeEvent(input$deimsid, ignoreInit = FALSE, {      
-        input$deimsid |>
-          deimsid_coordinates$get_coords() |>
-          coordinates()
 
-        coords_outtext <- coordinates()
-        # if (coords_outtext == NA) {
-        #   output$deimsidinfo <- renderText(paste0("Coordinates for the given DEIMS.id not found"))
-        # } else {
-          if (coords_outtext$lng == 11.8787 & coords_outtext$lat == 51.3919) {
-            output$deimsidinfo <- renderText(paste0("Waiting for DEIMS.id input..."))
-          } else if (coords_outtext$lng != 11.8787 & coords_outtext$lat != 51.3919) {
-            output$deimsidinfo <- renderText(paste0("Found coordinates:\nlng = ", coords_outtext$lng, ", lat = ", coords_outtext$lat))
-          }
-        # }        
-      })
-
-      # Calls update inputmap (aka leafletProxy fn) with the given coordinates (lng/lat or by DEIMS.id) ----
       observeEvent(
         input$update_map_location,
+        ignoreInit = TRUE,
+        ignoreNULL = TRUE,
         {
           map_options <- list()
+          
           if (input$input_type == "Lat, Long") {
+            # Loads lng/lat from direct inputs ----
+            
             map_options$lng <- input$lng
             map_options$lat <- input$lat
-          } else if (input$input_type == "DEIMS.id") {
-            map_options <- coordinates()
-          }
 
-          map_options$zoom <- 9
+            map_options |>
+              coordinates()
+
+          } else if (input$input_type == "DEIMS.id") {
+            # Loads lng/lat when DEIMS.id input is set ----
+            
+            input$deimsid |>
+              deimsid_coordinates$get_coords() |>
+              coordinates()
+
+            ## Short info that the given DEIMS.id was loaded correctly ----
+            coords_outtext <- coordinates()
+            if (is.numeric(coords_outtext$lng) & is.numeric(coords_outtext$lat) ) {
+              output$deimsidinfo <- renderText(
+                paste0(
+                  "Found coordinates:\nlng = ", coords_outtext$lng, ", lat = ", coords_outtext$lat
+                )
+              )
+            }
+          }
         }
       )
 
