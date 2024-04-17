@@ -36,4 +36,5 @@ local_data
 app/data
 
 # Testing script
-R/test.R
+test.R
+background.R

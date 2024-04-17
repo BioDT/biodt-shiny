@@ -2,7 +2,7 @@ box::use(
   shiny,
   bslib[bs_theme, page_navbar, nav_menu, nav_item, nav_panel],
   shinyjs[useShinyjs],
-  waiter[useWaiter, useHostess],
+  waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
 )
 
@@ -38,6 +38,13 @@ ui <- function(id) {
       useWaiter(),
       useHostess(),
       use_cicerone()
+    ),
+    waiterShowOnLoad(
+      html = spin_loaders(
+        id = 19,
+        color = "#414f2f"
+      ),
+      color = "rgba(256,256,256,0.9)"
     ),
     # Body ----
     # Main navbar----
@@ -124,5 +131,7 @@ server <- function(id) {
     )
     # Grassland pDT ----
     grassland_main$server("grassland_main")
+    
+    waiter_hide()
   })
 }
