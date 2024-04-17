@@ -9,7 +9,6 @@ box::use(
   app/view/biodiversity/grassland/location,
   # TODO
   # app/view/biodiversity/grassland/grassland_outputplot[grassland_outputplot_ui, grassland_outputplot_server],
-  app/view/biodiversity/grassland/control,
   app/logic/grassland/update_inputmap,
 )
 
@@ -18,7 +17,6 @@ ui <- function(id) {
   ns <- NS(id)
 
   tagList(
-    control$ui(ns("control")),    
     layout_column_wrap(
       width = NULL,
       fill = FALSE,
@@ -36,10 +34,10 @@ server <- function(id, r) {
       ns <- session$ns
 
       # LOCATION settings ----
-      location$server("location") 
+      coordinates <- location$server("location") 
       
       # MAP itself ----
-      inputmap$server("inputmap")
+      inputmap$server("inputmap", coordinates)
     }
   )
 }

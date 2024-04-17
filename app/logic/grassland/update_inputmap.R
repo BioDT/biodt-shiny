@@ -1,13 +1,9 @@
 box::use(
-  leaflet[leaflet, addTiles, setView, addMarkers, leafletProxy],
+  leaflet[addTiles, setView, addMarkers, leafletProxy],
 )
 
-# TODO make it working
 #' export
-update <- function(map_id, map_attributes) {
-  print(map_id)
-  print(map_attributes)
-
+grassland_update_map <- function(map_id, map_attributes) {
   if (
     is.numeric(map_attributes$lng) |
     is.numeric(map_attributes$lat)

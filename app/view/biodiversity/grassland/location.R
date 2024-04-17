@@ -88,6 +88,7 @@ server <- function(id) {
       )
 
       # Loads lng/lat when DEIMS.id input is set ----
+      # TODO MERGE THIS PART INTO OBSERVE EVENT BELOW
       coordinates <- reactiveVal()
       observeEvent(input$deimsid, ignoreInit = FALSE, {      
         input$deimsid |>
@@ -119,9 +120,10 @@ server <- function(id) {
           }
 
           map_options$zoom <- 9
-          update_inputmap$update(ns("leaflet_output"), map_options)
         }
       )
+
+      return(coordinates)
     }
   )
 }
