@@ -1,7 +1,6 @@
 box::use(
-  shiny[moduleServer, NS, tagList, sliderInput, tags, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput],
+  shiny[moduleServer, NS, tagList, sliderInput, tags, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput, checkboxInput],
   bslib[card, card_header, card_body],
-  shinyWidgets[awesomeCheckbox],
 )
 
 #' @export
@@ -43,23 +42,20 @@ honeybee_param_ui <- function(id,
           max = 100,
           step = 1
         ),
-        awesomeCheckbox(
+        checkboxInput(
           ns("HoneyHarvesting"),
           label = "Honey Harvest",
-          value = TRUE,
-          status = "info",
+          value = TRUE
         ),
-        awesomeCheckbox(
+        checkboxInput(
           ns("VarroaTreatment"),
           label = "Varroa treatment with arcaricide",
-          value = FALSE,
-          status = "info",
+          value = FALSE
         ),
-        awesomeCheckbox(
+        checkboxInput(
           ns("DroneBroodRemoval"),
           label = "Drone Brood Removal",
-          value = TRUE,
-          status = "info",
+          value = TRUE
         ),
         # shinyWidgets::airDatepickerInput(
         #   inputId = ns("SimulationDateStart"),

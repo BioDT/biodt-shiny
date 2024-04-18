@@ -9,9 +9,9 @@ box::use(
 
 box::use(
   app/view/honeybee/beekeeper_control[beekeeper_control_ui, beekeeper_control_server],
-  app/view/honeybee/honeybee_map[honeybee_map_ui, honeybee_map_server],
-  app/view/honeybee/honeybee_param[honeybee_param_ui, honeybee_param_server],
-  app/view/honeybee/honeybee_lookup[honeybee_lookup_ui, honeybee_lookup_server],
+  app/view/honeybee/beekeeper_map[honeybee_map_ui, honeybee_map_server],
+  app/view/honeybee/beekeeper_param[honeybee_param_ui, honeybee_param_server],
+  app/view/honeybee/beekeeper_lookup[honeybee_lookup_ui, honeybee_lookup_server],
   app/view/echarty[echarty_ui, echarty_server],
   app/logic/honeybee/honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map],
   app/logic/honeybee/honeybee_beekeeper_plot[honeybee_beekeeper_plot],
@@ -57,6 +57,7 @@ honeybee_beekeeper_server <- function(id,
     
     # Variables ----
     map <- reactiveVal()
+    leaflet_map <- reactiveVal()
     lookup_table <- reactiveVal()
     plot <- reactiveVal()
     
@@ -74,8 +75,11 @@ honeybee_beekeeper_server <- function(id,
                    # Hardcoded for prototype
                    "app/data/honeybee/map.tif" |>
                      read_honeybee_tif() |>
-                     honeybee_leaflet_map() |>
                      map()
+                   
+                   map() |>
+                     honeybee_leaflet_map() |>
+                     leaflet_map()
                    
                    # Lookup table
                    # Hardcoded for prototype
@@ -95,7 +99,7 @@ honeybee_beekeeper_server <- function(id,
     
     # Map ----
     coordinates <- honeybee_map_server("beekeeper_map",
-      leaflet_map = map
+      leaflet_map = leaflet_map
     )
 
     # Parameters ----
@@ -114,6 +118,7 @@ honeybee_beekeeper_server <- function(id,
                              coordinates,
                              lookup,
                              parameters,
+                             map,
                              w)
   })
 }

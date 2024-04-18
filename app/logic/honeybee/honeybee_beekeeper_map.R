@@ -2,7 +2,6 @@ box::use(
   terra[rast, spatSample, deepcopy, set.values, cells],
   leaflet[leaflet, addTiles, addRasterImage, addRasterLegend, addLayersControl, layersControlOptions, addScaleBar],
   leaflet.extras[addDrawToolbar, drawMarkerOptions],
-  htmlwidgets[onRender],
 )
 
 #' @export
@@ -53,20 +52,6 @@ honeybee_leaflet_map <- function(map_raster,
     addLayersControl(c("Beehave layers", "All layers"),
                      position = "topright",
                      options = layersControlOptions(collapsed = FALSE)
-    ) |>
-    onRender("
-      function(el, x) {
-         var updateLegend = function () {
-            var selectedGroup = document.querySelectorAll('input:checked')[0].nextSibling.innerText.substr(1);
-            var selectedClass = selectedGroup.replace(' ', '');
-            document.querySelectorAll('.legend').forEach(a => a.hidden=true);
-            document.querySelectorAll('.legend').forEach(l => {
-               if (l.classList.contains(selectedClass)) l.hidden=false;
-            });
-         };
-         updateLegend();
-         this.on('baselayerchange', el => updateLegend());
-      }"
     )
 
 

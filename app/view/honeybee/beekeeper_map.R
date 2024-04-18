@@ -1,7 +1,8 @@
 box::use(
   shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive],
   bslib[card, card_header, card_body],
-  leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape]
+  leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
+  htmlwidgets[onRender],
 )
 
 #' @export
@@ -41,7 +42,23 @@ honeybee_map_server <- function(id,
     out <- reactiveVal(NULL)
     
     observeEvent(leaflet_map(), {
-      output$map_plot <- renderLeaflet(leaflet_map())
+      output_map <- leaflet_map()  |>
+        onRender(paste0("
+      function(el, x) {
+         var updateLegend = function () {
+            var selectedGroup = document.querySelectorAll('#", ns("map_plot"), " input:checked')[0].nextSibling.innerText.substr(1);
+            var selectedClass = selectedGroup.replace(' ', '');
+            document.querySelectorAll('.legend').forEach(a => a.hidden=true);
+            document.querySelectorAll('.legend').forEach(l => {
+               if (l.classList.contains(selectedClass)) l.hidden=false;
+            });
+         };
+         updateLegend();
+         this.on('baselayerchange', el => updateLegend());
+      }"
+        ))
+      
+      output$map_plot <- renderLeaflet(output_map)
     })
 
    observeEvent(
