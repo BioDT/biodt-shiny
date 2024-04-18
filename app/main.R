@@ -80,10 +80,10 @@ ui <- function(id) {
         icon = shiny$icon("people-group"),
         ### Species response to environment - menu subitem ----
         nav_item(
-          shiny::tags$div(
+          tags$div(
             class = "p-2",
             shiny$icon("temperature-arrow-up"),
-            shiny::tags$strong("Species response to environmental change")
+            tags$strong("Species response to environmental change")
           )
         ),
         nav_panel(
