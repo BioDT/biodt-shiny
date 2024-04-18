@@ -7,7 +7,7 @@ box::use(
 )
 
 is_uuid <- function(id) {
-  uuid::UUIDvalidate(id)
+  UUIDvalidate(id)
 }
 
 resp_site <- function(deimsid) {
