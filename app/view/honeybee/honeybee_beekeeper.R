@@ -28,7 +28,7 @@ honeybee_beekeeper_ui <- function(id,
       layout_column_wrap(
         width = NULL,
         fill = FALSE,
-        style = htmltools::css(grid_template_columns = "2fr 1fr"),
+        style = css(grid_template_columns = "2fr 1fr"),
         honeybee_map_ui(ns("beekeeper_map")),
         honeybee_param_ui(ns("beekeeper_param"),
                           theme)
