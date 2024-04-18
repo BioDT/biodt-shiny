@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.3.0",
+    "Version": "4.3.3",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -161,6 +161,16 @@
         "Rcpp"
       ],
       "Hash": "74a64813f17b492da9c6afda6b128e3d"
+    },
+    "askpass": {
+      "Package": "askpass",
+      "Version": "1.2.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "sys"
+      ],
+      "Hash": "cad6cf7f1d5f6e906700b9d3e718c796"
     },
     "assertthat": {
       "Package": "assertthat",
@@ -392,6 +402,16 @@
         "lazyeval"
       ],
       "Hash": "ab12c7b080a57475248a30f4db6298c0"
+    },
+    "curl": {
+      "Package": "curl",
+      "Version": "5.2.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "411ca2c03b1ce5f548345d2fc2685f7a"
     },
     "cyclocomp": {
       "Package": "cyclocomp",
@@ -725,6 +745,27 @@
       ],
       "Hash": "c992f75861325961c29a188b45e549f7"
     },
+    "httr2": {
+      "Package": "httr2",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "R6",
+        "cli",
+        "curl",
+        "glue",
+        "lifecycle",
+        "magrittr",
+        "openssl",
+        "rappdirs",
+        "rlang",
+        "vctrs",
+        "withr"
+      ],
+      "Hash": "03d741c92fda96d98c3a3f22494e3b4a"
+    },
     "isoband": {
       "Package": "isoband",
       "Version": "0.2.7",
@@ -987,6 +1028,16 @@
       ],
       "Hash": "8d1938040a05566f4f7a14af4feadd6b"
     },
+    "openssl": {
+      "Package": "openssl",
+      "Version": "2.1.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "askpass"
+      ],
+      "Hash": "2a0dc8c6adfb6f032e4d4af82d258ab5"
+    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.9.0",
@@ -1222,7 +1273,12 @@
     "renv": {
       "Package": "renv",
       "Version": "1.0.5",
-      "Source": "Repository"
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "utils"
+      ],
+      "Hash": "32c3f93e8360f667ca5863272ec8ba6a"
     },
     "rex": {
       "Package": "rex",
@@ -1487,6 +1543,13 @@
       ],
       "Hash": "d61238fd44fc63c8adf4565efe8eb682"
     },
+    "sys": {
+      "Package": "sys",
+      "Version": "3.4.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "3a1be13d68d47a8cd0bfd74739ca1555"
+    },
     "terra": {
       "Package": "terra",
       "Version": "1.7-71",
@@ -1594,6 +1657,16 @@
         "R"
       ],
       "Hash": "62b65c52671e6665f803ff02954446e9"
+    },
+    "uuid": {
+      "Package": "uuid",
+      "Version": "1.2-0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "303c19bfd970bece872f93a824e323d9"
     },
     "vctrs": {
       "Package": "vctrs",
