@@ -33,7 +33,7 @@ parse_site <- function(site) {
 }
 
 #' @export
-get_coords <- function(deimsid) {
+get_coords_deimsid <- function(deimsid) {
   if (is_uuid(deimsid)) {
     site <- resp_site(deimsid)
     coordinates <- parse_site(site)

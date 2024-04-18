@@ -5,14 +5,14 @@ box::use(
 #' export
 grassland_update_map <- function(map_id, map_attributes) {
   if (
-    is.numeric(map_attributes$lng) |
-    is.numeric(map_attributes$lat)
+    is.numeric(map_attributes$lng) ||
+      is.numeric(map_attributes$lat)
   ) {
     lng <- map_attributes$lng
     lat <- map_attributes$lat
     zoom <- 9
   }
-  
+
   leafletProxy(map_id) |>
     addTiles() |>
     setView(

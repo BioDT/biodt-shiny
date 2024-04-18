@@ -2,15 +2,15 @@ box::use(
   shiny[NS, moduleServer, tags, observeEvent],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
-  htmlwidgets[JS]
+  htmlwidgets[JS],
 )
 
 box::use(
-  app/logic/grassland/update_inputmap[grassland_update_map]
+  app / logic / grassland / grassland_update_inputmap[grassland_update_map],
 )
 
 #' @export
-ui <- function(id) {
+grassland_dynamics_inputmap_ui <- function(id) {
   ns <- NS(id)
 
   card(
@@ -20,45 +20,45 @@ ui <- function(id) {
     card_header(
       tags$h5("Input Map")
     ),
-    card_body(      
+    card_body(
       leafletOutput(
         ns("leaflet_output")
       )
     )
-  )  
+  )
 }
 
 #' @export
-server <- function(id, coordinates) {
+grassland_dynamics_inputmap_server <- function(id, coordinates) { # nolint: object_length_linter.
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$leaflet_output <- renderLeaflet({      
+    output$leaflet_output <- renderLeaflet({
       leaflet(
         options = leafletOptions(
           zoomControl = TRUE,
           minZoom = 2,
         )
       ) |>
-      addTiles() |>
-      setView(
-        lng = 11.8787,
-        lat = 51.3919,
-        zoom = 9
-      )
+        addTiles() |>
+        setView(
+          lng = 11.8787,
+          lat = 51.3919,
+          zoom = 9
+        )
     })
 
-    # Calls update inputmap (aka leafletProxy fn) with the given coordinates (lng/lat or by DEIMS.id) ----
+    # Calls update inputmap (leafletProxy fn) with the given coordinates (lng/lat or DEIMS.id)----
     observeEvent(
       coordinates(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
         grassland_update_map(
-          ns("leaflet_output"), 
+          ns("leaflet_output"),
           coordinates()
         )
       }
-    )   
+    )
   })
-}  
+}
