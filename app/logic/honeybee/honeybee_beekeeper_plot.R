@@ -43,7 +43,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
       by = "Step2"
     )
 
-  echarty_plot <- echarty::ec.init(
+  echarty_plot <- ec.init(
     preset = FALSE,
     xAxis = list(
       type = "value",
@@ -83,7 +83,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
     series = list(
       list(
         type = "bar",
-        data = echarty::ec.data(input |> select(
+        data = ec.data(input |> select(
           Step,
           weather
         )),
@@ -99,7 +99,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
         name = "Honey (kg)",
         lineStyle = list(width = 3),
         color = "#E69F00",
-        data = echarty::ec.data(
+        data = ec.data(
           input |> select(
             Step,
             `Honey (kg)`
@@ -109,7 +109,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
       list(
         type = "line",
         showSymbol = FALSE,
-        data = echarty::ec.data(input |> select(
+        data = ec.data(input |> select(
           Step,
           `TotalIHbees + TotalForagers`
         )),

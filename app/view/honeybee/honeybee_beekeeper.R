@@ -4,6 +4,7 @@ box::use(
   bslib[layout_column_wrap],
   htmltools[css],
   waiter[Waiter],
+  readr[read_csv]
 )
 
 box::use(
@@ -79,7 +80,7 @@ honeybee_beekeeper_server <- function(id,
                    # Lookup table
                    # Hardcoded for prototype
                    "app/data/honeybee/lookup_table.csv" |>  
-                     readr::read_csv(show_col_types = FALSE) |>
+                     read_csv(show_col_types = FALSE) |>
                      lookup_table()
                    
                    # Hardcoded for prototype

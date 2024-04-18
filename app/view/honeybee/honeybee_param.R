@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, sliderInput, tags, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive],
+  shiny[moduleServer, NS, tagList, sliderInput, tags, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput],
   bslib[card, card_header, card_body],
   shinyWidgets[awesomeCheckbox],
 )
@@ -97,7 +97,7 @@ honeybee_param_server <- function(id) {
     observeEvent(input$N_INITIAL_MITES_HEALTHY,
                  ignoreInit = TRUE,
                  {
-                   shiny::updateSliderInput(
+                   updateSliderInput(
                      inputId = "N_INITIAL_MITES_INFECTED",
                      max = input$N_INITIAL_MITES_HEALTHY
                    )

@@ -54,7 +54,7 @@ honeybee_leaflet_map <- function(map_raster,
                      position = "topright",
                      options = layersControlOptions(collapsed = FALSE)
     ) |>
-    htmlwidgets::onRender("
+    onRender("
       function(el, x) {
          var updateLegend = function () {
             var selectedGroup = document.querySelectorAll('input:checked')[0].nextSibling.innerText.substr(1);
