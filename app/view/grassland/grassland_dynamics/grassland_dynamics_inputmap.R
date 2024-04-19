@@ -12,7 +12,6 @@ box::use(
 #' @export
 grassland_dynamics_inputmap_ui <- function(id) {
   ns <- NS(id)
-
   card(
     id = ns("inputmap"),
     class = "ms-md-3 card-shadow mt-2",

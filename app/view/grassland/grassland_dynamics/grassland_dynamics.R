@@ -22,7 +22,6 @@ box::use(
 #' @export
 grassland_dynamics_ui <- function(id) {
   ns <- NS(id)
-
   tagList(
     layout_column_wrap(
       width = NULL,

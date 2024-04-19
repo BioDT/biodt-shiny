@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow],
+  shiny[NS, column, tags, fluidRow],
 )
 
 #' @export
@@ -50,7 +50,7 @@ grassland_info_ui <- function(id) {
   )
 }
 
-#' @export
+# #' @export
 # grassland_info_server <- function(id) {
 #   moduleServer(id, function(input, output, session) {
 

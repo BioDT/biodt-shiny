@@ -10,9 +10,8 @@ box::use(
 )
 
 #' @export
-grassland_main_ui <- function(id, theme) {
+grassland_main_ui <- function(id) {
   ns <- NS(id)
-
   navset_tab(
     # Info Page ---
     nav_panel(
