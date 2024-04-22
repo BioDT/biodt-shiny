@@ -68,8 +68,8 @@ beekeeper_control_server <- function(
       coordinates(),
       {
         if (!is_empty(coordinates()) &
-            !is_empty(lookup()) &
-            !is_empty(parameters())) {
+          !is_empty(lookup()) &
+          !is_empty(parameters())) {
           enable("run_simulation")
         } else {
           disable("run_simulation")
