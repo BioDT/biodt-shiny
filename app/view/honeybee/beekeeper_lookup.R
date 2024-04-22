@@ -42,11 +42,12 @@ honeybee_lookup_server <- function(id,
       editable = list(target = "cell", disable = list(columns = c(0, 1))),
       selection = "none",
       style = "bootstrap5",
-      options = list(scrollX = TRUE,
-                     paging = FALSE,
-                     searching = FALSE,
-                     info = FALSE
-                     ),
+      options = list(
+        scrollX = TRUE,
+        paging = FALSE,
+        searching = FALSE,
+        info = FALSE
+      ),
       class = c("hover", "compact")
     )
 

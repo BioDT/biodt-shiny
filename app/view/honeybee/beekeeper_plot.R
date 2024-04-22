@@ -10,13 +10,14 @@ box::use(
 )
 
 #' @export
-beekeeper_plot_ui <- function(id,
-                       card_header = "Output plot",
-                       title = "output_plot",
-                       plot_width = "100%",
-                       plot_height = "500px"
-                       # custom_code = NULL
-) {
+beekeeper_plot_ui <- function(
+    id,
+    card_header = "Output plot",
+    title = "output_plot",
+    plot_width = "100%",
+    plot_height = "500px"
+    # custom_code = NULL
+    ) {
   ns <- NS(id)
   tagList(
     card(
@@ -46,54 +47,56 @@ beekeeper_plot_ui <- function(id,
 }
 
 #' @export
-beekeeper_plot_server <- function(id,
-                           beekeeper_selected,
-                           experiment_list,
-                           w) {
+beekeeper_plot_server <- function(
+    id,
+    beekeeper_selected,
+    experiment_list,
+    w) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     plot <- reactiveVal()
-    
+
     observeEvent(beekeeper_selected(),
-                 ignoreInit = TRUE,
-                 ignoreNULL = TRUE,
-                 {
-                   w$update(
-                     html = waiter_text(message = tags$h3("Preparing output plot...",
-                                                   style = "color: #414f2f;")
-                   ))
-                   print("preparing plot")
-                   w$show()
-                   # Hardcoded for prototype
-                   honeybee_beekeeper_plot(
-                     "app/data/honeybee/output_example/Result_table_original.csv"
-                   ) |>
-                     plot()
-                   w$hide()
-                 })
-    
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      {
+        w$update(
+          html = waiter_text(message = tags$h3("Preparing output plot...",
+            style = "color: #414f2f;"
+          ))
+        )
+        print("preparing plot")
+        w$show()
+        # Hardcoded for prototype
+        honeybee_beekeeper_plot(
+          "app/data/honeybee/output_example/Result_table_original.csv"
+        ) |>
+          plot()
+        w$hide()
+      }
+    )
+
     observeEvent(experiment_list(),
-                 ignoreInit = TRUE,
-                 ignoreNULL = TRUE,
-                 {
-                   print(experiment_list())
-                   print("updating list")
-                   shiny::updateSelectInput(
-                     inputId = "experiment",
-                     choices = experiment_list()
-                   )
-                 })
-    
-    observeEvent(input$update_plot,
-                 {
-                   honeybee_beekeeper_plot(
-                     input$experiment
-                   ) |>
-                     plot()
-                 })
-    
-    
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      {
+        print(experiment_list())
+        print("updating list")
+        shiny::updateSelectInput(
+          inputId = "experiment",
+          choices = experiment_list()
+        )
+      }
+    )
+
+    observeEvent(input$update_plot, {
+      honeybee_beekeeper_plot(
+        input$experiment
+      ) |>
+        plot()
+    })
+
     output$echarty_plot <-
       ecs.render(
         plot()

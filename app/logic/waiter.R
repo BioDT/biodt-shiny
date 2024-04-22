@@ -6,8 +6,10 @@ box::use(
 #' @export
 waiter_text <- function(
     message = h3("Working..."),
-    spinner = spin_loaders(id = 19,
-                           color = "#414f2f")){
+    spinner = spin_loaders(
+      id = 19,
+      color = "#414f2f"
+    )) {
   tagList(
     spinner,
     message

@@ -28,7 +28,7 @@ parse_site <- function(site) {
   coords_parsed <- list()
   coords_parsed$lng <- as.numeric(coords[[1]][1])
   coords_parsed$lat <- as.numeric(coords[[1]][2])
-  
+
   return(coords_parsed)
 }
 

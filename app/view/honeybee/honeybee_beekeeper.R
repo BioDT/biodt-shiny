@@ -4,7 +4,7 @@ box::use(
   bslib[layout_column_wrap],
   htmltools[css],
   waiter[Waiter],
-  readr[read_csv]
+  readr[read_csv],
 )
 
 box::use(
@@ -22,7 +22,6 @@ honeybee_beekeeper_ui <- function(id,
                                   theme) {
   ns <- NS(id)
   tagList(
-    # actionButton(ns("change"), "change"),
     tags$div(
       beekeeper_control_ui(ns("beekeeper_control")),
       layout_column_wrap(
@@ -30,8 +29,10 @@ honeybee_beekeeper_ui <- function(id,
         fill = FALSE,
         style = css(grid_template_columns = "2fr 1fr"),
         honeybee_map_ui(ns("beekeeper_map")),
-        honeybee_param_ui(ns("beekeeper_param"),
-                          theme)
+        honeybee_param_ui(
+          ns("beekeeper_param"),
+          theme
+        )
       ),
       honeybee_lookup_ui(ns("beekeeper_lookup")),
       beekeeper_plot_ui(ns("beekeeper_plot"))
@@ -44,50 +45,59 @@ honeybee_beekeeper_server <- function(id,
                                       session_dir,
                                       beekeeper_selected) {
   moduleServer(id, function(input, output, session) {
-    
     # Define waiter ----
-    msg <- list(waiter_text(message = tags$h3("Loading data...",
-                                              style = "color: #414f2f;")),
-                waiter_text(message = tags$h3("Computing Beehave simulation...",
-                                              style = "color: #414f2f;")))
-    
-    w <- Waiter$new(html = msg[[1]],
-                    color = "rgba(256,256,256,0.9)")
-    
+    msg <- list(
+      waiter_text(message = tags$h3("Loading data...",
+        style = "color: #414f2f;"
+      )),
+      waiter_text(message = tags$h3("Computing Beehave simulation...",
+        style = "color: #414f2f;"
+      ))
+    )
+
+    w <- Waiter$new(
+      html = msg[[1]],
+      color = "rgba(256,256,256,0.9)"
+    )
+
     # Variables ----
     map <- reactiveVal()
     leaflet_map <- reactiveVal()
     lookup_table <- reactiveVal()
-    
+
     # Initialization ----
-    observeEvent(beekeeper_selected(),
-                 ignoreInit = TRUE,
-                 ignoreNULL = TRUE,
-                 priority = 1000,
-                 {
-                   req(beekeeper_selected(),
-                       is.null(map()) ||
-                       is.null(lookup_table()))
-                   w$show()
-                   # Load map
-                   # Hardcoded for prototype
-                   "app/data/honeybee/map.tif" |>
-                     read_honeybee_tif() |>
-                     map()
-                   
-                   map() |>
-                     honeybee_leaflet_map() |>
-                     leaflet_map()
-                   
-                   # Lookup table
-                   # Hardcoded for prototype
-                   "app/data/honeybee/lookup_table.csv" |>  
-                     read_csv(show_col_types = FALSE) |>
-                     lookup_table()
-                   
-                   w$hide()
-                 })
-    
+    observeEvent(
+      beekeeper_selected(),
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      priority = 1000,
+      {
+        req(
+          beekeeper_selected(),
+          is.null(map()) ||
+            is.null(lookup_table())
+        )
+        w$show()
+        # Load map
+        # Hardcoded for prototype
+        "app/data/honeybee/map.tif" |>
+          read_honeybee_tif() |>
+          map()
+
+        map() |>
+          honeybee_leaflet_map() |>
+          leaflet_map()
+
+        # Lookup table
+        # Hardcoded for prototype
+        "app/data/honeybee/lookup_table.csv" |>
+          read_csv(show_col_types = FALSE) |>
+          lookup_table()
+
+        w$hide()
+      }
+    )
+
     # Map ----
     coordinates <- honeybee_map_server("beekeeper_map",
       leaflet_map = leaflet_map
@@ -98,24 +108,26 @@ honeybee_beekeeper_server <- function(id,
 
     # Lookup table ----
     lookup <- honeybee_lookup_server("beekeeper_lookup",
-                                     lookup_table = lookup_table)
-    
+      lookup_table = lookup_table
+    )
+
     # Execution ----
-    experiment_list <- beekeeper_control_server("beekeeper_control",
-                                                coordinates,
-                                                lookup,
-                                                parameters,
-                                                map,
-                                                session_dir,
-                                                w)
+    experiment_list <- beekeeper_control_server(
+      "beekeeper_control",
+      coordinates,
+      lookup,
+      parameters,
+      map,
+      session_dir,
+      w
+    )
 
     # Plot ----
-    beekeeper_plot_server("beekeeper_plot",
-                          beekeeper_selected,
-                          experiment_list,
-                          w
-                          )
-    
-
+    beekeeper_plot_server(
+      "beekeeper_plot",
+      beekeeper_selected,
+      experiment_list,
+      w
+    )
   })
 }

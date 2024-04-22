@@ -6,7 +6,7 @@ box::use(
 )
 
 box::use(
-  app / logic / grassland / grassland_update_inputmap[grassland_update_map],
+  app/logic/grassland/grassland_update_inputmap[grassland_update_map],
 )
 
 #' @export

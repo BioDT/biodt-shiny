@@ -5,15 +5,15 @@ box::use(
 )
 
 box::use(
-  app / view / grassland / grassland_dynamics / grassland_dynamics_inputmap[
+  app/view/grassland/grassland_dynamics/grassland_dynamics_inputmap[
     grassland_dynamics_inputmap_ui,
     grassland_dynamics_inputmap_server
   ],
-  app / view / grassland / grassland_dynamics / grassland_dynamics_location[
+  app/view/grassland/grassland_dynamics/grassland_dynamics_location[
     grassland_dynamics_location_ui,
     grassland_dynamics_location_server
   ],
-  app / view / grassland / grassland_dynamics / grassland_dynamics_outputplot[
+  app/view/grassland/grassland_dynamics/grassland_dynamics_outputplot[
     grassland_dynamics_outputplot_ui,
     grassland_dynamics_outputplot_server
   ],

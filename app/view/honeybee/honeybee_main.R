@@ -26,8 +26,8 @@ honeybee_ui <- function(id,
       title = "Beekeeper",
       icon = icon("forumbee"),
       honeybee_beekeeper_ui(
-       ns("honeybee_beekeeper"),
-       theme
+        ns("honeybee_beekeeper"),
+        theme
       )
     )
   )
@@ -39,9 +39,9 @@ honeybee_server <- function(id,
                             session_dir) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     beekeeper_selected <- reactiveVal(FALSE)
-    
+
     observeEvent(
       input$tab,
       {

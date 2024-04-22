@@ -16,7 +16,7 @@ grassland_dynamics_outputplot_ui <- function(id) { # nolint
     ),
     card_body(
       layout_column_wrap(
-        width = 1 / 3,
+        width = 1/3,
         selectInput(
           ns("output_list"),
           label = "Choose output dataset",

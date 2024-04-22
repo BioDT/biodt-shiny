@@ -4,9 +4,11 @@ box::use(
 )
 
 box::use(
-  app / view / grassland / grassland_dynamics / grassland_dynamics[grassland_dynamics_ui,
-                                                                   grassland_dynamics_server],
-  app / view / grassland / info / grassland_info[grassland_info_ui],
+  app/view/grassland/grassland_dynamics/grassland_dynamics[
+    grassland_dynamics_ui,
+    grassland_dynamics_server
+  ],
+  app/view/grassland/info/grassland_info[grassland_info_ui],
 )
 
 #' @export

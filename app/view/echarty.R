@@ -5,13 +5,12 @@ box::use(
 )
 
 #' @export
-echarty_ui <- function(id,
-                       card_header = "Output plot",
-                       title = "output_plot",
-                       plot_width = "100%",
-                       plot_height = "500px"
-                       # custom_code = NULL
-) {
+echarty_ui <- function(
+    id,
+    card_header = "Output plot",
+    title = "output_plot",
+    plot_width = "100%",
+    plot_height = "500px") {
   ns <- NS(id)
   tagList(
     card(
@@ -22,7 +21,6 @@ echarty_ui <- function(id,
       card_header(
         tags$h5(card_header)
       ),
-      # custom_code,
       ecs.output(
         ns("echarty_plot"),
         width = plot_width,

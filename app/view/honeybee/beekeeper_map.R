@@ -27,7 +27,8 @@ honeybee_map_ui <- function(id) {
           )
         ),
         leafletOutput(ns("map_plot"),
-                      height = "500px")
+          height = "500px"
+        )
       )
     ),
   )
@@ -40,9 +41,9 @@ honeybee_map_server <- function(id,
     ns <- session$ns
     coordinates_text <- reactiveVal()
     out <- reactiveVal(NULL)
-    
+
     observeEvent(leaflet_map(), {
-      output_map <- leaflet_map()  |>
+      output_map <- leaflet_map() |>
         onRender(paste0("
       function(el, x) {
          var updateLegend = function () {
@@ -55,46 +56,45 @@ honeybee_map_server <- function(id,
          };
          updateLegend();
          this.on('baselayerchange', el => updateLegend());
-      }"
-        ))
-      
+      }"))
+
       output$map_plot <- renderLeaflet(output_map)
     })
 
-   observeEvent(
+    observeEvent(
       input$map_plot_draw_new_feature,
       {
         leafletProxy("map_plot", session) |>
-        removeShape(layerId = "circle") |>
-        addCircles(
-          lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
-          lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-          radius = 5000,
-          layerId = "circle"
-        )
-      if (length(input$map_plot_draw_new_feature) > 0) {
-        HTML(
-          paste(
-            "Selected coordinates are: <br>",
-            "Latitude: ",
-            input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            "<br>",
-            "Longitude: ",
-            input$map_plot_draw_new_feature$geometry$coordinates[[1]],
-            "<br>"
+          removeShape(layerId = "circle") |>
+          addCircles(
+            lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+            radius = 5000,
+            layerId = "circle"
           )
-        ) |>
-          coordinates_text()
-        
-        data.frame(
-          lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-          lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]]
-        ) |>
-          out()
-      } else {
-        coordinates_text("No location selected.")
-        out(NULL)
-      }
+        if (length(input$map_plot_draw_new_feature) > 0) {
+          HTML(
+            paste(
+              "Selected coordinates are: <br>",
+              "Latitude: ",
+              input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+              "<br>",
+              "Longitude: ",
+              input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+              "<br>"
+            )
+          ) |>
+            coordinates_text()
+
+          data.frame(
+            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+            lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]]
+          ) |>
+            out()
+        } else {
+          coordinates_text("No location selected.")
+          out(NULL)
+        }
       }
     )
 

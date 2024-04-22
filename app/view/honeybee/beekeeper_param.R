@@ -86,20 +86,20 @@ honeybee_param_ui <- function(id,
 #' @export
 honeybee_param_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
     out <- reactiveVal()
     ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED" ----
     ## when value of sliderInput "N_INITIAL_MITES_HEALTHY" changes
-    observeEvent(input$N_INITIAL_MITES_HEALTHY,
-                 ignoreInit = TRUE,
-                 {
-                   updateSliderInput(
-                     inputId = "N_INITIAL_MITES_INFECTED",
-                     max = input$N_INITIAL_MITES_HEALTHY
-                   )
-                 }
+    observeEvent(
+      input$N_INITIAL_MITES_HEALTHY,
+      ignoreInit = TRUE,
+      {
+        updateSliderInput(
+          inputId = "N_INITIAL_MITES_INFECTED",
+          max = input$N_INITIAL_MITES_HEALTHY
+        )
+      }
     )
-    
+
     listen_param_change <- reactive({
       list(
         input$N_INITIAL_MITES_HEALTHY,
@@ -111,39 +111,40 @@ honeybee_param_server <- function(id) {
         input$SimulationDays
       )
     })
-    
-    observeEvent(listen_param_change(),
-                 {
-                   parameters <- data.frame(
-                     Parameter = c("N_INITIAL_BEES",
-                                   "N_INITIAL_MITES_HEALTHY",
-                                   "N_INITIAL_MITES_INFECTED",
-                                   "HoneyHarvesting",
-                                   "VarroaTreatment",
-                                   "DroneBroodRemoval"
-                     ),
-                     Value = c(input$N_INITIAL_BEES,
-                               input$N_INITIAL_MITES_HEALTHY,
-                               input$N_INITIAL_MITES_INFECTED,
-                               input$HoneyHarvesting,
-                               input$VarroaTreatment,
-                               input$DroneBroodRemoval
-                     ),
-                     Default.Value = NA
-                   )
-                   
-                   simulation <- data.frame(
-                     sim_days = input$SimulationDays,
-                     start_day = "2016-01-01"
-                   )
-                   
-                   list(
-                     parameters = parameters,
-                     simulation = simulation
-                   ) |>
-                     out()
-                 })
-    
+
+    observeEvent(listen_param_change(), {
+      parameters <- data.frame(
+        Parameter = c(
+          "N_INITIAL_BEES",
+          "N_INITIAL_MITES_HEALTHY",
+          "N_INITIAL_MITES_INFECTED",
+          "HoneyHarvesting",
+          "VarroaTreatment",
+          "DroneBroodRemoval"
+        ),
+        Value = c(
+          input$N_INITIAL_BEES,
+          input$N_INITIAL_MITES_HEALTHY,
+          input$N_INITIAL_MITES_INFECTED,
+          input$HoneyHarvesting,
+          input$VarroaTreatment,
+          input$DroneBroodRemoval
+        ),
+        Default.Value = NA
+      )
+
+      simulation <- data.frame(
+        sim_days = input$SimulationDays,
+        start_day = "2016-01-01"
+      )
+
+      list(
+        parameters = parameters,
+        simulation = simulation
+      ) |>
+        out()
+    })
+
     reactive(out())
   })
 }

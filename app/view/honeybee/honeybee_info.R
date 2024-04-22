@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow]
+  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow],
 )
 
 #' @export

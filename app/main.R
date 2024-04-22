@@ -4,12 +4,12 @@ box::use(
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
-  stringi[stri_rand_strings]
+  stringi[stri_rand_strings],
 )
 
 box::use(
-  app / view / info[mod_info_ui],
-  app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
+  app/view/info[mod_info_ui],
+  app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
 )
 
@@ -130,7 +130,7 @@ server <- function(id) {
         stri_rand_strings(1, 8)
       )
     )
-    
+
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
@@ -141,7 +141,7 @@ server <- function(id) {
     )
     # Grassland pDT ----
     grassland_main_server("grassland_main")
-    
+
     waiter_hide()
   })
 }
