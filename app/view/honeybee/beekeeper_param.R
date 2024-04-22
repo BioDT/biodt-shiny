@@ -8,8 +8,8 @@ honeybee_param_ui <- function(id,
                               theme) {
   ns <- NS(id)
   # tagList(
-    bootstrapPage(
-      theme = theme,
+  bootstrapPage(
+    theme = theme,
     card(
       class = "me-md-3 card-shadow",
       title = "params_simulation",
@@ -79,7 +79,7 @@ honeybee_param_ui <- function(id,
         )
       )
     )
-    )
+  )
   # )
 }
 
@@ -100,37 +100,50 @@ honeybee_param_server <- function(id) {
                  }
     )
     
-    
-    observeEvent({
-      input$N_INITIAL_MITES_HEALTHY
-      input$N_INITIAL_MITES_INFECTED
-      input$N_INITIAL_BEES
-      input$HoneyHarvesting
-      input$VarroaTreatment
-      input$DroneBroodRemoval
-      input$SimulationDays},
-      
-       data.frame(
-        Parameter = c("N_INITIAL_BEES",
-                      "N_INITIAL_MITES_HEALTHY",
-                      "N_INITIAL_MITES_INFECTED",
-                      "HoneyHarvesting",
-                      "VarroaTreatment",
-                      "DroneBroodRemoval",
-                      "SimulationDays"
-                      ),
-        Value = c(input$N_INITIAL_BEES,
-                  input$N_INITIAL_MITES_HEALTHY,
-                  input$N_INITIAL_MITES_INFECTED,
-                  input$HoneyHarvesting,
-                  input$VarroaTreatment,
-                  input$DroneBroodRemoval,
-                  input$SimulationDays
-                  ),
-        Default.Value = NA
-      ) |>
-        out()
+    listen_param_change <- reactive({
+      list(
+        input$N_INITIAL_MITES_HEALTHY,
+        input$N_INITIAL_MITES_INFECTED,
+        input$N_INITIAL_BEES,
+        input$HoneyHarvesting,
+        input$VarroaTreatment,
+        input$DroneBroodRemoval,
+        input$SimulationDays
       )
+    })
+    
+    observeEvent(listen_param_change(),
+                 {
+                   parameters <- data.frame(
+                     Parameter = c("N_INITIAL_BEES",
+                                   "N_INITIAL_MITES_HEALTHY",
+                                   "N_INITIAL_MITES_INFECTED",
+                                   "HoneyHarvesting",
+                                   "VarroaTreatment",
+                                   "DroneBroodRemoval"
+                     ),
+                     Value = c(input$N_INITIAL_BEES,
+                               input$N_INITIAL_MITES_HEALTHY,
+                               input$N_INITIAL_MITES_INFECTED,
+                               input$HoneyHarvesting,
+                               input$VarroaTreatment,
+                               input$DroneBroodRemoval
+                     ),
+                     Default.Value = NA
+                   )
+                   
+                   simulation <- data.frame(
+                     sim_days = input$SimulationDays,
+                     start_day = "2016-01-01"
+                   )
+                   
+                   list(
+                     parameters = parameters,
+                     simulation = simulation
+                   ) |>
+                     out()
+                 })
+    
     reactive(out())
   })
 }

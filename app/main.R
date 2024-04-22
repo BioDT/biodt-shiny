@@ -4,6 +4,7 @@ box::use(
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
+  stringi[stri_rand_strings]
 )
 
 box::use(
@@ -121,13 +122,22 @@ server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    session_dir <- file.path(
+      "shared",
+      paste0(
+        Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S"),
+        "_",
+        stri_rand_strings(1, 8)
+      )
+    )
+    
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",
-      r
+      session_dir
     )
     # Grassland pDT ----
     grassland_main$server("grassland_main")

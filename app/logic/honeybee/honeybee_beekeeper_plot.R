@@ -7,47 +7,25 @@ box::use(
 )
 
 #' @export
-honeybee_beekeeper_plot <- function(input_filepath,
-                                    weather_filepath) {
+honeybee_beekeeper_plot <- function(input_filepath) {
+  print("reading data")
   input <- read_csv(input_filepath,
     col_types = cols()
   ) |>
-    filter(
-      `[run number]` == 1,
-      siminputrow == 1
-    ) |>
     rename(
-      Step = `[step]`,
-      `Honey (kg)` = `(honeyEnergyStore / ( ENERGY_HONEY_per_g * 1000 ))`
+      `Honey (kg)` = `(honeyEnergyStore / ( ENERGY_HONEY_per_g * 1000 ))`,
+      Date = date
     ) |>
     mutate(
-      Step2 = Step %% 365,
       `Honey (kg)` = round(`Honey (kg)`, 2)
     )
 
-  weather <- read_file(weather_filepath) |>
-    str_split(" ",
-      simplify = TRUE
-    ) |>
-    as.integer() |>
-    na.omit()
-
-  weather_data <-
-    data.frame(
-      weather = weather,
-      Step2 = 0:(length(weather) - 1)
-    )
-
-  input <- input |>
-    left_join(weather_data,
-      by = "Step2"
-    )
-
+  print(input)
   echarty_plot <- ec.init(
     preset = FALSE,
     xAxis = list(
-      type = "value",
-      name = "Step",
+      type = "category",
+      name = "Date",
       nameGap = 0,
       nameLocation = "center",
       nameTextStyle = list(
@@ -84,7 +62,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
       list(
         type = "bar",
         data = ec.data(input |> select(
-          Step,
+          Date,
           weather
         )),
         yAxisIndex = 2,
@@ -101,7 +79,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
         color = "#E69F00",
         data = ec.data(
           input |> select(
-            Step,
+            Date,
             `Honey (kg)`
           )
         )
@@ -110,7 +88,7 @@ honeybee_beekeeper_plot <- function(input_filepath,
         type = "line",
         showSymbol = FALSE,
         data = ec.data(input |> select(
-          Step,
+          Date,
           `TotalIHbees + TotalForagers`
         )),
         yAxisIndex = 3,

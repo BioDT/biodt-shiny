@@ -12,9 +12,8 @@ box::use(
   app/view/honeybee/beekeeper_map[honeybee_map_ui, honeybee_map_server],
   app/view/honeybee/beekeeper_param[honeybee_param_ui, honeybee_param_server],
   app/view/honeybee/beekeeper_lookup[honeybee_lookup_ui, honeybee_lookup_server],
-  app/view/echarty[echarty_ui, echarty_server],
+  app/view/honeybee/beekeeper_plot[beekeeper_plot_ui, beekeeper_plot_server],
   app/logic/honeybee/honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map],
-  app/logic/honeybee/honeybee_beekeeper_plot[honeybee_beekeeper_plot],
   app/logic/waiter[waiter_text],
 )
 
@@ -35,19 +34,19 @@ honeybee_beekeeper_ui <- function(id,
                           theme)
       ),
       honeybee_lookup_ui(ns("beekeeper_lookup")),
-      echarty_ui(ns("beekeeper_plot"))
+      beekeeper_plot_ui(ns("beekeeper_plot"))
     )
   )
 }
 
 #' @export
 honeybee_beekeeper_server <- function(id,
-                                      r,
+                                      session_dir,
                                       beekeeper_selected) {
   moduleServer(id, function(input, output, session) {
     
     # Define waiter ----
-    msg <- list(waiter_text(message = tags$h3("Loding data...",
+    msg <- list(waiter_text(message = tags$h3("Loading data...",
                                               style = "color: #414f2f;")),
                 waiter_text(message = tags$h3("Computing Beehave simulation...",
                                               style = "color: #414f2f;")))
@@ -59,17 +58,16 @@ honeybee_beekeeper_server <- function(id,
     map <- reactiveVal()
     leaflet_map <- reactiveVal()
     lookup_table <- reactiveVal()
-    plot <- reactiveVal()
     
     # Initialization ----
     observeEvent(beekeeper_selected(),
                  ignoreInit = TRUE,
                  ignoreNULL = TRUE,
+                 priority = 1000,
                  {
                    req(beekeeper_selected(),
-                       is.null(map()) |
-                       is.null(lookup_table()) |
-                       is.null(plot()))
+                       is.null(map()) ||
+                       is.null(lookup_table()))
                    w$show()
                    # Load map
                    # Hardcoded for prototype
@@ -87,13 +85,6 @@ honeybee_beekeeper_server <- function(id,
                      read_csv(show_col_types = FALSE) |>
                      lookup_table()
                    
-                   # Hardcoded for prototype
-                   honeybee_beekeeper_plot(
-                     "app/data/honeybee/output_example/Result_table_original.csv",
-                     "app/data/honeybee/output_example/weather_412.txt"
-                   ) |>
-                     plot()
-                   
                    w$hide()
                  })
     
@@ -109,16 +100,22 @@ honeybee_beekeeper_server <- function(id,
     lookup <- honeybee_lookup_server("beekeeper_lookup",
                                      lookup_table = lookup_table)
     
-    # Plot ----
-    echarty_server("beekeeper_plot",
-                   echarty_plot = plot)
-    
     # Execution ----
-    beekeeper_control_server("beekeeper_control",
-                             coordinates,
-                             lookup,
-                             parameters,
-                             map,
-                             w)
+    experiment_list <- beekeeper_control_server("beekeeper_control",
+                                                coordinates,
+                                                lookup,
+                                                parameters,
+                                                map,
+                                                session_dir,
+                                                w)
+
+    # Plot ----
+    beekeeper_plot_server("beekeeper_plot",
+                          beekeeper_selected,
+                          experiment_list,
+                          w
+                          )
+    
+
   })
 }

@@ -6,3 +6,5 @@ manifest.json
 rsconnect/
 .Rproj.user
 renv
+shared
+.Rprofile
