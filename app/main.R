@@ -10,7 +10,7 @@ box::use(
 box::use(
   app / view / info[mod_info_ui],
   app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
-  app/view/biodiversity/grassland_main,
+  app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
 )
 
 # App theme ----
@@ -90,7 +90,7 @@ ui <- function(id) {
         nav_panel(
           class = "p-0",
           title = "Grassland Dynamics",
-          grassland_main$ui(
+          grassland_main_ui(
             ns("grassland_main")
           )
         ),
@@ -140,7 +140,7 @@ server <- function(id) {
       session_dir
     )
     # Grassland pDT ----
-    grassland_main$server("grassland_main")
+    grassland_main_server("grassland_main")
     
     waiter_hide()
   })
