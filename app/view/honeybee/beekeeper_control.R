@@ -53,12 +53,12 @@ beekeeper_control_server <- function(
     session_dir) {
   moduleServer(id, function(input, output, session) {
     # Define waiter ----
-    waiter_text(message = tags$h3("Computing Beehave simulation...",
+    msg <- waiter_text(message = tags$h3("Computing Beehave simulation...",
                                   style = "color: #414f2f;"
     ))
     
     w <- Waiter$new(
-      html = msg[[1]],
+      html = msg,
       color = "rgba(256,256,256,0.9)"
     )
     
