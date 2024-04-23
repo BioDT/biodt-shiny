@@ -6,6 +6,7 @@ box::use(
   terra[vect, project, buffer, crop, writeRaster],
   fs[file_copy],
   utils[write.csv],
+  waiter[Waiter],
 )
 
 box::use(
