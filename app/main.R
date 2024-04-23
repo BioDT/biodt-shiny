@@ -121,9 +121,11 @@ ui <- function(id) {
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
+    base_path <- Sys.getenv("BASE_PATH")
+    
     session_dir <- file.path(
-      "shared",
+      paste0(base_path, "shared"),
       paste0(
         Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S"),
         "_",

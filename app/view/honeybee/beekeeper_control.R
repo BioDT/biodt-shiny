@@ -138,8 +138,8 @@ beekeeper_control_server <- function(
 
         # BEWARE !!!!!!!!!!!!
         # HARDCODED paths follows
-
-        file_copy(file.path("shared", "uc-pollinators", "beehave", "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
+        
+        file_copy(file.path("app", "data", "honeybee", "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
           file.path(run_dir, "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
           overwrite = TRUE
         )
@@ -172,9 +172,11 @@ beekeeper_control_server <- function(
           file = locations_file,
           row.names = FALSE
         )
-
         # Run workflow ----
-        docker_call <- paste0("shared/uc-pollinators/scripts/cloud/cloud_execution.sh shared/uc-pollinators/R ", run_dir, " shared/uc-pollinators/scripts/cloud")
+        # docker_call <- paste0("shared/uc-pollinators/scripts/cloud/cloud_execution.sh shared/uc-pollinators/R ", run_dir, " shared/uc-pollinators/scripts/cloud")
+        # Execute docker run, no socket should be needed for this
+        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.7')
+        
         system(docker_call)
 
         # Update output data ----

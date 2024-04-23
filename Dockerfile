@@ -3,6 +3,18 @@ FROM rocker/r-ver:4.3.3
 RUN apt-get update -y && apt-get install -y  make pandoc zlib1g-dev libcurl4-openssl-dev libssl-dev libicu-dev libpng-dev libgdal-dev gdal-bin libgeos-dev libproj-dev libsqlite3-dev git libudunits2-dev libxt6 && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /usr/local/lib/R/etc/ /usr/lib/R/etc/
 
+# Add Docker's official GPG key:
+RUN apt-get update -y
+RUN apt-get install ca-certificates curl -y
+RUN install -m 0755 -d /etc/apt/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+RUN chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN apt-get update -y
+RUN apt-get install -y docker-ce docker-ce-cli
+
 RUN mkdir /.cache
 RUN chmod 777 /.cache .
 WORKDIR /code
