@@ -49,9 +49,18 @@ beekeeper_control_server <- function(
     lookup,
     parameters,
     landuse_map,
-    session_dir,
-    w) {
+    session_dir) {
   moduleServer(id, function(input, output, session) {
+    # Define waiter ----
+    waiter_text(message = tags$h3("Computing Beehave simulation...",
+                                  style = "color: #414f2f;"
+    ))
+    
+    w <- Waiter$new(
+      html = msg[[1]],
+      color = "rgba(256,256,256,0.9)"
+    )
+    
     # Prepare directory for results ----
     # Non-persistent data solution
     # Making a beekeeper dir in the shared folder
@@ -175,7 +184,7 @@ beekeeper_control_server <- function(
         # Run workflow ----
         # docker_call <- paste0("shared/uc-pollinators/scripts/cloud/cloud_execution.sh shared/uc-pollinators/R ", run_dir, " shared/uc-pollinators/scripts/cloud")
         # Execute docker run, no socket should be needed for this
-        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.7')
+        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.8')
         
         system(docker_call)
 
