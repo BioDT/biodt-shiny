@@ -71,7 +71,7 @@ beekeeper_control_server <- function(
     experiment_list <- reactiveVal(
       c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
     )
-    counter <- 0
+    counter <- reactiveVal(0)
 
     # Run workflow button ----
     observeEvent(
@@ -106,7 +106,7 @@ beekeeper_control_server <- function(
           parameters()
         )
 
-        counter <- counter + 1
+        counter(counter() + 1)
 
         # Prepare folder structure ----
         if (!dir.exists(session_dir)) {
@@ -191,7 +191,7 @@ beekeeper_control_server <- function(
 
         # Update output data ----
         new_out <- file.path(run_dir, "output", "output_id1_iter1.csv")
-        names(new_out) <- paste("Run", counter)
+        names(new_out) <- paste("Run", counter())
         if (file.exists(new_out)) {
           new_list <- experiment_list() |>
             c(new_out)
