@@ -118,8 +118,7 @@ honeybee_beekeeper_server <- function(id,
       lookup,
       parameters,
       map,
-      session_dir,
-      w
+      session_dir
     )
 
     # Plot ----
