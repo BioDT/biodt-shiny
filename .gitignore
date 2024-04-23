@@ -30,8 +30,12 @@ vignettes/*.pdf
 # System files
 .DS_Store
 renv
-
 # Data for pDTs
 local_data
+app/data
+shared
 # Testing script
-R/test.R
+test.R
+background.R
+docker-compose.yml
+Dockerfile_old
