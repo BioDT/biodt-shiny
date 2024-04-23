@@ -6,4 +6,5 @@ manifest.json
 rsconnect/
 .Rproj.user
 renv
-renv.lock
+shared
+.Rprofile
