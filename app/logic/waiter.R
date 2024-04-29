@@ -21,8 +21,8 @@ waiter_text <- function(
   )
 
   tagList(
+    css,
     spinner,
     message,
-    css
   )
 }
