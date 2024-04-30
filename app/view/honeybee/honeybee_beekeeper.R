@@ -125,8 +125,7 @@ honeybee_beekeeper_server <- function(id,
     beekeeper_plot_server(
       "beekeeper_plot",
       beekeeper_selected,
-      experiment_list,
-      w
+      experiment_list
     )
   })
 }

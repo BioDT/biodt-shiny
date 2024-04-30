@@ -7,7 +7,7 @@ box::use(
 )
 
 #' @export
-honeybee_beekeeper_plot <- function(input_filepath) {
+read_plot_data <- function(input_filepath) {
   print("reading data")
   input <- read_csv(input_filepath,
     col_types = cols()
@@ -19,6 +19,25 @@ honeybee_beekeeper_plot <- function(input_filepath) {
     mutate(
       `Honey (kg)` = round(`Honey (kg)`, 2)
     )
+}
+
+
+#' @export
+honeybee_beekeeper_plot <- function(input_filepath = NULL,
+                                    input = NULL) {
+  if (is.null(input)) {
+    print("reading data")
+    input <- read_csv(input_filepath,
+      col_types = cols()
+    ) |>
+      rename(
+        `Honey (kg)` = `(honeyEnergyStore / ( ENERGY_HONEY_per_g * 1000 ))`,
+        Date = date
+      ) |>
+      mutate(
+        `Honey (kg)` = round(`Honey (kg)`, 2)
+      )
+  }
 
   echarty_plot <- ec.init(
     preset = FALSE,

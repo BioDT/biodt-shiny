@@ -1,12 +1,14 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, selectInput, updateSelectInput, actionButton, reactiveVal, observeEvent],
+  shiny[moduleServer, NS, tagList, tags, selectInput, updateSelectInput, actionButton, reactiveVal, observeEvent, downloadButton, downloadHandler],
   bslib[card, card_header],
   echarty[ecs.output, ecs.render, ec.init],
+  waiter[Waiter],
+  readr[write_csv],
 )
 
 box::use(
   app/logic/waiter[waiter_text],
-  app/logic/honeybee/honeybee_beekeeper_plot[honeybee_beekeeper_plot],
+  app/logic/honeybee/honeybee_beekeeper_plot[honeybee_beekeeper_plot, read_plot_data],
 )
 
 #' @export
@@ -37,6 +39,10 @@ beekeeper_plot_ui <- function(
         ns("update_plot"),
         label = "Update plot"
       ),
+      downloadButton(
+        ns("download_data"),
+        label = "Download plot data"
+      ),
       ecs.output(
         ns("echarty_plot"),
         width = plot_width,
@@ -50,27 +56,37 @@ beekeeper_plot_ui <- function(
 beekeeper_plot_server <- function(
     id,
     beekeeper_selected,
-    experiment_list,
-    w) {
+    experiment_list) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     plot <- reactiveVal()
+    plot_data <- reactiveVal()
+
+    msg <- waiter_text(
+      message =
+        tags$h3("Updating plot...",
+          style = "color: #414f2f;"
+        )
+    )
+
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
 
     observeEvent(beekeeper_selected(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        w$update(
-          html = waiter_text(message = tags$h3("Preparing output plot...",
-            style = "color: #414f2f;"
-          ))
-        )
         print("preparing plot")
         w$show()
         # Hardcoded for prototype
+        read_plot_data("app/data/honeybee/output_example/Result_table_original.csv") |>
+          plot_data()
+
         honeybee_beekeeper_plot(
-          "app/data/honeybee/output_example/Result_table_original.csv"
+          input = plot_data()
         ) |>
           plot()
         w$hide()
@@ -91,12 +107,42 @@ beekeeper_plot_server <- function(
       }
     )
 
-    observeEvent(input$update_plot, {
-      honeybee_beekeeper_plot(
-        input$experiment
-      ) |>
-        plot()
-    })
+    # observeEvent(input$update_plot, {
+    #   honeybee_beekeeper_plot(
+    #     input$experiment
+    #   ) |>
+    #     plot()
+    # })
+
+    output$download_data <- downloadHandler(
+      filename = "output.csv",
+      content = function(file) {
+        write_csv(plot_data(), file)
+      },
+    )
+
+    observeEvent(
+      input$experiment,
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      {
+        # Start waiter ----
+        w$show()
+
+        read_plot_data(
+          input$experiment
+        ) |>
+          plot_data()
+
+        honeybee_beekeeper_plot(
+          input = plot_data()
+        ) |>
+          plot()
+
+        # Hide waiter ----
+        w$hide()
+      }
+    )
 
     output$echarty_plot <-
       ecs.render(
