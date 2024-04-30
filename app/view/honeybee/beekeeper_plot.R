@@ -31,18 +31,13 @@ beekeeper_plot_ui <- function(
         tags$h5(card_header)
       ),
       layout_column_wrap(
-        width = 1/3,
+        width = 1/2,
         tags$div(
           selectInput(
             ns("experiment"),
             label = "Choose experiment:",
             choices = c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
           ),
-          style = "max-width: 200px"
-        ),
-        actionButton(
-          ns("update_plot"),
-          label = "Update plot",
           style = "max-width: 200px"
         ),
         downloadButton(
