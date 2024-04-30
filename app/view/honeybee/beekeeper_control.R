@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tags, actionButton, observeEvent, req, reactive, reactiveVal],
+  shiny[moduleServer, NS, tags, tagList, actionButton, observeEvent, req, reactive, reactiveVal],
   bslib[card, card_header],
   shinyjs[disabled, disable, enable],
   purrr[is_empty],
@@ -53,9 +53,20 @@ beekeeper_control_server <- function(
     session_dir) {
   moduleServer(id, function(input, output, session) {
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Computing Beehave simulation...",
-                                  style = "color: #414f2f;"
-    ))
+    msg <- waiter_text(
+      message = tagList(
+        tags$h3("Computing Beehave simulation...",
+                style = "color: #414f2f;"),
+        tags$br(),
+        tags$h4("This operation takes some time.",
+                style = "color: #414f2f;"),
+        tags$h4("You can expect it to run for 2 to 4 minutes for 2 to 7 year simulation",
+                style = "color: #414f2f;"),
+        tags$h4("Please do not close the tab during this time. You can browser other tabs.",
+                style = "color: #414f2f;")
+        ),
+     
+     )
     
     w <- Waiter$new(
       html = msg,
@@ -92,11 +103,6 @@ beekeeper_control_server <- function(
       input$run_simulation,
       {
         # Start waiter ----
-        w$update(
-          html = waiter_text(message = tags$h3("Running simulation...",
-            style = "color: #414f2f;"
-          ))
-        )
         w$show()
 
         # Check data ----
