@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive],
+  shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
   bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
   htmlwidgets[onRender],
@@ -28,6 +28,9 @@ honeybee_map_ui <- function(id) {
         ),
         leafletOutput(ns("map_plot"),
           height = "500px"
+        ),
+        textOutput(
+          ns("acknowledgment")
         )
       )
     ),
@@ -36,12 +39,16 @@ honeybee_map_ui <- function(id) {
 
 #' @export
 honeybee_map_server <- function(id,
-                                leaflet_map) {
+                                leaflet_map,
+                                map_acknowledgment = reactiveVal("Preidl et al. RSE 2020")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     coordinates_text <- reactiveVal()
     out <- reactiveVal(NULL)
-
+    
+    output$acknowledgment <- renderText(map_acknowledgment())
+   
+    
     observeEvent(leaflet_map(), {
       output_map <- leaflet_map() |>
         onRender(paste0("
