@@ -1,6 +1,6 @@
 box::use(
   shiny[moduleServer, NS, tagList, tags, selectInput, updateSelectInput, actionButton, reactiveVal, observeEvent, downloadButton, downloadHandler],
-  bslib[card, card_header],
+  bslib[card, card_header, layout_column_wrap],
   echarty[ecs.output, ecs.render, ec.init],
   waiter[Waiter],
   readr[write_csv],
@@ -30,18 +30,26 @@ beekeeper_plot_ui <- function(
       card_header(
         tags$h5(card_header)
       ),
-      selectInput(
-        ns("experiment"),
-        label = "Choose experiment:",
-        choices = c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
-      ),
-      actionButton(
-        ns("update_plot"),
-        label = "Update plot"
-      ),
-      downloadButton(
-        ns("download_data"),
-        label = "Download plot data"
+      layout_column_wrap(
+        width = 1/3,
+        tags$div(
+          selectInput(
+            ns("experiment"),
+            label = "Choose experiment:",
+            choices = c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
+          ),
+          style = "max-width: 200px"
+        ),
+        actionButton(
+          ns("update_plot"),
+          label = "Update plot",
+          style = "max-width: 200px"
+        ),
+        downloadButton(
+          ns("download_data"),
+          label = "Download plot data",
+          style = "max-width: 200px"
+        )
       ),
       ecs.output(
         ns("echarty_plot"),
