@@ -76,7 +76,7 @@ honeybee_map_server <- function(id,
           addCircles(
             lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
             lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            radius = 5000,
+            radius = 3000,
             layerId = "circle"
           )
         if (length(input$map_plot_draw_new_feature) > 0) {
