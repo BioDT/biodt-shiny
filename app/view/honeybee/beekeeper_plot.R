@@ -81,11 +81,12 @@ beekeeper_plot_server <- function(
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        print(experiment_list())
-        print("updating list")
+        print("updating beekeeper plot list")
+        new_list <- experiment_list()
         shiny::updateSelectInput(
           inputId = "experiment",
-          choices = experiment_list()
+          choices = new_list,
+          selected = new_list[length(new_list)]
         )
       }
     )
