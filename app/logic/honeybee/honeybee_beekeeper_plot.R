@@ -20,7 +20,6 @@ honeybee_beekeeper_plot <- function(input_filepath) {
       `Honey (kg)` = round(`Honey (kg)`, 2)
     )
 
-  print(input)
   echarty_plot <- ec.init(
     preset = FALSE,
     xAxis = list(
