@@ -45,10 +45,10 @@ honeybee_map_server <- function(id,
     ns <- session$ns
     coordinates_text <- reactiveVal()
     out <- reactiveVal(NULL)
-    
+
     output$acknowledgment <- renderText(map_acknowledgment())
-   
-    
+
+
     observeEvent(leaflet_map(), {
       output_map <- leaflet_map() |>
         onRender(paste0("
