@@ -1,6 +1,6 @@
 box::use(
   shiny[moduleServer, NS, tags, actionButton, observeEvent, req, reactive, reactiveVal],
-  bslib[card, card_header],
+  bslib[card, card_header, card_body],
   shinyjs[disabled, disable, enable],
   purrr[is_empty],
   terra[vect, project, buffer, crop, writeRaster],
@@ -37,6 +37,26 @@ beekeeper_control_ui <- function(id) {
             )
           )
         )
+      )
+    ),
+    card_body(
+      id = ns("control"),
+      tags$div(
+        class = "row d-flex justify-content-between",
+        tags$h5("Instructions"),
+        tags$ol(
+          style = "margin-left: 20px; margin-top: 15px;",
+          tags$style("
+            ol li {
+              margin-bottom: 10px;
+            }
+          "),
+          tags$li("Select point on the map"),
+          tags$li("Adjust the parameters"),
+          tags$li("Change the lookup table values if needed"),
+          tags$li("Click the run simulation button")
+        ),
+        tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu.")
       )
     )
   )

@@ -35,7 +35,8 @@ beekeeper_plot_ui <- function(
       ),
       actionButton(
         ns("update_plot"),
-        label = "Update plot"
+        label = "Update plot",
+        style = "max-width: 200px"
       ),
       ecs.output(
         ns("echarty_plot"),
