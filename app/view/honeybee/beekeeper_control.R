@@ -62,10 +62,10 @@ beekeeper_control_server <- function(
         tags$h4("This operation takes some time.",
           style = "color: #414f2f;"
         ),
-        tags$h4("You can expect it to run for 2 to 4 minutes for 2 to 7 year simulation",
+        tags$h4("You can expect it to run for 2 to 4 minutes.",
           style = "color: #414f2f;"
         ),
-        tags$h4("Please do not close the tab during this time. You can browser other tabs.",
+        tags$h4("Please do not close the tab during this time. You can browse other tabs.",
           style = "color: #414f2f;"
         )
       ),
