@@ -40,7 +40,7 @@ honeybee_map_ui <- function(id) {
 #' @export
 honeybee_map_server <- function(id,
                                 leaflet_map,
-                                map_acknowledgment = reactiveVal("Preidl et al. RSE 2020")) {
+                                map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     coordinates_text <- reactiveVal()
