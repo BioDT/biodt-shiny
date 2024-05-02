@@ -121,9 +121,9 @@ ui <- function(id) {
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     base_path <- Sys.getenv("BASE_PATH")
-    
+
     session_dir <- file.path(
       paste0(base_path, "shared"),
       paste0(
