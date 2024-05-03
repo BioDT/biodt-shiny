@@ -9,6 +9,7 @@ box::use(
 
 box::use(
   app/view/info[mod_info_ui],
+  app/view/acknowledgements[mod_acknowledgements_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
 )
@@ -73,6 +74,14 @@ ui <- function(id) {
         icon = shiny$icon("circle-info"),
         class = "container-fluid index-info",
         mod_info_ui("info")
+      ),
+      ## Acknowledgements - main menu item ----
+      nav_panel(
+        title = "Acknowledgements",
+        value = "acknowledgements",
+        icon = shiny$icon("circle-info"),
+        class = "container-fluid index-info",
+        mod_acknowledgements_ui("info")
       ),
       ## Digital Twins - main menu item ----
       nav_menu(

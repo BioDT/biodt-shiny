@@ -46,10 +46,10 @@ beekeeper_control_ui <- function(id) {
         class = "row d-flex justify-content-between",
         tags$h5("Instructions"),
         tags$ol(
-          style = "margin-left: 20px; margin-top: 15px;",
           tags$style("
             ol li {
               margin-bottom: 10px;
+              margin-left: 20px;
             }
           "),
           tags$li("Select point on the map"),
