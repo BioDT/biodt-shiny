@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive],
+  shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
   bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
   htmlwidgets[onRender],
@@ -29,6 +29,9 @@ honeybee_map_ui <- function(id) {
         ),
         leafletOutput(ns("map_plot"),
           height = "500px"
+        ),
+        textOutput(
+          ns("acknowledgment")
         )
       )
     ),
@@ -37,11 +40,15 @@ honeybee_map_ui <- function(id) {
 
 #' @export
 honeybee_map_server <- function(id,
-                                leaflet_map) {
+                                leaflet_map,
+                                map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     coordinates_text <- reactiveVal()
     out <- reactiveVal(NULL)
+
+    output$acknowledgment <- renderText(map_acknowledgment())
+
 
     observeEvent(leaflet_map(), {
       output_map <- leaflet_map() |>
@@ -70,7 +77,7 @@ honeybee_map_server <- function(id,
           addCircles(
             lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
             lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            radius = 5000,
+            radius = 3000,
             layerId = "circle"
           )
         if (length(input$map_plot_draw_new_feature) > 0) {

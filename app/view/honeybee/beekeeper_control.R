@@ -1,11 +1,12 @@
 box::use(
-  shiny[moduleServer, NS, tags, actionButton, observeEvent, req, reactive, reactiveVal],
-  bslib[card, card_header, card_body],
+  shiny[moduleServer, NS, tags, tagList, actionButton, observeEvent, req, reactive, reactiveVal],
+  bslib[card, card_header],
   shinyjs[disabled, disable, enable],
   purrr[is_empty],
   terra[vect, project, buffer, crop, writeRaster],
   fs[file_copy],
   utils[write.csv],
+  waiter[Waiter],
 )
 
 box::use(
@@ -69,9 +70,32 @@ beekeeper_control_server <- function(
     lookup,
     parameters,
     landuse_map,
-    session_dir,
-    w) {
+    session_dir) {
   moduleServer(id, function(input, output, session) {
+    # Define waiter ----
+    msg <- waiter_text(
+      message = tagList(
+        tags$h3("Computing Beehave simulation...",
+          style = "color: #414f2f;"
+        ),
+        tags$br(),
+        tags$h4("This operation takes some time.",
+          style = "color: #414f2f;"
+        ),
+        tags$h4("You can expect it to run for 2 to 4 minutes.",
+          style = "color: #414f2f;"
+        ),
+        tags$h4("Please do not close the tab during this time. You can browse other tabs.",
+          style = "color: #414f2f;"
+        )
+      ),
+    )
+
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
+
     # Prepare directory for results ----
     # Non-persistent data solution
     # Making a beekeeper dir in the shared folder
@@ -81,7 +105,7 @@ beekeeper_control_server <- function(
     experiment_list <- reactiveVal(
       c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
     )
-    counter <- 0
+    counter <- reactiveVal(0)
 
     # Run workflow button ----
     observeEvent(
@@ -102,11 +126,6 @@ beekeeper_control_server <- function(
       input$run_simulation,
       {
         # Start waiter ----
-        w$update(
-          html = waiter_text(message = tags$h3("Running simulation...",
-            style = "color: #414f2f;"
-          ))
-        )
         w$show()
 
         # Check data ----
@@ -116,7 +135,7 @@ beekeeper_control_server <- function(
           parameters()
         )
 
-        counter <- counter + 1
+        counter(counter() + 1)
 
         # Prepare folder structure ----
         if (!dir.exists(session_dir)) {
@@ -193,15 +212,16 @@ beekeeper_control_server <- function(
           row.names = FALSE
         )
         # Run workflow ----
-        # docker_call <- paste0("shared/uc-pollinators/scripts/cloud/cloud_execution.sh shared/uc-pollinators/R ", run_dir, " shared/uc-pollinators/scripts/cloud")
+        # docker_call <- paste0('docker run -v "/Users/martinovic/resilio/IT4I/Projects/BioDT/WP6/uc-pollinators/scripts/cloud/":"/scripts" -v "/Users/martinovic/resilio/IT4I/Projects/BioDT/WP6/uc-pollinators/R":"/R" -v "/Users/martinovic/git/biodt-shiny/', run_dir,'":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
         # Execute docker run, no socket should be needed for this
-        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.7')
+
+        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
 
         system(docker_call)
 
         # Update output data ----
         new_out <- file.path(run_dir, "output", "output_id1_iter1.csv")
-        names(new_out) <- paste("Run", counter)
+        names(new_out) <- paste("Run", counter())
         if (file.exists(new_out)) {
           new_list <- experiment_list() |>
             c(new_out)
