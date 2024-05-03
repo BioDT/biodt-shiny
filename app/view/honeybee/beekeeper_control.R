@@ -1,6 +1,6 @@
 box::use(
   shiny[moduleServer, NS, tags, tagList, actionButton, observeEvent, req, reactive, reactiveVal],
-  bslib[card, card_header],
+  bslib[card, card_header, card_body],
   shinyjs[disabled, disable, enable],
   purrr[is_empty],
   terra[vect, project, buffer, crop, writeRaster],
