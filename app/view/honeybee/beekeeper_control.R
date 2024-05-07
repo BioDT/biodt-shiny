@@ -43,11 +43,11 @@ beekeeper_control_ui <- function(id) {
     card_body(
       id = ns("control"),
       tags$div(
-        class = "row d-flex justify-content-between",
+        class = "row d-flex justify-content-between card-list",
         tags$h5("Instructions"),
         tags$ol(
           tags$style("
-            ol li {
+            .card-list ol li {
               margin-bottom: 10px;
               margin-left: 20px;
             }
