@@ -18,7 +18,7 @@ beekeeper_control_ui <- function(id) {
   ns <- NS(id)
   card(
     id = ns("control"),
-    class = "mt-2 mx-md-3 card-shadow",
+    class = "mt-2 mx-md-3 card-shadow overflow-hidden",
     card_header(
       tags$div(
         class = "row d-flex justify-content-between align-items-center my-1",
