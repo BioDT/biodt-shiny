@@ -110,19 +110,19 @@ ui <- function(id) {
           title = "Honeybee",
           class = "p-0",
           honeybee_ui(ns("honeybee_main"),
-                      theme = biodt_theme
+            theme = biodt_theme
           )
         )
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
       nav_panel(
-          title = "Acknowledgements",
-          value = "acknowledgements",
-          icon = shiny$icon("users-gear"),
-          class = "container-fluid index-info",
-          mod_acknowledgements_ui("info")
-        ),
+        title = "Acknowledgements",
+        value = "acknowledgements",
+        icon = shiny$icon("users-gear"),
+        class = "container-fluid index-info",
+        mod_acknowledgements_ui("info")
+      ),
     )
   )
 }
@@ -131,9 +131,9 @@ ui <- function(id) {
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     base_path <- Sys.getenv("BASE_PATH")
-    
+
     session_dir <- file.path(
       paste0(base_path, "shared"),
       paste0(
@@ -142,7 +142,7 @@ server <- function(id) {
         stri_rand_strings(1, 8)
       )
     )
-    
+
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
@@ -153,7 +153,7 @@ server <- function(id) {
     )
     # Grassland pDT ----
     # grassland_main_server("grassland_main")
-    
+
     waiter_hide()
   })
 }
