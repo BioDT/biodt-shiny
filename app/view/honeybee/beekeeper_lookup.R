@@ -69,41 +69,14 @@ honeybee_lookup_server <- function(id,
           if (idx == 0 || idx == 1) {
             return;
           } else {
-            /*
-            let divWrap = document.createElement("div");
-            divWrap.setAttribute("data-bs-title", "default link...");
-            divWrap.setAttribute("data-bs-toggle", "tooltip");
-            divWrap.setAttribute("class", "tooltip");
+            let tooltipEl = document.createElement("span");
+            tooltipEl.innerText = "🛈"
+            tooltipEl.setAttribute("type", "button");
+            tooltipEl.setAttribute("data-bs-toggle", "popover");
+            tooltipEl.setAttribute("data-bs-content", "body content here");
+            tooltipEl.setAttribute("title", tooltipInfo[idx - 2]);
 
-            let spanText = document.createElement("span");
-            spanText.setAttribute("class", "tooltiptext");
-            spanText.innerHTML = tooltipInfo[idx - 2];
-
-            let spanIco = document.createElement("span");
-            spanIco.setAttribute("class","fa fa-circle-info");          
-
-            divWrap.appendChild(spanText)
-            
-            th_cells[idx].appendChild(spanIco)
-            th_cells[idx].appendChild(divWrap)
-            */
-
-            // th_cells[idx].setAttribute("type", "button");
-            // th_cells[idx].setAttribute("class", "btn btn-secondary");
-            // th_cells[idx].setAttribute("data-bs-title", "default link...");
-            // th_cells[idx].setAttribute("data-bs-content", "OBSAH...");
-            // th_cells[idx].setAttribute("data-bs-toggle", "tooltip");
-            
-            
-            let btnTip = document.createElement("button");
-            btnTip.setAttribute("type", "button");
-            btnTip.setAttribute("data-bs-toggle", "popover");
-            btnTip.setAttribute("data-bs-content", "body content here");
-            btnTip.setAttribute("title", tooltipInfo[idx - 2]);
-
-            th_cells[idx].appendChild(btnTip)
-
-            console.log("th_cells[idx]:::", th_cells[idx])
+            th_cells[idx].appendChild(tooltipEl)
           }
         })
       '))
