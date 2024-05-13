@@ -5,6 +5,7 @@ box::use(
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
   stringi[stri_rand_strings],
+  htmltools[includeScript],
 )
 
 box::use(
@@ -48,6 +49,7 @@ ui <- function(id) {
       ),
       color = "rgba(256,256,256,0.9)"
     ),
+    includeScript("app/js/popover.js"),
     # Body ----
     # Main navbar----
     page_navbar(
