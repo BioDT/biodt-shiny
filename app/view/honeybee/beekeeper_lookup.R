@@ -2,6 +2,8 @@ box::use(
   shiny[moduleServer, NS, tagList, tags, reactive, reactiveVal, observeEvent],
   bslib[card, card_header, card_body],
   DT[DTOutput, renderDT],
+  htmlwidgets[JS],
+
 )
 
 #' @export
@@ -18,6 +20,7 @@ honeybee_lookup_ui <- function(id) {
       ),
       card_body(
         tags$div(
+          id = "bee-lookup-table",
           DTOutput(
             ns("lookup_table")
           )
@@ -48,7 +51,35 @@ honeybee_lookup_server <- function(id,
         searching = FALSE,
         info = FALSE
       ),
-      class = c("hover", "compact")
+      class = c("hover", "compact"),
+      callback = JS(paste0('
+        let th_cells = document.querySelectorAll("#bee-lookup-table table thead tr th")
+
+        const tooltipInfo = [
+          "Amount of pollen g/m^2 per day",
+          "Conversion factor (mol/l) from nectar (l) into sugar (mol)",
+          "Amount of nectar l/m^2 per day",
+          "Minimum time in seconds a bee needs to harvest nectar resources during one flight",
+          "Minimum time in seconds a bee needs to harvest pollen resources during one flight",
+          "Calendar day when resources become available",
+          "Calendar day until resources are available"
+        ]
+
+        th_cells.forEach((el, idx) => {
+          if (idx == 0 || idx == 1) {
+            return;
+          } else {
+            let tooltipEl = document.createElement("span");
+            tooltipEl.innerText = "🛈"
+            tooltipEl.setAttribute("type", "button");
+            tooltipEl.setAttribute("data-bs-toggle", "popover");
+            tooltipEl.setAttribute("data-bs-content", "body content here");
+            tooltipEl.setAttribute("title", tooltipInfo[idx - 2]);
+
+            th_cells[idx].appendChild(tooltipEl)
+          }
+        })
+      '))
     )
 
     # Lookup table edit logic ----

@@ -5,6 +5,7 @@ box::use(
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
   stringi[stri_rand_strings],
+  htmltools[includeScript],
 )
 
 box::use(
@@ -47,6 +48,7 @@ ui <- function(id) {
       ),
       color = "rgba(256,256,256,0.9)"
     ),
+    includeScript("app/js/popover.js"),
     # Body ----
     # Main navbar----
     page_navbar(
@@ -80,20 +82,20 @@ ui <- function(id) {
         align = "left",
         icon = shiny$icon("people-group"),
         ### Species response to environment - menu subitem ----
-        nav_item(
-          shiny$tags$div(
-            class = "p-2",
-            shiny$icon("temperature-arrow-up"),
-            shiny$tags$strong("Species response to environmental change")
-          )
-        ),
-        nav_panel(
-          class = "p-0",
-          title = "Grassland Dynamics",
-          grassland_main_ui(
-            ns("grassland_main")
-          )
-        ),
+        # nav_item(
+        #   shiny$tags$div(
+        #     class = "p-2",
+        #     shiny$icon("temperature-arrow-up"),
+        #     shiny$tags$strong("Species response to environmental change")
+        #   )
+        # ),
+        # nav_panel(
+        #   class = "p-0",
+        #   title = "Grassland Dynamics",
+        #   grassland_main_ui(
+        #     ns("grassland_main")
+        #   )
+        # ),
         ### Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
@@ -142,7 +144,7 @@ server <- function(id) {
       session_dir
     )
     # Grassland pDT ----
-    grassland_main_server("grassland_main")
+    # grassland_main_server("grassland_main")
 
     waiter_hide()
   })
