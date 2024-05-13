@@ -18,7 +18,7 @@ beekeeper_control_ui <- function(id) {
   ns <- NS(id)
   card(
     id = ns("control"),
-    class = "mt-2 mx-md-3 card-shadow",
+    class = "mt-2 mx-md-3 card-shadow overflow-hidden",
     card_header(
       tags$div(
         class = "row d-flex justify-content-between align-items-center my-1",
@@ -43,13 +43,13 @@ beekeeper_control_ui <- function(id) {
     card_body(
       id = ns("control"),
       tags$div(
-        class = "row d-flex justify-content-between",
+        class = "row d-flex justify-content-between card-list",
         tags$h5("Instructions"),
         tags$ol(
-          style = "margin-left: 20px; margin-top: 15px;",
           tags$style("
-            ol li {
+            .card-list ol li {
               margin-bottom: 10px;
+              margin-left: 20px;
             }
           "),
           tags$li("Select point on the map"),

@@ -1,6 +1,6 @@
 box::use(
   shiny,
-  bslib[bs_theme, page_navbar, nav_menu, nav_item, nav_panel],
+  bslib[bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel],
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
@@ -9,6 +9,7 @@ box::use(
 
 box::use(
   app/view/info[mod_info_ui],
+  app/view/acknowledgements[mod_acknowledgements_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
 )
@@ -112,7 +113,16 @@ ui <- function(id) {
             theme = biodt_theme
           )
         )
-      )
+      ),
+      nav_spacer(),
+      ## Acknowledgements - main menu item ----
+      nav_panel(
+        title = "Acknowledgements",
+        value = "acknowledgements",
+        icon = shiny$icon("users-gear"),
+        class = "container-fluid index-info",
+        mod_acknowledgements_ui("info")
+      ),
     )
   )
 }

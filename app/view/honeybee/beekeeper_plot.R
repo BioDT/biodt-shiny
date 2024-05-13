@@ -23,7 +23,7 @@ beekeeper_plot_ui <- function(
   ns <- NS(id)
   tagList(
     card(
-      class = "mx-md-3 card-shadow",
+      class = "mx-md-3 card-shadow overflow-hidden",
       id = ns("echarty_card"),
       title = title,
       full_screen = TRUE,

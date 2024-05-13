@@ -11,7 +11,7 @@ honeybee_param_ui <- function(id,
   bootstrapPage(
     theme = theme,
     card(
-      class = "me-md-3 card-shadow",
+      class = "me-md-3 card-shadow overflow-hidden",
       title = "params_simulation",
       full_screen = FALSE,
       card_header(
