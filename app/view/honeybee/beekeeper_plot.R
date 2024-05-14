@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, selectInput, updateSelectInput, actionButton, reactiveVal, observeEvent, downloadButton, downloadHandler],
+  shiny[moduleServer, NS, tagList, tags, selectInput, updateSelectInput, actionButton, reactiveVal, observeEvent, downloadButton, downloadHandler, req],
   bslib[card, card_header, layout_column_wrap],
   echarty[ecs.output, ecs.render, ec.init],
   waiter[Waiter],
@@ -82,6 +82,8 @@ beekeeper_plot_server <- function(
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
+        req(beekeeper_selected(),
+            is.null(plot_data()))
         print("preparing plot")
         w$show()
         # Hardcoded for prototype
