@@ -25,7 +25,7 @@ mod_info_ui <- function(id) {
         ),
 
         tags$div(
-          class = "row",
+          class = "row mt-5",
           tags$div(
             class = "col-md-6",
             tags$div(
@@ -92,7 +92,7 @@ mod_info_ui <- function(id) {
                     tags$div(
                       class = "img-box",
                       tags$img(
-                        src = "https://www.biodt.eu/sites/default/files/2022-06/use%20case%202.png",
+                        src = "static/img/usecase2.png",
                         width = 210,
                         height = 210,
                         loading = "lazy"
@@ -124,6 +124,103 @@ mod_info_ui <- function(id) {
             )
           ),
         ),
+
+        tags$div(
+          class = "row",
+          tags$div(
+            class = "col-md-6",
+            tags$div(
+              class = "landing-pdt-wrap",
+              tags$div(
+                class = "title",
+                tags$h3("Dynamics and threats from and for species of policy concern")
+              ),
+              tags$div(
+                class = "description",
+                tags$div(
+                  class = "row",
+                  tags$div(
+                    class = "col-lg-6",
+                    tags$div(
+                      class = "img-box",
+                      tags$img(
+                        src = "static/img/usecase3.png",
+                        width = 210,
+                        height = 210,
+                        loading = "lazy"
+                      ),
+
+                    )
+                  ),
+                  tags$div(
+                    class = "col-lg-6",
+                    tags$div(
+                      class = "views-element-container",
+                      tags$ul(
+                        tags$li(
+                          tags$a(
+                            href = "#",
+                            "Invasive Species"
+                          ),
+                        ),
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          tags$div(
+            class = "col-md-6",
+            tags$div(
+              class = "landing-pdt-wrap",
+              tags$div(
+                class = "title",
+                tags$h3("Species interactions with each other and with humans")
+              ),
+              tags$div(
+                class = "description",
+                tags$div(
+                  class = "row",
+                  tags$div(
+                    class = "col-lg-6",
+                    tags$div(
+                      class = "img-box",
+                      tags$img(
+                        src = "static/img/usecase4.png",
+                        width = 210,
+                        height = 210,
+                        loading = "lazy"
+                      )
+                    )
+                  ),
+                  tags$div(
+                    class = "col-lg-6",
+                    tags$div(
+                      class = "views-element-container",
+                      tags$ul(
+                        tags$li(
+                          tags$a(
+                            href = "#",
+                            "Pollinators"
+                          )
+                        ),
+                        tags$li(
+                          tags$a(
+                            href = "#",
+                            "Disease Outbreaks"
+                          )
+                        ),
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          ),
+        ),
+
+
         tags$div(
           class = "info-text",
           tags$p(
