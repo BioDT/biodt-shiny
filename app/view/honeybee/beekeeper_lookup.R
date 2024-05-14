@@ -19,6 +19,8 @@ honeybee_lookup_ui <- function(id) {
         tags$h5("Lookup Table"),
       ),
       card_body(
+        tags$p("All values are based on previous studies (e.g. Horn et al. 2020, https://doi.org/10.1002/eap.2216) or a best guesses."),
+        tags$p("The user is encouraged to use own estimates or experiment using alternative values."),
         tags$div(
           id = "bee-lookup-table",
           DTOutput(
