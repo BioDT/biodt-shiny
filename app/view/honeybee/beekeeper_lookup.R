@@ -72,7 +72,7 @@ honeybee_lookup_server <- function(id,
             return;
           } else {
             let tooltipEl = document.createElement("span");
-            tooltipEl.innerText = "🛈"
+            tooltipEl.innerText = "(?)";
             tooltipEl.setAttribute("type", "button");
             tooltipEl.setAttribute("data-bs-toggle", "popover");
             tooltipEl.setAttribute("data-bs-content", "body content here");
