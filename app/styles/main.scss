@@ -150,6 +150,7 @@
   padding: 30px 50px;
   min-height: 200px;
   margin-bottom: 30px;
+  min-width: 200px;
 
   .title {
     display: flex;
@@ -170,18 +171,24 @@
       align-items: center;
 
       ul {
-        list-style-image: url("../img/title_tail_update.svg");
+        //list-style-image: url("../img/title_tail_update.svg");
       
         li {
           font-weight: 600;
           margin-bottom: 20px;
           font-size: 1rem;
           color: #bc6c25;
-        }
+          display: inline-block;
+          padding-left: 50px;
+          background: url("../img/title_tail.svg") no-repeat left top;
+          background-size: 40px;
+          list-style: none;
+          }
+          
       }
 
       .views-element-container ul {
-        margin-top: 20px;
+        margin-top: 10px;
       }
     }
   }
