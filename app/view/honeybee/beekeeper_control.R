@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tags, tagList, actionButton, observeEvent, req, reactive, reactiveVal, bookmarkButton],
+  shiny[moduleServer, NS, tags, tagList, actionButton, observeEvent, req, reactive, reactiveVal],
   bslib[card, card_header, card_body],
   shinyjs[disabled, disable, enable],
   purrr[is_empty],
@@ -28,7 +28,6 @@ beekeeper_control_ui <- function(id) {
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
-          bookmarkButton(),
           disabled(
             actionButton(
               ns("run_simulation"),

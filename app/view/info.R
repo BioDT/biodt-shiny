@@ -12,8 +12,7 @@ mod_info_ui <- function(id) {
   ns <- NS(id)
 
   fluidRow(
-    tags$div(
-      class = "row",
+    class = "index-info",
       tags$div(
         class = "col mx-auto col-lg-8",
         tags$h1(
@@ -240,7 +239,6 @@ mod_info_ui <- function(id) {
           ),
         ),
       )
-    ),
 
   )
 }

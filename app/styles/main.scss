@@ -15,8 +15,9 @@
 .index-info {
   background-image: url("../img/forest2.png");
   background-repeat: no-repeat;
-  background-size: 100%;
   background-position: bottom;
+  background-attachment: fixed;
+  background-size: 100%;
   display: flex;
 }
 
