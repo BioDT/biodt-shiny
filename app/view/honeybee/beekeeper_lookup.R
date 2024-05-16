@@ -70,11 +70,11 @@ honeybee_lookup_server <- function(id,
           if (idx == 0 || idx == 1) {
             return;
           } else {
-            let tooltipEl = document.createElement("span");
-            tooltipEl.innerText = "(?)";
+            let tooltipEl = document.createElement("i");
+            tooltipEl.setAttribute("class", "fas fa-circle-info fa-fw")
+            tooltipEl.setAttribute("aria-label", "circle-info icon")
             tooltipEl.setAttribute("type", "button");
             tooltipEl.setAttribute("data-bs-toggle", "popover");
-            tooltipEl.setAttribute("data-bs-content", "body content here");
             tooltipEl.setAttribute("title", tooltipInfo[idx - 2]);
 
             th_cells[idx].appendChild(tooltipEl)
