@@ -7,16 +7,16 @@ box::use(
 waiter_text <- function(
     message = h3("Working..."),
     style = "color: #414f2f;",
-    css,
+    css = NULL,
     spinner = spin_loaders(
       id = 19,
       color = "#414f2f"
     )) {
-  if (missing(css)) { # default
+  if (is.null(css)) { # default
     css <- tags$style(
       paste0(
-        ".waiter-fullscreen {
-          background-image: url('./img/forest2.png');
+        ".waiter-content-overlay {
+          background-image: url('../img/forest2.png');
           background-repeat: no-repeat;
           background-size: 100%;
           background-position: bottom;
