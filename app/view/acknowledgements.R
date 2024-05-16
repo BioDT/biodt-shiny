@@ -7,7 +7,7 @@ box::use(
 mod_acknowledgements_ui <- function(id) {
   ns <- NS(id)
   tags$div(
-    class = "column",
+    class = "column index-info",
     tags$div(
       class = "col",
       card(
