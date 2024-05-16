@@ -30,20 +30,25 @@ beekeeper_plot_ui <- function(
       card_header(
         tags$h5(card_header)
       ),
-      layout_column_wrap(
-        width = 1/2,
+      tags$div(
+        class = "row",
         tags$div(
+          class = "col-10",
           selectInput(
             ns("experiment"),
             label = "Choose experiment:",
             choices = c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
           ),
-          style = "max-width: 200px"
+          # style = "max-width: 200px"
         ),
-        downloadButton(
-          ns("download_data"),
-          label = "Download plot data",
-          style = "max-width: 200px"
+        tags$div(
+          class = "col-2 d-flex align-items-end flex-column",
+          downloadButton(
+            class = "",
+            ns("download_data"),
+            label = "Download plot data",
+            # style = "max-width: 200px"
+          )
         )
       ),
       ecs.output(
