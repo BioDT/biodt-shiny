@@ -74,13 +74,25 @@ mod_info_ui <- function(id) {
                       tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Biodiversity Dynamics"
+                        "Grassland Biodiversity Dynamics"
                         # ),
                       ),
                       tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Ecosystem Services"
+                        "Forest/Bird Biodiversity Dynamics"
+                        # ),
+                      ),
+                      tags$li(
+                        # tags$a(
+                        #   href = "#",
+                        "Real-time Bird Monitoring with Citizen Science Data"
+                        # ),
+                      ),
+                      tags$li(
+                        # tags$a(
+                        #   href = "#",
+                        "Cultural Ecosystem Services"
                         # ),
                       )
                     )
@@ -122,13 +134,19 @@ mod_info_ui <- function(id) {
                       tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Crop wild relatives and genetic resources for food security"
+                        "Crop Wild Relatives and Genetic Resources for Food Security"
                         # )
                       ),
                       tags$li(
                         # tags$a(
                         #   href = "#",
-                        "DNA detected biodiversity in cryptic habitats"
+                        "Genetically Deteceted Biodiversity in Cryptic Habitats"
+                        # )
+                      ),
+                      tags$li(
+                        # tags$a(
+                        #   href = "#",
+                        "DNA Detected Biodiversity, Poorly Known Habitats"
                         # )
                       ),
                     )
@@ -215,7 +233,7 @@ mod_info_ui <- function(id) {
                       tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Pollinators"
+                        "Pollinators (Honeybee)"
                         # )
                       ),
                       tags$li(
