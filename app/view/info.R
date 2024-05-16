@@ -56,34 +56,34 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase1.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       ),
 
                     )
                   ),
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Biodiversity Dynamics"
-                          ),
+                          # ),
                         ),
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Ecosystem Services"
-                          ),
+                          # ),
                         )
                       )
                     )
@@ -105,33 +105,33 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase2.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       )
                     )
                   ),
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Crop wild relatives and genetic resources for food security"
-                          )
+                          # )
                         ),
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "DNA detected biodiversity in cryptic habitats"
-                          )
+                          # )
                         ),
                       )
                     )
@@ -157,13 +157,13 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase3.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       ),
 
@@ -175,10 +175,10 @@ mod_info_ui <- function(id) {
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Invasive Species"
-                          ),
+                          # ),
                         ),
                       )
                     )
@@ -200,33 +200,33 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase4.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       )
                     )
                   ),
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Pollinators"
-                          )
+                          # )
                         ),
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Disease Outbreaks"
-                          )
+                          # )
                         ),
                       )
                     )
