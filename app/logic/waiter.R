@@ -15,7 +15,7 @@ waiter_text <- function(
   if (missing(css)) { # default
     css <- tags$style(
       paste0(
-        ".waiter-overlay-content {
+        ".waiter-fullscreen {
           background-image: url('./img/forest2.png');
           background-repeat: no-repeat;
           background-size: 100%;
