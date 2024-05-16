@@ -20,8 +20,9 @@
 .index-info {
   background-image: url("../img/forest2.png");
   background-repeat: no-repeat;
-  background-size: 100%;
   background-position: bottom;
+  background-attachment: fixed;
+  background-size: 100%;
   display: flex;
 }
 
@@ -147,7 +148,7 @@
   position: relative;
   overflow: hidden;
   padding: 30px 50px;
-  min-height: 325px;
+  min-height: 200px;
   margin-bottom: 30px;
 
   .title {
@@ -169,12 +170,13 @@
       align-items: center;
 
       ul {
-        list-style-image: url("title_tail.svg");
+        list-style-image: url("../img/title_tail_update.svg");
       
         li {
           font-weight: 600;
           margin-bottom: 20px;
           font-size: 1rem;
+          color: #bc6c25;
         }
       }
 

@@ -15,6 +15,7 @@ box::use(
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
 )
 
+shiny$enableBookmarking("server")
 # App theme ----
 #' @export
 biodt_theme <- bs_theme(
@@ -122,9 +123,12 @@ ui <- function(id) {
         title = "Acknowledgements",
         value = "acknowledgements",
         icon = shiny$icon("users-gear"),
-        class = "container-fluid index-info",
+        class = "container-fluid",
         mod_acknowledgements_ui("info")
       ),
+      nav_item(
+        shiny$bookmarkButton()
+      )
     )
   )
 }

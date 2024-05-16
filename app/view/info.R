@@ -12,8 +12,7 @@ mod_info_ui <- function(id) {
   ns <- NS(id)
 
   fluidRow(
-    tags$div(
-      class = "row",
+    class = "index-info",
       tags$div(
         class = "col mx-auto col-lg-8",
         tags$h1(
@@ -22,6 +21,24 @@ mod_info_ui <- function(id) {
             "Prototype"
           ),
           "Digital Twins"
+        ),
+        tags$div(
+          class = "info-text",
+          tags$p(
+            "The Biodiversity Digital Twin prototype will provide advanced models for simulation 
+            and prediction capabilities, through practical use cases addressing critical issues 
+            related to global biodiversity dynamics."
+          ),
+          tags$p(
+            "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital 
+            infrastructure, predictive modelling and AI solutions, facilitating evidence-based 
+            solutions for biodiversity protection and restoration."
+          ),
+          tags$p(
+            "The project responds to key EU and international policy initiatives, including the EU 
+            Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals,
+            Destination Earth."
+          ),
         ),
 
         tags$div(
@@ -39,34 +56,34 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase1.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       ),
 
                     )
                   ),
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Biodiversity Dynamics"
-                          ),
+                          # ),
                         ),
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Ecosystem Services"
-                          ),
+                          # ),
                         )
                       )
                     )
@@ -88,33 +105,33 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase2.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       )
                     )
                   ),
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Crop wild relatives and genetic resources for food security"
-                          )
+                          # )
                         ),
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "DNA detected biodiversity in cryptic habitats"
-                          )
+                          # )
                         ),
                       )
                     )
@@ -140,13 +157,13 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase3.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       ),
 
@@ -158,10 +175,10 @@ mod_info_ui <- function(id) {
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Invasive Species"
-                          ),
+                          # ),
                         ),
                       )
                     )
@@ -183,33 +200,33 @@ mod_info_ui <- function(id) {
                 tags$div(
                   class = "row",
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "img-box",
                       tags$img(
                         src = "static/img/usecase4.png",
-                        width = 210,
-                        height = 210,
+                        width = 140,
+                        height = 140,
                         loading = "lazy"
                       )
                     )
                   ),
                   tags$div(
-                    class = "col-lg-6",
+                    class = "col-md-6",
                     tags$div(
                       class = "views-element-container",
                       tags$ul(
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Pollinators"
-                          )
+                          # )
                         ),
                         tags$li(
-                          tags$a(
-                            href = "#",
+                          # tags$a(
+                          #   href = "#",
                             "Disease Outbreaks"
-                          )
+                          # )
                         ),
                       )
                     )
@@ -221,26 +238,8 @@ mod_info_ui <- function(id) {
         ),
 
 
-        tags$div(
-          class = "info-text",
-          tags$p(
-            "The Biodiversity Digital Twin prototype will provide advanced models for simulation 
-            and prediction capabilities, through practical use cases addressing critical issues 
-            related to global biodiversity dynamics."
-          ),
-          tags$p(
-            "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital 
-            infrastructure, predictive modelling and AI solutions, facilitating evidence-based 
-            solutions for biodiversity protection and restoration."
-          ),
-          tags$p(
-            "The project responds to key EU and international policy initiatives, including the EU 
-            Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals,
-            Destination Earth."
-          ),
-        ),
+
       )
-    ),
 
   )
 }
