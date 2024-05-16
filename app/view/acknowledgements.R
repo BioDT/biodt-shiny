@@ -7,7 +7,7 @@ box::use(
 mod_acknowledgements_ui <- function(id) {
   ns <- NS(id)
   tags$div(
-    class = "column index-info",
+    class = "column",
     tags$div(
       class = "col",
       card(
@@ -63,14 +63,13 @@ mod_acknowledgements_ui <- function(id) {
               tags$li("Kata Sara-aho, CSC - IT Center for Science"),
             ),
           ),
-         tags$div(
-           tags$p("You can report issues on ", tags$a(
-             "Github", icon("github"),
-             href = "https://github.com/BioDT/biodt-shiny/issues",
-             target = "_blank"
-           )),
-           
-         )
+          tags$div(
+            tags$p("You can report issues on ", tags$a(
+              "Github", icon("github"),
+              href = "https://github.com/BioDT/biodt-shiny/issues",
+              target = "_blank"
+            )),
+          )
         )
       )
     )

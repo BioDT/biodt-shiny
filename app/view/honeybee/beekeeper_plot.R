@@ -87,8 +87,10 @@ beekeeper_plot_server <- function(
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        req(beekeeper_selected(),
-            is.null(plot_data()))
+        req(
+          beekeeper_selected(),
+          is.null(plot_data())
+        )
         print("preparing plot")
         w$show()
         # Hardcoded for prototype

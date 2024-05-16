@@ -3,7 +3,6 @@ box::use(
   bslib[card, card_header, card_body],
   DT[DTOutput, renderDT],
   htmlwidgets[JS],
-
 )
 
 #' @export

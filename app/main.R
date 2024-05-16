@@ -123,12 +123,12 @@ ui <- function(id) {
         title = "Acknowledgements",
         value = "acknowledgements",
         icon = shiny$icon("users-gear"),
-        class = "container-fluid",
+        class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
-      ),
-      nav_item(
-        shiny$bookmarkButton()
-      )
+      )#,
+      # nav_item(
+      #   shiny$bookmarkButton()
+      # )
     )
   )
 }
