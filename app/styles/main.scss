@@ -2,6 +2,11 @@
   overflow: auto;
 }
 
+.bslib-card .card-body {
+    overflow: auto;
+    overflow-x: hidden;
+}
+
 .btn-navbar {
   color: #414F2F;
   background-color: #fff;

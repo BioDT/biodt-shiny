@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, fillPage, div, p, moduleServer, tagList, tags, column],
+  shiny[NS, fillPage, div, p, moduleServer, tagList, tags, column, icon],
   bslib[card, card_header, card_body],
 )
 
@@ -62,7 +62,15 @@ mod_acknowledgements_ui <- function(id) {
               tags$li("Simon Rolph, UK Centre for Ecology & Hydrology"),
               tags$li("Kata Sara-aho, CSC - IT Center for Science"),
             ),
-          )
+          ),
+         tags$div(
+           tags$p("You can report issues on ", tags$a(
+             "Github", icon("github"),
+             href = "https://github.com/BioDT/biodt-shiny/issues",
+             target = "_blank"
+           )),
+           
+         )
         )
       )
     )
