@@ -140,7 +140,7 @@ mod_info_ui <- function(id) {
                       tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Genetically Deteceted Biodiversity in Cryptic Habitats"
+                        "Genetically Detected Biodiversity in Cryptic Habitats"
                         # )
                       ),
                       tags$li(
