@@ -48,7 +48,8 @@ mod_acknowledgements_ui <- function(id) {
           id = ns("credits"),
           tags$div(
             class = "row d-flex justify-content-between acknowledgement-card",
-            tags$p("Credits to the main development contributors"),
+            tags$p("Credits to the main development contributors of the shiny web app",
+                   tags$br(), "The contributors for the pDT development are listed on the pDT pages"),
             tags$ul(
               tags$style("
             .acknowledgement-card ul li {
@@ -64,7 +65,7 @@ mod_acknowledgements_ui <- function(id) {
             ),
           ),
           tags$div(
-            tags$p("You can report issues on ", tags$a(
+            tags$p("You can report issues for the shiny web app on ", tags$a(
               "Github", icon("github"),
               href = "https://github.com/BioDT/biodt-shiny/issues",
               target = "_blank"
