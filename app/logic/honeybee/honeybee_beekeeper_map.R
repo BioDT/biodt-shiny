@@ -30,12 +30,12 @@ honeybee_leaflet_map <- function(map_raster,
   leaflet_map <-
     leaflet() |>
     addTiles() |>
-    # addRasterImage(
-    #   scaled_map,
-    #   opacity = 0.5,
-    #   project = FALSE,
-    #   group = "All layers"
-    # ) |>
+    addRasterImage(
+      scaled_map,
+      opacity = 0.5,
+      project = FALSE,
+      group = "All layers"
+    ) |>
     addRasterLegend(
       scaled_map,
       opacity = 0.5,
@@ -43,12 +43,12 @@ honeybee_leaflet_map <- function(map_raster,
       group = "Alllayers",
       className = "info legend Alllayers"
     ) |>
-    # addRasterImage(
-    #   bee_map,
-    #   opacity = 0.9,
-    #   project = FALSE,
-    #   group = "Beehave layers"
-    # ) |>
+    addRasterImage(
+      bee_map,
+      opacity = 0.9,
+      project = FALSE,
+      group = "Beehave layers"
+    ) |>
     addRasterLegend(
       bee_map,
       opacity = 0.9,
