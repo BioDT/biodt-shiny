@@ -5,7 +5,7 @@ box::use(
 )
 
 box::use(
-  app/view/honeybee/honeybee_info[honeybee_info_ui],
+  app/view/honeybee/honeybee_info[honeybee_info_ui, honeybee_info_server],
   app/view/honeybee/honeybee_beekeeper[honeybee_beekeeper_ui, honeybee_beekeeper_server],
   app/view/honeybee/beekeeper_contributors[bee_contributors_ui],
 )
@@ -61,6 +61,9 @@ honeybee_server <- function(id,
         }
       }
     )
+
+    honeybee_info_server("honeybee_info",
+    session)
 
     honeybee_beekeeper_server(
       "honeybee_beekeeper",

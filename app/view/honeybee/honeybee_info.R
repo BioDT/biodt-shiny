@@ -1,5 +1,6 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton],
+  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent],
+  bslib[nav_select],
 )
 
 #' @export
@@ -56,8 +57,17 @@ honeybee_info_ui <- function(id) {
 
 
 #' @export
-honeybee_info_server <- function(id) {
+honeybee_info_server <- function(id, main_session) {
   moduleServer(id, function(input, output, session) {
-    
+    observeEvent(
+      input$start,
+      {
+        nav_select(
+          "tab",
+          selected = "Beekeeper",
+          session = main_session
+        )
+      }
+    )
   })
 }
