@@ -1,5 +1,6 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon],
+  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent],
+  bslib[nav_select],
 )
 
 #' @export
@@ -13,9 +14,9 @@ honeybee_info_ui <- function(id) {
       class = "col-sm-12 col-lg-6",
       style = "height: 100vh;",
       tags$div(
-        class = "col-sm-10 offset-sm-1 text-center mt-5",
+        class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
-          class = "greeting display-4 font-weight-bold mt-10",
+          class = "greeting display-4 font-weight-bold",
           "HONEYBEE pDT"
         ),
         tags$p(
@@ -26,10 +27,16 @@ honeybee_info_ui <- function(id) {
         tags$p("The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,", tags$a("https://doi.org/10.1594/PANGAEA.910837", href = "https://doi.org/10.1594/PANGAEA.910837"), ")."),
         tags$p("Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (", tags$a("https://cran.r-project.org/web/packages/rdwd/index.html", href = "https://cran.r-project.org/web/packages/rdwd/index.html"), ")."),
         tags$p("Source code and scripts of the pDT can be found at ", tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
-        tags$h4("Contributors"),
-        tags$p("Jürgen Groeneveld and Volker Grimm, Department of Ecological Modelling ,Helmholtz Centre for Environmental Research - UFZ, Permoserstr. 15, 7 04318 Leipzig, Germany"),
-        tags$p("Tomas Martinovic and Ondrej Salamon, IT4Innovations, VSB – Technical University of Ostrava, 17. listopadu 2172/15, 708 00 Ostrava-Poruba, Czech Republic"),        
-        tags$p("Tuomas Rossi and Kata Sara-aho, CSC – IT Center for Science Ltd., P.O. Box 405, 02101 Espoo, Finland.")
+        tags$div(
+          class = "mt-5",
+            actionButton(
+              ns("start"),
+              label = "Start prototyping",
+              width = "100%",
+              class = "btn-secondary",
+              style = "max-width: 200px"
+          )
+        )
       )
     ),
     column(
@@ -39,7 +46,7 @@ honeybee_info_ui <- function(id) {
       tags$div(
         tags$img(
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-          style = "width: 50vw; height: 100vh; object-fit: cover;"
+          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
         )
       )
     )
@@ -50,8 +57,17 @@ honeybee_info_ui <- function(id) {
 
 
 #' @export
-honeybee_info_server <- function(id) {
+honeybee_info_server <- function(id, main_session) {
   moduleServer(id, function(input, output, session) {
-    
+    observeEvent(
+      input$start,
+      {
+        nav_select(
+          "tab",
+          selected = "Beekeeper",
+          session = main_session
+        )
+      }
+    )
   })
 }

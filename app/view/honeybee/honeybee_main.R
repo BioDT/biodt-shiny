@@ -5,8 +5,9 @@ box::use(
 )
 
 box::use(
-  app/view/honeybee/honeybee_info[honeybee_info_ui],
+  app/view/honeybee/honeybee_info[honeybee_info_ui, honeybee_info_server],
   app/view/honeybee/honeybee_beekeeper[honeybee_beekeeper_ui, honeybee_beekeeper_server],
+  app/view/honeybee/beekeeper_contributors[bee_contributors_ui],
 )
 #' @export
 honeybee_ui <- function(id,
@@ -29,7 +30,15 @@ honeybee_ui <- function(id,
         ns("honeybee_beekeeper"),
         theme
       )
-    )
+    ),
+    # Beekeper Contributors ----
+    nav_panel(
+      title = "Contributors",
+      icon = icon("forumbee"),
+      bee_contributors_ui(
+        ns("beekeeper_contributors")
+        )
+    ),
   )
   # )
 }
@@ -52,6 +61,9 @@ honeybee_server <- function(id,
         }
       }
     )
+
+    honeybee_info_server("honeybee_info",
+    session)
 
     honeybee_beekeeper_server(
       "honeybee_beekeeper",
