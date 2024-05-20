@@ -6,14 +6,16 @@ box::use(
 honeybee_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
-    class = "align-items-center justify-content-center",
+    class = "align-items-center justify-content-center m-0 p-0",
+    style ="overflow-x: hidden",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
+      style = "height: 100vh;",
       tags$div(
-        class = "col-sm-10 offset-sm-1 text-center",
+        class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(
-          class = "greeting display-4 font-weight-bold",
+          class = "greeting display-4 font-weight-bold mt-10",
           "HONEYBEE pDT"
         ),
         tags$p(
@@ -32,20 +34,24 @@ honeybee_info_ui <- function(id) {
     ),
     column(
       width = 6,
+      style = "height: 100vh;",
+      class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        class = "m-0 p-0 d-none d-lg-block",
         tags$img(
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-          style = "width: 1000px;"
+          style = "width: 50vw; height: 100vh; object-fit: cover;"
         )
       )
     )
   )
 }
 
+
+
+
 #' @export
 honeybee_info_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-
+    
   })
 }
