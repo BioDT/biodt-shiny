@@ -1,6 +1,6 @@
 box::use(
   terra[rast, spatSample, deepcopy, set.values, cells],
-  leaflet[leaflet, addTiles, addRasterImage, addRasterLegend, addLayersControl, layersControlOptions, addScaleBar],
+  leaflet[leaflet, addTiles, addRasterImage, addRasterLegend, addLayersControl, layersControlOptions, addScaleBar, addAwesomeMarkers, makeAwesomeIcon, setView],
   leaflet.extras[addDrawToolbar, drawMarkerOptions],
 )
 
@@ -13,6 +13,9 @@ read_honeybee_tif <- function(map_path) {
 honeybee_leaflet_map <- function(map_raster,
                                  lookup_table = NULL,
                                  add_control = TRUE) {
+  
+  icon.fa <- makeAwesomeIcon(icon = 'check', markerColor = 'cadetblue', library='fa', iconColor = '#fff')
+  
   scaled_map <- map_raster |>
     spatSample(2000000,
       "regular",
@@ -27,12 +30,12 @@ honeybee_leaflet_map <- function(map_raster,
   leaflet_map <-
     leaflet() |>
     addTiles() |>
-    addRasterImage(
-      scaled_map,
-      opacity = 0.5,
-      project = FALSE,
-      group = "All layers"
-    ) |>
+    # addRasterImage(
+    #   scaled_map,
+    #   opacity = 0.5,
+    #   project = FALSE,
+    #   group = "All layers"
+    # ) |>
     addRasterLegend(
       scaled_map,
       opacity = 0.5,
@@ -40,12 +43,12 @@ honeybee_leaflet_map <- function(map_raster,
       group = "Alllayers",
       className = "info legend Alllayers"
     ) |>
-    addRasterImage(
-      bee_map,
-      opacity = 0.9,
-      project = FALSE,
-      group = "Beehave layers"
-    ) |>
+    # addRasterImage(
+    #   bee_map,
+    #   opacity = 0.9,
+    #   project = FALSE,
+    #   group = "Beehave layers"
+    # ) |>
     addRasterLegend(
       bee_map,
       opacity = 0.9,
@@ -57,7 +60,14 @@ honeybee_leaflet_map <- function(map_raster,
       c("Beehave layers", "All layers"),
       position = "topright",
       options = layersControlOptions(collapsed = FALSE)
-    )
+    ) |>
+    addAwesomeMarkers(11.8787,
+                      51.3919,
+                      label = htmltools::HTML("<strong>Example</strong>"),
+                      icon = icon.fa) |>
+    setView(11.8787,
+            51.3919,
+            zoom = 5)
 
 
   if (add_control) {

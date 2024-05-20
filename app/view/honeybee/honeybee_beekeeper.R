@@ -100,7 +100,8 @@ honeybee_beekeeper_server <- function(id,
 
     # Map ----
     coordinates <- honeybee_map_server("beekeeper_map",
-      leaflet_map = leaflet_map
+      leaflet_map = leaflet_map,
+      experiment_list = experiment_list
     )
 
     # Parameters ----
