@@ -34,7 +34,7 @@ honeybee_ui <- function(id,
     # Beekeper Contributors ----
     nav_panel(
       title = "Contributors",
-      icon = icon("forumbee"),
+      icon = icon("sitemap"),
       bee_contributors_ui(
         ns("beekeeper_contributors")
         )

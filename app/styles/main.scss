@@ -19,6 +19,7 @@
 
 .index-info {
   background-image: url("../img/forest2.png");
+  background-color: #FFF;
   background-repeat: no-repeat;
   background-position: bottom;
   background-attachment: fixed;
@@ -27,7 +28,7 @@
 }
 
 .info-text {
-  color: #bc6c25;
+  color: #546145;
   background-color: #fff;
   background-color: rgba(256, 256, 256, 0.8);
   border-radius: 25px;
@@ -144,13 +145,14 @@
 
 .landing-pdt-wrap {
   background: #fff;
-  border-radius: 50px;
   position: relative;
   overflow: hidden;
   padding: 30px 50px;
   min-height: 200px;
   margin-bottom: 30px;
   min-width: 200px;
+  box-shadow: 5px 5px 5px #899180;
+  border-radius: 10px;
 
   .title {
     display: flex;
