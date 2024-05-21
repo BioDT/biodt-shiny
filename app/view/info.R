@@ -22,6 +22,7 @@ mod_info_ui <- function(id) {
         ),
         "Digital Twins"
       ),
+      # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
       tags$div(
         class = "info-text",
         tags$p(
@@ -231,10 +232,10 @@ mod_info_ui <- function(id) {
                     class = "views-element-container",
                     tags$ul(
                       tags$li(
-                        # tags$a(
-                        #   href = "#",
+                        tags$a(
+                        href = "https://app.biodt.eu/app/biodtshiny",
                         "Pollinators (Honeybee)"
-                        # )
+                         )
                       ),
                       tags$li(
                         # tags$a(
