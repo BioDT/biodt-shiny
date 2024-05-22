@@ -231,17 +231,17 @@ mod_info_ui <- function(id) {
                     class = "views-element-container",
                     tags$ul(
                       tags$li(
+                        tags$a(
+                          href = "?_state_id_=beekeeper",
+                          "Pollinators (Honeybee)"
+                        )
+                      ),
+                      # tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Pollinators (Honeybee)"
+                        # "Disease Outbreaks"
                         # )
-                      ),
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Disease Outbreaks"
-                        # )
-                      ),
+                      # ),
                     )
                   )
                 )
