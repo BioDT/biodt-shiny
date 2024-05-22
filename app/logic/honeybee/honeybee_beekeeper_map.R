@@ -61,10 +61,10 @@ honeybee_leaflet_map <- function(map_raster,
       position = "topright",
       options = layersControlOptions(collapsed = FALSE)
     ) |>
-    addAwesomeMarkers(11.8787,
-                      51.3919,
-                      label = htmltools::HTML("<strong>Example</strong>"),
-                      icon = icon.fa) |>
+    # addAwesomeMarkers(11.8787,
+    #                   51.3919,
+    #                   label = htmltools::HTML("<strong>Example</strong>"),
+    #                   icon = icon.fa) |>
     setView(11.8787,
             51.3919,
             zoom = 5)
