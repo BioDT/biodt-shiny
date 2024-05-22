@@ -72,10 +72,17 @@ mod_info_ui <- function(id) {
                     tags$ul(
                       tags$li(
                         tags$a(
-                        href = "#",
-                        "Pollinators (Honeybee)"
-                        ),
+                          href = "?_state_id_=beekeeper",
+                          "Pollinators (Honeybee)"
+                        )
                       ),
+                      # tags$li(
+                        # tags$a(
+                        #   href = "#",
+                        # "Disease Outbreaks"
+                        # )
+                      # ),
+
                     )
                   )
                 )
