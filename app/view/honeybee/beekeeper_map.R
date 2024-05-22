@@ -114,6 +114,14 @@ honeybee_map_server <- function(id,
       {
         # Add code to add awesomemarker to the map with the name of the list values in the label.
         new_name <- names(experiment_list)[length(experiment_list)]
+        print("new name:::")
+        print(new_name)
+
+        print("Printing experiment_list from beekeeper_map:::")
+        print(experiment_list)
+        print("experiment_list length:::")
+        print(length(experiment_list))
+        print("END Printing experiment_list from beekeeper_map:::")
       }
     )
     
