@@ -6,6 +6,7 @@ box::use(
   cicerone[use_cicerone],
   stringi[stri_rand_strings],
   htmltools[includeScript],
+  config,
 )
 
 box::use(
@@ -28,6 +29,46 @@ biodt_theme <- bs_theme(
   bg = "#fff",
   fg = "#414f2f",
   bootswatch = "bootstrap"
+)
+
+
+# MENU UI - Species interactions (themselves, human) - menu subitem ----
+honeybee_menu_ui <- c(
+  nav_item(
+    shiny$div(
+      class = "p-2",
+      shiny$div(
+        shiny$icon("bugs"),
+        shiny$strong("Species interactions with each other and with humans"),
+        style = "width: 450px"
+      ),
+    )
+  ),
+  nav_panel(
+    title = "Honeybee",
+    class = "p-0",
+    honeybee_ui(ns("honeybee_main"),
+      theme = biodt_theme
+    )
+  )
+)
+
+# MENU UI - Species response to environment - menu subitem ----
+grassland_menu_ui <- c(
+  nav_item(
+    shiny$tags$div(
+      class = "p-2",
+      shiny$icon("temperature-arrow-up"),
+      shiny$tags$strong("Species response to environmental change")
+    )
+  ),
+  nav_panel(
+    class = "p-0",
+    title = "Grassland Dynamics",
+    grassland_main_ui(
+      ns("grassland_main")
+    )
+  )
 )
 
 #' @export
@@ -83,39 +124,65 @@ ui <- function(id) {
         title = "Digital Twins",
         align = "left",
         icon = shiny$icon("people-group"),
-        ### Species response to environment - menu subitem ----
-        # nav_item(
-        #   shiny$tags$div(
-        #     class = "p-2",
-        #     shiny$icon("temperature-arrow-up"),
-        #     shiny$tags$strong("Species response to environmental change")
-        #   )
-        # ),
-        # nav_panel(
-        #   class = "p-0",
-        #   title = "Grassland Dynamics",
-        #   grassland_main_ui(
-        #     ns("grassland_main")
-        #   )
-        # ),
-        ### Species interactions (themselves, human) - menu subitem ----
-        nav_item(
-          shiny$div(
-            class = "p-2",
-            shiny$div(
-              shiny$icon("bugs"),
-              shiny$strong("Species interactions with each other and with humans"),
-              style = "width: 450px"
+
+        if (Sys.getenv("R_CONFIG_ACTIVE") == "prod") {
+          shiny::tagList(
+            ## Honeybee - menu subitem ----
+            nav_item(
+              shiny$div(
+                class = "p-2",
+                shiny$div(
+                  shiny$icon("bugs"),
+                  shiny$strong("Species interactions with each other and with humans"),
+                  style = "width: 450px"
+                ),
+              )
             ),
+            nav_panel(
+              title = "Honeybee",
+              class = "p-0",
+              honeybee_ui(ns("honeybee_main"),
+                theme = biodt_theme
+              )
+            )
           )
-        ),
-        nav_panel(
-          title = "Honeybee",
-          class = "p-0",
-          honeybee_ui(ns("honeybee_main"),
-            theme = biodt_theme
+        } else if (Sys.getenv("R_CONFIG_ACTIVE") == "dev") {
+          shiny::tagList(
+            ## Grassland - menu subitem ----
+            nav_item(
+              shiny$tags$div(
+                class = "p-2",
+                shiny$icon("temperature-arrow-up"),
+                shiny$tags$strong("Species response to environmental change")
+              )
+            ),
+            nav_panel(
+              class = "p-0",
+              title = "Grassland Dynamics",
+              grassland_main_ui(
+                ns("grassland_main")
+              )
+            ),
+            ## Honeybee - menu subitem ----
+            nav_item(
+              shiny$div(
+                class = "p-2",
+                shiny$div(
+                  shiny$icon("bugs"),
+                  shiny$strong("Species interactions with each other and with humans"),
+                  style = "width: 450px"
+                ),
+              )
+            ),
+            nav_panel(
+              title = "Honeybee",
+              class = "p-0",
+              honeybee_ui(ns("honeybee_main"),
+                theme = biodt_theme
+              )
+            )
           )
-        )
+        }
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
@@ -136,9 +203,11 @@ ui <- function(id) {
 #' @export
 server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
+    print("pre ns")
     ns <- session$ns
 
     base_path <- Sys.getenv("BASE_PATH")
+    print(base_path)
 
     session_dir <- file.path(
       paste0(base_path, "shared"),
@@ -152,13 +221,24 @@ server <- function(id) {
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
-    # Honeybee pDT ----
-    honeybee_server(
-      "honeybee_main",
-      session_dir
-    )
-    # Grassland pDT ----
-    # grassland_main_server("grassland_main")
+
+    if (Sys.getenv("R_CONFIG_ACTIVE") == "dev") {
+      # Honeybee pDT ----
+      honeybee_server(
+        "honeybee_main",
+        session_dir
+      )
+      # Grassland pDT ----
+      grassland_main_server(
+        "grassland_main",
+      )
+    } else if (Sys.getenv("R_CONFIG_ACTIVE") == "prod") {
+      # Honeybee pDT ----
+      honeybee_server(
+        "honeybee_main",
+        session_dir
+      )
+    }
 
     waiter_hide()
   })
