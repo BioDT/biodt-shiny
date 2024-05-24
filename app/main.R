@@ -35,7 +35,7 @@ biodt_theme <- bs_theme(
 #' @export
 ui <- function(id) {
   ns <- shiny::NS(id)
-  
+
   main_menu_ui_prod <- function() {
     nav_item(
       ### Species interactions - Honeybee menu subitem ----
@@ -136,6 +136,14 @@ ui <- function(id) {
       collapsible = TRUE,
       fluid = TRUE,
       ## Info - main menu item ----
+      nav_item(
+        shiny$div(
+          style = "width: 250px",
+          shiny$icon("dev"),
+          shiny$strong("Active dev environment:"),
+          shiny::tags$p(env_active),
+        ),
+      ),
       nav_panel(
         title = "Info",
         value = "info",
@@ -149,11 +157,18 @@ ui <- function(id) {
         align = "left",
         icon = shiny$icon("people-group"),
 
+
+
         if (env_active == "prod") {
+          print("env_active:::")
+          print(env_active)
           main_menu_ui_prod()
         } else {
+          print("env_active:::")
+          print(env_active)
           man_menu_ui_dev()
         }
+
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
