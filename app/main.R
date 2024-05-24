@@ -12,7 +12,6 @@ box::use(
 box::use(
   app/view/info[mod_info_ui],
   app/view/acknowledgements[mod_acknowledgements_ui],
-  app/view/tests[mod_tests_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
 )
@@ -94,8 +93,6 @@ ui <- function(id) {
   }
 
   env_active <- Sys.getenv("R_CONFIG_ACTIVE")
-  print("Sys.getenv(`R_CONFIG_ACTIVE`):::")
-  print(Sys.getenv("R_CONFIG_ACTIVE"))
 
   ns <- shiny$NS(id)
   shiny$bootstrapPage(
@@ -135,15 +132,17 @@ ui <- function(id) {
       # must be true
       collapsible = TRUE,
       fluid = TRUE,
+      if (env_active == "dev") {
+        nav_item(
+          shiny$div(
+            style = "width: 250px",
+            shiny$icon("dev"),
+            shiny$strong("Active dev environment:"),
+            shiny::tags$p(env_active),
+          ),
+        )
+      },
       ## Info - main menu item ----
-      nav_item(
-        shiny$div(
-          style = "width: 250px",
-          shiny$icon("dev"),
-          shiny$strong("Active dev environment:"),
-          shiny::tags$p(env_active),
-        ),
-      ),
       nav_panel(
         title = "Info",
         value = "info",
@@ -156,19 +155,47 @@ ui <- function(id) {
         title = "Digital Twins",
         align = "left",
         icon = shiny$icon("people-group"),
-
-
-
-        if (env_active == "prod") {
-          print("env_active:::")
-          print(env_active)
-          main_menu_ui_prod()
-        } else {
-          print("env_active:::")
-          print(env_active)
-          man_menu_ui_dev()
+        if (env_active == "dev") {
+          nav_item(
+            ## Species response to environment - menu subitem ----
+            shiny$tags$div(
+              class = "p-2",
+              shiny$icon("temperature-arrow-up"),
+              shiny$tags$strong("Species response to environmental change")
+            )
+          )
+        },
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = "Grassland Dynamics",
+            grassland_main_ui(
+              ns("grassland_main")
+            )
+          )
+        },
+        if (env_active == "prod" || env_active == "dev") {
+          ## Species interactions (themselves, human) - menu subitem ----
+          nav_item(
+            shiny$div(
+              class = "p-2",
+              shiny$div(
+                shiny$icon("bugs"),
+                shiny$strong("Species interactions with each other and with humans"),
+                style = "width: 450px"
+              ),
+            )
+          )
+        },
+        if (env_active == "prod" || env_active == "dev") {
+          nav_panel(
+            title = "Honeybee",
+            class = "p-0",
+            honeybee_ui(ns("honeybee_main"),
+              theme = biodt_theme
+            )
+          )
         }
-
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
@@ -179,13 +206,6 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),
-      nav_panel(
-        title = "Tests",
-        value = "tests",
-        icon = shiny$icon("microscope"),
-        class = "container-fluid index-info",
-        mod_tests_ui("tests")
-      )
       #,
       # nav_item(
       #   shiny$bookmarkButton()
