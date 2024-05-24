@@ -34,6 +34,69 @@ biodt_theme <- bs_theme(
 
 #' @export
 ui <- function(id) {
+  ns <- shiny::NS(id)
+  
+  main_menu_ui_prod <- function() {
+    nav_item(
+      ### Species interactions - Honeybee menu subitem ----
+      shiny$div(
+        class = "p-2",
+        shiny$div(
+          shiny$icon("bugs"),
+          shiny$strong("Species interactions with each other and with humans"),
+          style = "width: 450px"
+        ),
+      )
+    )
+    nav_panel(
+      title = "Honeybee",
+      class = "p-0",
+      honeybee_ui(ns("honeybee_main"),
+        theme = biodt_theme
+      )
+    )
+  }
+
+  man_menu_ui_dev <- function() {
+    nav_item(
+      ## Species response to environment - menu subitem ----
+      shiny$tags$div(
+        class = "p-2",
+        shiny$icon("temperature-arrow-up"),
+        shiny$tags$strong("Species response to environmental change")
+      )
+    )
+    nav_panel(
+      class = "p-0",
+      title = "Grassland Dynamics",
+      grassland_main_ui(
+        ns("grassland_main")
+      )
+    )
+    ## Species interactions (themselves, human) - menu subitem ----
+    nav_item(
+      shiny$div(
+        class = "p-2",
+        shiny$div(
+          shiny$icon("bugs"),
+          shiny$strong("Species interactions with each other and with humans"),
+          style = "width: 450px"
+        ),
+      )
+    )
+    nav_panel(
+      title = "Honeybee",
+      class = "p-0",
+      honeybee_ui(ns("honeybee_main"),
+        theme = biodt_theme
+      )
+    )
+  }
+
+  env_active <- Sys.getenv("R_CONFIG_ACTIVE")
+  print("Sys.getenv(`R_CONFIG_ACTIVE`):::")
+  print(Sys.getenv("R_CONFIG_ACTIVE"))
+
   ns <- shiny$NS(id)
   shiny$bootstrapPage(
     theme = biodt_theme,
@@ -85,39 +148,12 @@ ui <- function(id) {
         title = "Digital Twins",
         align = "left",
         icon = shiny$icon("people-group"),
-        ### Species response to environment - menu subitem ----
-        # nav_item(
-        #   shiny$tags$div(
-        #     class = "p-2",
-        #     shiny$icon("temperature-arrow-up"),
-        #     shiny$tags$strong("Species response to environmental change")
-        #   )
-        # ),
-        # nav_panel(
-        #   class = "p-0",
-        #   title = "Grassland Dynamics",
-        #   grassland_main_ui(
-        #     ns("grassland_main")
-        #   )
-        # ),
-        ### Species interactions (themselves, human) - menu subitem ----
-        nav_item(
-          shiny$div(
-            class = "p-2",
-            shiny$div(
-              shiny$icon("bugs"),
-              shiny$strong("Species interactions with each other and with humans"),
-              style = "width: 450px"
-            ),
-          )
-        ),
-        nav_panel(
-          title = "Honeybee",
-          class = "p-0",
-          honeybee_ui(ns("honeybee_main"),
-            theme = biodt_theme
-          )
-        )
+
+        if (env_active == "prod") {
+          main_menu_ui_prod()
+        } else {
+          man_menu_ui_dev()
+        }
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
