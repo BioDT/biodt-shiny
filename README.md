@@ -52,7 +52,7 @@ We utilize a [common way for setting up your enviroment](https://appsilon.github
 In the working directory you need to create your own `.Renviron` file which is git ignored. You can easily do it by issuing the following command in your Bash (Zsh, etc) terminal
 
 ```
-cp .Renviron.example Renviron
+cp .Renviron.example .Renviron
 ```
 
 **Config env variable**
@@ -104,23 +104,19 @@ shiny::runApp()
 
 ## Modules
 
-There are modules for each pDT:
+The app is modularized and each pDT have files in its own subfolder. UI files are located mainly in the `app/view` subfolder, R function mainly in the `app/logic` subfolder. UI files for each pDT is located:
 
- * BEEHAVE: `R/mod_BEEHAVE.R`
- * Cultural Ecosystem Services: `R/mod_cultural_ecosystem_services.R`
- * Crop wild relatives: `R/mod_cwr.R`
- * GRASSLAND: `R/mod_grassland`
- * Invasive alien species: `R/mod_ias.R`
+ * BEEHAVE: `app/view/honeybee`
+ * Cultural Ecosystem Services: `TBD`
+ * Crop wild relatives: `TBD`
+ * GRASSLAND: `app/view/grassland`
+ * Invasive alien species: `TBD`
 
 ## Technicals
 
-🤖 This shiny app uses {golem} (https://github.com/ThinkR-open/golem & https://engineering-shiny.org/golem.html). The {golem} package is a framework for building production-grade shiny applications.
-
-🚀 The shiny app is split into shiny modules for each pDT. This gives each pDT the freedom to design a user interface that meets their specific needs. Each module is made up of an `.R` file in `/R/` and needs to be specified as a module in `R/app_server.R`.
-
 🔒 Authentication and access to running models on LUMI/KAROLINA is enabled using R package {r4lexis} https://github.com/It4innovations/r4lexis the package is only available on GitHub.
 
-🎨 We use {bslib} in order to use bootstrap 4 elements (https://rstudio.github.io/bslib/). The theme is a custom BioDT theme. The css, favicons, backgrounds etc. are located in `inst/app/www`.
+🎨 We use {bslib} in order to use Bootstrap 4/5 elements (https://rstudio.github.io/bslib/). The theme is a custom BioDT theme. The css, favicons, backgrounds etc. are located in `inst/app/www`.
 
 ✅ Tests are developed using the {testthat} package. Tests are written as `.R` files in `tests/testthat/`.
 
