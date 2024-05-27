@@ -128,4 +128,4 @@ There are modules for each pDT:
 
 ### Development
 
-Please feel free to create a branch and pull requests for making significant changes to the Shiny app. If you add new packages to the app requirements then update the snapshot with `renv::snapshot()`.
+Please feel free to create a branch and pull requests for making significant changes to the Shiny app.
