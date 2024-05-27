@@ -73,7 +73,7 @@ R_CONFIG_ACTIVE="prod"
 (...)
 ```
 
-Other environment variables, which aren't secrets (ie. git ignored), can be seen in the file `config.yml`. At the time (May 2024) the file contains dummy variables, serving as an example only.
+Other environment variables, which aren't secrets (ie. git ignored) and are publicily avaible, can be seen and/or edit in the file `config.yml`. At the time (May 2024) the file contains dummy variables, serving as an example only.
 
 Note! **You might probably want to restart (re-open) your R terminal at this moment and restart your R session**.
 
