@@ -102,6 +102,10 @@ Now you should be ready to launch the app, which you can do using this command i
 shiny::runApp()
 ```
 
+### Development
+
+Please feel free to create a branch and pull requests for making significant changes to the Shiny app.
+
 ## Modules
 
 The app is modularized and each pDT have files in its own subfolder. UI files are located mainly in the `app/view` subfolder, R function mainly in the `app/logic` subfolder. UI files for each pDT is located:
@@ -121,7 +125,3 @@ The app is modularized and each pDT have files in its own subfolder. UI files ar
 ✅ Tests are developed using the {testthat} package. Tests are written as `.R` files in `tests/testthat/`.
 
 🌍 Maps are rendered using {leaflet}: https://rstudio.github.io/leaflet/.
-
-### Development
-
-Please feel free to create a branch and pull requests for making significant changes to the Shiny app.
