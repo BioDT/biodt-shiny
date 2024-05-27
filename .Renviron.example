@@ -1,0 +1,9 @@
+# set environment variable `R_CONFIG_ACTIVE` to "dev" if you are further developing the app, ie. the development environment
+R_CONFIG_ACTIVE="dev"
+
+# set `R_CONFIG_ACTIVE` to "prod" for production use, ie. the production environment
+# R_CONFIG_ACTIVE="prod"
+
+# some dummy variables which may be utilized in the future - to be removed if not used
+## API key for accessing some third party API
+# API_KEY="some_api_key_^$@-18%&"

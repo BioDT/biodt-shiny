@@ -6,6 +6,7 @@ box::use(
   cicerone[use_cicerone],
   stringi[stri_rand_strings],
   htmltools[includeScript],
+  config,
 )
 
 box::use(
@@ -29,6 +30,8 @@ biodt_theme <- bs_theme(
   fg = "#414f2f",
   bootswatch = "bootstrap"
 )
+
+env_active <- Sys.getenv("R_CONFIG_ACTIVE")
 
 #' @export
 ui <- function(id) {
@@ -70,6 +73,13 @@ ui <- function(id) {
       # must be true
       collapsible = TRUE,
       fluid = TRUE,
+      if (env_active == "dev") {
+        nav_item(
+          shiny$div(
+            shiny$icon("dev"),
+          ),
+        )
+      },
       ## Info - main menu item ----
       nav_panel(
         title = "Info",
@@ -83,22 +93,26 @@ ui <- function(id) {
         title = "Digital Twins",
         align = "left",
         icon = shiny$icon("people-group"),
-        ### Species response to environment - menu subitem ----
-        # nav_item(
-        #   shiny$tags$div(
-        #     class = "p-2",
-        #     shiny$icon("temperature-arrow-up"),
-        #     shiny$tags$strong("Species response to environmental change")
-        #   )
-        # ),
-        # nav_panel(
-        #   class = "p-0",
-        #   title = "Grassland Dynamics",
-        #   grassland_main_ui(
-        #     ns("grassland_main")
-        #   )
-        # ),
-        ### Species interactions (themselves, human) - menu subitem ----
+        if (env_active == "dev") {
+          nav_item(
+            ## Species response to environment - menu subitem ----
+            shiny$tags$div(
+              class = "p-2",
+              shiny$icon("temperature-arrow-up"),
+              shiny$tags$strong("Species response to environmental change")
+            )
+          )
+        },
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = "Grassland Dynamics",
+            grassland_main_ui(
+              ns("grassland_main")
+            )
+          )
+        }, 
+        ## Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
             class = "p-2",
@@ -125,7 +139,8 @@ ui <- function(id) {
         icon = shiny$icon("users-gear"),
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
-      )#,
+      ),
+      #,
       # nav_item(
       #   shiny$bookmarkButton()
       # )
