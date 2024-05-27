@@ -51,10 +51,10 @@ mod_info_ui <- function(id) {
             ),
             tags$div(
               class = "description",
-              tags$div(
-                class = "row",
-                tags$div(
-                  class = "col-md-6",
+              # tags$div(
+              #   class = "row",
+                # tags$div(
+                #   class = "col-md-6",
                   tags$div(
                     class = "img-box",
                     tags$img(
@@ -63,10 +63,10 @@ mod_info_ui <- function(id) {
                       height = 140,
                       loading = "lazy"
                     )
-                  )
+                  # )
                 ),
-                tags$div(
-                  class = "col-md-6",
+                # tags$div(
+                #   class = "col-md-6",
                   tags$div(
                     class = "views-element-container",
                     tags$ul(
@@ -83,10 +83,10 @@ mod_info_ui <- function(id) {
                         # )
                       # ),
 
-                    )
+                    # )
                   )
                 )
-              )
+              # )
             )
           )
         ),
