@@ -6,8 +6,4 @@ R_CONFIG_ACTIVE="dev"
 
 # some dummy variables which may be utilized in the future - to be removed if not used
 ## API key for accessing some third party API
-API_KEY="some_api_key_^$@-18%&"
-## Rhino: default file for saving log file
-RHINO_LOG_FILE=NA
-## Rhino: default level of loging 
-RHINO_LOG_LEVEL="INFO"
+# API_KEY="some_api_key_^$@-18%&"
