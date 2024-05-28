@@ -19,6 +19,7 @@
 
 .index-info {
   background-image: url("../img/forest2.png");
+  background-color: #FFF;
   background-repeat: no-repeat;
   background-position: bottom;
   background-attachment: fixed;
@@ -27,7 +28,7 @@
 }
 
 .info-text {
-  color: #bc6c25;
+  color: #546145;
   background-color: #fff;
   background-color: rgba(256, 256, 256, 0.8);
   border-radius: 25px;
@@ -144,13 +145,14 @@
 
 .landing-pdt-wrap {
   background: #fff;
-  border-radius: 50px;
   position: relative;
   overflow: hidden;
-  padding: 30px 50px;
+  padding: 15px 20px;
   min-height: 200px;
   margin-bottom: 30px;
   min-width: 200px;
+  box-shadow: 2px 2px 5px #899180;
+  border-radius: 10px;
 
   .title {
     display: flex;
@@ -165,36 +167,38 @@
 
   .description {
     height: 100%;
+    align-items: left;
+   // > .card {
+    //  height: 100%;
+    //align-items: center;
 
-    > .row {
-      height: 100%;
-      align-items: center;
-
-      ul {
-        //list-style-image: url("../img/title_tail_update.svg");
-      
-        li {
-          font-weight: 600;
-          margin-bottom: 20px;
-          font-size: 1rem;
-          color: #bc6c25;
-          display: inline-block;
-          padding-left: 50px;
-          background: url("../img/title_tail.svg") no-repeat left top;
-          background-size: 40px;
-          list-style: none;
-          }
+    ul {
+      //list-style-image: url("../img/title_tail_update.svg");
+      padding-top: 1rem;
+      padding-left: 0.5rem;
+      li {
+        font-weight: 600;
+        margin-bottom: 20px;
+        font-size: 1rem;
+        color: #bc6c25;
+        display: inline-block;
+        padding-left: 50px;
+        background: url("../img/title_tail.svg") no-repeat left top;
+        background-size: 40px;
+        list-style: none;
+        }
           
-      }
+    //}
 
-      .views-element-container ul {
-        margin-top: 10px;
-      }
+    //  .views-element-container ul {
+    //    margin-top: 10px;
+    //  }
     }
   }
 
   .img-box {
     text-align: center;
+    align-items: center;
 
     img {
       border-radius: 50%;

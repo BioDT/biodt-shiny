@@ -1,16 +1,16 @@
 box::use(
   shiny[NS, fillPage, div, p, moduleServer, tags, h1, fluidRow],
-  bslib[card, card_header, card_body],
+  bslib[card, card_header, card_body, bs_theme],
 )
 
 box::use(
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
 )
 
+
 #' @export
 mod_info_ui <- function(id) {
   ns <- NS(id)
-
   fluidRow(
     class = "index-info",
     tags$div(
@@ -41,169 +41,9 @@ mod_info_ui <- function(id) {
             Destination Earth."
         ),
       ),
-      tags$div(
-        class = "row mt-5",
         tags$div(
           class = "col-md-6",
-          tags$div(
-            class = "landing-pdt-wrap",
-            tags$div(
-              class = "title",
-              tags$h3("Species response to environmental change")
-            ),
-            tags$div(
-              class = "description",
-              tags$div(
-                class = "row",
-                tags$div(
-                  class = "col-md-6",
-                  tags$div(
-                    class = "img-box",
-                    tags$img(
-                      src = "static/img/usecase1.png",
-                      width = 140,
-                      height = 140,
-                      loading = "lazy"
-                    ),
-                  )
-                ),
-                tags$div(
-                  class = "col-md-6",
-                  tags$div(
-                    class = "views-element-container",
-                    tags$ul(
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Grassland Biodiversity Dynamics"
-                        # ),
-                      ),
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Forest/Bird Biodiversity Dynamics"
-                        # ),
-                      ),
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Real-time Bird Monitoring with Citizen Science Data"
-                        # ),
-                      ),
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Cultural Ecosystem Services"
-                        # ),
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
-        tags$div(
-          class = "col-md-6",
-          tags$div(
-            class = "landing-pdt-wrap",
-            tags$div(
-              class = "title",
-              tags$h3("Genetically detected biodiversity")
-            ),
-            tags$div(
-              class = "description",
-              tags$div(
-                class = "row",
-                tags$div(
-                  class = "col-md-6",
-                  tags$div(
-                    class = "img-box",
-                    tags$img(
-                      src = "static/img/usecase2.png",
-                      width = 140,
-                      height = 140,
-                      loading = "lazy"
-                    )
-                  )
-                ),
-                tags$div(
-                  class = "col-md-6",
-                  tags$div(
-                    class = "views-element-container",
-                    tags$ul(
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Crop Wild Relatives and Genetic Resources for Food Security"
-                        # )
-                      ),
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Genetically Detected Biodiversity in Cryptic Habitats"
-                        # )
-                      ),
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "DNA Detected Biodiversity, Poorly Known Habitats"
-                        # )
-                      ),
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
-      ),
-      tags$div(
-        class = "row",
-        tags$div(
-          class = "col-md-6",
-          tags$div(
-            class = "landing-pdt-wrap",
-            tags$div(
-              class = "title",
-              tags$h3("Dynamics and threats from and for species of policy concern")
-            ),
-            tags$div(
-              class = "description",
-              tags$div(
-                class = "row",
-                tags$div(
-                  class = "col-md-6",
-                  tags$div(
-                    class = "img-box",
-                    tags$img(
-                      src = "static/img/usecase3.png",
-                      width = 140,
-                      height = 140,
-                      loading = "lazy"
-                    ),
-                  )
-                ),
-                tags$div(
-                  class = "col-lg-6",
-                  tags$div(
-                    class = "views-element-container",
-                    tags$ul(
-                      tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        "Invasive Species"
-                        # ),
-                      ),
-                    )
-                  )
-                )
-              )
-            )
-          )
-        ),
-        tags$div(
-          class = "col-md-6",
+          style = "margin-right: auto; margin-left: auto; margin-top: 50px;",
           tags$div(
             class = "landing-pdt-wrap",
             tags$div(
@@ -212,10 +52,10 @@ mod_info_ui <- function(id) {
             ),
             tags$div(
               class = "description",
-              tags$div(
-                class = "row",
-                tags$div(
-                  class = "col-md-6",
+              # tags$div(
+              #   class = "row",
+                # tags$div(
+                #   class = "col-md-6",
                   tags$div(
                     class = "img-box",
                     tags$img(
@@ -224,35 +64,35 @@ mod_info_ui <- function(id) {
                       height = 140,
                       loading = "lazy"
                     )
-                  )
+                  # )
                 ),
-                tags$div(
-                  class = "col-md-6",
+                # tags$div(
+                #   class = "col-md-6",
                   tags$div(
                     class = "views-element-container",
                     tags$ul(
                       tags$li(
                         tags$a(
-                        href = "https://app.biodt.eu/app/biodtshiny",
-                        "Pollinators (Honeybee)"
-                         )
+                          href = "?_state_id_=beekeeper",
+                          "Pollinators (Honeybee)"
+                        )
                       ),
-                      tags$li(
+                      # tags$li(
                         # tags$a(
                         #   href = "#",
-                        "Disease Outbreaks"
+                        # "Disease Outbreaks"
                         # )
-                      ),
-                    )
+                      # ),
+
+                    # )
                   )
                 )
-              )
+              # )
             )
           )
         ),
       ),
     )
-  )
 }
 
 #' @export
@@ -261,3 +101,4 @@ mod_info_server <- function(id, r) {
     ns <- session$ns
   })
 }
+
