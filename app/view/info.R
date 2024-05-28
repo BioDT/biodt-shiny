@@ -41,58 +41,172 @@ mod_info_ui <- function(id) {
             Destination Earth."
         ),
       ),
+      tags$div(
+        class = "row",
+        style = "margin-top: 50px;",
         tags$div(
-          class = "col-md-6",
-          style = "margin-right: auto; margin-left: auto; margin-top: 50px;",
+          class = "landing-pdt-wrap col-sm-6",
           tags$div(
-            class = "landing-pdt-wrap",
+            class = "title",
+            tags$h3("Species response to environmental change")
+          ),
+          tags$div(
+            class = "description",
             tags$div(
-              class = "title",
-              tags$h3("Species interactions with each other and with humans")
+              class = "img-box",
+              tags$img(
+                src = "static/img/usecase1.png",
+                width = 140,
+                height = 140,
+                loading = "lazy"
+              ),
             ),
             tags$div(
-              class = "description",
-              # tags$div(
-              #   class = "row",
-                # tags$div(
-                #   class = "col-md-6",
-                  tags$div(
-                    class = "img-box",
-                    tags$img(
-                      src = "static/img/usecase4.png",
-                      width = 140,
-                      height = 140,
-                      loading = "lazy"
-                    )
-                  # )
+              class = "views-element-container",
+              tags$ul(
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Grassland Biodiversity Dynamics"
+                  # ),
                 ),
-                # tags$div(
-                #   class = "col-md-6",
-                  tags$div(
-                    class = "views-element-container",
-                    tags$ul(
-                      tags$li(
-                        tags$a(
-                          href = "?_state_id_=beekeeper",
-                          "Pollinators (Honeybee)"
-                        )
-                      ),
-                      # tags$li(
-                        # tags$a(
-                        #   href = "#",
-                        # "Disease Outbreaks"
-                        # )
-                      # ),
-
-                    # )
-                  )
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Forest/Bird Biodiversity Dynamics"
+                  # ),
+                ),
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Real-time Bird Monitoring with Citizen Science Data"
+                  # ),
+                ),
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Cultural Ecosystem Services"
+                  # ),
                 )
-              # )
+              )
             )
           )
         ),
-      ),
+
+        tags$div(
+          class = "landing-pdt-wrap col-sm-6",
+          tags$div(
+            class = "title",
+            tags$h3("Genetically detected biodiversity")
+          ),
+          tags$div(
+            class = "description",
+            tags$div(
+              class = "img-box",
+              tags$img(
+                src = "static/img/usecase2.png",
+                width = 140,
+                height = 140,
+                loading = "lazy"
+              )
+            ),
+            tags$div(
+              class = "views-element-container",
+              tags$ul(
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Crop Wild Relatives and Genetic Resources for Food Security"
+                  # )
+                ),
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Genetically Detected Biodiversity in Cryptic Habitats"
+                  # )
+                ),
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "DNA Detected Biodiversity, Poorly Known Habitats"
+                  # )
+                ),
+              )
+            )
+          )
+        ),
+
+        tags$div(
+          class = "landing-pdt-wrap col-sm-6",
+          tags$div(
+            class = "title",
+            tags$h3("Dynamics and threats from and for species of policy concern")
+          ),
+          tags$div(
+            class = "description",
+            tags$div(
+              class = "img-box",
+              tags$img(
+                src = "static/img/usecase3.png",
+                width = 140,
+                height = 140,
+                loading = "lazy"
+              ),
+            ),
+            tags$div(
+              class = "views-element-container",
+              tags$ul(
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Invasive Species"
+                  # ),
+                ),
+              )
+            )
+          )
+        ),
+
+        tags$div(
+          class = "landing-pdt-wrap col-sm-6",
+          tags$div(
+            class = "title",
+            tags$h3("Species interactions with each other and with humans")
+          ),
+          tags$div(
+            class = "description",
+            tags$div(
+              class = "img-box",
+              tags$img(
+                src = "static/img/usecase4.png",
+                width = 140,
+                height = 140,
+                loading = "lazy"
+              )
+            ),
+            tags$div(
+              class = "views-element-container",
+              tags$ul(
+                tags$li(
+                  tags$a(
+                    href = "?_state_id_=beekeeper",
+                    "Pollinators (Honeybee)"
+                  )
+                ),
+                tags$li(
+                  # tags$a(
+                  #   href = "#",
+                  "Disease Outbreaks"
+                  # )
+                )
+              )
+            )
+          )
+        )
+
+      )
     )
+  )
 }
 
 #' @export
