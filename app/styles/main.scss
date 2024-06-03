@@ -147,10 +147,9 @@
   background: #fff;
   overflow: hidden;
   padding-top: 15px;
-  min-height: 200px;
-  min-width: 200px;
   box-shadow: 2px 2px 5px #899180;
   border-radius: 10px;
+  max-width: 35em;
 
   .title {
     display: flex;
@@ -170,6 +169,7 @@
     ul {
       padding-top: 1rem;
       padding-left: 0.5rem;
+      list-style: none inside;
       li {
         font-weight: 600;
         margin-bottom: 20px;

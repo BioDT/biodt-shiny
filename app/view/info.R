@@ -16,6 +16,7 @@ mod_info_ui <- function(id) {
     tags$div(
       class = "col mx-auto col-lg-8",
       tags$h1(
+        class = "justify-content-center",
         tags$span(
           class = "text-primary",
           "Prototype"
@@ -24,7 +25,7 @@ mod_info_ui <- function(id) {
       ),
       # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
       tags$div(
-        class = "info-text",
+        class = "info-text justify-content-center",
         tags$p(
           "The Biodiversity Digital Twin prototype will provide advanced models for simulation
             and prediction capabilities, through practical use cases addressing critical issues
@@ -65,24 +66,28 @@ mod_info_ui <- function(id) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Grassland Biodiversity Dynamics"
                   # ),
                 ),
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Forest/Bird Biodiversity Dynamics"
                   # ),
                 ),
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Real-time Bird Monitoring with Citizen Science Data"
                   # ),
                 ),
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Cultural Ecosystem Services"
@@ -114,18 +119,21 @@ mod_info_ui <- function(id) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Crop Wild Relatives and Genetic Resources for Food Security"
                   # )
                 ),
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Genetically Detected Biodiversity in Cryptic Habitats"
                   # )
                 ),
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "DNA Detected Biodiversity, Poorly Known Habitats"
@@ -157,6 +165,7 @@ mod_info_ui <- function(id) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Invasive Species"
@@ -189,11 +198,13 @@ mod_info_ui <- function(id) {
               tags$ul(
                 tags$li(
                   tags$a(
+                    class = "w-100",
                     href = "?_state_id_=beekeeper",
                     "Pollinators (Honeybee)"
                   )
                 ),
                 tags$li(
+                  class = "w-100",
                   # tags$a(
                   #   href = "#",
                   "Disease Outbreaks"
