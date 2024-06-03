@@ -87,7 +87,7 @@ Then download the data from the
 Each pDT's shiny module has it's own folder for local data within this which you can see specififed in this file: https://github.com/BioDT/biodt-shiny/blob/main/dev/run_dev.R therefore you need to create a folder within the `local_data` folder. The folder names are:
 
  - Crop wild relatives: `app/data/cwr`
- - BEEHAVE: `app/data/pollinators`
+ - BEEHAVE: `app/data/honeybee`
  - Cultural ecosystem services: `app/data/ces` 
 
 ### 5. Launch the app
