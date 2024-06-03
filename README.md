@@ -38,7 +38,7 @@ install.packages("renv")
 Then install all the dependencies by calling `renv::restore()` command. All the dependencies are stored in the `renv.lock` file.
 
 ```R
-install.packages("rhino")
+renv::restore()
 ```
 
 ### 3. Setup local development, or production, environment
