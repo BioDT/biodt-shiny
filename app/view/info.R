@@ -42,10 +42,10 @@ mod_info_ui <- function(id) {
         ),
       ),
       tags$div(
-        class = "row",
-        style = "margin-top: 50px;",
+        class = "row gap-3 justify-content-center",
+        style = "margin-top: 3em;",
         tags$div(
-          class = "landing-pdt-wrap col-sm-6",
+          class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
             tags$h3("Species response to environmental change")
@@ -94,7 +94,7 @@ mod_info_ui <- function(id) {
         ),
 
         tags$div(
-          class = "landing-pdt-wrap col-sm-6",
+          class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
             tags$h3("Genetically detected biodiversity")
@@ -137,7 +137,7 @@ mod_info_ui <- function(id) {
         ),
 
         tags$div(
-          class = "landing-pdt-wrap col-sm-6",
+          class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
             tags$h3("Dynamics and threats from and for species of policy concern")
@@ -168,7 +168,7 @@ mod_info_ui <- function(id) {
         ),
 
         tags$div(
-          class = "landing-pdt-wrap col-sm-6",
+          class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
             tags$h3("Species interactions with each other and with humans")

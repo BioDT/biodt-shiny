@@ -145,11 +145,9 @@
 
 .landing-pdt-wrap {
   background: #fff;
-  // position: relative;
-  // overflow: hidden;
+  overflow: hidden;
   padding-top: 15px;
   min-height: 200px;
-  margin-bottom: 30px;
   min-width: 200px;
   box-shadow: 2px 2px 5px #899180;
   border-radius: 10px;
@@ -168,12 +166,8 @@
   .description {
     height: 100%;
     align-items: left;
-   // > .card {
-    //  height: 100%;
-    //align-items: center;
 
     ul {
-      //list-style-image: url("../img/title_tail_update.svg");
       padding-top: 1rem;
       padding-left: 0.5rem;
       li {
@@ -186,13 +180,7 @@
         background: url("../img/title_tail.svg") no-repeat left top;
         background-size: 40px;
         list-style: none;
-        }
-          
-    //}
-
-    //  .views-element-container ul {
-    //    margin-top: 10px;
-    //  }
+      }
     }
   }
 
