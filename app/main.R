@@ -14,6 +14,7 @@ box::use(
   app/view/acknowledgements[mod_acknowledgements_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
+  app/view/ces/ces_main[ces_ui, ces_server],
 )
 
 shiny$enableBookmarking("server")
@@ -112,6 +113,15 @@ ui <- function(id) {
             )
           )
         }, 
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = "Cultural Ecosystem Services",
+            ces_ui(
+              ns("ces_main")
+            )
+          )
+        },
         ## Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
