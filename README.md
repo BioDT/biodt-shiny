@@ -121,3 +121,35 @@ The app is modularized and each pDT have files in its own subfolder. UI files ar
 ✅ Tests are developed using the {testthat} package. Tests are written as `.R` files in `tests/testthat/`.
 
 🌍 Maps are rendered using {leaflet}: https://rstudio.github.io/leaflet/.
+
+### Loading screens with {waiter}
+
+If you have computations that take a long time then use the implemented waiter functionality. This will not make the app load faster but make it feel faster as it induces patience in your users and make the app feel slicker. To set this up in your module you can use `waiter_text()` function to prepare text message with custom HTML format.
+
+```r
+    msg <- 
+      waiter_text(message = tags$h3("Computing Beehave simulation...",
+        style = "color: #414f2f;"
+      ))
+```
+
+Then create a waiter object
+
+```r
+w <- Waiter$new(
+      html = msg[[1]],
+      color = "rgba(256,256,256,0.9)"
+    )
+``` 
+
+You can then use the following lines within your shiny code:
+
+ * `w$show()` to show a loading screen
+ * `w$update()` to update message in the middle of computation
+ * `w$hide()` to hide a loading screen
+
+See https://waiter.john-coene.com/ for more info
+
+### Tutorials with {cicerone}
+
+We use cicerone to create guided tours of your shiny module to help users understand how to use the app. See https://cicerone.john-coene.com/ for more info
