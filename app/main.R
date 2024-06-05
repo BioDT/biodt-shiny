@@ -60,15 +60,13 @@ ui <- function(id) {
       window_title = "BioDT",
       title = shiny$actionLink(
         inputId = ns("biodt_logo"),
-        label = shiny$div(shiny$a(
-          href = "?_state_id_=homepage",
           shiny$img(
             src = "static/logo.svg",
             height = "70px",
             style = "padding-right: 20px"
           ),
-      ))),
-      id = "navbar",
+      ),
+      id = ns("navbar"),
       theme = biodt_theme,
       bg = "#fff",
       fillable = TRUE,
@@ -179,7 +177,9 @@ server <- function(id) {
     # grassland_main_server("grassland_main")
 
     shiny$observeEvent(input$biodt_logo, {
-      nav_select("biodt_logo")
+      nav_select(id = "navbar",
+                 selected = "info",
+                 session = session)
     })
 
     waiter_hide()
