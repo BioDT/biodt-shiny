@@ -1,6 +1,6 @@
 box::use(
   shiny,
-  bslib[bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel],
+  bslib[nav_select, bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel],
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
@@ -58,14 +58,16 @@ ui <- function(id) {
     # Main navbar----
     page_navbar(
       window_title = "BioDT",
-      title = shiny$div(shiny$a(
-        href = "?_state_id_=homepage",
-        shiny$img(
-          src = "static/logo.svg",
-          height = "70px",
-          style = "padding-right: 20px"
-        ),
-      )),
+      title = shiny$actionLink(
+        inputId = ns("biodt_logo"),
+        label = shiny$div(shiny$a(
+          href = "?_state_id_=homepage",
+          shiny$img(
+            src = "static/logo.svg",
+            height = "70px",
+            style = "padding-right: 20px"
+          ),
+      ))),
       id = "navbar",
       theme = biodt_theme,
       bg = "#fff",
@@ -140,9 +142,11 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),
-      nav_item(
-        shiny$bookmarkButton()
-      )
+      if (env_active == "dev") {
+        nav_item(
+          shiny$bookmarkButton()
+        )
+      }
     )
   )
 }
@@ -173,6 +177,10 @@ server <- function(id) {
     )
     # Grassland pDT ----
     # grassland_main_server("grassland_main")
+
+    shiny$observeEvent(input$biodt_logo, {
+      nav_select("biodt_logo")
+    })
 
     waiter_hide()
   })
