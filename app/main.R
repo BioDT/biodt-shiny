@@ -59,7 +59,7 @@ ui <- function(id) {
     page_navbar(
       window_title = "BioDT",
       title = shiny$div(shiny$a(
-        href = "#",
+        href = "?_state_id_=homepage",
         shiny$img(
           src = "static/logo.svg",
           height = "70px",
@@ -140,10 +140,9 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),
-      #,
-      # nav_item(
-      #   shiny$bookmarkButton()
-      # )
+      nav_item(
+        shiny$bookmarkButton()
+      )
     )
   )
 }
