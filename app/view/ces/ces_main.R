@@ -4,7 +4,8 @@ box::use(
 )
 
 box::use(
-  app/view/ces/ces_info[ces_info_ui],
+  app/view/ces/ces_info[ces_info_ui,ces_info_server],
+  app/view/ces/ces_rp[ces_rp_ui,ces_rp_server],
 )
 
 #' @export
@@ -19,6 +20,13 @@ ces_ui <- function(id) {
       ces_info_ui(
         ns("ces_info")
       )
+    ),
+    nav_panel(
+      title = "Recreation potential",
+      icon = icon("forumbee"),
+      ces_rp_ui(
+        ns("ces_rp")
+      )
     )
   )
 }
@@ -27,7 +35,8 @@ ces_ui <- function(id) {
 ces_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
+    ces_rp_server("ces_rp")
 
-    ces_dynamics_server("ces_app")
   })
 }

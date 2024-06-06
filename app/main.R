@@ -185,6 +185,10 @@ server <- function(id) {
     )
     # Grassland pDT ----
     # grassland_main_server("grassland_main")
+    
+    ces_server(
+      "ces_main"
+    )
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(id = "navbar",
