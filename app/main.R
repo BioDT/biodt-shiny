@@ -14,6 +14,10 @@ box::use(
   app/view/acknowledgements[mod_acknowledgements_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
+  app/view/disease_outbreaks/disease_outbreaks_main[
+    disease_outbreaks_main_ui,
+    disease_outbreaks_main_server
+  ],
 )
 
 shiny$enableBookmarking("server")
@@ -129,6 +133,11 @@ ui <- function(id) {
           honeybee_ui(ns("honeybee_main"),
             theme = biodt_theme
           )
+        ),
+        nav_panel(
+          title = "Disease Outubreaks",
+          class = "p-0",
+          grassland_main_ui(ns("disease_outbreaks_main_ui"))
         )
       ),
       nav_spacer(),
