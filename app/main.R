@@ -7,6 +7,7 @@ box::use(
   stringi[stri_rand_strings],
   htmltools[includeScript],
   config,
+  shiny.i18n[Translator],
 )
 
 box::use(
@@ -36,6 +37,9 @@ biodt_theme <- bs_theme(
 )
 
 env_active <- Sys.getenv("R_CONFIG_ACTIVE")
+
+i18n <- Translator$new(translation_json_path = "app/translations/translations.json")
+i18n$set_translation_language("en")
 
 #' @export
 ui <- function(id) {
@@ -84,6 +88,17 @@ ui <- function(id) {
           ),
         )
       },
+      nav_item(
+        shiny$div(
+          style = "float: right;",
+          shiny$selectInput(
+            ns("selected_language"),
+            "Change language",
+            choices = i18n$get_languages(),
+            selected = i18n$get_key_translation()
+          )
+        )
+      ),
       ## Info - main menu item ----
       nav_panel(
         title = "Info",
