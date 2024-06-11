@@ -1275,6 +1275,25 @@
       ],
       "Hash": "54b26646816af9960a4c64d8ceec75d6"
     },
+    "shiny.i18n": {
+      "Package": "shiny.i18n",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "R6",
+        "glue",
+        "jsonlite",
+        "methods",
+        "rstudioapi",
+        "shiny",
+        "stringr",
+        "utils",
+        "yaml"
+      ],
+      "Hash": "fb1b47e69750065a4f3c8c4ef24e4891"
+    },
     "shinyjs": {
       "Package": "shinyjs",
       "Version": "2.1.0",
