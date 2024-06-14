@@ -157,18 +157,16 @@ ui <- function(id) {
       ),
       if (env_active == "dev") {
         nav_item(
-          shiny$bookmarkButton()
+          shiny$bookmarkButton(),
+          shiny$selectInput(
+            ns("selected_language"),
+            shiny$span(), # shiny$p(i18n$translate("Language:")),
+            choices = i18n$get_languages(),
+            selected = i18n$get_key_translation(),
+            width = "75px"
+          )
         )
-      },
-      nav_item(
-        shiny$selectInput(
-          ns("selected_language"),
-          shiny$p(), # shiny$p(i18n$translate("Language:")),
-          choices = i18n$get_languages(),
-          selected = i18n$get_key_translation(),
-          width = "75px"
-        )
-      ),
+      }
     )
   )
 }
