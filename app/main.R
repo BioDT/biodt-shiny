@@ -7,7 +7,7 @@ box::use(
   stringi[stri_rand_strings],
   htmltools[includeScript],
   config,
-  shiny.i18n[Translator],
+  shiny.i18n[Translator, usei18n, update_lang],
 )
 
 box::use(
@@ -188,6 +188,10 @@ server <- function(id) {
         stri_rand_strings(1, 8)
       )
     )
+
+    shiny$observeEvent(input$selected_language, {
+      update_lang(input$selected_language)
+    })
 
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
