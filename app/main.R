@@ -155,25 +155,20 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),
-      nav_item(
-        shiny$div(
-          style = "float: right;",
-          shiny$selectInput(
-            ns("selected_language"),
-            i18n$translate("Change language"),
-            choices = i18n$get_languages(),
-            selected = i18n$get_key_translation()
-          )
-        ),
-      ),
-      nav_item(
-        shiny$titlePanel(i18n$translate("Hello Shiny!"), windowTitle = NULL),
-      ),
       if (env_active == "dev") {
         nav_item(
           shiny$bookmarkButton()
         )
-      }
+      },
+      nav_item(
+        shiny$selectInput(
+          ns("selected_language"),
+          shiny$p(), # shiny$p(i18n$translate("Language:")),
+          choices = i18n$get_languages(),
+          selected = i18n$get_key_translation(),
+          width = "75px"
+        )
+      ),
     )
   )
 }
