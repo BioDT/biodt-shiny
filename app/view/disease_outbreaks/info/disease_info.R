@@ -8,7 +8,6 @@ disease_info_ui <- function(id) {
   fluidRow(
     id = ns("welcome"),
     class = "align-items-center justify-content-center",
-    column()
   )
 }
 
