@@ -135,9 +135,9 @@ ui <- function(id) {
           )
         ),
         nav_panel(
-          title = "Disease Outubreaks",
+          title = "Disease Outbreaks",
           class = "p-0",
-          grassland_main_ui(ns("disease_outbreaks_main_ui"))
+          disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"))
         )
       ),
       nav_spacer(),
