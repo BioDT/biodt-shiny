@@ -38,7 +38,7 @@ mod_info_ui <- function(id, i18n) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Species response to environmental change")
+            tags$h3(i18n$translate("Species response to environmental change"))
           ),
           tags$div(
             class = "description",
@@ -58,28 +58,28 @@ mod_info_ui <- function(id, i18n) {
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Grassland Biodiversity Dynamics"
+                  i18n$translate("Grassland Biodiversity Dynamics")
                   # ),
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Forest/Bird Biodiversity Dynamics"
+                  i18n$translate("Forest/Bird Biodiversity Dynamics")
                   # ),
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Real-time Bird Monitoring with Citizen Science Data"
+                  i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
                   # ),
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Cultural Ecosystem Services"
+                  i18n$translate("Cultural Ecosystem Services")
                   # ),
                 )
               )
@@ -91,7 +91,7 @@ mod_info_ui <- function(id, i18n) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Genetically detected biodiversity")
+            tags$h3(i18n$translate("Genetically detected biodiversity"))
           ),
           tags$div(
             class = "description",
@@ -111,21 +111,21 @@ mod_info_ui <- function(id, i18n) {
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Crop Wild Relatives and Genetic Resources for Food Security"
+                  i18n$translate("Crop Wild Relatives and Genetic Resources for Food Security")
                   # )
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Genetically Detected Biodiversity in Cryptic Habitats"
+                  i18n$translate("Genetically Detected Biodiversity in Cryptic Habitats")
                   # )
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "DNA Detected Biodiversity, Poorly Known Habitats"
+                  i18n$translate("DNA Detected Biodiversity, Poorly Known Habitats")
                   # )
                 ),
               )
@@ -137,7 +137,7 @@ mod_info_ui <- function(id, i18n) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Dynamics and threats from and for species of policy concern")
+            tags$h3(i18n$translate("Dynamics and threats from and for species of policy concern"))
           ),
           tags$div(
             class = "description",
@@ -157,7 +157,7 @@ mod_info_ui <- function(id, i18n) {
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Invasive Species"
+                  i18n$translate("Invasive Species")
                   # ),
                 ),
               )
@@ -169,7 +169,7 @@ mod_info_ui <- function(id, i18n) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Species interactions with each other and with humans")
+            tags$h3(i18n$translate("Species interactions with each other and with humans"))
           ),
           tags$div(
             class = "description",
@@ -189,14 +189,14 @@ mod_info_ui <- function(id, i18n) {
                   tags$a(
                     class = "w-100",
                     href = "?_state_id_=beekeeper",
-                    "Pollinators (Honeybee)"
+                    i18n$translate("Pollinators (Honeybee)")
                   )
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Disease Outbreaks"
+                  i18n$translate("Disease Outbreaks")
                   # )
                 )
               )

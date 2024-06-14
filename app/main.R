@@ -133,7 +133,7 @@ ui <- function(id) {
           )
         ),
         nav_panel(
-          title = i18n$translate("Disease Outubreaks"),
+          title = i18n$translate("Disease Outbreaks"),
           class = "p-0",
           grassland_main_ui(ns("disease_outbreaks_main_ui"))
         )
@@ -141,7 +141,7 @@ ui <- function(id) {
       nav_spacer(),
       ## Acknowledgements - main menu item ----
       nav_panel(
-        title = "Acknowledgements",
+        title = i18n$translate("Acknowledgements"),
         value = "acknowledgements",
         icon = shiny$icon("users-gear"),
         class = "container-fluid index-info",

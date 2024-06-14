@@ -34,20 +34,68 @@
         "cz": "Dynamika travních porostů"
       },
       {
+        "en": "Grassland Biodiversity Dynamics",
+        "cz": "Dynamika biodiverzity travních porostů"
+      },
+      {
+        "en": "Forest/Bird Biodiversity Dynamics",
+        "cz": "Dynamika biodiverzity lesních porostů a ptáků"
+      },
+      {
+        "en": "Real-time Bird Monitoring with Citizen Science Data",
+        "cz": "Monitorování ptáků v reálném čase pomocí dat 'Citizen Science'"
+      },
+      {
+        "en": "Cultural Ecosystem Services",
+        "cz": "Služby kulturních ekosystémů"
+      },
+      {
+        "en": "Genetically detected biodiversity",
+        "cz": "Geneticky detekovaná biodiverzita"
+      },
+      {
+        "en": "Crop Wild Relatives and Genetic Resources for Food Security",
+        "cz": "Plodiny divoce žijících příbuzných a genetické zdroje pro zajištění potravin"
+      },
+      {
+        "en": "Genetically Detected Biodiversity in Cryptic Habitats",
+        "cz": "Geneticky detekovaná biodiverzita v kryptických biotopech"
+      },
+      {
+        "en": "DNA Detected Biodiversity, Poorly Known Habitats",
+        "cz": "Biodiverzita zjištěná přes DNA, málo známé biotopy"
+      },
+      {
+        "en": "Dynamics and threats from and for species of policy concern",
+        "cz": "Dynamika a hrozby od politicky významných druhů a pro ně"
+      },
+      {
+        "en": "Invasive Species",
+        "cz": "Invazní druhy"
+      },
+      {
         "en": "Species interactions with each other and with humans",
         "cz": "Interakce druhů mezi sebou a s lidmi"
+      },
+      {
+        "en": "Pollinators (Honeybee)",
+        "cz": "Opylovači (včelí med 'Honeybee')"
       },
       {
         "en": "Honeybee",
         "cz": "Včelí med 'Honeybee'"
       },
       {
-        "en": "Disease Outubreaks",
+        "en": "Disease Outbreaks",
         "cz": "Ohniska onemocnění"
       },
       {
+        "en": "Acknowledgements",
+        "cz": "Poděkování"
+      },
+      {
         "en": "The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.",
-        "cz": "Prototyp digitálního dvojčete umožní pokročilé modelování simulací i predikcí, prostřednictvím případů praktických případů použití, které řeší kritické problémy související s dynamikou globální biologické diverzity."
+        "cz": "Prototyp digitálního dvojčete umožní pokročilé modelování simulací i predikcí, prostřednictvím praktických případů použití, které řeší kritické problémy související s dynamikou globální biologické diverzity."
       },
       {
         "en": "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.",
