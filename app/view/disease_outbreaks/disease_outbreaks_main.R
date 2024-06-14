@@ -16,7 +16,7 @@ disease_outbreaks_main_ui <- function(id) {
       title = "Info",
       value = "Info",
       icon = icon("circle-info"),
-      grassland_info_ui(
+      disease_info_ui(
         ns("disease_info_ui")
       )
     ),
