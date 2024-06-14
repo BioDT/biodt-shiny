@@ -88,24 +88,14 @@ ui <- function(id) {
           ),
         )
       },
-      nav_item(
-        shiny$div(
-          style = "float: right;",
-          shiny$selectInput(
-            ns("selected_language"),
-            "Change language",
-            choices = i18n$get_languages(),
-            selected = i18n$get_key_translation()
-          )
-        )
-      ),
+
       ## Info - main menu item ----
       nav_panel(
         title = "Info",
         value = "info",
         icon = shiny$icon("circle-info"),
         class = "container-fluid index-info",
-        mod_info_ui("info")
+        mod_info_ui("info", i18n)
       ),
       ## Digital Twins - main menu item ----
       nav_menu(
@@ -164,6 +154,21 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),
+      nav_item(
+        usei18n(i18n),
+        shiny$div(
+          style = "float: right;",
+          shiny$selectInput(
+            ns("selected_language"),
+            "Change language",
+            choices = i18n$get_languages(),
+            selected = i18n$get_key_translation()
+          )
+        ),
+      ),
+      nav_item(
+        shiny$titlePanel(i18n$translate("Hello Shiny!"), windowTitle = NULL),
+      ),
       if (env_active == "dev") {
         nav_item(
           shiny$bookmarkButton()
@@ -189,13 +194,14 @@ server <- function(id) {
       )
     )
 
+    r <- shiny$reactiveValues(
+      biodt_theme = biodt_theme
+    )
+
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
     })
 
-    r <- shiny$reactiveValues(
-      biodt_theme = biodt_theme
-    )
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",

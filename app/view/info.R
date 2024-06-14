@@ -9,7 +9,7 @@ box::use(
 
 
 #' @export
-mod_info_ui <- function(id) {
+mod_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "index-info",
@@ -26,20 +26,9 @@ mod_info_ui <- function(id) {
       # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
       tags$div(
         class = "info-text justify-content-center",
-        tags$p(
-          "The Biodiversity Digital Twin prototype will provide advanced models for simulation
-            and prediction capabilities, through practical use cases addressing critical issues
-            related to global biodiversity dynamics."
-        ),
-        tags$p(
-          "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital
-            infrastructure, predictive modelling and AI solutions, facilitating evidence-based
-            solutions for biodiversity protection and restoration."
-        ),
-        tags$p(
-          "The project responds to key EU and international policy initiatives, including the EU
-            Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals,
-            Destination Earth."
+        tags$p(i18n$translate("The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.")),
+        tags$p(i18n$translate("BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.")),
+        tags$p(i18n$translate("The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth.")
         ),
       ),
       tags$div(
