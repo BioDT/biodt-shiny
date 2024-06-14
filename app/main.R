@@ -52,7 +52,8 @@ ui <- function(id) {
       useShinyjs(),
       useWaiter(),
       useHostess(),
-      use_cicerone()
+      use_cicerone(),
+      usei18n(i18n)
     ),
     waiterShowOnLoad(
       html = spin_loaders(
@@ -155,12 +156,11 @@ ui <- function(id) {
         mod_acknowledgements_ui("info")
       ),
       nav_item(
-        usei18n(i18n),
         shiny$div(
           style = "float: right;",
           shiny$selectInput(
             ns("selected_language"),
-            "Change language",
+            i18n$translate("Change language"),
             choices = i18n$get_languages(),
             selected = i18n$get_key_translation()
           )
