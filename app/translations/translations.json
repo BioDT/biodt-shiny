@@ -6,21 +6,57 @@
         "cz": "Ahoj Shiny!"
       },
       {
+        "en": "Prototype",
+        "cz": "Prototyp"
+      },
+      {
+        "en": "Digital Twins",
+        "cz": "digitálních dvojčat"
+      },
+      {
         "en": "Language:",
         "cz": "Jazyk:"
       },
       {
+        "en": "Info",
+        "cz": "Informace"
+      },
+      {
+        "en": "Digital Twin",
+        "cz": "Digitální dvojče"
+      },
+      {
+        "en": "Species response to environmental change",
+        "cz": "Reakce druhů na změny životního prostředí"
+      },
+      {
+        "en": "Grassland Dynamics",
+        "cz": "Dynamika travních porostů"
+      },
+      {
+        "en": "Species interactions with each other and with humans",
+        "cz": "Interakce druhů mezi sebou a s lidmi"
+      },
+      {
+        "en": "Honeybee",
+        "cz": "Včelí med 'Honeybee'"
+      },
+      {
+        "en": "Disease Outubreaks",
+        "cz": "Ohniska onemocnění"
+      },
+      {
         "en": "The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.",
-        "cz": "[CZ] The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics."
+        "cz": "Prototyp digitálního dvojčete umožní pokročilé modelování simulací i predikcí, prostřednictvím případů praktických případů použití, které řeší kritické problémy související s dynamikou globální biologické diverzity."
       },
       {
         "en": "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.",
-        "cz": "[CZ] BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration."
+        "cz": "BioDT, s využitím principů FAIR dat, těžící ze síly superpočítače LUMI kombinované s digitální infrastrukturou, prediktivním modelováním a AI, usnadňuje vytváření 'evidence-based' řešení pro ochranu a obnovu biodiverzity."
         
       },
       {
         "en": "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth.",
-        "cz": "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth."
+        "cz": "BioDT reaguje na klíčovou politickou iniciativu, která pochází z Evropské unie i z mezinárodního společenství, včetně evropské Strategie pro biodiverzitu 2030, evropského Green Dealu, Udržitelného rozvoje Spojených národů a Destination Earth."
       }
     ]
 }

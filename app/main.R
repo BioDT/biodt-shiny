@@ -82,17 +82,9 @@ ui <- function(id) {
       # must be true
       collapsible = TRUE,
       fluid = TRUE,
-      if (env_active == "dev") {
-        nav_item(
-          shiny$div(
-            shiny$icon("dev"),
-          ),
-        )
-      },
-
       ## Info - main menu item ----
       nav_panel(
-        title = "Info",
+        title = i18n$translate("Info"),
         value = "info",
         icon = shiny$icon("circle-info"),
         class = "container-fluid index-info",
@@ -100,7 +92,7 @@ ui <- function(id) {
       ),
       ## Digital Twins - main menu item ----
       nav_menu(
-        title = "Digital Twins",
+        title = i18n$translate("Digital Twin"),
         align = "left",
         icon = shiny$icon("people-group"),
         if (env_active == "dev") {
@@ -109,14 +101,14 @@ ui <- function(id) {
             shiny$tags$div(
               class = "p-2",
               shiny$icon("temperature-arrow-up"),
-              shiny$tags$strong("Species response to environmental change")
+              shiny$tags$strong(i18n$translate("Species response to environmental change"))
             )
           )
         },
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
-            title = "Grassland Dynamics",
+            title = i18n$translate("Grassland Dynamics"),
             grassland_main_ui(
               ns("grassland_main")
             )
@@ -128,20 +120,20 @@ ui <- function(id) {
             class = "p-2",
             shiny$div(
               shiny$icon("bugs"),
-              shiny$strong("Species interactions with each other and with humans"),
+              shiny$strong(i18n$translate("Species interactions with each other and with humans")),
               style = "width: 450px"
             ),
           )
         ),
         nav_panel(
-          title = "Honeybee",
+          title = i18n$translate("Honeybee"),
           class = "p-0",
           honeybee_ui(ns("honeybee_main"),
             theme = biodt_theme
           )
         ),
         nav_panel(
-          title = "Disease Outubreaks",
+          title = i18n$translate("Disease Outubreaks"),
           class = "p-0",
           grassland_main_ui(ns("disease_outbreaks_main_ui"))
         )
