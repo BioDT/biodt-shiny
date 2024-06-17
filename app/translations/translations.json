@@ -1,4 +1,5 @@
 {
+<<<<<<< 37-multilingual-RIGHT-ONE
   "languages": ["en", "cz"],
   "translation": [
       {
@@ -128,3 +129,39 @@
       }
     ]
 }
+=======
+  "languages": ["en", "fi", "cz"],
+  "translation": [
+      {
+        "en": "Hello Shiny!",
+        "fi": "Witaj Shiny!",
+        "cz": "Ciao Shiny!"
+      },
+      {
+        "en": "Number of bins:",
+        "fi": "Liczba podziałek:",
+        "cz": "Numero di intervalli"
+      },
+      {
+        "en": "This is description of the plot.",
+        "fi": "To jest opis obrazka.",
+        "cz": "Questa è la descrizione della grafico."
+      },
+      {
+        "en": "Histogram of x",
+        "fi": "Histogram x",
+        "cz": "Istogramma di x"
+      },
+      {
+        "en": "Frequency",
+        "fi": "Częstotliwość",
+        "cz": "Frequenza"
+      },
+      {
+        "en": "Change language",
+        "fi": "Wybierz język",
+        "cz": "Cambia lingua"
+      }
+    ]
+}
+>>>>>>> main
