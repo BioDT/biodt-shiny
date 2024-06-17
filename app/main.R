@@ -113,7 +113,7 @@ ui <- function(id) {
               ns("grassland_main")
             )
           )
-        }, 
+        },
         ## Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
@@ -132,11 +132,13 @@ ui <- function(id) {
             theme = biodt_theme
           )
         ),
-        nav_panel(
-          title = i18n$translate("Disease Outbreaks"),
-          class = "p-0",
-          disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"), i18n)
-        )
+        if (env_active == "dev") {
+          nav_panel(
+            title = i18n$translate("Disease Outbreaks"),
+            class = "p-0",
+            disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"), i18n)
+          )
+        }
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
