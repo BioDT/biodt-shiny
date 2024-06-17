@@ -25,7 +25,7 @@ disease_outbreaks_main_ui <- function(id, i18n) {
       title = i18n$translate("Grassland Dynamics"),
       icon = icon("bugs"),
       disease_app_ui(
-        ns("disease_app", i18n)
+        ns("disease_app"), i18n
       )
     )
   )
