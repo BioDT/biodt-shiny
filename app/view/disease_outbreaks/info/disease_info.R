@@ -17,13 +17,12 @@ disease_info_ui <- function(id, i18n) {
         tags$p(class = "pt-3",
                i18n$translate("[EN] Lorem ipsum..."))
       ),
-      tags$h6("Background - scientific breakthroughs:"),
     ),
     column(
       width = 6,
       tags$div(
         class = "m-0 p-0 d-none d-lg-block",
-        tags$img(src = "static/img/disease_outbreaks_info.jpg",
+        tags$img(src = "static/img/wild_boar.jpeg",
                  style = "width: 1000px;")
       )
     )
