@@ -125,6 +125,10 @@
     {
       "en": "[EN] Lorem ipsum...",
       "cz": "[CZ] Lorem ipsum..."
+    },
+    {
+      "en": "Simulation length (in years):",
+      "cz": "Délka simulace (počet let):"
     }
   ]
 }

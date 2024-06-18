@@ -68,13 +68,13 @@ honeybee_param_ui <- function(id, theme, i18n) {
         #   update_on = "close",
         #   addon = "none"
         # ),
-        numericInput(
-          inputId = ns("SimulationDays"),
-          label = "Simulation length (days):",
-          value = 365,
-          min = 365,
-          max = 3650,
-          step = 365
+        sliderInput(
+          inputId = ns("SimYears"),
+          label = i18n$translate("Simulation length (in years):"),
+          value = 1,
+          min = 1,
+          max = 10,
+          step = 1
         )
       )
     )
@@ -107,7 +107,7 @@ honeybee_param_server <- function(id) {
         input$HoneyHarvesting,
         input$VarroaTreatment,
         input$DroneBroodRemoval,
-        input$SimulationDays
+        input$SimYears
       )
     })
 
@@ -133,7 +133,7 @@ honeybee_param_server <- function(id) {
       )
 
       simulation <- data.frame(
-        sim_days = input$SimulationDays,
+        sim_days = (365 * input$SimYears),
         start_day = "2016-01-01"
       )
 
