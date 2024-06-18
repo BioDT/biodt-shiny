@@ -7,6 +7,7 @@ box::use(
   stringi[stri_rand_strings],
   htmltools[includeScript],
   config,
+  shiny.i18n[Translator, usei18n, update_lang],
 )
 
 box::use(
@@ -37,6 +38,9 @@ biodt_theme <- bs_theme(
 
 env_active <- Sys.getenv("R_CONFIG_ACTIVE")
 
+i18n <- Translator$new(translation_json_path = "app/translations/translations.json")
+i18n$set_translation_language("en")
+
 #' @export
 ui <- function(id) {
   ns <- shiny$NS(id)
@@ -48,7 +52,8 @@ ui <- function(id) {
       useShinyjs(),
       useWaiter(),
       useHostess(),
-      use_cicerone()
+      use_cicerone(),
+      usei18n(i18n)
     ),
     waiterShowOnLoad(
       html = spin_loaders(
@@ -77,24 +82,17 @@ ui <- function(id) {
       # must be true
       collapsible = TRUE,
       fluid = TRUE,
-      if (env_active == "dev") {
-        nav_item(
-          shiny$div(
-            shiny$icon("dev"),
-          ),
-        )
-      },
       ## Info - main menu item ----
       nav_panel(
-        title = "Info",
+        title = i18n$translate("Info"),
         value = "info",
         icon = shiny$icon("circle-info"),
         class = "container-fluid index-info",
-        mod_info_ui("info")
+        mod_info_ui("info", i18n)
       ),
       ## Digital Twins - main menu item ----
       nav_menu(
-        title = "Digital Twins",
+        title = i18n$translate("Digital Twin"),
         align = "left",
         icon = shiny$icon("people-group"),
         if (env_active == "dev") {
@@ -103,47 +101,57 @@ ui <- function(id) {
             shiny$tags$div(
               class = "p-2",
               shiny$icon("temperature-arrow-up"),
-              shiny$tags$strong("Species response to environmental change")
+              shiny$tags$strong(i18n$translate("Species response to environmental change"))
             )
           )
         },
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
-            title = "Grassland Dynamics",
+            title = i18n$translate("Grassland Dynamics"),
             grassland_main_ui(
               ns("grassland_main")
             )
           )
-        }, 
+        },
         ## Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
             class = "p-2",
             shiny$div(
               shiny$icon("bugs"),
-              shiny$strong("Species interactions with each other and with humans"),
+              shiny$strong(i18n$translate("Species interactions with each other and with humans")),
               style = "width: 450px"
             ),
           )
         ),
         nav_panel(
-          title = "Honeybee",
+          title = i18n$translate("Honeybee"),
           class = "p-0",
           honeybee_ui(ns("honeybee_main"),
             theme = biodt_theme
           )
         ),
+<<<<<<< 37-multilingual-RIGHT-ONE
+        if (env_active == "dev") {
+          nav_panel(
+            title = i18n$translate("Disease Outbreaks"),
+            class = "p-0",
+            disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"), i18n)
+          )
+        }
+=======
         nav_panel(
           title = "Disease Outbreaks",
           class = "p-0",
           disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"))
         )
+>>>>>>> main
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
       nav_panel(
-        title = "Acknowledgements",
+        title = i18n$translate("Acknowledgements"),
         value = "acknowledgements",
         icon = shiny$icon("users-gear"),
         class = "container-fluid index-info",
@@ -151,7 +159,14 @@ ui <- function(id) {
       ),
       if (env_active == "dev") {
         nav_item(
-          shiny$bookmarkButton()
+          shiny$bookmarkButton(),
+          shiny$selectInput(
+            ns("selected_language"),
+            shiny$span(), # shiny$p(i18n$translate("Language:")),
+            choices = i18n$get_languages(),
+            selected = i18n$get_key_translation(),
+            width = "75px"
+          )
         )
       }
     )
@@ -177,6 +192,11 @@ server <- function(id) {
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
+
+    shiny$observeEvent(input$selected_language, {
+      update_lang(input$selected_language)
+    })
+
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",

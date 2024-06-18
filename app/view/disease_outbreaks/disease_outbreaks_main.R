@@ -4,30 +4,34 @@ box::use(
 )
 
 box::use(
-  app/view/disease_outbreaks/info/disease_info[disease_info_ui, disease_info_server]
+  app/view/disease_outbreaks/info/disease_info[disease_info_ui, disease_info_server],
+  app/view/disease_outbreaks/disease_app/disease_app[disease_app_ui, disease_app_server],
 )
 
 #' @export
-disease_outbreaks_main_ui <- function(id) {
+disease_outbreaks_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$translate("Info"),
       value = "Info",
       icon = icon("circle-info"),
       disease_info_ui(
+<<<<<<< 37-multilingual-RIGHT-ONE
+        ns("disease_info_ui"), i18n
+=======
         ns("disease_info_ui")
+>>>>>>> main
       )
     ),
-    # Grassland Case ----
-    # nav_panel(
-    #   title = "Disease Outbreaks",
-    #   icon = icon("disease"),
-    #   grassland_dynamics_ui(
-    #     ns("disease_outbreaks_app")
-    #   )
-    # )
+    nav_panel(
+      title = i18n$translate("Disease Outbreaks"),
+      icon = icon("bugs"),
+      disease_app_ui(
+        ns("disease_app"), i18n
+      )
+    )
   )
 }
 
@@ -36,6 +40,6 @@ disease_outbreaks_main_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # disease_info_server("grassland_app")
+    # disease_info_server("disease_info_server")
   })
 }

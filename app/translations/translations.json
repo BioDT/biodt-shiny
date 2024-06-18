@@ -1,4 +1,135 @@
 {
+<<<<<<< 37-multilingual-RIGHT-ONE
+  "languages": ["en", "cz"],
+  "translation": [
+      {
+        "en": "Hello Shiny!",
+        "cz": "Ahoj Shiny!"
+      },
+      {
+        "en": "Prototype",
+        "cz": "Prototyp"
+      },
+      {
+        "en": "Digital Twins",
+        "cz": "digitálních dvojčat"
+      },
+      {
+        "en": "Language:",
+        "cz": "Jazyk:"
+      },
+      {
+        "en": "Info",
+        "cz": "Informace"
+      },
+      {
+        "en": "Digital Twin",
+        "cz": "Digitální dvojče"
+      },
+      {
+        "en": "Species response to environmental change",
+        "cz": "Reakce druhů na změny životního prostředí"
+      },
+      {
+        "en": "Grassland Dynamics",
+        "cz": "Dynamika travních porostů"
+      },
+      {
+        "en": "Grassland Biodiversity Dynamics",
+        "cz": "Dynamika biodiverzity travních porostů"
+      },
+      {
+        "en": "Forest/Bird Biodiversity Dynamics",
+        "cz": "Dynamika biodiverzity lesních porostů a ptáků"
+      },
+      {
+        "en": "Real-time Bird Monitoring with Citizen Science Data",
+        "cz": "Monitorování ptáků v reálném čase pomocí dat 'Citizen Science'"
+      },
+      {
+        "en": "Cultural Ecosystem Services",
+        "cz": "Služby kulturních ekosystémů"
+      },
+      {
+        "en": "Genetically detected biodiversity",
+        "cz": "Geneticky detekovaná biodiverzita"
+      },
+      {
+        "en": "Crop Wild Relatives and Genetic Resources for Food Security",
+        "cz": "Plodiny divoce žijících příbuzných a genetické zdroje pro zajištění potravin"
+      },
+      {
+        "en": "Genetically Detected Biodiversity in Cryptic Habitats",
+        "cz": "Geneticky detekovaná biodiverzita v kryptických biotopech"
+      },
+      {
+        "en": "DNA Detected Biodiversity, Poorly Known Habitats",
+        "cz": "Biodiverzita zjištěná přes DNA, málo známé biotopy"
+      },
+      {
+        "en": "Dynamics and threats from and for species of policy concern",
+        "cz": "Dynamika a hrozby od politicky významných druhů a pro ně"
+      },
+      {
+        "en": "Invasive Species",
+        "cz": "Invazní druhy"
+      },
+      {
+        "en": "Species interactions with each other and with humans",
+        "cz": "Interakce druhů mezi sebou a s lidmi"
+      },
+      {
+        "en": "Pollinators (Honeybee)",
+        "cz": "Opylovači (včelí med 'Honeybee')"
+      },
+      {
+        "en": "Honeybee",
+        "cz": "Včelí med 'Honeybee'"
+      },
+      {
+        "en": "Disease Outbreaks",
+        "cz": "Ohniska onemocnění"
+      },
+      {
+        "en": "Acknowledgements",
+        "cz": "Poděkování"
+      },
+      {
+        "en": "Input map",
+        "cz": "Vstupní mapa"
+      },
+      {
+        "en": "Location",
+        "cz": "Zadej lokaci"
+      },
+      {
+        "en": "Output Plot",
+        "cz": "Výstupní graf"
+      },
+      {
+        "en": "The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.",
+        "cz": "Prototyp digitálního dvojčete umožní pokročilé modelování simulací i predikcí, prostřednictvím praktických případů použití, které řeší kritické problémy související s dynamikou globální biologické diverzity."
+      },
+      {
+        "en": "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.",
+        "cz": "BioDT, s využitím principů FAIR dat, těžící ze síly superpočítače LUMI kombinované s digitální infrastrukturou, prediktivním modelováním a AI, usnadňuje vytváření 'evidence-based' řešení pro ochranu a obnovu biodiverzity."
+        
+      },
+      {
+        "en": "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth.",
+        "cz": "BioDT reaguje na klíčovou politickou iniciativu, která pochází z Evropské unie i z mezinárodního společenství, včetně evropské Strategie pro biodiverzitu 2030, evropského Green Dealu, Udržitelného rozvoje Spojených národů a Destination Earth."
+      },
+      {
+        "en": "Subheading - Disease Outbreaks",
+        "cz": "Podnadpis - Ohniska onemocnění"
+      },
+      {
+        "en": "[EN] Lorem ipsum...",
+        "cz": "[CZ] Lorem ipsum..."
+      }
+    ]
+}
+=======
   "languages": ["en", "fi", "cz"],
   "translation": [
       {
@@ -33,3 +164,4 @@
       }
     ]
 }
+>>>>>>> main
