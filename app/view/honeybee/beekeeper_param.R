@@ -4,8 +4,7 @@ box::use(
 )
 
 #' @export
-honeybee_param_ui <- function(id,
-                              theme) {
+honeybee_param_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   # tagList(
   bootstrapPage(

@@ -18,8 +18,7 @@ box::use(
 )
 
 #' @export
-honeybee_beekeeper_ui <- function(id,
-                                  theme) {
+honeybee_beekeeper_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   tagList(
     tags$div(
@@ -31,7 +30,8 @@ honeybee_beekeeper_ui <- function(id,
         honeybee_map_ui(ns("beekeeper_map")),
         honeybee_param_ui(
           ns("beekeeper_param"),
-          theme
+          theme,
+          i18n
         )
       ),
       honeybee_lookup_ui(ns("beekeeper_lookup")),
