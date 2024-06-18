@@ -132,21 +132,13 @@ ui <- function(id) {
             theme = biodt_theme
           )
         ),
-<<<<<<< 37-multilingual-RIGHT-ONE
         if (env_active == "dev") {
           nav_panel(
             title = i18n$translate("Disease Outbreaks"),
             class = "p-0",
             disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"), i18n)
           )
-        }
-=======
-        nav_panel(
-          title = "Disease Outbreaks",
-          class = "p-0",
-          disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"))
-        )
->>>>>>> main
+        },
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----

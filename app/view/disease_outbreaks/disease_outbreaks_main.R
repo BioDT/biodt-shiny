@@ -18,11 +18,7 @@ disease_outbreaks_main_ui <- function(id, i18n) {
       value = "Info",
       icon = icon("circle-info"),
       disease_info_ui(
-<<<<<<< 37-multilingual-RIGHT-ONE
         ns("disease_info_ui"), i18n
-=======
-        ns("disease_info_ui")
->>>>>>> main
       )
     ),
     nav_panel(
