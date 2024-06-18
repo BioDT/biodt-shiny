@@ -69,11 +69,11 @@ ui <- function(id) {
       window_title = "BioDT",
       title = shiny$actionLink(
         inputId = ns("biodt_logo"),
-          shiny$img(
-            src = "static/logo.svg",
-            height = "70px",
-            style = "padding-right: 20px"
-          ),
+        shiny$img(
+          src = "static/logo.svg",
+          height = "70px",
+          style = "padding-right: 20px"
+        ),
       ),
       id = ns("navbar"),
       theme = biodt_theme,
@@ -132,21 +132,13 @@ ui <- function(id) {
             theme = biodt_theme
           )
         ),
-<<<<<<< 37-multilingual-RIGHT-ONE
         if (env_active == "dev") {
           nav_panel(
             title = i18n$translate("Disease Outbreaks"),
             class = "p-0",
             disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"), i18n)
           )
-        }
-=======
-        nav_panel(
-          title = "Disease Outbreaks",
-          class = "p-0",
-          disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"))
-        )
->>>>>>> main
+        },
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
