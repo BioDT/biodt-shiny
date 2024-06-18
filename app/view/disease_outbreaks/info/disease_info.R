@@ -30,6 +30,7 @@ disease_info_ui <- function(id, i18n) {
       width = 6,
       tags$div(
         class = "m-0 p-0 d-none d-lg-block",
+        tags$img(
           src = "static/img/disease_outbreaks_info.jpg",
           style = "width: 1000px;"
       )

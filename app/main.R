@@ -15,6 +15,7 @@ box::use(
   app/view/acknowledgements[mod_acknowledgements_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
+  app/view/ces/ces_main[ces_ui, ces_server],
   app/view/disease_outbreaks/disease_outbreaks_main[
     disease_outbreaks_main_ui,
     disease_outbreaks_main_server
@@ -69,11 +70,11 @@ ui <- function(id) {
       window_title = "BioDT",
       title = shiny$actionLink(
         inputId = ns("biodt_logo"),
-          shiny$img(
-            src = "static/logo.svg",
-            height = "70px",
-            style = "padding-right: 20px"
-          ),
+        shiny$img(
+          src = "static/logo.svg",
+          height = "70px",
+          style = "padding-right: 20px"
+        ),
       ),
       id = ns("navbar"),
       theme = biodt_theme,
@@ -111,6 +112,15 @@ ui <- function(id) {
             title = i18n$translate("Grassland Dynamics"),
             grassland_main_ui(
               ns("grassland_main")
+            )
+          )
+        }, 
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = "Cultural Ecosystem Services",
+            ces_ui(
+              ns("ces_main")
             )
           )
         },
@@ -196,6 +206,10 @@ server <- function(id) {
     )
     # Grassland pDT ----
     # grassland_main_server("grassland_main")
+    
+    ces_server(
+      "ces_main"
+    )
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(id = "navbar",
