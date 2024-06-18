@@ -8,7 +8,7 @@ disease_info_ui <- function(id, i18n) {
   fluidRow(
     id = ns("welcome"),
     class = "align-items-center justify-content-center",
-    column(
+     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
       tags$div(
@@ -22,7 +22,9 @@ disease_info_ui <- function(id, i18n) {
           class = "pt-3",
           i18n$translate("[EN] Lorem ipsum...")
         ),
-      )
+          "DISEASE OUTBREAKS"
+        ),
+        tags$h6("Background - scientific breakthroughs:"),
     ),
     column(
       width = 6,
@@ -31,7 +33,6 @@ disease_info_ui <- function(id, i18n) {
         tags$img(
           src = "static/img/disease_outbreaks_info.jpg",
           style = "width: 1000px;"
-        )
       )
     )
   )
