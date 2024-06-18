@@ -186,6 +186,24 @@
       ],
       "Hash": "d94049c1d9446b0abb413fde9e82a505"
     },
+    "box.linters": {
+      "Package": "box.linters",
+      "Version": "0.9.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "cli",
+        "fs",
+        "glue",
+        "lintr",
+        "rlang",
+        "stringr",
+        "xml2",
+        "xmlparsedata"
+      ],
+      "Hash": "6178eaa9c568b6d6286a6c888bbb8eb6"
+    },
     "brio": {
       "Package": "brio",
       "Version": "1.1.5",
@@ -1130,12 +1148,13 @@
     },
     "rhino": {
       "Package": "rhino",
-      "Version": "1.7.0",
+      "Version": "1.8.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "box",
+        "box.linters",
         "cli",
         "config",
         "fs",
@@ -1151,10 +1170,9 @@
         "testthat",
         "utils",
         "withr",
-        "xml2",
         "yaml"
       ],
-      "Hash": "59ee79b26dd590b08dd1a3111d093832"
+      "Hash": "68bf7621e151b44967292b400b1392e1"
     },
     "rlang": {
       "Package": "rlang",
@@ -1274,6 +1292,25 @@
         "xtable"
       ],
       "Hash": "54b26646816af9960a4c64d8ceec75d6"
+    },
+    "shiny.i18n": {
+      "Package": "shiny.i18n",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "R6",
+        "glue",
+        "jsonlite",
+        "methods",
+        "rstudioapi",
+        "shiny",
+        "stringr",
+        "utils",
+        "yaml"
+      ],
+      "Hash": "fb1b47e69750065a4f3c8c4ef24e4891"
     },
     "shinyjs": {
       "Package": "shinyjs",

@@ -9,37 +9,26 @@ box::use(
 
 
 #' @export
-mod_info_ui <- function(id) {
+mod_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "index-info",
     tags$div(
       class = "col mx-auto col-lg-8",
       tags$h1(
-        class = "justify-content-center",
         tags$span(
+          i18n$translate("Prototype"),
           class = "text-primary",
-          "Prototype"
         ),
-        "Digital Twins"
+        i18n$translate("Digital Twins"),
+        class = "justify-content-center",
       ),
       # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
       tags$div(
         class = "info-text justify-content-center",
-        tags$p(
-          "The Biodiversity Digital Twin prototype will provide advanced models for simulation
-            and prediction capabilities, through practical use cases addressing critical issues
-            related to global biodiversity dynamics."
-        ),
-        tags$p(
-          "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital
-            infrastructure, predictive modelling and AI solutions, facilitating evidence-based
-            solutions for biodiversity protection and restoration."
-        ),
-        tags$p(
-          "The project responds to key EU and international policy initiatives, including the EU
-            Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals,
-            Destination Earth."
+        tags$p(i18n$translate("The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.")),
+        tags$p(i18n$translate("BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.")),
+        tags$p(i18n$translate("The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth.")
         ),
       ),
       tags$div(
@@ -49,7 +38,7 @@ mod_info_ui <- function(id) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Species response to environmental change")
+            tags$h3(i18n$translate("Species response to environmental change"))
           ),
           tags$div(
             class = "description",
@@ -69,28 +58,28 @@ mod_info_ui <- function(id) {
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Grassland Biodiversity Dynamics"
+                  i18n$translate("Grassland Biodiversity Dynamics")
                   # ),
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Forest/Bird Biodiversity Dynamics"
+                  i18n$translate("Forest/Bird Biodiversity Dynamics")
                   # ),
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Real-time Bird Monitoring with Citizen Science Data"
+                  i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
                   # ),
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Cultural Ecosystem Services"
+                  i18n$translate("Cultural Ecosystem Services")
                   # ),
                 )
               )
@@ -102,7 +91,7 @@ mod_info_ui <- function(id) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Genetically detected biodiversity")
+            tags$h3(i18n$translate("Genetically detected biodiversity"))
           ),
           tags$div(
             class = "description",
@@ -122,21 +111,21 @@ mod_info_ui <- function(id) {
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Crop Wild Relatives and Genetic Resources for Food Security"
+                  i18n$translate("Crop Wild Relatives and Genetic Resources for Food Security")
                   # )
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Genetically Detected Biodiversity in Cryptic Habitats"
+                  i18n$translate("Genetically Detected Biodiversity in Cryptic Habitats")
                   # )
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "DNA Detected Biodiversity, Poorly Known Habitats"
+                  i18n$translate("DNA Detected Biodiversity, Poorly Known Habitats")
                   # )
                 ),
               )
@@ -148,7 +137,7 @@ mod_info_ui <- function(id) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Dynamics and threats from and for species of policy concern")
+            tags$h3(i18n$translate("Dynamics and threats from and for species of policy concern"))
           ),
           tags$div(
             class = "description",
@@ -168,7 +157,7 @@ mod_info_ui <- function(id) {
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Invasive Species"
+                  i18n$translate("Invasive Species")
                   # ),
                 ),
               )
@@ -180,7 +169,7 @@ mod_info_ui <- function(id) {
           class = "landing-pdt-wrap col-sm-5",
           tags$div(
             class = "title",
-            tags$h3("Species interactions with each other and with humans")
+            tags$h3(i18n$translate("Species interactions with each other and with humans"))
           ),
           tags$div(
             class = "description",
@@ -200,14 +189,14 @@ mod_info_ui <- function(id) {
                   tags$a(
                     class = "w-100",
                     href = "?_state_id_=beekeeper",
-                    "Pollinators (Honeybee)"
+                    i18n$translate("Pollinators (Honeybee)")
                   )
                 ),
                 tags$li(
                   class = "w-100",
                   # tags$a(
                   #   href = "#",
-                  "Disease Outbreaks"
+                  i18n$translate("Disease Outbreaks")
                   # )
                 )
               )

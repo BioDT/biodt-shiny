@@ -17,7 +17,7 @@ bee_contributors_ui <- function(id) {
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h4("CONTRIBUTORS",
                 style = "margin-bottom: 50px"),
-        tags$p("Jürgen Groeneveld and Volker Grimm, Department of Ecological Modelling ,Helmholtz Centre for Environmental Research - UFZ, Permoserstr. 15, 7 04318 Leipzig, Germany"),
+        tags$p("Jürgen Groeneveld and Volker Grimm, Department of Ecological Modelling, Helmholtz Centre for Environmental Research - UFZ, Permoserstr. 15, 7 04318 Leipzig, Germany"),
         tags$p("Tomas Martinovic and Ondrej Salamon, IT4Innovations, VSB – Technical University of Ostrava, 17. listopadu 2172/15, 708 00 Ostrava-Poruba, Czech Republic"),        
         tags$p("Tuomas Rossi and Kata Sara-aho, CSC – IT Center for Science Ltd., P.O. Box 405, 02101 Espoo, Finland.")
       )
