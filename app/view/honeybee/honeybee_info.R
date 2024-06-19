@@ -8,7 +8,7 @@ honeybee_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
-    style ="overflow-x: hidden",
+    style = "overflow-x: hidden",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
@@ -29,12 +29,12 @@ honeybee_info_ui <- function(id) {
         tags$p("Source code and scripts of the pDT can be found at ", tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
         tags$div(
           class = "mt-5",
-            actionButton(
-              ns("start"),
-              label = "Start prototyping",
-              width = "100%",
-              class = "btn-secondary",
-              style = "max-width: 200px"
+          actionButton(
+            ns("start"),
+            label = "Start prototyping",
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
           )
         )
       )

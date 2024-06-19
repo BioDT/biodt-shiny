@@ -37,7 +37,7 @@ honeybee_ui <- function(id,
       icon = icon("sitemap"),
       bee_contributors_ui(
         ns("beekeeper_contributors")
-        )
+      )
     ),
   )
   # )
@@ -62,8 +62,10 @@ honeybee_server <- function(id,
       }
     )
 
-    honeybee_info_server("honeybee_info",
-    session)
+    honeybee_info_server(
+      "honeybee_info",
+      session
+    )
 
     honeybee_beekeeper_server(
       "honeybee_beekeeper",

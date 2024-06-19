@@ -114,7 +114,7 @@ ui <- function(id) {
               ns("grassland_main")
             )
           )
-        }, 
+        },
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
@@ -161,7 +161,11 @@ ui <- function(id) {
       ),
       if (env_active == "dev") {
         nav_item(
-          shiny$bookmarkButton(),
+          shiny$bookmarkButton()
+        )
+      },
+      if (env_active == "dev") {
+        nav_item(
           shiny$selectInput(
             ns("selected_language"),
             shiny$span(), # shiny$p(i18n$translate("Language:")),
@@ -206,15 +210,17 @@ server <- function(id) {
     )
     # Grassland pDT ----
     # grassland_main_server("grassland_main")
-    
+
     ces_server(
       "ces_main"
     )
 
     shiny$observeEvent(input$biodt_logo, {
-      nav_select(id = "navbar",
-                 selected = "info",
-                 session = session)
+      nav_select(
+        id = "navbar",
+        selected = "info",
+        session = session
+      )
     })
 
     waiter_hide()

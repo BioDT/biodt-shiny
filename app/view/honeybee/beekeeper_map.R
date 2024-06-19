@@ -116,8 +116,8 @@ honeybee_map_server <- function(id,
         new_name <- names(experiment_list)[length(experiment_list)]
       }
     )
-    
-    
+
+
     reactive(out())
   })
 }
