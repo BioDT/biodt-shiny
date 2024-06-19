@@ -1,8 +1,8 @@
 box::use(
   shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent,radioButtons,HTML,p,textOutput,renderText,showNotification],
-  bslib[nav_select,card_title,card_body],
+  bslib[card,nav_select,card_title,card_body],
   leaflet[leaflet,leafletOutput, renderLeaflet, leafletProxy,colorNumeric,removeLayersControl,addLayersControl,setView,addTiles,addRasterImage,hideGroup,showGroup],
-  terra[rast]
+  terra[rast, values]
 )
 
 
@@ -11,7 +11,7 @@ ces_rp_ui <- function(id) {
   ns <- NS(id)
   
   tagList(
-    bslib::card(
+    card(
       title = "rec_pot_map",
       full_screen = TRUE,
       card_title("Recreation potential mapping"),
@@ -60,8 +60,8 @@ ces_rp_server <- function(id) {
         NULL
       })
 
-      hard_pal <- colorNumeric(c("#1D4F11", "#CACD68", "#6F4660"), terra::values(hard_rec), na.color = "transparent")
-      soft_pal <- colorNumeric(c("#1D4F11", "#CACD68", "#6F4660"), terra::values(soft_rec), na.color = "transparent")
+      hard_pal <- colorNumeric(c("#1D4F11", "#CACD68", "#6F4660"), values(hard_rec), na.color = "transparent")
+      soft_pal <- colorNumeric(c("#1D4F11", "#CACD68", "#6F4660"), values(soft_rec), na.color = "transparent")
 
       leaflet() |>
         addTiles() |>
