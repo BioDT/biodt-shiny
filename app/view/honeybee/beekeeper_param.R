@@ -56,18 +56,16 @@ honeybee_param_ui <- function(id, theme, i18n) {
           label = "Drone Brood Removal",
           value = TRUE
         ),
-        # shinyWidgets::airDatepickerInput(
-        #   inputId = ns("SimulationDateStart"),
-        #   label = "Start the simulation from:",
-        #   value = "2016-01-01",
-        #   multiple = FALSE,
-        #   placeholder = "What starting date of your simulation run do you want to?",
-        #   minDate = "2016-01-01",
-        #   startView = "2020-01-01",
-        #   clearButton = TRUE,
-        #   update_on = "close",
-        #   addon = "none"
-        # ),
+        shinyWidgets::airDatepickerInput(
+          inputId = ns("SimulationDateStart"),
+          label = "Start the simulation from year:",
+          value = "2016",
+          minDate = "2016",
+          startView = "2016",
+          clearButton = TRUE,
+          minView = "years",
+          dateFormat = "yyyy"
+        ),
         sliderInput(
           inputId = ns("SimYears"),
           label = i18n$translate("Simulation length (in years):"),
