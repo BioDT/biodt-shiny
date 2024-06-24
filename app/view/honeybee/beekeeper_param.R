@@ -62,18 +62,19 @@ honeybee_param_ui <- function(id, theme, i18n) {
           value = "2016",
           minDate = "2016",
           startView = "2016",
-          clearButton = TRUE,
           minView = "years",
           dateFormat = "yyyy"
         ),
-        sliderInput(
-          inputId = ns("SimYears"),
-          label = i18n$translate("Simulation length (in years):"),
-          value = 1,
-          min = 1,
-          max = 10,
-          step = 1
-        )
+        shinyWidgets::airDatepickerInput(
+          inputId = ns("SimulationDateEnd"),
+          label = "Until the year:",
+          value = "2017",
+          minDate = "2017",
+          startView = "2017",
+          minView = "years",
+          dateFormat = "yyyy"
+        ),
+        #https://stackoverflow.com/questions/41012125/r-shiny-daterangeinput-for-month-and-year-only
       )
     )
   )
@@ -105,7 +106,8 @@ honeybee_param_server <- function(id) {
         input$HoneyHarvesting,
         input$VarroaTreatment,
         input$DroneBroodRemoval,
-        input$SimYears
+        input$SimulationDateStart,
+        input$SimulationDateEnd
       )
     })
 
@@ -131,9 +133,12 @@ honeybee_param_server <- function(id) {
       )
 
       simulation <- data.frame(
-        sim_days = (365 * input$SimYears),
-        start_day = "2016-01-01"
+        sim_days = input$SimulationDateEnd - input$SimulationDateStart,
+        start_day = input$SimulationDateStart
       )
+
+      print("simulation:::\n")
+      print(simulation)
 
       list(
         parameters = parameters,
