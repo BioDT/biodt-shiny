@@ -56,23 +56,25 @@ honeybee_param_ui <- function(id, theme, i18n) {
           label = "Drone Brood Removal",
           value = TRUE
         ),
-        shinyWidgets::airDatepickerInput(
+        shinyWidgets::airYearpickerInput(
           inputId = ns("SimulationDateStart"),
           label = "Start the simulation from year:",
           value = "2016",
           minDate = "2016",
           startView = "2016",
           minView = "years",
-          dateFormat = "yyyy"
+          dateFormat = "yyyy",
+          addon = "none"
         ),
-        shinyWidgets::airDatepickerInput(
+        shinyWidgets::airYearpickerInput(
           inputId = ns("SimulationDateEnd"),
           label = "Until the year:",
           value = "2017",
           minDate = "2017",
           startView = "2017",
           minView = "years",
-          dateFormat = "yyyy"
+          dateFormat = "yyyy",
+          addon = "none"
         ),
         #https://stackoverflow.com/questions/41012125/r-shiny-daterangeinput-for-month-and-year-only
       )
