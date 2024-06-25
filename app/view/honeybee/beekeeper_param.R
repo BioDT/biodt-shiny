@@ -67,15 +67,13 @@ honeybee_param_ui <- function(id, theme, i18n) {
           dateFormat = "yyyy",
           addon = "none"
         ),
-        airYearpickerInput(
-          inputId = ns("SimulationDateEnd"),
-          label = "Until the year:",
-          value = "2017",
-          minDate = "2017",
-          startView = "2017",
-          minView = "years",
-          dateFormat = "yyyy",
-          addon = "none"
+        sliderInput(
+          ns("DaysLimit"),
+          label = "For how many days:",
+          value = 365,
+          min = 365,
+          max = 730, # (Sys.Date() - 30) - as.Date("2023-01-01"), # |> as.integer(),
+          step = 365
         ),
       )
     )
@@ -109,7 +107,7 @@ honeybee_param_server <- function(id) {
         input$VarroaTreatment,
         input$DroneBroodRemoval,
         input$SimulationDateStart,
-        input$SimulationDateEnd
+        input$DaysLimit
       )
     })
 
@@ -137,6 +135,16 @@ honeybee_param_server <- function(id) {
       simulation <- data.frame(
         sim_days = input$SimulationDateEnd - input$SimulationDateStart,
         start_day = input$SimulationDateStart
+      )
+
+      observeEvent(
+        input$SimulationDateStart,
+        {
+          updateSliderInput(
+            inputId = "DaysLimit",
+            max = ((Sys.Date() - 31) - as.Date("2023-01-01") |> as.integer())
+          )
+        }
       )
 
       print("simulation:::\n")
