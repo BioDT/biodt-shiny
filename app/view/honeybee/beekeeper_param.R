@@ -58,7 +58,7 @@ honeybee_param_ui <- function(id, theme, i18n) {
           value = TRUE
         ),
         airYearpickerInput(
-          inputId = ns("SimulationDateStart"),
+          inputId = ns("SimulationYearStart"),
           label = "Start the simulation from year:",
           value = "2016",
           minDate = "2016",
@@ -106,7 +106,7 @@ honeybee_param_server <- function(id) {
         input$HoneyHarvesting,
         input$VarroaTreatment,
         input$DroneBroodRemoval,
-        input$SimulationDateStart,
+        input$SimulationYearStart,
         input$DaysLimit
       )
     })
@@ -119,7 +119,9 @@ honeybee_param_server <- function(id) {
           "N_INITIAL_MITES_INFECTED",
           "HoneyHarvesting",
           "VarroaTreatment",
-          "DroneBroodRemoval"
+          "DroneBroodRemoval",
+          "SimulationYearStart",
+          "DaysLimit"
         ),
         Value = c(
           input$N_INITIAL_BEES,
@@ -127,18 +129,20 @@ honeybee_param_server <- function(id) {
           input$N_INITIAL_MITES_INFECTED,
           input$HoneyHarvesting,
           input$VarroaTreatment,
-          input$DroneBroodRemoval
+          input$DroneBroodRemoval,
+          input$SimulationYearStart,
+          input$DaysLimit
         ),
         Default.Value = NA
       )
 
       simulation <- data.frame(
-        sim_days = input$SimulationDateEnd - input$SimulationDateStart,
-        start_day = input$SimulationDateStart
+        sim_days = input$DaysLimit,
+        start_day = input$SimulationYearStart
       )
 
       observeEvent(
-        input$SimulationDateStart,
+        input$SimulationYearStart,
         {
           updateSliderInput(
             inputId = "DaysLimit",
