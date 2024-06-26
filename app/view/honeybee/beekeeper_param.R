@@ -120,9 +120,9 @@ honeybee_param_server <- function(id) {
           "N_INITIAL_MITES_INFECTED",
           "HoneyHarvesting",
           "VarroaTreatment",
-          "DroneBroodRemoval",
-          "SimulationYearStart",
-          "DaysLimit"
+          "DroneBroodRemoval"#,
+          #"SimulationYearStart",
+          #"DaysLimit"
         ),
         Value = c(
           input$N_INITIAL_BEES,
