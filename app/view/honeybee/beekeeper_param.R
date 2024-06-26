@@ -150,7 +150,7 @@ honeybee_param_server <- function(id) {
 
       simulation <- data.frame(
         sim_days = input$DaysLimit,
-        start_day = input$SimulationYearStart
+        start_day = as.Date(paste0(input$SimulationYearStart, "-01-01"))
       )
 
       list(
