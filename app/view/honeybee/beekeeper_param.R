@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, sliderInput, tags, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput, checkboxInput],
+  shiny[moduleServer, NS, tagList, sliderInput, tags, div, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput, checkboxInput],
   bslib[card, card_header, card_body],
   shinyWidgets[airYearpickerInput],
 )
@@ -57,23 +57,25 @@ honeybee_param_ui <- function(id, theme, i18n) {
           label = "Drone Brood Removal",
           value = TRUE
         ),
-        airYearpickerInput(
-          inputId = ns("SimulationYearStart"),
-          label = "Start the simulation from year:",
-          value = "2016-01-01",
-          minDate = "2016-01-01",
-          startView = "2016-01-01",
-          minView = "years",
-          dateFormat = "yyyy",
-          addon = "none"
+        div(
+          class = "no-minor-ticks",
+          sliderInput(
+            ns("SimulationYearStart"),
+            label = "Choose start year of the simulation:",
+            value = 2016L,
+            min = 2016L,
+            #ticks = FALSE,
+            max = (Sys.Date() - 395) |> format("%Y") |> as.integer(), # 395 -> year plus one month
+            step = 1
+          )
         ),
         sliderInput(
           ns("DaysLimit"),
           label = "For how many days:",
           value = 365,
           min = 365,
-          max = as.integer((Sys.Date() - 31) - as.Date("2016-01-01")), # |> as.integer(),
-          step = 365
+          max = as.integer((Sys.Date() - 31) - as.Date("2016-01-01")),
+          step = 30
         ),
       )
     )
@@ -142,7 +144,7 @@ honeybee_param_server <- function(id) {
         {
           updateSliderInput(
             inputId = "DaysLimit",
-            max = as.integer((Sys.Date() - 31) - as.Date(input$SimulationYearStart))
+            max = as.integer((Sys.Date() - 31) - as.Date(paste0(input$SimulationYearStart, "-01-01")))
           )
         }
       )
