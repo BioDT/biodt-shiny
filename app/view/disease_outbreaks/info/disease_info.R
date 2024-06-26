@@ -27,7 +27,7 @@ disease_info_ui <- function(id, i18n) {
       tags$div(
         class = "m-0 p-0 d-none d-lg-block",
         tags$img(
-          src = "static/img/wild_boar.jpeg",
+          src = "static/img/Alexis-Lours-Sus-scrofa-Linnaeus.gif",
           style = "width: 1000px;"
         )
       )
