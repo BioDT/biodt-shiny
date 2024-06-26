@@ -21,7 +21,14 @@ honeybee_map_ui <- function(id) {
           class = "row d-flex justify-content-between",
           tags$div(
             class = "col-lg-6 col-sm-12",
-            tags$p(tags$b("First,"), "click the placement icon and", tags$b("then"), "select desired placement on the map."),
+            tags$p(
+              tags$b("Click the"),
+              shiny::icon("location-dot"),
+              tags$b("icon"), 
+              "and", 
+              tags$b("select"), 
+              "desired placement on the map."
+            ),
             uiOutput(
               ns("map_coordinates"),
             ),
