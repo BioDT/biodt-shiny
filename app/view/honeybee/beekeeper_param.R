@@ -1,7 +1,6 @@
 box::use(
   shiny[moduleServer, NS, tagList, sliderInput, tags, div, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput, checkboxInput],
   bslib[card, card_header, card_body],
-  shinyWidgets[airYearpickerInput],
 )
 
 #' @export
