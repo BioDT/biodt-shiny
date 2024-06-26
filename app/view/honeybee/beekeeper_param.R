@@ -60,9 +60,9 @@ honeybee_param_ui <- function(id, theme, i18n) {
         airYearpickerInput(
           inputId = ns("SimulationYearStart"),
           label = "Start the simulation from year:",
-          value = "2016",
-          minDate = "2016",
-          startView = "2016",
+          value = "2016-01-01",
+          minDate = "2016-01-01",
+          startView = "2016-01-01",
           minView = "years",
           dateFormat = "yyyy",
           addon = "none"
@@ -72,7 +72,7 @@ honeybee_param_ui <- function(id, theme, i18n) {
           label = "For how many days:",
           value = 365,
           min = 365,
-          max = 730, # (Sys.Date() - 30) - as.Date("2023-01-01"), # |> as.integer(),
+          max = as.integer((Sys.Date() - 31) - as.Date("2016-01-01")), # |> as.integer(),
           step = 365
         ),
       )
@@ -136,23 +136,21 @@ honeybee_param_server <- function(id) {
         Default.Value = NA
       )
 
-      simulation <- data.frame(
-        sim_days = input$DaysLimit,
-        start_day = input$SimulationYearStart
-      )
-
       observeEvent(
         input$SimulationYearStart,
+        ignoreInit = TRUE,
         {
           updateSliderInput(
             inputId = "DaysLimit",
-            max = ((Sys.Date() - 31) - as.Date("2023-01-01") |> as.integer())
+            max = as.integer((Sys.Date() - 31) - as.Date(input$SimulationYearStart))
           )
         }
       )
 
-      print("simulation:::\n")
-      print(simulation)
+      simulation <- data.frame(
+        sim_days = input$DaysLimit,
+        start_day = input$SimulationYearStart
+      )
 
       list(
         parameters = parameters,
