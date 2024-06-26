@@ -1,7 +1,7 @@
 box::use(
   shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
   bslib[card, card_header, card_body],
-  leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
+  leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, addMarkers],
   htmlwidgets[onRender],
 )
 
@@ -118,13 +118,36 @@ honeybee_map_server <- function(id,
 
     observeEvent(
       experiment_list(),
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
       {
         # Add code to add awesomemarker to the map with the name of the list values in the label.
         new_name <- names(experiment_list)[length(experiment_list)]
+        print("new name:::")
+        print(new_name)
+
+        leafletProxy("map_plot", session) |>
+          addMarkers(
+            lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+            popup = paste0(
+              new_name,
+              "<br />",
+              "Latitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+              "Longitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]]
+            ),
+            label = paste0(
+              new_name,
+              "<br />",
+              "Latitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+              "Longitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]]
+            ),
+          )
+
       }
     )
-
-
+    
+    
     reactive(out())
   })
 }
