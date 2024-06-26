@@ -131,8 +131,8 @@ honeybee_param_server <- function(id) {
           input$HoneyHarvesting,
           input$VarroaTreatment,
           input$DroneBroodRemoval,
-          input$SimulationYearStart,
-          input$DaysLimit
+          #input$SimulationYearStart,
+          #input$DaysLimit
         ),
         Default.Value = NA
       )
