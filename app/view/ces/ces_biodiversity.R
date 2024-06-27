@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, radioButtons, fluidRow, column, textOutput, observeEvent, reactive, renderText,observe,req, HTML,p],
+  shiny[moduleServer, NS, tagList, radioButtons, fluidRow, column, textOutput, observeEvent, reactive, renderText,observe,req, HTML,p,tags],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addTiles, addLayersControl, addRasterImage, hideGroup, layersControlOptions,setView, leaflet,clearGroup, showGroup],
   DT[renderDT, DTOutput],
   dplyr[mutate, select, arrange, left_join, desc],
@@ -7,7 +7,9 @@ box::use(
   purrr[map_chr, pluck],
   cli[hash_md5],
   utils[read.csv],
-  bslib[card,nav_select,card_title,card_body]
+  bslib[card,nav_select,card_title,card_body],
+  waiter[Waiter],
+  app/logic/waiter[waiter_text]
 )
 
 #' @export
@@ -70,6 +72,17 @@ ces_biodiversity_ui <- function(id) {
 #' @export
 ces_biodiversity_server <- function(id) {
   moduleServer(id, function(input, output, session) {
+    
+    msg <- 
+      waiter_text(message = tags$h3("Loading...",
+                                    style = "color: #414f2f;"
+      ))
+    
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
+    
     # Define the path to the data directory
     ces_path <- "app/data/ces"
     ns <- session$ns
@@ -124,9 +137,12 @@ ces_biodiversity_server <- function(id) {
     # Reactive expression to compute the total SDM raster by averaging and filtering values
     sdm_rast_total <- reactive({
       req(input$radio_group_select)
+      
       rast_out <- app(sdm_rasts(), mean)
       rast_out <- ifel(rast_out < 0.1, NA, rast_out)
+      
       rast_out
+      
     })
     
     # Reactive expression to arrange species based on the maximum priority of gap rasters
@@ -188,6 +204,7 @@ ces_biodiversity_server <- function(id) {
     # Observe changes in the selected species group and update the map with the total SDM raster
     observe({
       req(input$radio_group_select)
+      w$show()
       leafletProxy(ns("sp_map")) |>
         clearGroup("Biodiversity hotspots") |>
         addRasterImage(
@@ -196,6 +213,7 @@ ces_biodiversity_server <- function(id) {
           opacity = 0.4,
           colors = "viridis"
         )
+      w$hide()
     })
     
     # Render the species table with additional columns for likelihood and priority
