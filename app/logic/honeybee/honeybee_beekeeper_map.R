@@ -13,9 +13,8 @@ read_honeybee_tif <- function(map_path) {
 honeybee_leaflet_map <- function(map_raster,
                                  lookup_table = NULL,
                                  add_control = TRUE) {
-  
-  icon.fa <- makeAwesomeIcon(icon = 'check', markerColor = 'cadetblue', library='fa', iconColor = '#fff')
-  
+  icon.fa <- makeAwesomeIcon(icon = "check", markerColor = "cadetblue", library = "fa", iconColor = "#fff")
+
   scaled_map <- map_raster |>
     spatSample(2000000,
       "regular",
@@ -66,8 +65,9 @@ honeybee_leaflet_map <- function(map_raster,
     #                   label = htmltools::HTML("<strong>Example</strong>"),
     #                   icon = icon.fa) |>
     setView(11.8787,
-            51.3919,
-            zoom = 5)
+      51.3919,
+      zoom = 5
+    )
 
 
   if (add_control) {

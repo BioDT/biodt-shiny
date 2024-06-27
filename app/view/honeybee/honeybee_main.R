@@ -10,8 +10,7 @@ box::use(
   app/view/honeybee/beekeeper_contributors[bee_contributors_ui],
 )
 #' @export
-honeybee_ui <- function(id,
-                        theme) {
+honeybee_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   # tagList(
   navset_tab(
@@ -28,7 +27,8 @@ honeybee_ui <- function(id,
       icon = icon("forumbee"),
       honeybee_beekeeper_ui(
         ns("honeybee_beekeeper"),
-        theme
+        theme,
+        i18n
       )
     ),
     # Beekeper Contributors ----
@@ -37,7 +37,7 @@ honeybee_ui <- function(id,
       icon = icon("sitemap"),
       bee_contributors_ui(
         ns("beekeeper_contributors")
-        )
+      )
     ),
   )
   # )
@@ -62,8 +62,10 @@ honeybee_server <- function(id,
       }
     )
 
-    honeybee_info_server("honeybee_info",
-    session)
+    honeybee_info_server(
+      "honeybee_info",
+      session
+    )
 
     honeybee_beekeeper_server(
       "honeybee_beekeeper",
