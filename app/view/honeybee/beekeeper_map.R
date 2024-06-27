@@ -104,7 +104,8 @@ honeybee_map_server <- function(id,
 
           data.frame(
             lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]]
+            lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+            experiment = NULL
           ) |>
             out()
         } else {
@@ -121,33 +122,24 @@ honeybee_map_server <- function(id,
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        # Add code to add awesomemarker to the map with the name of the list values in the label.
-        new_name <- names(experiment_list)[length(experiment_list)]
-        print("new name:::")
-        print(new_name)
+        new_name <- names(experiment_list())[length(experiment_list)]
+
+        label <- paste0(
+          new_name, "\n", coordinates_text()
+        )
 
         leafletProxy("map_plot", session) |>
           addMarkers(
-            lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
-            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            popup = paste0(
-              new_name,
-              "<br />",
-              "Latitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-              "Longitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]]
-            ),
-            label = paste0(
-              new_name,
-              "<br />",
-              "Latitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-              "Longitude: ", input$map_plot_draw_new_feature$geometry$coordinates[[2]]
-            ),
+            lng = out$lon,
+            lat = out$lat,
+            popup = label,
+            label = label,
           )
 
+        out()$experiment <- c(new_name = label)
       }
     )
-    
-    
+
     reactive(out())
   })
 }
