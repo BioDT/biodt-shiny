@@ -105,7 +105,7 @@ honeybee_map_server <- function(id,
           data.frame(
             lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
             lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
-            experiment = NULL
+            label = coordinates_text()
           ) |>
             out()
         } else {
@@ -136,7 +136,6 @@ honeybee_map_server <- function(id,
             label = label,
           )
 
-        out()$experiment <- c(new_name = label)
       }
     )
 
