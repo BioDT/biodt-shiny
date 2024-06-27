@@ -102,6 +102,11 @@ honeybee_map_server <- function(id,
           ) |>
             coordinates_text()
 
+          if (terra NA) {
+            coordinates_text("Selected location is outside boundaries.")
+            out(NULL)
+          }
+
           data.frame(
             lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
             lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]]
