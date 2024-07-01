@@ -24,12 +24,15 @@ disease_info_ui <- function(id, i18n) {
     ),
     column(
       width = 6,
+      style = "height: 100vh;",
+      class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        class = "m-0 p-0 d-none d-lg-block",
         tags$img(
           src = "static/img/Alexis-Lours-Sus-scrofa-Linnaeus.gif",
-          style = "width: 1000px;"
-        )
+          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
+        ),
+        tags$p(
+          "Credits: fabd06, Sus scrofa Linnaeus, 1758 observed in France, https://www.inaturalist.org/observations/197457782")
       )
     )
   )
