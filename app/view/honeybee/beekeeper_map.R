@@ -49,6 +49,7 @@ honeybee_map_ui <- function(id) {
 honeybee_map_server <- function(id,
                                 leaflet_map,
                                 experiment_list,
+                                map,
                                 map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -56,7 +57,6 @@ honeybee_map_server <- function(id,
     out <- reactiveVal(NULL)
 
     output$acknowledgment <- renderText(map_acknowledgment())
-
 
     observeEvent(leaflet_map(), {
       output_map <- leaflet_map() |>
@@ -102,10 +102,10 @@ honeybee_map_server <- function(id,
           ) |>
             coordinates_text()
 
-          if (terra NA) {
-            coordinates_text("Selected location is outside boundaries.")
-            out(NULL)
-          }
+          # if (terra NA) {
+          #   coordinates_text("Selected location is outside boundaries.")
+          #   out(NULL)
+          # }
 
           data.frame(
             lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
