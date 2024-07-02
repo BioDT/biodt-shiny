@@ -10,14 +10,14 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_inputmap_ui <- function(id) {
+grassland_dynamics_inputmap_ui <- function(id, i18n) {
   ns <- NS(id)
   card(
     id = ns("inputmap"),
     class = "ms-md-3 card-shadow mt-2",
     full_screen = TRUE,
     card_header(
-      tags$h5("Input Map")
+      tags$h5(i18n$translate("Input map"))
     ),
     card_body(
       leafletOutput(
