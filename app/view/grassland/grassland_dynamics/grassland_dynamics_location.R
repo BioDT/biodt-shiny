@@ -38,15 +38,15 @@ grassland_dynamics_location_ui <- function(id, i18n) {
         tags$div(
           id = ns("latlon"),
           layout_column_wrap(
-            width = 1/3,
+            width = 1 / 3,
             numericInput(
               ns("lat"),
-              label = "Latitude",
+              label = i18n$translate("Latitude"),
               value = 51.3919
             ),
             numericInput(
               ns("lng"),
-              label = "Longitude",
+              label = i18n$translate("Longitude"),
               value = 11.8787
             )
           ),
@@ -57,7 +57,7 @@ grassland_dynamics_location_ui <- function(id, i18n) {
       ),
       actionButton(
         inputId = ns("update_map_location"),
-        label = "Update Map Location"
+        label = i18n$translate("Update Map Location")
       ),
     )
   )

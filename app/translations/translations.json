@@ -145,6 +145,34 @@
     {
       "en": "Choose location type:",
       "cz": "Vyber typ lokace:"
+    },
+    {
+      "en": "Latitude",
+      "cz": "Zeměpisná šířka"
+    },
+    {
+      "en": "Longitude",
+      "cz": "Zeměpisná délka"
+    },
+    {
+      "en": "Update Map Location",
+      "cz": "Aktualizace polohy na mapě"
+    },
+    {
+      "en": "Model Output",
+      "cz": "Výstup modelu"
+    },
+    {
+      "en": "Choose output dataset",
+      "cz": "Vyberte výstupní dataset"
+    },
+    {
+      "en": "Choose output files",
+      "cz": "Vyberte výstupní soubory"
+    },
+    {
+      "en": "Show results",
+      "cz": "Ukaž výsledky"
     }
   ]
 }
