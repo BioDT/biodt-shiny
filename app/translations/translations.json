@@ -173,6 +173,14 @@
     {
       "en": "Show results",
       "cz": "Ukaž výsledky"
+    },
+    {
+      "en": "HONEYBEE Prototype Digital Twin (DT)",
+      "cz": "Prototyp digitálního dvojčete Honeybee"
+    },
+    {
+      "en": "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE.",
+      "cz": "Prototyp digitálního (pDT) HONEYBEE je založen na mechanistickém simulačním modelu BEEHAVE."
     }
   ]
 }

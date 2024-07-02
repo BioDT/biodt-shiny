@@ -11,7 +11,8 @@ box::use(
 )
 #' @export
 honeybee_ui <- function(id,
-                        theme) {
+                        theme,
+                        i18n) {
   ns <- NS(id)
   # tagList(
   navset_tab(
@@ -20,7 +21,10 @@ honeybee_ui <- function(id,
     nav_panel(
       title = "Info",
       icon = icon("circle-info"),
-      honeybee_info_ui(ns("honeybee_info"))
+      honeybee_info_ui(
+        ns("honeybee_info"),
+        i18n
+      )
     ),
     # Beekeper Case ----
     nav_panel(
