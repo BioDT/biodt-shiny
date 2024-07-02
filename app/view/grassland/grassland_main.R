@@ -30,7 +30,8 @@ grassland_main_ui <- function(id, i18n) {
       title = i18n$translate("Grassland Dynamics"),
       icon = icon("leaf"),
       grassland_dynamics_ui(
-        ns("grassland_app")
+        ns("grassland_app"),
+        i18n
       )
     )
   )

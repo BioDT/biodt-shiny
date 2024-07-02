@@ -12,19 +12,19 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_location_ui <- function(id) {
+grassland_dynamics_location_ui <- function(id, i18n) {
   ns <- NS(id)
   card(
     class = "mt-2 me-md-3 card-shadow",
     id = ns("location_select"),
     full_screen = FALSE,
     card_header(
-      tags$h5("Select Location")
+      tags$h5(i18n$translate("Location"))
     ),
     card_body(
       radioButtons(
         inputId = ns("input_type"),
-        label = "Choose location type:",
+        label = i18n$translate("Choose location type:"),
         choices = list("DEIMS.id", "Lat, Long"),
         selected = "DEIMS.id"
       ),
@@ -32,22 +32,21 @@ grassland_dynamics_location_ui <- function(id) {
         inputId = ns("deimsid"),
         "DEIMS.id",
         value = "102ae489-04e3-481d-97df-45905837dc1a"
-        # examples: Bily Kriz a61dd7df-5fd7-47b4-8172-b7dfaf969748,
-        # Elbe 858b9f78-889f-4acb-8a12-c3c2436d794c, ...
+        # example: Elbe 858b9f78-889f-4acb-8a12-c3c2436d794c
       ),
       hidden(
         tags$div(
           id = ns("latlon"),
           layout_column_wrap(
-            width = 1/3,
+            width = 1 / 3,
             numericInput(
               ns("lat"),
-              label = "Latitude",
+              label = i18n$translate("Latitude"),
               value = 51.3919
             ),
             numericInput(
               ns("lng"),
-              label = "Longitude",
+              label = i18n$translate("Longitude"),
               value = 11.8787
             )
           ),
@@ -58,7 +57,7 @@ grassland_dynamics_location_ui <- function(id) {
       ),
       actionButton(
         inputId = ns("update_map_location"),
-        label = "Update Map Location"
+        label = i18n$translate("Update Map Location")
       ),
     )
   )
