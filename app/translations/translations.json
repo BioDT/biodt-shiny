@@ -175,12 +175,32 @@
       "cz": "Ukaž výsledky"
     },
     {
-      "en": "HONEYBEE Prototype Digital Twin (DT)",
+      "en": "Honeybee Prototype Digital Twin (DT)",
       "cz": "Prototyp digitálního dvojčete Honeybee"
     },
     {
       "en": "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE.",
       "cz": "Prototyp digitálního (pDT) HONEYBEE je založen na mechanistickém simulačním modelu BEEHAVE."
+    },
+    {
+      "en": "Model descriptions of BEEHAVE and additional information can be found on",
+      "cz": "Popis modelu BEEHAVE a další informace naleznete na"
+    },
+    {
+      "en": "The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,",
+      "cz": "Prototyp digitálního dvojčete Honeybee potřebuje informace o zdrojích květin. Jako ukázkový příklad používáme mapu krajinného pokryvu, poskytnutou viz Preidl et al. (2020,"
+    },
+    {
+      "en": "Source code and scripts of the pDT can be found at ",
+      "cz": "Zdrojový kód a skripty pDT lze nalézt na "
+    },
+    {
+      "en": "Start prototyping",
+      "cz": "Začněte prototypovat"
+    },
+    {
+      "en": "Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (",
+      "cz": "Údaje o počasí jsou poskytovány Deutscher Wetterdienst (DWD) pomocí rozhraní API, poskytovaného R balíkem rdwd ("
     }
   ]
 }

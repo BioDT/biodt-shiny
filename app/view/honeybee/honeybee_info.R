@@ -21,21 +21,21 @@ honeybee_info_ui <- function(id, i18n) {
         ),
         tags$p(
           class = "pt-3",
-          i18n$translate("The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE."),
+          i18n$translate("The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE."), # nolint: line_length_linter.
           tags$a(
             "(Becher et al. 2014, https://doi.org/10.1111/1365-2664.12222)",
             href = "https://doi.org/10.1111/1365-2664.12222"
           )
         ),
-        tags$p("Model descriptions of BEEHAVE and additional information can be found on", tags$a("https://beehave-model.net/", href = "https://beehave-model.net/"), "."),
-        tags$p("The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,", tags$a("https://doi.org/10.1594/PANGAEA.910837", href = "https://doi.org/10.1594/PANGAEA.910837"), ")."),
-        tags$p("Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (", tags$a("https://cran.r-project.org/web/packages/rdwd/index.html", href = "https://cran.r-project.org/web/packages/rdwd/index.html"), ")."),
-        tags$p("Source code and scripts of the pDT can be found at ", tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
+        tags$p(i18n$translate("Model descriptions of BEEHAVE and additional information can be found on"), tags$a("https://beehave-model.net/", href = "https://beehave-model.net/"), "."),
+        tags$p(i18n$translate("The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,"), tags$a("https://doi.org/10.1594/PANGAEA.910837", href = "https://doi.org/10.1594/PANGAEA.910837"), ")."),
+        tags$p(i18n$translate("Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd ("), tags$a("https://cran.r-project.org/web/packages/rdwd/index.html", href = "https://cran.r-project.org/web/packages/rdwd/index.html"), ")."),
+        tags$p(i18n$translate("Source code and scripts of the pDT can be found at "), tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
         tags$div(
           class = "mt-5",
             actionButton(
               ns("start"),
-              label = "Start prototyping",
+              label = i18n$translate("Start prototyping"),
               width = "100%",
               class = "btn-secondary",
               style = "max-width: 200px"
