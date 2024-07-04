@@ -40,8 +40,9 @@ honeybee_ui <- function(id,
       title = "Contributors",
       icon = icon("sitemap"),
       bee_contributors_ui(
-        ns("beekeeper_contributors")
-        )
+        ns("beekeeper_contributors"),
+        i18n
+      )
     ),
   )
   # )

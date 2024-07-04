@@ -201,6 +201,18 @@
     {
       "en": "Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (",
       "cz": "Údaje o počasí jsou poskytovány Deutscher Wetterdienst (DWD) pomocí rozhraní API, poskytovaného R balíkem rdwd ("
+    },
+    {
+      "en": "Beekeeper",
+      "cz": "Včelař"
+    },
+    {
+      "en": "Contributors",
+      "cz": "Přispěvatelé"
+    },
+    {
+      "en": "CONTRIBUTORS",
+      "cz": "PŘISPĚVATELÉ"
     }
   ]
 }
