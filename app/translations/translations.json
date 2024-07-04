@@ -213,6 +213,14 @@
     {
       "en": "CONTRIBUTORS",
       "cz": "PŘISPĚVATELÉ"
+    },
+    {
+      "en": "Honeybee Beekeeper Case",
+      "cz": "Beekeeper - prototyp Včelař"
+    },
+    {
+      "en": "Run simulation",
+      "cz": "Spustit simulaci"
     }
   ]
 }

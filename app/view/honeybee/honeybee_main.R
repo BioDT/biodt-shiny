@@ -32,7 +32,8 @@ honeybee_ui <- function(id,
       icon = icon("forumbee"),
       honeybee_beekeeper_ui(
         ns("honeybee_beekeeper"),
-        theme
+        theme,
+        i18n
       )
     ),
     # Beekeper Contributors ----
