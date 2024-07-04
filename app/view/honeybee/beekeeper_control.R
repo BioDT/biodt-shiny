@@ -52,10 +52,10 @@ beekeeper_control_ui <- function(id, i18n) {
               margin-left: 20px;
             }
           "),
-          tags$li(tags$b("Select"), "point on the map by first clicking the placement icon"),
-          tags$li(tags$b("Adjust"), "the parameters"),
-          tags$li(tags$b("Change"), "the lookup table values if needed"),
-          tags$li(tags$b("Click"), "the run simulation button")
+          tags$li(i18n$translate("Select point on the map by first clicking the placement icon")),
+          tags$li(i18n$translate("Adjust the parameters")),
+          tags$li(i18n$translate("Change the lookup table values if needed")),
+          tags$li(i18n$translate("Click the run simulation button"))
         ),
         tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu.")
       )

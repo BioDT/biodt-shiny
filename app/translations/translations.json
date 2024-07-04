@@ -221,6 +221,10 @@
     {
       "en": "Run simulation",
       "cz": "Spustit simulaci"
+    },
+    {
+      "en": "Select point on the map by first clicking the placement icon",
+      "cz": "Vyberte bod na mapě kliknutím na ikonu umístění"
     }
   ]
 }
