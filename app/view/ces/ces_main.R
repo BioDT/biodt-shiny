@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, icon, NS],
+  shiny[moduleServer, icon, NS,showNotification],
   bslib[navset_tab, nav_panel],
 )
 
@@ -43,6 +43,7 @@ ces_ui <- function(id) {
 ces_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    
     
     ces_rp_server("ces_rp")
     ces_biodiversity_server("ces_biodiversity")

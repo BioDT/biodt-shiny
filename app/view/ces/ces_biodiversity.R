@@ -1,6 +1,6 @@
 box::use(
   shiny[moduleServer, NS, tagList, radioButtons, fluidRow, column, textOutput, observeEvent, reactive, renderText,observe,req, HTML,p,tags],
-  leaflet[leafletOutput, renderLeaflet, leafletProxy, addTiles, addLayersControl, addRasterImage, hideGroup, layersControlOptions,setView, leaflet,clearGroup, showGroup],
+  leaflet[leafletOutput, renderLeaflet, leafletProxy, addTiles, addLayersControl, addRasterImage, hideGroup, layersControlOptions,setView, leaflet,clearGroup, showGroup,addProviderTiles,providers,providerTileOptions,tileOptions],
   DT[renderDT, DTOutput],
   dplyr[mutate, select, arrange, left_join, desc],
   terra[rast, crop, values, ext, as.polygons, app, ifel],
@@ -43,11 +43,15 @@ ces_biodiversity_ui <- function(id) {
              card(
                title = "biodiversity_map",
                full_screen = TRUE,
-               max_height = "550px",
+               max_height = "650px",
                card_title("Biodiversity mapping"),
                card_body(
-                 leafletOutput(ns("sp_map"), height = 400, width = "100%"),
-                 HTML('<p><span style="background-color: #460F5D; color: white;">Low biodiversity</span> → <span style="background-color: #FDE725">High biodiversity</span></p>'),
+                 leafletOutput(ns("sp_map"), height = 600, width = "100%"),
+                 HTML('<p><span style="background-color: #FFFFCC; color: black;">Low biodiversity</span>
+             <span style="background-color: #A1DAB4;color: #A1DAB4;">----</span>
+             <span style="background-color: #41B6C4;color: #41B6C4;">----</span>
+             <span style="background-color: #2C7FB8;color: #2C7FB8;">----</span>
+             <span style="background-color: #253494; color: white;">High biodiversity</span></p>'),
                  textOutput(ns("selected_species"))
                )
              )
@@ -56,10 +60,12 @@ ces_biodiversity_ui <- function(id) {
              card(
                title = "sdm_table",
                full_screen = TRUE,
+               min_height = "800px",
                card_title("Species list"),
                card_body(
+                 min_height = "1200px",
                  p("Click on a species in the species list to show its distribution on the map"),
-                 DTOutput(ns('sp_tbl'), height = 800)
+                 DTOutput(ns('sp_tbl'), height = 1200)
                )
              )
       )
@@ -110,9 +116,11 @@ ces_biodiversity_server <- function(id) {
     
     # Reactive expression to get the bounding box from the map input
     bounding_box <- reactive({
-      bounds <- input$sp_map_bounds
-      req(bounds)
-      ext(c(bounds$west, bounds$east, bounds$south, bounds$north)) |>
+      # bounds <- input$sp_map_bounds
+      # req(bounds)
+      # ext(c(bounds$west, bounds$east, bounds$south, bounds$north)) |>
+      #   as.polygons(crs = "+proj=longlat")
+      ext(c(-4.5, -2.5, 56, 57.5)) |>
         as.polygons(crs = "+proj=longlat")
     })
     
@@ -186,6 +194,8 @@ ces_biodiversity_server <- function(id) {
     output$sp_map <- renderLeaflet({
       leaflet() |>
         addTiles() |>
+        addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex=1000),group="ESRI World Imagery") |>
+        addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex=1000),group="Open Topo Map") |>
         setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
         addTiles(
           urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
@@ -193,7 +203,7 @@ ces_biodiversity_server <- function(id) {
           group = "Biodiversity data"
         ) |>
         addLayersControl(
-          baseGroups = c("Open Street Map"),
+          baseGroups = c("Open Street Map","ESRI World Imagery","Open Topo Map"),
           overlayGroups = c("Biodiversity hotspots", "Biodiversity data", "Focal species"),
           options = layersControlOptions(collapsed = FALSE)
         ) |>
@@ -210,8 +220,9 @@ ces_biodiversity_server <- function(id) {
         addRasterImage(
           sdm_rast_total(),
           group = "Biodiversity hotspots",
-          opacity = 0.4,
-          colors = "viridis"
+          opacity = 0.6,
+          colors = "YlGnBu",
+          options = tileOptions(zIndex = 1000)
         )
       w$hide()
     })
@@ -228,8 +239,8 @@ ces_biodiversity_server <- function(id) {
         select(
           "Vernacular name" = common_name,
           "Scientific name" = sci_name,
-          "Observation probability" = likelihood,
-          "Recording priority" = priority,
+          #"Observation probability" = likelihood,
+          #"Recording priority" = priority,
           " " = image_url
         )
     }, escape = FALSE, selection = 'single', class = 'compact')
@@ -249,7 +260,9 @@ ces_biodiversity_server <- function(id) {
         addRasterImage(
           rast_to_add,
           group = "Focal species",
-          colors = "viridis"
+          colors = "YlGnBu",
+          options = tileOptions(zIndex = 1000),
+          opacity = 0.6
         )
       
       output$selected_species <- renderText({
