@@ -123,7 +123,15 @@ honeybee_map_server <- function(id,
           extracted <- extract(map(), pts)
 
           if (is.na(extracted$category)) {
-            coordinates_text("WARNING! Selected location is outside boundaries.")
+            HTML(
+              paste(
+                "<span class='text-danger'>",
+                "WARNING! Selected location is outside boundaries.",
+                "</span>"
+              )
+            ) |>
+              coordinates_text()
+            
             out(NULL)
           }
         } else {
