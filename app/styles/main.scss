@@ -213,3 +213,21 @@
   background-position: bottom;
   display: flex;
 }
+
+/* info page styles */
+
+.info-picture {
+  width: 50vw;
+  height: 100vh;
+  max-height: 1000px;
+  object-fit: cover;
+}
+
+.fluid-row {
+  margin: 0;
+  padding: 0;
+  align-items: center; 
+  justify-content: center;
+}
+
+

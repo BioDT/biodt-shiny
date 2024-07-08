@@ -15,8 +15,8 @@ bee_contributors_ui <- function(id) {
       style = "height: 100vh;",
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
-        tags$h4("CONTRIBUTORS",
-          style = "margin-bottom: 50px"
+        tags$h2("CONTRIBUTORS",
+          style = "greeting display-4 font-weight-bold"
         ),
         tags$p("Jürgen Groeneveld and Volker Grimm, Department of Ecological Modelling, Helmholtz Centre for Environmental Research - UFZ, Permoserstr. 15, 7 04318 Leipzig, Germany"),
         tags$p("Tomas Martinovic and Ondrej Salamon, IT4Innovations, VSB – Technical University of Ostrava, 17. listopadu 2172/15, 708 00 Ostrava-Poruba, Czech Republic"),
@@ -30,7 +30,7 @@ bee_contributors_ui <- function(id) {
       tags$div(
         tags$img(
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
+          class = "info-picture",
         )
       )
     )

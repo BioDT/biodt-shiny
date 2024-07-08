@@ -7,17 +7,17 @@ grassland_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
     id = ns("welcome"),
-    class = "align-items-center justify-content-center",
+    class = "fluid-row",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
+      style = "height: 100vh;",
       tags$div(
-        class = "col-sm-10 offset-sm-1 text-center",
+        class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "GRASSLAND"
+          "Grassland pDT"
         ),
-        tags$h6("Background - scientific breakthroughs:"),
         tags$p(
           class = "pt-3",
           "Describe temporal biodiversity dynamics for different local grassland sites
@@ -35,15 +35,16 @@ grassland_info_ui <- function(id) {
         tags$p("Project temporal changes in biodiversity dynamics (e.g. due to climate change or
         climate extremes) and provide scenario-based (management) options for mitigating undesired
         effects.")
-      )
+      ),
     ),
     column(
       width = 6,
+      style = "height: 100vh;",
+      class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        class = "m-0 p-0 d-none d-lg-block",
         tags$img(
+          class = "info-picture",
           src = "static/img/grassmind_long.jpg",
-          style = "width: 1000px;"
         )
       )
     )

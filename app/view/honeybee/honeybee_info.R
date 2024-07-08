@@ -7,8 +7,7 @@ box::use(
 honeybee_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
-    class = "align-items-center justify-content-center m-0 p-0",
-    style = "overflow-x: hidden",
+    class = "fluid-row",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
@@ -17,7 +16,7 @@ honeybee_info_ui <- function(id) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "HONEYBEE pDT"
+          "Honeybee pDT"
         ),
         tags$p(
           class = "pt-3",
@@ -45,8 +44,8 @@ honeybee_info_ui <- function(id) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
+          class = "info-picture",
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
         )
       )
     )

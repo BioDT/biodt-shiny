@@ -5,15 +5,16 @@ disease_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     id = ns("welcome"),
-    class = "align-items-center justify-content-center",
+    class = "fluid-row",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
+      style = "height: 100vh;",
       tags$div(
-        class = "col-sm-10 offset-sm-1 text-center",
+        class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          i18n$translate("Disease Outbreaks")
+          "Disease Outbreak pDT"
         ),
         tags$p(
           class = "pt-3",
@@ -23,7 +24,7 @@ disease_info_ui <- function(id, i18n) {
         tags$p("Read more about the pDT here:", tags$a("https://riojournal.com/article/125521/", href = "https://riojournal.com/article/125521/"), "."),
         tags$p("Read more about the wild boar-ASF simulation model here:", tags$a("https://doi.org/10.1007/s00477-016-1358-8", href = "https://doi.org/10.1007/s00477-016-1358-8"), "."),
         tags$p("Video source: Alexis Lours, Sus scrofa Linnaeus, 1758 observed in France,", tags$a("https://www.inaturalist.org/observations/197802817", href = "https://www.inaturalist.org/observations/197802817"), "."),
-       ),
+      ),
     ),
     column(
       width = 6,
@@ -31,8 +32,8 @@ disease_info_ui <- function(id, i18n) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
+          class = "info-picture",
           src = "static/img/Alexis-Lours-Sus-scrofa-Linnaeus.gif",
-          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
         ),
       )
     )
