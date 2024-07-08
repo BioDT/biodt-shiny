@@ -3,7 +3,7 @@ box::use(
   bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
   htmlwidgets[onRender],
-  terra[vect]
+  terra[vect, extract]
 )
 
 #' @export
@@ -106,6 +106,13 @@ honeybee_map_server <- function(id,
           ) |>
             coordinates_text()
 
+          data.frame(
+            lat = lat,
+            lon = long
+          ) |>
+            out()
+
+          # https://www.paulamoraga.com/book-spatial/the-terra-package-for-raster-and-vector-data.html#vector-data-1
           pts_long <- c(long)
           pts_lat <- c(lat)
 
@@ -113,18 +120,12 @@ honeybee_map_server <- function(id,
 
           pts <- vect(pts_longlat, crs = "epsg:4326")
 
-          print(pts)
-          
-          # if (terra NA) {
-          #   coordinates_text("Selected location is outside boundaries.")
-          #   out(NULL)
-          # }
+          extracted <- extract(map(), pts)
 
-          data.frame(
-            lat = lat,
-            lon = long
-          ) |>
-            out()
+          if (is.na(extracted$category)) {
+            coordinates_text("WARNING! Selected location is outside boundaries.")
+            out(NULL)
+          }
         } else {
           coordinates_text("No location selected.")
           out(NULL)
