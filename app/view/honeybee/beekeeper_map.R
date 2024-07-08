@@ -3,6 +3,7 @@ box::use(
   bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
   htmlwidgets[onRender],
+  terra[vect]
 )
 
 #' @export
@@ -80,11 +81,14 @@ honeybee_map_server <- function(id,
     observeEvent(
       input$map_plot_draw_new_feature,
       {
+        lat <- input$map_plot_draw_new_feature$geometry$coordinates[[2]]
+        long <- input$map_plot_draw_new_feature$geometry$coordinates[[1]]
+
         leafletProxy("map_plot", session) |>
           removeShape(layerId = "circle") |>
           addCircles(
-            lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
-            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+            lng = long,
+            lat = lat,
             radius = 3000,
             layerId = "circle"
           )
@@ -93,23 +97,32 @@ honeybee_map_server <- function(id,
             paste(
               "Selected coordinates are: <br>",
               "Latitude: ",
-              input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+              lat,
               "<br>",
               "Longitude: ",
-              input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+              long,
               "<br>"
             )
           ) |>
             coordinates_text()
 
+          pts_long <- c(long)
+          pts_lat <- c(lat)
+
+          pts_longlat <- cbind(pts_long, pts_lat)
+
+          pts <- vect(pts_longlat, crs = "epsg:4326")
+
+          print(pts)
+          
           # if (terra NA) {
           #   coordinates_text("Selected location is outside boundaries.")
           #   out(NULL)
           # }
 
           data.frame(
-            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]]
+            lat = lat,
+            lon = long
           ) |>
             out()
         } else {
