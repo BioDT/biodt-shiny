@@ -19,7 +19,8 @@ honeybee_ui <- function(id,
     id = ns("tab"),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$translate("Info"),
+      value = "Info",
       icon = icon("circle-info"),
       honeybee_info_ui(
         ns("honeybee_info"),
@@ -28,7 +29,8 @@ honeybee_ui <- function(id,
     ),
     # Beekeper Case ----
     nav_panel(
-      title = "Beekeeper",
+      title = i18n$translate("Beekeeper"),
+      value = "Beekeeper",
       icon = icon("forumbee"),
       honeybee_beekeeper_ui(
         ns("honeybee_beekeeper"),
@@ -38,7 +40,8 @@ honeybee_ui <- function(id,
     ),
     # Beekeper Contributors ----
     nav_panel(
-      title = "Contributors",
+      title = i18n$translate("Contributors"),
+      valule = "Contributors",
       icon = icon("sitemap"),
       bee_contributors_ui(
         ns("beekeeper_contributors"),
