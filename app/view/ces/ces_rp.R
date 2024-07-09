@@ -65,8 +65,8 @@ ces_rp_server <- function(id) {
         NULL
       })
 
-      hard_pal <- colorBin("YlGnBu", values(hard_rec), bins = 5, na.color = "transparent")
-      soft_pal <- colorBin("YlGnBu", values(soft_rec), bins = 5, na.color = "transparent")
+      hard_pal <- colorBin("YlGnBu", values(hard_rec), bins = c(0,0.25,0.3,0.33,0.36,0.39,0.45,1), na.color = "transparent",reverse = F)
+      soft_pal <- colorBin("YlGnBu", values(soft_rec), bins = c(0,0.25,0.3,0.33,0.36,0.39,0.45,1), na.color = "transparent",reverse = F)
 
       leaflet() |>
         addTiles(group = "Open Street Map") |>
