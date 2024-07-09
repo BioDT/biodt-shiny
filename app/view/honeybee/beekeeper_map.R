@@ -3,6 +3,7 @@ box::use(
   bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
   htmlwidgets[onRender],
+  terra[vect, extract, project]
 )
 
 #' @export
@@ -49,6 +50,7 @@ honeybee_map_ui <- function(id) {
 honeybee_map_server <- function(id,
                                 leaflet_map,
                                 experiment_list,
+                                map,
                                 map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -56,7 +58,6 @@ honeybee_map_server <- function(id,
     out <- reactiveVal(NULL)
 
     output$acknowledgment <- renderText(map_acknowledgment())
-
 
     observeEvent(leaflet_map(), {
       output_map <- leaflet_map() |>
@@ -80,11 +81,14 @@ honeybee_map_server <- function(id,
     observeEvent(
       input$map_plot_draw_new_feature,
       {
+        lat <- input$map_plot_draw_new_feature$geometry$coordinates[[2]]
+        long <- input$map_plot_draw_new_feature$geometry$coordinates[[1]]
+
         leafletProxy("map_plot", session) |>
           removeShape(layerId = "circle") |>
           addCircles(
-            lng = input$map_plot_draw_new_feature$geometry$coordinates[[1]],
-            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+            lng = long,
+            lat = lat,
             radius = 3000,
             layerId = "circle"
           )
@@ -93,20 +97,46 @@ honeybee_map_server <- function(id,
             paste(
               "Selected coordinates are: <br>",
               "Latitude: ",
-              input$map_plot_draw_new_feature$geometry$coordinates[[2]],
+              lat,
               "<br>",
               "Longitude: ",
-              input$map_plot_draw_new_feature$geometry$coordinates[[1]],
+              long,
               "<br>"
             )
           ) |>
             coordinates_text()
 
           data.frame(
-            lat = input$map_plot_draw_new_feature$geometry$coordinates[[2]],
-            lon = input$map_plot_draw_new_feature$geometry$coordinates[[1]]
+            lat = lat,
+            lon = long
           ) |>
             out()
+
+          # https://www.paulamoraga.com/book-spatial/the-terra-package-for-raster-and-vector-data.html#vector-data-1
+          pts_long <- c(long)
+          pts_lat <- c(lat)
+
+          pts_longlat <- cbind(pts_long, pts_lat)
+
+          pts <- vect(pts_longlat, crs = "epsg:4326") |>
+            project("epsg:3857")
+
+          print(pts)
+          extracted <- extract(map(), pts)
+          print(extracted)
+
+          if (is.na(extracted$category) || extracted$category == "Unclassified") {
+            HTML(
+              paste(
+                "<span class='text-danger'>",
+                "WARNING! Selected location is outside boundaries.",
+                "</span>"
+              )
+            ) |>
+              coordinates_text()
+            
+            out(NULL)
+          }
         } else {
           coordinates_text("No location selected.")
           out(NULL)
