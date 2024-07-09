@@ -3,7 +3,7 @@ box::use(
   bslib[card, card_header, card_body],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
   htmlwidgets[onRender],
-  terra[vect, extract]
+  terra[vect, extract, project]
 )
 
 #' @export
@@ -118,11 +118,14 @@ honeybee_map_server <- function(id,
 
           pts_longlat <- cbind(pts_long, pts_lat)
 
-          pts <- vect(pts_longlat, crs = "epsg:4326")
+          pts <- vect(pts_longlat, crs = "epsg:4326") |>
+            project("epsg:3857")
 
+          print(pts)
           extracted <- extract(map(), pts)
+          print(extracted)
 
-          if (is.na(extracted$category)) {
+          if (is.na(extracted$category) || extracted$category == "Unclassified") {
             HTML(
               paste(
                 "<span class='text-danger'>",
