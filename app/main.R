@@ -11,7 +11,7 @@ box::use(
 )
 
 box::use(
-  app/view/info[mod_info_ui],
+  app/view/info[mod_info_ui, mod_info_server],
   app/view/acknowledgements[mod_acknowledgements_ui],
   app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
   app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
@@ -89,7 +89,7 @@ ui <- function(id) {
         value = "info",
         icon = shiny$icon("circle-info"),
         class = "container-fluid index-info",
-        mod_info_ui("info", i18n)
+        mod_info_ui(ns("info"), i18n)
       ),
       ## Digital Twins - main menu item ----
       nav_menu(
@@ -137,6 +137,7 @@ ui <- function(id) {
         ),
         nav_panel(
           title = i18n$translate("Honeybee"),
+          value = "Honeybee",
           class = "p-0",
           honeybee_ui(
             ns("honeybee_main"),
@@ -200,11 +201,19 @@ server <- function(id) {
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
-
+    
+    # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
     })
-
+    
+    # Info page ----
+    mod_info_server(
+      "info",
+      main_session = session
+    )
+    
+    
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",
