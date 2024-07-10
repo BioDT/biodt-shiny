@@ -8,7 +8,7 @@ honeybee_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
-    style ="overflow-x: hidden",
+    style = "overflow-x: hidden",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",

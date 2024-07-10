@@ -136,6 +136,11 @@
 }
 /* END slider inputs color fix (for awesome inputs which were removed) */
 
+.no-minor-ticks{
+  .irs-grid-pol.small {
+    height: 0px;
+  }
+}
 /* shiny checkbox color fix */
 .shiny-input-checkbox {
   background-color: #DDA15E !important;

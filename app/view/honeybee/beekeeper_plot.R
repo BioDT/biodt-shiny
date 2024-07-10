@@ -4,6 +4,7 @@ box::use(
   echarty[ecs.output, ecs.render, ec.init],
   waiter[Waiter],
   readr[write_csv],
+  stringr[str_replace_all, str_remove],
 )
 
 box::use(
@@ -128,7 +129,9 @@ beekeeper_plot_server <- function(
     # })
 
     output$download_data <- downloadHandler(
-      filename = "output.csv",
+      filename = function() { 
+        paste0("honeybee_", names(experiment_list())[experiment_list() == input$experiment], "_", str_replace_all(str_replace_all(str_remove(Sys.time(), "\\.(.*)"), ":", "-"), " ", "_"),".csv")
+      },
       content = function(file) {
         write_csv(plot_data(), file)
       },

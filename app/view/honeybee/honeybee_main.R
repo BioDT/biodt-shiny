@@ -13,6 +13,7 @@ box::use(
 honeybee_ui <- function(id,
                         theme,
                         i18n) {
+
   ns <- NS(id)
   # tagList(
   navset_tab(
@@ -71,8 +72,10 @@ honeybee_server <- function(id,
       }
     )
 
-    honeybee_info_server("honeybee_info",
-    session)
+    honeybee_info_server(
+      "honeybee_info",
+      session
+    )
 
     honeybee_beekeeper_server(
       "honeybee_beekeeper",

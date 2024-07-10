@@ -11,7 +11,7 @@
     },
     {
       "en": "Digital Twins",
-      "cz": "digitálních dvojčat"
+      "cz": "Digitálních dvojčat"
     },
     {
       "en": "Language:",
@@ -225,6 +225,10 @@
     {
       "en": "Select point on the map by first clicking the placement icon",
       "cz": "Vyberte bod na mapě kliknutím na ikonu umístění"
+    },
+    {
+      "en": "Simulation length (in years):",
+      "cz": "Délka simulace (počet let):"
     }
   ]
 }

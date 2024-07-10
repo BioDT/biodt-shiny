@@ -110,6 +110,7 @@ beekeeper_control_server <- function(
     # Run workflow button ----
     observeEvent(
       coordinates(),
+      ignoreNULL = FALSE,
       {
         if (!is_empty(coordinates()) &
           !is_empty(lookup()) &

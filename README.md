@@ -71,6 +71,22 @@ R_CONFIG_ACTIVE="prod"
 
 Other environment variables, which aren't secrets (ie. git ignored) and are publicily avaible, can be seen and/or edit in the file `config.yml`. At the time (May 2024) the file contains dummy variables, serving as an example only.
 
+**Config .Rprofile**
+
+We prefer to use PPM packages where possible and therefore it is advised to use following lines in the `.Rprofile` file in the home directory of the project.
+
+```r
+source("renv/activate.R")
+
+options(repos = c(PPM = "https://packagemanager.posit.co/cran/latest"))
+```
+
+In case of Windows and MacOS environment You might want to add one more line after these two:
+
+```r
+options(pkgType = "binary")
+```
+
 Note! **You might probably want to restart (re-open) your R terminal at this moment and restart your R session**.
 
 ### 4. Get local data
