@@ -47,7 +47,8 @@ mod_info_ui <- function(id, i18n) {
                 src = "static/img/usecase1.png",
                 width = 140,
                 height = 140,
-                loading = "lazy"
+                loading = "lazy",
+                aria-hidden = "true"
               ),
             ),
             tags$div(
@@ -99,7 +100,8 @@ mod_info_ui <- function(id, i18n) {
                 src = "static/img/usecase2.png",
                 width = 140,
                 height = 140,
-                loading = "lazy"
+                loading = "lazy",
+                aria-hidden = "true"
               )
             ),
             tags$div(
@@ -144,7 +146,8 @@ mod_info_ui <- function(id, i18n) {
                 src = "static/img/usecase3.png",
                 width = 140,
                 height = 140,
-                loading = "lazy"
+                loading = "lazy",
+                aria-hidden = "true"
               ),
             ),
             tags$div(
@@ -175,7 +178,8 @@ mod_info_ui <- function(id, i18n) {
                 src = "static/img/usecase4.png",
                 width = 140,
                 height = 140,
-                loading = "lazy"
+                loading = "lazy",
+                aria-hidden = "true"
               )
             ),
             tags$div(

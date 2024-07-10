@@ -34,6 +34,7 @@ disease_info_ui <- function(id, i18n) {
         tags$img(
           class = "info-picture",
           src = "static/img/Alexis-Lours-Sus-scrofa-Linnaeus.gif",
+          alt = "Video of wild boar pack",
         ),
       )
     )

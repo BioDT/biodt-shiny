@@ -45,6 +45,7 @@ grassland_info_ui <- function(id) {
         tags$img(
           class = "info-picture",
           src = "static/img/grassmind_long.jpg",
+          alt = "",
         )
       )
     )
