@@ -6,7 +6,7 @@ box::use(
 )
 
 #' @export
-honeybee_lookup_ui <- function(id) {
+honeybee_lookup_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     # Lookup Table----

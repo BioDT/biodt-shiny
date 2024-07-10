@@ -15,6 +15,7 @@ box::use(
 #' @export
 beekeeper_plot_ui <- function(
     id,
+    i18n,
     card_header = "Output plot",
     title = "output_plot",
     plot_width = "100%",

@@ -111,7 +111,8 @@ ui <- function(id) {
             class = "p-0",
             title = i18n$translate("Grassland Dynamics"),
             grassland_main_ui(
-              ns("grassland_main")
+              ns("grassland_main"),
+              i18n
             )
           )
         },

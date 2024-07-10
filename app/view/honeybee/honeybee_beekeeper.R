@@ -22,20 +22,32 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   tagList(
     tags$div(
-      beekeeper_control_ui(ns("beekeeper_control")),
+      beekeeper_control_ui(
+        ns("beekeeper_control"),
+        i18n
+      ),
       layout_column_wrap(
         width = NULL,
         fill = FALSE,
         style = css(grid_template_columns = "2fr 1fr"),
-        honeybee_map_ui(ns("beekeeper_map")),
+        honeybee_map_ui(
+          ns("beekeeper_map"),
+          i18n
+        ),
         honeybee_param_ui(
           ns("beekeeper_param"),
           theme,
           i18n
         )
       ),
-      honeybee_lookup_ui(ns("beekeeper_lookup")),
-      beekeeper_plot_ui(ns("beekeeper_plot"))
+      honeybee_lookup_ui(
+        ns("beekeeper_lookup"),
+        i18n
+      ),
+      beekeeper_plot_ui(
+        ns("beekeeper_plot"),
+        i18n
+      )
     )
   )
 }

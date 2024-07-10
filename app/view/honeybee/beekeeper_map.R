@@ -5,7 +5,7 @@ box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observ
          terra[vect, extract, project])
 
 #' @export
-honeybee_map_ui <- function(id) {
+honeybee_map_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     card(
