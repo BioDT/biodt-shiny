@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, radioButtons, fluidRow, column, textOutput, observeEvent, reactive, renderText,observe,req, HTML,p,tags],
+  shiny[moduleServer, NS, tagList, radioButtons, fluidRow, column, textOutput, observeEvent, reactive, renderText,observe,req, HTML,p,tags, showNotification],
   leaflet[leafletOutput, renderLeaflet, leafletProxy, addTiles, addLayersControl, addRasterImage, hideGroup, layersControlOptions,setView, leaflet,clearGroup, showGroup,addProviderTiles,providers,providerTileOptions,tileOptions],
   DT[renderDT, DTOutput],
   dplyr[mutate, select, arrange, left_join, desc],
