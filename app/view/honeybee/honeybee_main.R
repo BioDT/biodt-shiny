@@ -42,7 +42,7 @@ honeybee_ui <- function(id,
     # Beekeper Contributors ----
     nav_panel(
       title = i18n$translate("Contributors"),
-      valule = "Contributors",
+      value = "Contributors",
       icon = icon("sitemap"),
       bee_contributors_ui(
         ns("beekeeper_contributors"),
