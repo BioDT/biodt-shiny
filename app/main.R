@@ -20,6 +20,7 @@ box::use(
     disease_outbreaks_main_ui,
     disease_outbreaks_main_server
   ],
+  app/view/cwr/cwr_main[mod_cwr_server, mod_cwr_ui]
 )
 
 shiny$enableBookmarking("server")
@@ -125,6 +126,26 @@ ui <- function(id) {
             )
           )
         },
+        if (env_active == "dev") {
+          nav_item(
+            ## Species response to environment - menu subitem ----
+            shiny$tags$div(
+              class = "p-2",
+              shiny$icon("temperature-arrow-up"),
+              shiny$tags$strong(i18n$translate("Species response to environmental change"))
+            )
+          )
+        },
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = i18n$translate("Crop wild relatives and genetic resources for food security"),
+            mod_cwr_ui(
+              ns("cwr_main"),
+              i18n
+            )
+          )
+        },
         ## Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
@@ -213,7 +234,11 @@ server <- function(id) {
       "info",
       main_session = session
     )
-    
+    # CWR pDT ----
+    mod_cwr_server(
+      "cwr_main",
+      i18n
+    )
     
     # Honeybee pDT ----
     honeybee_server(
