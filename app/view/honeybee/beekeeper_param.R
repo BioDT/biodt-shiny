@@ -14,7 +14,9 @@ honeybee_param_ui <- function(id, theme, i18n) {
       title = "params_simulation",
       full_screen = FALSE,
       card_header(
-        tags$h5("Simulation Parameters")
+        tags$h2(
+          class = "card_title",
+          "Simulation Parameters")
       ),
       card_body(
         sliderInput(

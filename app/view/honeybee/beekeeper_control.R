@@ -24,7 +24,9 @@ beekeeper_control_ui <- function(id) {
         class = "row d-flex justify-content-between align-items-center my-1",
         tags$div(
           class = "col-md-8 col-sm-12 me-auto",
-          tags$h5("Honeybee Beekeeper Case"),
+          tags$h2(
+            class = "card_title",
+            "Honeybee Beekeeper Case"),
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
@@ -44,7 +46,9 @@ beekeeper_control_ui <- function(id) {
       id = ns("control"),
       tags$div(
         class = "row d-flex justify-content-between card-list",
-        tags$h5("Instructions"),
+        tags$h3(
+          class = "pdt_instructions_title",
+          "Instructions"),
         tags$ol(
           tags$style("
             .card-list ol li {
@@ -55,7 +59,11 @@ beekeeper_control_ui <- function(id) {
           tags$li(tags$b("Select"), "point on the map by first clicking the placement icon"),
           tags$li(tags$b("Adjust"), "the parameters"),
           tags$li(tags$b("Change"), "the lookup table values if needed"),
-          tags$li(tags$b("Click"), "the run simulation button")
+          tags$li(
+            "Click the",
+            tags$b("Run simulation"), 
+            "button", 
+          ),
         ),
         tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu.")
       )

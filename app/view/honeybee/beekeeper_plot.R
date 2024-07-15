@@ -29,7 +29,9 @@ beekeeper_plot_ui <- function(
       title = title,
       full_screen = TRUE,
       card_header(
-        tags$h5(card_header)
+        tags$h2(
+          class = "card_title",
+          card_header)
       ),
       tags$div(
         class = "row",

@@ -14,13 +14,9 @@ mod_acknowledgements_ui <- function(id) {
         id = ns("acknowledgement"),
         class = "mt-2 mx-md-3 card-shadow",
         card_header(
-          tags$div(
-            class = "row d-flex justify-content-between align-items-center my-1",
-            tags$div(
-              class = "col-md-8 col-sm-12 me-auto",
-              tags$h5("Acknowledgements"),
-            ),
-          )
+              tags$h2(
+                class = "card_title",
+                "Acknowledgements"),
         ),
         card_body(
           id = ns("acknowledgement"),
@@ -42,13 +38,9 @@ mod_acknowledgements_ui <- function(id) {
         id = ns("credits"),
         class = "mt-2 mx-md-3 card-shadow",
         card_header(
-          tags$div(
-            class = "row d-flex justify-content-between align-items-center my-1",
-            tags$div(
-              class = "col-md-8 col-sm-12 me-auto",
-              tags$h5("Credits"),
-            ),
-          )
+              tags$h2(
+                class = "card_title",
+                "Credits"),
         ),
         card_body(
           id = ns("credits"),
