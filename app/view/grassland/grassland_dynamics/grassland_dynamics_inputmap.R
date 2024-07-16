@@ -17,7 +17,9 @@ grassland_dynamics_inputmap_ui <- function(id) {
     class = "ms-md-3 card-shadow mt-2",
     full_screen = TRUE,
     card_header(
-      tags$h5("Input Map")
+      tags$h2(
+        class = "card_title",
+        "Input Map")
     ),
     card_body(
       leafletOutput(

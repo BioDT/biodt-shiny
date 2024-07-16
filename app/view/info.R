@@ -47,7 +47,8 @@ mod_info_ui <- function(id, i18n) {
                 width = 140,
                 height = 140,
                 loading = "lazy",
-                `aria-hidden` = "true"
+                `aria-hidden` = "true",
+                alt = "",
               ),
             ),
             tags$div(
@@ -100,7 +101,8 @@ mod_info_ui <- function(id, i18n) {
                 width = 140,
                 height = 140,
                 loading = "lazy",
-                `aria-hidden` = "true"
+                `aria-hidden` = "true",
+                alt = "",
               )
             ),
             tags$div(
@@ -146,7 +148,8 @@ mod_info_ui <- function(id, i18n) {
                 width = 140,
                 height = 140,
                 loading = "lazy",
-                `aria-hidden` = "true"
+                `aria-hidden` = "true",
+                alt = "",
               ),
             ),
             tags$div(
@@ -178,7 +181,8 @@ mod_info_ui <- function(id, i18n) {
                 width = 140,
                 height = 140,
                 loading = "lazy",
-                `aria-hidden` = "true"
+                `aria-hidden` = "true",
+                alt = "",
               )
             ),
             tags$div(
