@@ -31,6 +31,7 @@ bee_contributors_ui <- function(id) {
         tags$img(
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
           class = "info-picture",
+          alt = "Picture of honeybees"
         )
       )
     )
