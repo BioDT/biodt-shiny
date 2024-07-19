@@ -23,7 +23,7 @@ ces_info_ui <- function(id) {
           class = "pt-3",
           "The CES prototype Digital Twin (pDT) in EARLY ACCESS"
         ),
-        tags$h2("This prototype digital twin is in early access and intended for research purposes only; do not use for decision-making or operational purposes."),
+        tags$span(tags$h2("This prototype digital twin is in early access and intended for research purposes only; do not use for decision-making or operational purposes."), style="color:red"),
         tags$p("Explore the Digital Twin for Cultural Ecosystems! Our digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
   Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect.")
       )
