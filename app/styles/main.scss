@@ -7,6 +7,15 @@
     overflow-x: hidden;
 }
 
+.card_title {
+    margin: 0.25rem 0 0.25rem 0;
+    font-size: 1.5rem;
+}
+
+.pdt_instructions_title {
+  font-size: 1.25rem;
+}
+
 .btn-navbar {
   color: #414F2F;
   background-color: #fff;
@@ -160,9 +169,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    text-align: center;
 
-    h3 {
-      font-weight: 700;
+    h2 {
+      font-weight: 600;
       font-size: 1.5rem;
     }
   }
@@ -213,3 +223,21 @@
   background-position: bottom;
   display: flex;
 }
+
+/* info page styles */
+
+.info-picture {
+  width: 50vw;
+  height: 100vh;
+  max-height: 1000px;
+  object-fit: cover;
+}
+
+.fluid-row {
+  margin: 0;
+  padding: 0;
+  align-items: center; 
+  justify-content: center;
+}
+
+

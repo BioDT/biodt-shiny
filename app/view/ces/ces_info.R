@@ -7,7 +7,7 @@ box::use(
 ces_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
-    class = "align-items-center justify-content-center m-0 p-0",
+    class = "fluid-row",
     style ="overflow-x: hidden",
     column(
       width = 6,
@@ -34,8 +34,9 @@ ces_info_ui <- function(id) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
+          class = "info-picture",
           src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
-          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
+          alt = "",
         )
       )
     )

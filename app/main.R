@@ -74,7 +74,8 @@ ui <- function(id) {
         shiny$img(
           src = "static/logo.svg",
           height = "70px",
-          style = "padding-right: 20px"
+          style = "padding-right: 20px",
+          alt = "Biodiversity Digital Twin",
         ),
       ),
       id = ns("navbar"),
@@ -88,7 +89,7 @@ ui <- function(id) {
       nav_panel(
         title = i18n$translate("Info"),
         value = "info",
-        icon = shiny$icon("circle-info"),
+        icon = shiny$icon("circle-info", `aria-hidden` = "true"),
         class = "container-fluid index-info",
         mod_info_ui(ns("info"), i18n)
       ),
@@ -96,13 +97,13 @@ ui <- function(id) {
       nav_menu(
         title = i18n$translate("Digital Twin"),
         align = "left",
-        icon = shiny$icon("people-group"),
+        icon = shiny$icon("people-group", `aria-hidden` = "true"),
         if (env_active == "dev") {
           nav_item(
             ## Species response to environment - menu subitem ----
             shiny$tags$div(
               class = "p-2",
-              shiny$icon("temperature-arrow-up"),
+              shiny$icon("temperature-arrow-up", `aria-hidden` = "true"),
               shiny$tags$strong(i18n$translate("Species response to environmental change"))
             )
           )
@@ -151,7 +152,7 @@ ui <- function(id) {
           shiny$div(
             class = "p-2",
             shiny$div(
-              shiny$icon("bugs"),
+              shiny$icon("bugs", `aria-hidden` = "true"),
               shiny$strong(i18n$translate("Species interactions with each other and with humans")),
               style = "width: 450px"
             ),
@@ -180,7 +181,7 @@ ui <- function(id) {
       nav_panel(
         title = i18n$translate("Acknowledgements"),
         value = "acknowledgements",
-        icon = shiny$icon("users-gear"),
+        icon = shiny$icon("users-gear", `aria-hidden` = "true"),
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),

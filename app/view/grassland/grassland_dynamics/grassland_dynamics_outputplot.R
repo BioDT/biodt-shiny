@@ -12,7 +12,9 @@ grassland_dynamics_outputplot_ui <- function(id, i18n) { # nolint
     class = "mx-md-3 card-shadow mb-2",
     full_screen = TRUE,
     card_header(
-      tags$h5((i18n$translate("Model Output")))
+      tags$h2(
+        class = "card_title",
+        i18n$translate("Model Output"))
     ),
     card_body(
       layout_column_wrap(

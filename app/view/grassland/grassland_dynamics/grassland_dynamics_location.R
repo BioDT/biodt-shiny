@@ -19,7 +19,9 @@ grassland_dynamics_location_ui <- function(id, i18n) {
     id = ns("location_select"),
     full_screen = FALSE,
     card_header(
-      tags$h5(i18n$translate("Location"))
+      tags$h2(
+        class="card_title",
+        i18n$translate("Location"))
     ),
     card_body(
       radioButtons(

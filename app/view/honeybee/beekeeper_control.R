@@ -24,7 +24,9 @@ beekeeper_control_ui <- function(id, i18n) {
         class = "row d-flex justify-content-between align-items-center my-1",
         tags$div(
           class = "col-md-8 col-sm-12 me-auto",
-          tags$h5(i18n$translate("Honeybee Beekeeper Case")),
+          tags$h2(
+            class = "card_title",
+            i18n$translate("Honeybee Beekeeper Case")),
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
@@ -44,7 +46,9 @@ beekeeper_control_ui <- function(id, i18n) {
       id = ns("control"),
       tags$div(
         class = "row d-flex justify-content-between card-list",
-        tags$h5("Instructions"),
+        tags$h3(
+          class = "pdt_instructions_title",
+          "Instructions"),
         tags$ol(
           tags$style("
             .card-list ol li {

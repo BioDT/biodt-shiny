@@ -7,8 +7,7 @@ box::use(
 honeybee_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
-    class = "align-items-center justify-content-center m-0 p-0",
-    style = "overflow-x: hidden",
+    class = "fluid-row",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
@@ -49,8 +48,9 @@ honeybee_info_ui <- function(id, i18n) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
+          class = "info-picture",
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
+          alt = "Picture of honeybees",
         )
       )
     )

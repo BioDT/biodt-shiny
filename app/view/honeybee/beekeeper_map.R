@@ -13,7 +13,9 @@ honeybee_map_ui <- function(id, i18n) {
       title = "input_map",
       id = ns("input_map"),
       full_screen = TRUE,
-      card_header(tags$h5("Input Map"),),
+      card_header(tags$h2(
+                    class = "card_title",
+                    "Input Map"), ),
       card_body(
         id = ns("map_input_card"),
         tags$div(

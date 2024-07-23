@@ -7,12 +7,13 @@ grassland_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     id = ns("welcome"),
-    class = "align-items-center justify-content-center",
+    class = "fluid-row",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
+      style = "height: 100vh;",
       tags$div(
-        class = "col-sm-10 offset-sm-1 text-center",
+        class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
           i18n$translate("Grassland")
@@ -28,11 +29,13 @@ grassland_info_ui <- function(id, i18n) {
     ),
     column(
       width = 6,
+      style = "height: 100vh;",
+      class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        class = "m-0 p-0 d-none d-lg-block",
         tags$img(
+          class = "info-picture",
           src = "static/img/grassmind_long.jpg",
-          style = "width: 1000px;"
+          alt = "",
         )
       )
     )
