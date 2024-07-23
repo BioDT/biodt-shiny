@@ -41,7 +41,7 @@ mod_info_ui <- function(id, i18n) {
                tags$div(
                  class = "landing-pdt-wrap col-sm-5",
                  tags$div(class = "title",
-                          tags$h3(
+                          tags$h2(
                             i18n$translate("Species response to environmental change")
                           )),
                  tags$div(
@@ -75,7 +75,7 @@ mod_info_ui <- function(id, i18n) {
                tags$div(
                  class = "landing-pdt-wrap col-sm-5",
                  tags$div(class = "title",
-                          tags$h3(
+                          tags$h2(
                             i18n$translate("Genetically detected biodiversity")
                           )),
                  tags$div(
@@ -111,7 +111,7 @@ mod_info_ui <- function(id, i18n) {
                tags$div(
                  class = "landing-pdt-wrap col-sm-5",
                  tags$div(class = "title",
-                          tags$h3(
+                          tags$h2(
                             i18n$translate("Dynamics and threats from and for species of policy concern")
                           )),
                  tags$div(
@@ -137,7 +137,7 @@ mod_info_ui <- function(id, i18n) {
                tags$div(
                  class = "landing-pdt-wrap col-sm-5",
                  tags$div(class = "title",
-                          tags$h3(
+                          tags$h2(
                             i18n$translate("Species interactions with each other and with humans")
                           )),
                  tags$div(
