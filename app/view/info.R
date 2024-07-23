@@ -67,8 +67,13 @@ mod_info_ui <- function(id, i18n) {
                                 class = "w-100",
                                 i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
                               ),
-                              tags$li(class = "w-100",
-                                      i18n$translate("Cultural Ecosystem Services"))
+                              tags$li(
+                                      actionLink(
+                                        class = "w-100",
+                                        inputId = ns("ces_selector"),
+                                        label = i18n$translate("Cultural Ecosystem Services")
+                                      )
+                              )
                             ))
                  )
                ),
@@ -184,6 +189,17 @@ mod_info_server <- function(id, r, main_session) {
                               session = main_session)
                    nav_select("honeybee_main-tab",
                               selected = "Beekeeper",
+                              session = main_session)
+                 })
+    
+    observeEvent(input$ces_selector,
+                 {
+                   print("actionlink selected")
+                   nav_select("navbar",
+                              selected = "CES",
+                              session = main_session)
+                   nav_select("ces_main-tab",
+                              selected = "Info",
                               session = main_session)
                  })
   })

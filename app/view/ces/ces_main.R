@@ -13,6 +13,7 @@ box::use(
 ces_ui <- function(id) {
   ns <- NS(id)
   navset_tab(
+    id = ns("tab"),
     # Info Page ---
     nav_panel(
       title = "Info",

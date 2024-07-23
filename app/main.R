@@ -121,7 +121,8 @@ ui <- function(id) {
         # if (env_active == "dev") {
           nav_panel(
             class = "p-0",
-            title = "Cultural Ecosystem Services",
+            title = i18n$translate("Cultural Ecosystem Services"),
+            value = "CES",
             ces_ui(
               ns("ces_main")
             )
