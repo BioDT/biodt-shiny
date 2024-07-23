@@ -127,6 +127,106 @@
       "cz": "[CZ] Lorem ipsum..."
     },
     {
+      "en": "Grassland",
+      "cz": "Travní porosty"
+    },
+    {
+      "en": "Background - scientific breakthroughs:",
+      "cz": "Pozadí - vědecké objevy:"
+    },
+    {
+      "en": "Describe temporal biodiversity dynamics for different local grassland sites by a regionally transferable model (GRASSMIND), i.e. with a generic parameterization such that separate site-specific model calibration is avoided ('biodiversity' represented in the model by 4 plant functional groups: grasses, small herbs, tall herbs, legumes).",
+      "cz": "Popisuje časovou dynamiku biodiverzity pro různé lokální travní porosty prostřednictvím modelu ('GRASSMIND'), který je regionálně přenosný. Tj. s generickou parametrizací takovou, že brání separátní kalibraci modelu specifického pro dané místo ('biodiverzita' reprezentovaná v modelu čtyřmi funkčními skupinami rostlin: trávy, drobné byliny, vysoké byliny, luštěniny)." 
+    },
+    {
+      "en": "Project temporal changes in biodiversity dynamics (e.g. due to climate change or climate extremes) and provide scenario-based (management) options for mitigating undesired effects.",
+      "cz": "Projektuje časové změny v dynamice biodiverzity (např. v důsledku klimatické změny nebo klimatických extrémů) a poskytuje možnosti (řízení) založené na scénářích pro zmírnění nežádoucích účinků."
+    },
+    {
+      "en": "Choose location type:",
+      "cz": "Vyber typ lokace:"
+    },
+    {
+      "en": "Latitude",
+      "cz": "Zeměpisná šířka"
+    },
+    {
+      "en": "Longitude",
+      "cz": "Zeměpisná délka"
+    },
+    {
+      "en": "Update Map Location",
+      "cz": "Aktualizace polohy na mapě"
+    },
+    {
+      "en": "Model Output",
+      "cz": "Výstup modelu"
+    },
+    {
+      "en": "Choose output dataset",
+      "cz": "Vyberte výstupní dataset"
+    },
+    {
+      "en": "Choose output files",
+      "cz": "Vyberte výstupní soubory"
+    },
+    {
+      "en": "Show results",
+      "cz": "Ukaž výsledky"
+    },
+    {
+      "en": "Honeybee Prototype Digital Twin (DT)",
+      "cz": "Prototyp digitálního dvojčete Honeybee"
+    },
+    {
+      "en": "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE.",
+      "cz": "Prototyp digitálního (pDT) HONEYBEE je založen na mechanistickém simulačním modelu BEEHAVE."
+    },
+    {
+      "en": "Model descriptions of BEEHAVE and additional information can be found on",
+      "cz": "Popis modelu BEEHAVE a další informace naleznete na"
+    },
+    {
+      "en": "The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,",
+      "cz": "Prototyp digitálního dvojčete Honeybee potřebuje informace o zdrojích květin. Jako ukázkový příklad používáme mapu krajinného pokryvu, poskytnutou viz Preidl et al. (2020,"
+    },
+    {
+      "en": "Source code and scripts of the pDT can be found at ",
+      "cz": "Zdrojový kód a skripty pDT lze nalézt na "
+    },
+    {
+      "en": "Start prototyping",
+      "cz": "Začněte prototypovat"
+    },
+    {
+      "en": "Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (",
+      "cz": "Údaje o počasí jsou poskytovány Deutscher Wetterdienst (DWD) pomocí rozhraní API, poskytovaného R balíkem rdwd ("
+    },
+    {
+      "en": "Beekeeper",
+      "cz": "Včelař"
+    },
+    {
+      "en": "Contributors",
+      "cz": "Přispěvatelé"
+    },
+    {
+      "en": "CONTRIBUTORS",
+      "cz": "PŘISPĚVATELÉ"
+    },
+    {
+      "en": "Honeybee Beekeeper Case",
+      "cz": "Beekeeper - prototyp Včelař"
+    },
+    {
+      "en": "Run simulation",
+      "cz": "Spustit simulaci"
+    },
+    {
+      "en": "Select point on the map by first clicking the placement icon",
+      "cz": "Vyberte bod na mapě kliknutím na ikonu umístění"
+    },
+    {
       "en": "Simulation length (in years):",
       "cz": "Délka simulace (počet let):"
     }

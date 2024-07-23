@@ -14,7 +14,7 @@ box::use(
 )
 
 #' @export
-beekeeper_control_ui <- function(id) {
+beekeeper_control_ui <- function(id, i18n) {
   ns <- NS(id)
   card(
     id = ns("control"),
@@ -26,14 +26,14 @@ beekeeper_control_ui <- function(id) {
           class = "col-md-8 col-sm-12 me-auto",
           tags$h2(
             class = "card_title",
-            "Honeybee Beekeeper Case"),
+            i18n$translate("Honeybee Beekeeper Case")),
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
           disabled(
             actionButton(
               ns("run_simulation"),
-              label = "Run simulation",
+              label = i18n$translate("Run simulation"),
               width = "100%",
               class = "btn-secondary",
               style = "max-width: 200px"
@@ -56,14 +56,10 @@ beekeeper_control_ui <- function(id) {
               margin-left: 20px;
             }
           "),
-          tags$li(tags$b("Select"), "point on the map by first clicking the placement icon"),
-          tags$li(tags$b("Adjust"), "the parameters"),
-          tags$li(tags$b("Change"), "the lookup table values if needed"),
-          tags$li(
-            "Click the",
-            tags$b("Run simulation"), 
-            "button", 
-          ),
+          tags$li(i18n$translate("Select point on the map by first clicking the placement icon")),
+          tags$li(i18n$translate("Adjust the parameters")),
+          tags$li(i18n$translate("Change the lookup table values if needed")),
+          tags$li(i18n$translate("Click the run simulation button"))
         ),
         tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu.")
       )
@@ -118,6 +114,7 @@ beekeeper_control_server <- function(
     # Run workflow button ----
     observeEvent(
       coordinates(),
+      ignoreNULL = FALSE,
       {
         if (!is_empty(coordinates()) &
           !is_empty(lookup()) &

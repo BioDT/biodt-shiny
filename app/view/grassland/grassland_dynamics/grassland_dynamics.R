@@ -20,23 +20,17 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_ui <- function(id) {
+grassland_dynamics_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     layout_column_wrap(
       width = NULL,
       fill = FALSE,
       style = css(grid_template_columns = "3fr 1fr"),
-      grassland_dynamics_inputmap_ui(
-        ns("inputmap")
-      ),
-      grassland_dynamics_location_ui(
-        ns("location")
-      ),
+      grassland_dynamics_inputmap_ui(ns("inputmap"), i18n),
+      grassland_dynamics_location_ui(ns("location"), i18n),
     ),
-    grassland_dynamics_outputplot_ui(
-      ns("outputplot")
-    )
+    grassland_dynamics_outputplot_ui(ns("outputplot"), i18n)
   )
 }
 

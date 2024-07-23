@@ -4,7 +4,7 @@ box::use(
 
 
 #' @export
-bee_contributors_ui <- function(id) {
+bee_contributors_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
@@ -15,7 +15,7 @@ bee_contributors_ui <- function(id) {
       style = "height: 100vh;",
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
-        tags$h2("CONTRIBUTORS",
+        tags$h2(i18n$translate("CONTRIBUTORS"),
           style = "greeting display-4 font-weight-bold"
         ),
         tags$p("Jürgen Groeneveld and Volker Grimm, Department of Ecological Modelling, Helmholtz Centre for Environmental Research - UFZ, Permoserstr. 15, 7 04318 Leipzig, Germany"),

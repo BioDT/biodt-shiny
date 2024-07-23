@@ -5,7 +5,7 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_outputplot_ui <- function(id) { # nolint
+grassland_dynamics_outputplot_ui <- function(id, i18n) { # nolint
   ns <- NS(id)
   card(
     id = ns("outputplot"),
@@ -14,26 +14,26 @@ grassland_dynamics_outputplot_ui <- function(id) { # nolint
     card_header(
       tags$h2(
         class = "card_title",
-        "Model Output")
+        i18n$translate("Model Output"))
     ),
     card_body(
       layout_column_wrap(
         width = 1/3,
         selectInput(
           ns("output_list"),
-          label = "Choose output dataset",
+          label = i18n$translate("Choose output dataset"),
           choices = NULL
         ),
         selectInput(
           ns("output_files_list"),
-          label = "Choose output files",
+          label = i18n$translate("Choose output files"),
           choices = NULL,
           multiple = TRUE
         ),
         disabled(
           actionButton(
             ns("update_output"),
-            label = "Show results",
+            label = i18n$translate("Show results"),
             class = "mt-auto"
           )
         )

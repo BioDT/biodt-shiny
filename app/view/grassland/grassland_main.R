@@ -12,7 +12,7 @@ box::use(
 )
 
 #' @export
-grassland_main_ui <- function(id) {
+grassland_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
     # Info Page ---
@@ -21,15 +21,18 @@ grassland_main_ui <- function(id) {
       value = "Info",
       icon = icon("circle-info"),
       grassland_info_ui(
-        ns("grassland_info")
+        ns("grassland_info"),
+        i18n
       )
     ),
     # Grassland Case ----
     nav_panel(
+      # title = i18n$translate("Grassland Dynamics"),
       title = "Grassland Dynamics",
       icon = icon("leaf"),
       grassland_dynamics_ui(
-        ns("grassland_app")
+        ns("grassland_app"),
+        i18n
       )
     )
   )

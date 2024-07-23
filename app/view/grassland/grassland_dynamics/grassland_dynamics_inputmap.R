@@ -10,7 +10,7 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_inputmap_ui <- function(id) {
+grassland_dynamics_inputmap_ui <- function(id, i18n) {
   ns <- NS(id)
   card(
     id = ns("inputmap"),
@@ -19,7 +19,7 @@ grassland_dynamics_inputmap_ui <- function(id) {
     card_header(
       tags$h2(
         class = "card_title",
-        "Input Map")
+        i18n$translate("Input map"))
     ),
     card_body(
       leafletOutput(

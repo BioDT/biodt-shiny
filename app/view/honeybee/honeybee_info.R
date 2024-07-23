@@ -4,7 +4,7 @@ box::use(
 )
 
 #' @export
-honeybee_info_ui <- function(id) {
+honeybee_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "fluid-row",
@@ -16,24 +16,28 @@ honeybee_info_ui <- function(id) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "Honeybee pDT"
+          i18n$translate("Honeybee Prototype Digital Twin (DT)")
         ),
         tags$p(
           class = "pt-3",
-          "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE (Becher et al. 2014,", tags$a("https://doi.org/10.1111/1365-2664.12222", href = "https://doi.org/10.1111/1365-2664.12222"), ")."
+          i18n$translate("The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE."), # nolint: line_length_linter.
+          tags$a(
+            "(Becher et al. 2014, https://doi.org/10.1111/1365-2664.12222)",
+            href = "https://doi.org/10.1111/1365-2664.12222"
+          )
         ),
-        tags$p("Model descriptions of BEEHAVE and additional information can be found on", tags$a("https://beehave-model.net/", href = "https://beehave-model.net/"), "."),
-        tags$p("The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,", tags$a("https://doi.org/10.1594/PANGAEA.910837", href = "https://doi.org/10.1594/PANGAEA.910837"), ")."),
-        tags$p("Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (", tags$a("https://cran.r-project.org/web/packages/rdwd/index.html", href = "https://cran.r-project.org/web/packages/rdwd/index.html"), ")."),
-        tags$p("Source code and scripts of the pDT can be found at ", tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
+        tags$p(i18n$translate("Model descriptions of BEEHAVE and additional information can be found on"), tags$a("https://beehave-model.net/", href = "https://beehave-model.net/"), "."),
+        tags$p(i18n$translate("The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,"), tags$a("https://doi.org/10.1594/PANGAEA.910837", href = "https://doi.org/10.1594/PANGAEA.910837"), ")."),
+        tags$p(i18n$translate("Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd ("), tags$a("https://cran.r-project.org/web/packages/rdwd/index.html", href = "https://cran.r-project.org/web/packages/rdwd/index.html"), ")."),
+        tags$p(i18n$translate("Source code and scripts of the pDT can be found at "), tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
         tags$div(
           class = "mt-5",
-          actionButton(
-            ns("start"),
-            label = "Start prototyping",
-            width = "100%",
-            class = "btn-secondary",
-            style = "max-width: 200px"
+            actionButton(
+              ns("start"),
+              label = i18n$translate("Start prototyping"),
+              width = "100%",
+              class = "btn-secondary",
+              style = "max-width: 200px"
           )
         )
       )

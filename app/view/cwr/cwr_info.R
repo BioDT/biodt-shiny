@@ -7,7 +7,7 @@ box::use(
 ces_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
-    class = "fluid-row",
+    class = "align-items-center justify-content-center m-0 p-0",
     style ="overflow-x: hidden",
     column(
       width = 6,
@@ -17,15 +17,14 @@ ces_info_ui <- function(id) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "Cultural Ecosystem Services pDT"
+          "Crop Wild Relatives pDT"
         ),
         tags$p(
           class = "pt-3",
-          "The CES prototype Digital Twin (pDT) in EARLY ACCESS"
+          "The CWR prototype Digital Twin (pDT) in EARLY ACCESS"
         ),
-        tags$span(tags$h2("This prototype digital twin is in early access and intended for research purposes only; do not use for decision-making or operational purposes."), style="color:red"),
-        tags$p("Explore the Digital Twin for Cultural Ecosystems! Our digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
-  Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect.")
+        tags$h2("This prototype digital twin is in early access and intended for research purposes only; do not use for decision-making or operational purposes."),
+        tags$p("Pariatur ut maiores qui. Aut sint quia quis minus natus temporibus modi deleniti. Eum excepturi maiores repudiandae neque. Quidem perspiciatis et laudantium similique illo eaque. Excepturi eius atque aspernatur excepturi dolore modi adipisci maxime")
       )
     ),
     column(
@@ -34,9 +33,8 @@ ces_info_ui <- function(id) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
-          class = "info-picture",
           src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
-          alt = "",
+          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
         )
       )
     )
@@ -55,7 +53,7 @@ ces_info_server <- function(id, main_session) {
       {
         nav_select(
           "tab",
-          selected = "CES",
+          selected = "cwr-map",
           session = main_session
         )
       }
