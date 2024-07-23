@@ -98,7 +98,7 @@ ui <- function(id) {
         title = i18n$translate("Digital Twin"),
         align = "left",
         icon = shiny$icon("people-group", `aria-hidden` = "true"),
-        if (env_active == "dev") {
+        # if (env_active == "dev") {
           nav_item(
             ## Species response to environment - menu subitem ----
             shiny$tags$div(
@@ -106,8 +106,8 @@ ui <- function(id) {
               shiny$icon("temperature-arrow-up", `aria-hidden` = "true"),
               shiny$tags$strong(i18n$translate("Species response to environmental change"))
             )
-          )
-        },
+          ),
+        # },
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
@@ -118,15 +118,15 @@ ui <- function(id) {
             )
           )
         },
-        if (env_active == "dev") {
+        # if (env_active == "dev") {
           nav_panel(
             class = "p-0",
             title = "Cultural Ecosystem Services",
             ces_ui(
               ns("ces_main")
             )
-          )
-        },
+          ),
+        # },
         if (env_active == "dev") {
           nav_item(
             ## Species response to environment - menu subitem ----
