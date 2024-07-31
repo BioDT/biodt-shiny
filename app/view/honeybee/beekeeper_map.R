@@ -2,7 +2,12 @@ box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observ
          bslib[card, card_header, card_body],
          leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
          htmlwidgets[onRender],
-         terra[vect, extract, project])
+         terra[vect, extract, project, buffer, crop],
+         )
+
+box::use(
+  app/logic/honeybee/honeybee_beekeeper_map[honeybee_leaflet_map],
+)
 
 #' @export
 honeybee_map_ui <- function(id, i18n) {
@@ -51,6 +56,7 @@ honeybee_map_server <- function(id,
     ns <- session$ns
     coordinates_text <- reactiveVal()
     out <- reactiveVal(NULL)
+    zoomed_map <- reactiveVal(NULL)
     
     output$acknowledgment <- renderText(map_acknowledgment())
     
@@ -121,6 +127,7 @@ honeybee_map_server <- function(id,
                          coordinates_text()
                        
                        out(NULL)
+                       zoomed_map(NULL)
                      } else {
                        HTML(
                          paste(
@@ -135,6 +142,15 @@ honeybee_map_server <- function(id,
                        ) |>
                          coordinates_text()
                        
+                       # Choose area around the selected point
+                       clip_buffer <- buffer(pts, 
+                                             3000)
+                       # Crop area from the map and create unscaled map for minimap
+                       crop(map(),
+                            clip_buffer) |>
+                         honeybee_leaflet_map(scale = FALSE) |>
+                         zoomed_map()
+                       # Sent coordinates to out reactive value to use it outside module
                        data.frame(lat = lat,
                                   lon = long) |>
                          out()
@@ -142,6 +158,7 @@ honeybee_map_server <- function(id,
                    } else {
                      coordinates_text("No location selected.")
                      out(NULL)
+                     zoomed_map(NULL)
                    }
                  })
     

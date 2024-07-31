@@ -12,15 +12,20 @@ read_honeybee_tif <- function(map_path) {
 #' @export
 honeybee_leaflet_map <- function(map_raster,
                                  lookup_table = NULL,
-                                 add_control = TRUE) {
+                                 add_control = TRUE,
+                                 scale = TRUE) {
   icon.fa <- makeAwesomeIcon(icon = "check", markerColor = "cadetblue", library = "fa", iconColor = "#fff")
 
-  scaled_map <- map_raster |>
-    spatSample(2000000,
-      "regular",
-      as.raster = TRUE,
-      warn = FALSE
-    )
+  if (scale) {
+    scaled_map <- map_raster |>
+      spatSample(2000000,
+        "regular",
+        as.raster = TRUE,
+        warn = FALSE
+      )
+  } else {
+    scaled_map <- map_raster
+  }
 
   bee_map <- deepcopy(scaled_map)
   set.values(scaled_map, cells(scaled_map, c(0, 24)) |> unlist(), NA)
