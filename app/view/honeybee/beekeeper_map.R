@@ -36,6 +36,10 @@ honeybee_map_ui <- function(id, i18n) {
               "desired placement on the map."
             ),
             uiOutput(ns("map_coordinates"),),
+          ),
+          tags$div(
+            class = "col-lg-6 col-sm-12",
+            leafletOutput(ns("map_mini"), height = "200px"),
           )
         ),
         leafletOutput(ns("map_plot"),
@@ -146,10 +150,16 @@ honeybee_map_server <- function(id,
                        clip_buffer <- buffer(pts, 
                                              3000)
                        # Crop area from the map and create unscaled map for minimap
-                       crop(map(),
-                            clip_buffer) |>
+                       crop(map(), clip_buffer) |>
                          honeybee_leaflet_map(scale = FALSE) |>
                          zoomed_map()
+
+                       observeEvent(zoomed_map(), {
+                         output_map <- zoomed_map()
+
+                         output$map_mini <- renderLeaflet(output_map)
+                       })
+
                        # Sent coordinates to out reactive value to use it outside module
                        data.frame(lat = lat,
                                   lon = long) |>
