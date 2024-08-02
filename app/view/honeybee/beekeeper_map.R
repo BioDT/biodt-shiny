@@ -1,8 +1,9 @@
 box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
          bslib[card, card_header, card_body],
-         leaflet[leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape],
+         leaflet[setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
          htmlwidgets[onRender],
          terra[vect, extract, project, buffer, crop],
+         leaflet.extras[removeDrawToolbar],
          )
 
 box::use(
@@ -115,9 +116,7 @@ honeybee_map_server <- function(id,
                      pts <- vect(pts_longlat, crs = "epsg:4326") |>
                        project("epsg:3857")
                      
-                     print(pts)
                      extracted <- extract(map(), pts)
-                     print(extracted)
                      
                      if (is.na(extracted$category) ||
                          extracted$category == "Unclassified") {
@@ -155,9 +154,15 @@ honeybee_map_server <- function(id,
                          zoomed_map()
 
                        observeEvent(zoomed_map(), {
-                         output_map <- zoomed_map()
+                         output_zoomed <- zoomed_map() |>
+                           setView(
+                             long,
+                             lat,
+                             zoom = 18
+                           ) |>
+                           removeDrawToolbar(clearFeatures = FALSE)
 
-                         output$map_mini <- renderLeaflet(output_map)
+                         output$map_mini <- renderLeaflet(output_zoomed)
                        })
 
                        # Sent coordinates to out reactive value to use it outside module
