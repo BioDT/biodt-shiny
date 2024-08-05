@@ -3,7 +3,6 @@ box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observ
          leaflet[setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
          htmlwidgets[onRender],
          terra[vect, extract, project, buffer, crop],
-         leaflet.extras[removeDrawToolbar],
          )
 
 box::use(
@@ -146,11 +145,10 @@ honeybee_map_server <- function(id,
                          coordinates_text()
                        
                        # Choose area around the selected point
-                       clip_buffer <- buffer(pts, 
-                                             3000)
+                       clip_buffer <- buffer(pts, 3000)
                        # Crop area from the map and create unscaled map for minimap
                        crop(map(), clip_buffer) |>
-                         honeybee_leaflet_map(scale = FALSE) |>
+                         honeybee_leaflet_map(add_control = FALSE, scale = FALSE) |>
                          zoomed_map()
 
                        observeEvent(zoomed_map(), {
@@ -158,9 +156,17 @@ honeybee_map_server <- function(id,
                            setView(
                              long,
                              lat,
-                             zoom = 18
-                           ) |>
-                           removeDrawToolbar(clearFeatures = FALSE)
+                             zoom = 13
+                           )
+
+                         leafletProxy("map_mini", session) |>
+                           removeShape(layerId = "circle") |>
+                           addCircles(
+                             lng = long,
+                             lat = lat,
+                             radius = 3000,
+                             layerId = "circle"
+                           )
 
                          output$map_mini <- renderLeaflet(output_zoomed)
                        })
