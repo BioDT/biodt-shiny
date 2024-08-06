@@ -1,6 +1,6 @@
 box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
          bslib[card, card_header, card_body],
-         leaflet[clearGroup, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
+         leaflet[setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
          htmlwidgets[onRender],
          terra[vect, extract, project, buffer, crop],
          )
@@ -18,9 +18,11 @@ honeybee_map_ui <- function(id, i18n) {
       title = "input_map",
       id = ns("input_map"),
       full_screen = TRUE,
-      card_header(tags$h2(
-                    class = "card_title",
-                    "Input Map"), ),
+      card_header(
+        tags$h2(
+          class = "card_title",
+          "Input Map"
+      )),
       card_body(
         id = ns("map_input_card"),
         tags$div(
@@ -117,8 +119,7 @@ honeybee_map_server <- function(id,
                      
                      extracted <- extract(map(), pts)
                      
-                     if (is.na(extracted$category) ||
-                         extracted$category == "Unclassified") {
+                     if (is.na(extracted$category) || extracted$category == "Unclassified") {
                        HTML(
                          paste(
                            "<span class='text-danger'>",
@@ -148,7 +149,7 @@ honeybee_map_server <- function(id,
                        clip_buffer <- buffer(pts, 3000)
                        # Crop area from the map and create unscaled map for minimap
                        crop(map(), clip_buffer) |>
-                         honeybee_leaflet_map(add_control = FALSE, scale = FALSE) |>
+                         honeybee_leaflet_map(main_map_features = FALSE, scale = FALSE) |>
                          zoomed_map()
 
                        observeEvent(zoomed_map(), {
@@ -166,9 +167,7 @@ honeybee_map_server <- function(id,
                              lat = lat,
                              radius = 3000,
                              layerId = "circle"
-                           ) |>
-                           removeLayersControl() |>
-                           clearGroup("Alllayers")
+                           )
 
                          output$map_mini <- renderLeaflet(output_zoomed)
                        })
