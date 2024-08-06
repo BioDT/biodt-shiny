@@ -38,7 +38,7 @@ honeybee_leaflet_map <- function(map_raster,
       scaled_map,
       opacity = 0.5,
       project = FALSE,
-      group = "All layers"
+      group = "Alllayers"
     ) |>
     addRasterLegend(
       scaled_map,

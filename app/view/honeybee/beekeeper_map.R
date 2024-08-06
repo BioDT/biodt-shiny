@@ -1,6 +1,6 @@
 box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
          bslib[card, card_header, card_body],
-         leaflet[setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
+         leaflet[clearGroup, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
          htmlwidgets[onRender],
          terra[vect, extract, project, buffer, crop],
          )
@@ -166,7 +166,9 @@ honeybee_map_server <- function(id,
                              lat = lat,
                              radius = 3000,
                              layerId = "circle"
-                           )
+                           ) |>
+                           removeLayersControl() |>
+                           clearGroup("Alllayers")
 
                          output$map_mini <- renderLeaflet(output_zoomed)
                        })
