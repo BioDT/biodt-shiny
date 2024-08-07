@@ -1,6 +1,6 @@
 box::use(shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
          bslib[card, card_header, card_body],
-         leaflet[removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
+         leaflet[flyTo, fitBounds, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
          htmlwidgets[onRender],
          terra[vect, extract, project, buffer, crop],
          )
@@ -41,7 +41,7 @@ honeybee_map_ui <- function(id, i18n) {
           ),
           tags$div(
             class = "col-lg-6 col-sm-12",
-            leafletOutput(ns("map_mini"), height = "200px"),
+            leafletOutput(ns("map_mini"), height = "256px"),
           )
         ),
         leafletOutput(ns("map_plot"),
@@ -149,7 +149,7 @@ honeybee_map_server <- function(id,
                        clip_buffer <- buffer(pts, 3000)
                        # Crop area from the map and create unscaled map for minimap
                        crop(map(), clip_buffer) |>
-                         honeybee_leaflet_map(main_map_features = FALSE, scale = FALSE) |>
+                         honeybee_leaflet_map(add_control = FALSE, main_map_features = FALSE, scale = FALSE) |>
                          zoomed_map()
 
                        observeEvent(zoomed_map(), {
@@ -157,18 +157,14 @@ honeybee_map_server <- function(id,
                            setView(
                              long,
                              lat,
-                             zoom = 13
+                             zoom = 12
                            )
 
-
-                         leafletProxy("map_mini", session) |>
-                           removeShape(layerId = "circle") |>
-                           addCircles(
-                             lng = long,
-                             lat = lat,
-                             radius = 3000,
-                             layerId = "circle"
-                           )
+                          observeEvent(input$map_mini_bounds,
+                          {
+                            leafletProxy("map_mini", session) |>
+                              flyTo(long, lat, zoom = 13)
+                          })
 
                          output$map_mini <- renderLeaflet(output_zoomed)
                        })
