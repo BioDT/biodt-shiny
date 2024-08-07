@@ -1,7 +1,7 @@
 box::use(
   terra[rast, spatSample, deepcopy, set.values, cells],
   leaflet[leaflet, addTiles, addRasterImage, addRasterLegend, addLayersControl, layersControlOptions, addScaleBar, addAwesomeMarkers, makeAwesomeIcon, setView],
-  leaflet.extras[addDrawToolbar, drawMarkerOptions],
+  leaflet.extras[removeDrawToolbar, addDrawToolbar, drawMarkerOptions],
 )
 
 #' @export
@@ -38,10 +38,23 @@ honeybee_leaflet_map <- function(map_raster,
       lng = 11.8787,
       lat = 51.3919,
       zoom = 5
-    )
+    ) |>
+    addRasterImage(
+        bee_map,
+        opacity = 0.9,
+        project = FALSE,
+        group = "Beehave layers"
+      ) |>
+      addRasterLegend(
+        bee_map,
+        opacity = 0.9,
+        position = "bottomright",
+        group = "Beehavelayers",
+        className = "info legend Beehavelayers"
+      )
 
   if (main_map_features) {
-      leaflet_map <- leaflet_map |>
+    leaflet_map <- leaflet_map |>
       addRasterImage(
         scaled_map,
         opacity = 0.5,
@@ -54,19 +67,6 @@ honeybee_leaflet_map <- function(map_raster,
         position = "bottomright",
         group = "Alllayers",
         className = "info legend Alllayers"
-      ) |>
-      addRasterImage(
-        bee_map,
-        opacity = 0.9,
-        project = FALSE,
-        group = "Beehave layers"
-      ) |>
-      addRasterLegend(
-        bee_map,
-        opacity = 0.9,
-        position = "bottomright",
-        group = "Beehavelayers",
-        className = "info legend Beehavelayers"
       ) |>
       addLayersControl(
         c("Beehave layers", "All layers"),
@@ -88,6 +88,7 @@ honeybee_leaflet_map <- function(map_raster,
       ) |>
       addScaleBar()
   }
+
 
   # LATER - viz issue #29
   # addAwesomeMarkers(11.8787,
