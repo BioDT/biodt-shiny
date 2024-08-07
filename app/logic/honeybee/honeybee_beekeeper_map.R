@@ -40,18 +40,18 @@ honeybee_leaflet_map <- function(map_raster,
       zoom = 5
     ) |>
     addRasterImage(
-        bee_map,
-        opacity = 0.9,
-        project = FALSE,
-        group = "Beehave layers"
-      ) |>
-      addRasterLegend(
-        bee_map,
-        opacity = 0.9,
-        position = "bottomright",
-        group = "Beehavelayers",
-        className = "info legend Beehavelayers"
-      )
+      bee_map,
+      opacity = 0.9,
+      project = FALSE,
+      group = "Beehave layers"
+    ) |>
+    addRasterLegend(
+      bee_map,
+      opacity = 0.9,
+      position = "bottomright",
+      group = "Beehavelayers",
+      className = "info legend Beehavelayers"
+    )
 
   if (main_map_features) {
     leaflet_map <- leaflet_map |>
@@ -88,7 +88,6 @@ honeybee_leaflet_map <- function(map_raster,
       ) |>
       addScaleBar()
   }
-
 
   # LATER - viz issue #29
   # addAwesomeMarkers(11.8787,

@@ -158,7 +158,7 @@ honeybee_map_server <- function(id,
               setView(
                 long,
                 lat,
-                zoom = 12
+                zoom = 10
               )
 
             observeEvent(input$map_mini_bounds, {
