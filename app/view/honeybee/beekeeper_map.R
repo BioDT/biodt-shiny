@@ -1,7 +1,7 @@
 box::use(
   shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
   bslib[card, card_header, card_body],
-  leaflet[flyTo, fitBounds, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
+  leaflet[addRectangles, flyTo, fitBounds, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
   htmlwidgets[onRender],
   terra[vect, extract, project, buffer, crop],
 )
@@ -100,12 +100,13 @@ honeybee_map_server <- function(id,
         input$map_plot_draw_new_feature$geometry$coordinates[[1]]
 
       leafletProxy("map_plot", session) |>
-        removeShape(layerId = "circle") |>
-        addCircles(
-          lng = long,
-          lat = lat,
-          radius = 3000,
-          layerId = "circle"
+        removeShape(layerId = "rect") |>
+        addRectangles(
+          lng1 = long - 0.027131078,
+          lat1 = lat - 0.027131078,
+          lng2 = long + 0.027131078,
+          lat2 = lat + 0.027131078,
+          layerId = "rect"
         )
 
       if (length(input$map_plot_draw_new_feature) > 0) {
@@ -163,7 +164,7 @@ honeybee_map_server <- function(id,
 
             observeEvent(input$map_mini_bounds, {
               leafletProxy("map_mini", session) |>
-                flyTo(long, lat, zoom = 13)
+                setView(long, lat, zoom = 13)
             })
 
             output$map_mini <- renderLeaflet(output_zoomed)
