@@ -159,13 +159,8 @@ honeybee_map_server <- function(id,
               setView(
                 long,
                 lat,
-                zoom = 10
+                zoom = 13
               )
-
-            observeEvent(input$map_mini_bounds, {
-              leafletProxy("map_mini", session) |>
-                setView(long, lat, zoom = 13)
-            })
 
             output$map_mini <- renderLeaflet(output_zoomed)
           })
