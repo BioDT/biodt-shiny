@@ -103,9 +103,9 @@ honeybee_map_server <- function(id,
         removeShape(layerId = "rect") |>
         addRectangles(
           lng1 = long - 0.027131078,
-          lat1 = lat - 0.027131078,
+          lat1 = lat - 0.016125,
           lng2 = long + 0.027131078,
-          lat2 = lat + 0.027131078,
+          lat2 = lat + 0.016125,
           layerId = "rect"
         )
 
@@ -141,8 +141,7 @@ honeybee_map_server <- function(id,
               lat,
               "<br>",
               "Longitude: ",
-              long,
-              "<br>"
+              long
             )
           ) |>
             coordinates_text()
@@ -160,6 +159,14 @@ honeybee_map_server <- function(id,
                 long,
                 lat,
                 zoom = 13
+              ) |>
+              removeShape(layerId = "rect2") |>
+              addRectangles(
+                lng1 = long - 0.027131078,
+                lat1 = lat - 0.016125,
+                lng2 = long + 0.027131078,
+                lat2 = lat + 0.016125,
+                layerId = "rect2"
               )
 
             output$map_mini <- renderLeaflet(output_zoomed)
