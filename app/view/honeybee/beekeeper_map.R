@@ -4,6 +4,7 @@ box::use(
   leaflet[addRectangles, flyTo, fitBounds, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
   htmlwidgets[onRender],
   terra[vect, extract, project, buffer, crop],
+  shinyjs[hide, show, useShinyjs]
 )
 
 box::use(
@@ -14,6 +15,7 @@ box::use(
 honeybee_map_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
+    useShinyjs(),
     card(
       class = "ms-md-3 card-shadow",
       title = "input_map",
@@ -69,6 +71,9 @@ honeybee_map_server <- function(id,
 
     output$acknowledgment <- renderText(map_acknowledgment())
 
+    # do not show minimap by default
+    hide("map_mini")
+
     observeEvent(leaflet_map(), {
       output_map <- leaflet_map() |>
         onRender(
@@ -106,7 +111,8 @@ honeybee_map_server <- function(id,
           lat1 = lat - 0.016125,
           lng2 = long + 0.027131078,
           lat2 = lat + 0.016125,
-          layerId = "rect"
+          layerId = "rect",
+          fillColor = "transparent"
         )
 
       if (length(input$map_plot_draw_new_feature) > 0) {
@@ -134,6 +140,7 @@ honeybee_map_server <- function(id,
           out(NULL)
           zoomed_map(NULL)
         } else {
+          show("map_mini")
           HTML(
             paste(
               "Selected coordinates are: <br>",
@@ -166,7 +173,8 @@ honeybee_map_server <- function(id,
                 lat1 = lat - 0.016125,
                 lng2 = long + 0.027131078,
                 lat2 = lat + 0.016125,
-                layerId = "rect2"
+                layerId = "rect2",
+                fillColor = "transparent"
               )
 
             output$map_mini <- renderLeaflet(output_zoomed)
