@@ -97,7 +97,10 @@ honeybee_beekeeper_server <- function(id,
           map()
 
         map() |>
-          honeybee_leaflet_map() |>
+          honeybee_leaflet_map(
+            add_control = TRUE,
+            main_map_features = TRUE,
+          ) |>
           leaflet_map()
 
         # Lookup table
