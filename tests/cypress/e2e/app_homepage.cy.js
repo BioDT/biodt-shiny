@@ -1,20 +1,48 @@
-describe('app_homepage', () => {
+describe("The application", () => {
+  /**
+   * Cypress goes to the application's root URL. No need to specify full address 
+   * because base URL is already configured in the Cypress config (tests/cypress.config.js).
+   */
   beforeEach(() => {
     cy.visit('/')
   })
-  
-  it("Loads app on landing page, showing top (h1) heading's first part 'Prototype'", () =>
+
+  it("starts", () => {})
+
+  it("has correct (document) title", () =>
     {
-      cy.wait(1000)
-      cy.get("#app-info-heading-first-part span").should("be.visible").should("have.text", "Prototype")
+      cy.title().should('eq', 'BioDT')
+    }
+  )
+  
+  it("the first of three paragraphs with info text appears", () =>
+    {
+      cy.get(".info-text p:first-child span")
+        .should("be.visible")
+        .should("have.text", "The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.")
     }
   )
 
-  
-  it("Loads app on landing page, showing a rest of top (h1) heading", "Digital Twin", () =>
+  it("the second of three paragraphs with info text appears", () =>
     {
-      cy.wait(4000)
-      cy.get("#app-info-heading-second-part span").should("be.visible").should("have.text", "Digital Twins")
+      cy.get(".info-text p:nth-child(2) span")
+        .should("be.visible")
+        .should("have.text", "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.")
+    }
+  )
+
+  it("the third of three paragraphs with info text appears", () =>
+    {
+      cy.get(".info-text p:nth-child(3) span")
+        .should("be.visible")
+        .should("have.text", "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth.")
+    }
+  )
+
+  it("displays 4 'cards' with different categories of pDTs", () => 
+    {
+      cy.get(".landing-pdt-wrap ")
+        .should("have.length", 4)
     }
   )
 })
