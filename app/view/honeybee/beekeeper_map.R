@@ -128,6 +128,8 @@ honeybee_map_server <- function(id,
         extracted <- extract(map(), pts)
 
         if (is.na(extracted$category) || extracted$category == "Unclassified") {
+          hide("map_mini")
+          
           HTML(
             paste(
               "<span class='text-danger'>",
