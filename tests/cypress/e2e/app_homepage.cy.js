@@ -45,4 +45,10 @@ describe("The application", () => {
         .should("have.length", 4)
     }
   )
+
+  // TODO test whether on mobile device breadcrumb appears
+
+  // TODO test switching language to CZ
+
+  // TODO test if click on "Digital Twin" menu item pops up menu with each working pDT
 })
