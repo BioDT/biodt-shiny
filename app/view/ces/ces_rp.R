@@ -1,7 +1,7 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent, radioButtons, HTML, p, textOutput, renderText, showNotification, reactive],
+  shiny[moduleServer, NS, tagList, column, tags, fluidRow, icon, actionButton, observeEvent, radioButtons, p, textOutput, renderText, showNotification, reactive],
   bslib[card, nav_select, card_title, card_body],
-  leaflet[leaflet, leafletOutput, renderLeaflet, leafletProxy, colorBin, removeLayersControl, addLayersControl, setView, addTiles, addRasterImage, hideGroup, showGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend],
+  leaflet[leaflet, leafletOutput, renderLeaflet, leafletProxy, colorBin, removeLayersControl, addLayersControl, setView, addTiles, addRasterImage, hideGroup, showGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds],
   terra[rast, values],
   waiter[Waiter]
 )
@@ -25,10 +25,8 @@ ces_rp_ui <- function(id) {
           width = "100%",
           selected = character(0)
         ),
-        div(
-          id = ns("map_container"),
-          leafletOutput(ns("rec_pot_map_plot"), height = 600)
-        )
+        leafletOutput(ns("rec_pot_map_plot"), height = 600),
+        p("Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterized by scoring landscape features such as water bodies, types of forest.")
       )
     )
   )
@@ -72,6 +70,7 @@ ces_rp_server <- function(id) {
         addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
         addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
         setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
+        setMaxBounds(lng1 = -3.860, lat1 = 56.870, lng2 = -3.000, lat2 = 57.290) |>
         addRasterImage(hard_rec, group = "Hard recreationalist", opacity = 0.75, colors = hard_pal, options = tileOptions(zIndex = 1000)) |>
         addRasterImage(soft_rec, group = "Soft recreationalist", opacity = 0.75, colors = soft_pal, options = tileOptions(zIndex = 1000)) |>
         addLegend(pal = hard_pal, values = values(hard_rec), title = "Recreation Potential (Hard)", position = "bottomright") |>
