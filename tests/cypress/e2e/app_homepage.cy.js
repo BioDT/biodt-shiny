@@ -11,7 +11,8 @@ describe("The application", () => {
 
   it("has correct (document) title", () =>
     {
-      cy.title().should('eq', 'BioDT')
+      cy.title()
+        .should('eq', 'BioDT')
     }
   )
   
@@ -41,8 +42,27 @@ describe("The application", () => {
 
   it("displays 4 'cards' with different categories of pDTs", () => 
     {
-      cy.get(".landing-pdt-wrap ")
+      cy.get(".landing-pdt-wrap")
         .should("have.length", 4)
+    }
+  )
+
+  it("by clicking on 'Pollinators (Honeybee)' the screen changes to pDT 'Honeybee Beekeeper Case', and then gets back to homepage by clicking on BioDT logo", () => 
+    {
+      cy.get("#app-info-honeybee_selector")
+        // .find("#app-info-honeybee_selector")
+        .should('be.visible')
+        .wait(2000)
+        .click()
+        .wait(2000)
+        .get(".card_title")
+        .first()
+        .should("have.text", "Honeybee Beekeeper Case")
+        //.should("have.text", "Pollinators (Honeybee)")
+        //.click()
+
+      //cy.get("h2")
+      //  .should("have.text", "Honeybee Beekeeper Case")
     }
   )
 
