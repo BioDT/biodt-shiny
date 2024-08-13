@@ -1,10 +1,10 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent,radioButtons,HTML,p,textOutput,renderText,showNotification],
-  bslib[card,nav_select,card_title,card_body],
-  leaflet[leaflet,leafletOutput, renderLeaflet, leafletProxy,colorBin,removeLayersControl,addLayersControl,setView,addTiles,addRasterImage,hideGroup,showGroup,addProviderTiles,providerTileOptions,providers,tileOptions],
-  terra[rast, values]
+  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent, radioButtons, HTML, p, textOutput, renderText, showNotification, reactive],
+  bslib[card, nav_select, card_title, card_body],
+  leaflet[leaflet, leafletOutput, renderLeaflet, leafletProxy, colorBin, removeLayersControl, addLayersControl, setView, addTiles, addRasterImage, hideGroup, showGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend],
+  terra[rast, values],
+  waiter[Waiter]
 )
-
 
 #' @export
 ces_rp_ui <- function(id) {
@@ -25,14 +25,10 @@ ces_rp_ui <- function(id) {
           width = "100%",
           selected = character(0)
         ),
-        leafletOutput(ns("rec_pot_map"), height = 600),
-        HTML('<p>
-             <span style="background-color: #FFFFCC; color: black;">Low recreation potential</span>
-             <span style="background-color: #A1DAB4;color: #A1DAB4;">----</span>
-             <span style="background-color: #41B6C4;color: #41B6C4;">----</span>
-             <span style="background-color: #2C7FB8;color: #2C7FB8;">----</span>
-             <span style="background-color: #253494; color: white;">High recreation potential</span></p>'),
-        p("Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterized by scoring landscape features such as water bodies, types of forest.")
+        div(
+          id = ns("map_container"),
+          leafletOutput(ns("rec_pot_map_plot"), height = 600)
+        )
       )
     )
   )
@@ -41,16 +37,19 @@ ces_rp_ui <- function(id) {
 #' @export
 ces_rp_server <- function(id) {
   moduleServer(id, function(input, output, session) {
-    
-    ces_path <- "app/data/ces"
-
     ns <- session$ns
+    ces_path <- "app/data/ces"
     
-    output$rec_pot_map <- renderLeaflet({
-      leaflet() |> addTiles()
-    })
-    
-    output$rec_pot_map <- renderLeaflet({
+    # Create a waiter for the map container
+    w <- Waiter$new(
+      color = "rgba(256,256,256,0.9)"
+    )
+        
+    rec_pot_map <- reactive({
+      # Show the waiter
+      w$show()
+
+      # Load the raster files
       hard_rec <- tryCatch({
         rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
       }, error = function(e) {
@@ -65,31 +64,37 @@ ces_rp_server <- function(id) {
         NULL
       })
 
-      hard_pal <- colorBin("YlGnBu", values(hard_rec), bins = c(0,0.25,0.3,0.33,0.36,0.39,0.45,1), na.color = "transparent",reverse = F)
-      soft_pal <- colorBin("YlGnBu", values(soft_rec), bins = c(0,0.25,0.3,0.33,0.36,0.39,0.45,1), na.color = "transparent",reverse = F)
+      hard_pal <- colorBin("YlGnBu", values(hard_rec), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE)
+      soft_pal <- colorBin("YlGnBu", values(soft_rec), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE)
 
-      leaflet() |>
+      plot <- leaflet() |>
         addTiles(group = "Open Street Map") |>
-        addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex=-1000),group="ESRI World Imagery") |>
-        addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex=-1000),group="Open Topo Map") |>
+        addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
+        addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
         setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
-        addLayersControl(
-          baseGroups = c("Open Street Map","ESRI World Imagery","Open Topo Map"),
-          overlayGroups = c("Hard recreationalist", "Soft recreationalist")
-        ) |>
-        addRasterImage(hard_rec, group = "Hard recreationalist", opacity = 0.75, colors = hard_pal,options = tileOptions(zIndex = 1000)) |>
-        addRasterImage(soft_rec, group = "Soft recreationalist", opacity = 0.75, colors = soft_pal,options = tileOptions(zIndex = 1000)) |>
+        addRasterImage(hard_rec, group = "Hard recreationalist", opacity = 0.75, colors = hard_pal, options = tileOptions(zIndex = 1000)) |>
+        addRasterImage(soft_rec, group = "Soft recreationalist", opacity = 0.75, colors = soft_pal, options = tileOptions(zIndex = 1000)) |>
+        addLegend(pal = hard_pal, values = values(hard_rec), title = "Recreation Potential (Hard)", position = "bottomright") |>
         hideGroup("Hard recreationalist") |>
         hideGroup("Soft recreationalist")
+
+      w$hide()
+      
+      # Hide the waiter after rendering the map
+      plot
+    })
+
+    output$rec_pot_map_plot <- renderLeaflet({
+      rec_pot_map()
     })
 
     observeEvent(input$persona, {
       if (input$persona == "hard") {
-        leafletProxy(ns("rec_pot_map")) |>
+        leafletProxy(ns("rec_pot_map_plot")) |>
           hideGroup("Soft recreationalist") |>
           showGroup("Hard recreationalist")
       } else {
-        leafletProxy(ns("rec_pot_map")) |>
+        leafletProxy(ns("rec_pot_map_plot")) |>
           hideGroup("Hard recreationalist") |>
           showGroup("Soft recreationalist")
       }
