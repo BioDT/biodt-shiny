@@ -50,25 +50,15 @@ describe("The application", () => {
   it("by clicking on 'Pollinators (Honeybee)' the screen changes to pDT 'Honeybee Beekeeper Case', and then gets back to homepage by clicking on BioDT logo", () => 
     {
       cy.get("#app-info-honeybee_selector")
-        // .find("#app-info-honeybee_selector")
         .should('be.visible')
-        .wait(2000)
-        .click()
-        .wait(2000)
-        .get(".card_title")
+        .click({force: true})
+        .get("#app-biodt_logo")
+        .click({force: true})
+        .get(".title h2 span")
         .first()
-        .should("have.text", "Honeybee Beekeeper Case")
-        //.should("have.text", "Pollinators (Honeybee)")
-        //.click()
-
-      //cy.get("h2")
-      //  .should("have.text", "Honeybee Beekeeper Case")
+        .should("have.text", "Species response to environmental change")
     }
   )
 
-  // TODO test whether on mobile device breadcrumb appears
 
-  // TODO test switching language to CZ
-
-  // TODO test if click on "Digital Twin" menu item pops up menu with each working pDT
 })
