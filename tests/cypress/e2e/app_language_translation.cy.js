@@ -10,11 +10,11 @@ describe("The app's language translation", () => {
   it("defaults to EN in the beginning of the application", () => 
     {
       cy.get("#app-selected_language + div")
-        .wait(20000)
+        .wait(5000)
         .click()
-        //.get("select")
-        //.select("en")
-        //.should("have.value", "en")
+        .get(".selected, .option")
+        .first()
+        .should("have.text", "en")
     }
   )
 
