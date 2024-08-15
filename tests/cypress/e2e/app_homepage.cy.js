@@ -59,6 +59,4 @@ describe("The application", () => {
         .should("have.text", "Species response to environmental change")
     }
   )
-
-
 })
