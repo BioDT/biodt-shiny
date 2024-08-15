@@ -7,29 +7,32 @@ describe("The app's language translation", () => {
     cy.visit('/')
   })
 
-  it("defaults to EN in the beginning of the application", () => 
+  it("defaults to EN in the beginning of the application, i.e. option 'en' is selected from the application start and the heading H1 is in English", () => 
     {
       cy.get("#app-selected_language + div")
-        .wait(5000)
+        .wait(2000)
         .click()
         .get(".selected, .option")
         .first()
         .should("have.text", "en")
+        .get("h1")
+        .get("#app-info-heading-second-part span")
+        .should("have.text", "Digital Twins")
     }
   )
 
-
-
-  /*it("by clicking on 'Pollinators (Honeybee)' the screen changes to pDT 'Honeybee Beekeeper Case', and then gets back to homepage by clicking on BioDT logo", () => 
+  it("switch app's language to CZ (option 'cz' is selected), and afterwards check whether H1 heading is in Czech", () => 
     {
-      cy.get("#app-info-honeybee_selector")
-        .should('be.visible')
-        .click({force: true})
-        .get("#app-biodt_logo")
-        .click({force: true})
-        .get(".title h2 span")
-        .first()
-        .should("have.text", "Species response to environmental change")
+      cy.get("#app-selected_language + div")
+        .wait(2000)
+        .click()
+        .get(".option")
+        .eq(1)
+        .should("have.text", "cz")
+        .click()
+        .get("h1")
+        .get("#app-info-heading-second-part span")
+        .should("have.text", "Digitálních dvojčat")
     }
-  )*/
+  )
 })
