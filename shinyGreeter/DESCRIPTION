@@ -15,4 +15,5 @@ Imports:
     htmltools,
     shiny
 Suggests: 
-    pkgload
+    pkgload,
+    shinytest2
