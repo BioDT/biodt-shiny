@@ -12,8 +12,12 @@ mod_info_ui <- function(id, i18n) {
              class = "col mx-auto col-lg-8",
              tags$h1(
                tags$span(i18n$translate("Prototype"),
-                         class = "text-primary"),
-               i18n$translate("Digital Twins"),
+                          class = "text-primary",
+                          id = ns("heading-first-part")
+                         ),
+               tags$span(i18n$translate("Digital Twins"),
+                  id = ns("heading-second-part")
+                ),
                class = "justify-content-center",
              ),
              # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
