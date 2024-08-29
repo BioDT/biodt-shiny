@@ -13,6 +13,7 @@ jobs:
       - name: Setup system dependencies
         run: |
           packages=(
+            libgdal-dev
             # List each package on a separate line.
           )
           sudo apt-get update
