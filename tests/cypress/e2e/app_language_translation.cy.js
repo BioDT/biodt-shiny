@@ -24,12 +24,15 @@ describe("The app's language translation", () => {
   it("switch app's language to CZ (option 'cz' is selected), and afterwards check whether H1 heading is in Czech", () => 
     {
       cy.get("#app-selected_language + div")
-        .wait(3000)
+        .wait(3000)        
+        .click({force: true})
+        .get(".items")
+        .first()
         .click()
-        .get(".option")
+        .get(".selectize-dropdown-content .option")
         .eq(1)
         .should("have.text", "cz")
-        .click()
+        .click({force: true})
         .get("h1")
         .get("#app-info-heading-second-part span")
         .should("have.text", "Digitálních dvojčat")
