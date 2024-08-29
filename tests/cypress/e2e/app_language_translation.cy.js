@@ -10,7 +10,7 @@ describe("The app's language translation", () => {
   it("defaults to EN in the beginning of the application, i.e. option 'en' is selected from the application start and the heading H1 is in English", () => 
     {
       cy.get("#app-selected_language + div")
-        .wait(2000)
+        .wait(3000)
         .click()
         .get(".selected, .option")
         .first()
@@ -24,7 +24,7 @@ describe("The app's language translation", () => {
   it("switch app's language to CZ (option 'cz' is selected), and afterwards check whether H1 heading is in Czech", () => 
     {
       cy.get("#app-selected_language + div")
-        .wait(2000)
+        .wait(3000)
         .click()
         .get(".option")
         .eq(1)
