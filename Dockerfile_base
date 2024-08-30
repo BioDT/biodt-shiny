@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.3.3 AS biodt-shiny-base
+FROM rocker/r-ver:4.4.1 AS biodt-shiny-base
 
 RUN apt-get update -y && apt-get install -y  make pandoc zlib1g-dev libcurl4-openssl-dev libssl-dev libicu-dev libpng-dev libgdal-dev gdal-bin libgeos-dev libproj-dev libsqlite3-dev git libudunits2-dev libxt6 && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /usr/local/lib/R/etc/ /usr/lib/R/etc/
