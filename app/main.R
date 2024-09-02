@@ -55,7 +55,8 @@ ui <- function(id) {
       useWaiter(),
       useHostess(),
       use_cicerone(),
-      usei18n(i18n)
+      usei18n(i18n),
+      includeScript("app/js/tab-index.js") 
     ),
     waiterShowOnLoad(
       html = spin_loaders(
