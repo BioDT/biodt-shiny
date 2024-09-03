@@ -4,6 +4,10 @@ box::use(
   htmltools[css],
 )
 
+box::use(
+  app/view/disease_outbreaks/disease_app/disease_map[disease_map_ui, disease_map_server],
+)
+
 # box::use(
 #   app/view/grassland/grassland_dynamics/grassland_dynamics_inputmap[
 #     grassland_dynamics_inputmap_ui,
