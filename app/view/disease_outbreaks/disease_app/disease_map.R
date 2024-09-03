@@ -17,13 +17,32 @@ disease_map_ui <- function(id, i18n) {
         i18n$translate("Map")
       )
     ),
-    card_body()
+    card_body(
+      leafletOutput(
+        ns("leaflet_output")
+      )
+    )
   )
 }
 
 #' @export
 disease_map_server <- function(id, coordinates) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
 
+    output$leaflet_output <- renderLeaflet({
+      leaflet(
+        options = leafletOptions(
+          zoomControl = TRUE,
+          min_zoom = 3
+        )
+      ) |>
+        addTiles() |>
+        setView(
+          lng = 12.0,
+          lat = 51.0,
+          zoom = 10
+        )
+    })
   })
 }
