@@ -31,7 +31,8 @@ honeybee_lookup_ui <- function(id, i18n) {
           DTOutput(
             ns("lookup_table")
           )
-        )
+        ),
+        tags$p(class = "my-2", icon("circle-exclamation"), "The lookup table allows to translate the land cover around a hive into floral resources (Nectar, Pollen) on a daily resolution. Therefore, the resources around a hive, e.g. grid cells of oil seed rape during the flowering period, will be summed up around a hive (square with an edge length of 3 km and the hive in the middle). Grid cells of the same land cover will be summarized into one polygon and split up if the polygon is too large. Please consult the scripts available on ", tags$a("https://github.com/BioDT", href = "https://github.com/BioDT"), " for more details."),
       )
     )
   )
