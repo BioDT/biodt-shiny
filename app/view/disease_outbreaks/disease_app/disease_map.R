@@ -8,7 +8,7 @@ box::use(
 disease_map_ui <- function(id, i18n) {
   ns <- NS(id)
   card(
-    id = ns("map"),
+    id = ns("map_wrapper"),
     class = "ms-md-3 card-shadow mt-2",
     full_screen = TRUE,
     card_header(
@@ -37,12 +37,12 @@ disease_map_server <- function(id, coordinates) {
           min_zoom = 3
         )
       ) |>
-        addTiles() |>
-        setView(
-          lng = 12.0,
-          lat = 51.0,
-          zoom = 10
-        )
+        addTiles() # |>
+        # setView(
+        #   lng = 12.0,
+        #   lat = 51.0,
+        #   zoom = 10
+        # )
     })
   })
 }

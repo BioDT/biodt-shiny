@@ -3,7 +3,7 @@ box::use(
 )
 
 #' @export
-disease_outbreaks_contributors_ui <- function(id, i18n) { # nolint
+disease_contributors_ui <- function(id, i18n) { # nolint
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
@@ -36,7 +36,7 @@ disease_outbreaks_contributors_ui <- function(id, i18n) { # nolint
 }
 
 #' @export
-disease_outbreaks_contributors_server <- function(id, r) { # nolint
+disease_contributors_server <- function(id, r) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
   })

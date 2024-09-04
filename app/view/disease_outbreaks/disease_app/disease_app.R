@@ -18,7 +18,7 @@ disease_app_ui <- function(id, i18n) {
       fill = FALSE,
       style = css(grid_template_columns = "3fr 1fr"),
       disease_map_ui(
-        ns("map"), i18n
+        ns("disease_map"), i18n
       ),
       tags$h3(i18n$translate("Location")),
     ),
