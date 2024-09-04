@@ -19,30 +19,30 @@ disease_map_ui <- function(id, i18n) {
     ),
     card_body(
       leafletOutput(
-        ns("leaflet_output")
+        ns("map_output")
       )
     )
   )
 }
 
 #' @export
-disease_map_server <- function(id, coordinates) {
+disease_map_server <- function(id, map_switch) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$leaflet_output <- renderLeaflet({
+    output$map_output <- renderLeaflet({
       leaflet(
         options = leafletOptions(
           zoomControl = TRUE,
           min_zoom = 3
         )
       ) |>
-        addTiles() # |>
-        # setView(
-        #   lng = 12.0,
-        #   lat = 51.0,
-        #   zoom = 10
-        # )
+        addTiles() |>
+        setView(
+          lng = 12.0,
+          lat = 51.0,
+          zoom = 10
+        )
     })
   })
 }
