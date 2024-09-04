@@ -1,7 +1,9 @@
 box::use(
-  shiny[moduleServer, NS, tagList, selectInput, bootstrapPage]
+  shiny[moduleServer, NS, tagList, selectInput, bootstrapPage, tags],
+  bslib[card, card_header, card_body],
 )
 
+#' @export
 disease_select_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   bootstrapPage(

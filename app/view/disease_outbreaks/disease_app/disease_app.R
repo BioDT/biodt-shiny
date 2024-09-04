@@ -6,6 +6,7 @@ box::use(
 
 box::use(
   app/view/disease_outbreaks/disease_app/disease_map[disease_map_ui, disease_map_server],
+  app/view/disease_outbreaks/disease_app/disease_select[disease_select_ui, disease_select_server],
 )
 
 
@@ -20,7 +21,10 @@ disease_app_ui <- function(id, i18n) {
       disease_map_ui(
         ns("disease_map"), i18n
       ),
-      tags$h3(i18n$translate("Location")),
+      disease_select_ui(
+        ns("disease_select"), i18n
+      ),
+      # tags$h3(i18n$translate("Location")),
     ),
     tags$h3(i18n$translate("Output Plot"))
   )
