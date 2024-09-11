@@ -72,7 +72,10 @@ ces_rp_biodiversity_server <- function(id) {
           "Select species:",
           choices = paste0(species_include$common_name, " (", species_include$sci_name, ")"),
           selected = NULL,
-          multiple = TRUE
+          multiple = TRUE,
+          options = list(
+            `live-search` = TRUE
+          )
         )
       )
     })
