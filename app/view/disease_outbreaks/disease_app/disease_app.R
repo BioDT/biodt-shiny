@@ -35,6 +35,8 @@ disease_app_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    #map <- reactive(NULL)
+
     # # LOCATION settings ----
     # coordinates <- grassland_dynamics_location_server("location")
 

@@ -26,7 +26,7 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id, map_switch) {
+disease_map_server <- function(id, map, map_switch) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
