@@ -7,6 +7,7 @@ box::use(
   app/view/ces/ces_info[ces_info_ui,ces_info_server],
   app/view/ces/ces_rp[ces_rp_ui,ces_rp_server],
   app/view/ces/ces_biodiversity[ces_biodiversity_ui,ces_biodiversity_server],
+  app/view/ces/ces_rp_biodiversity[ces_rp_biodiversity_ui,ces_rp_biodiversity_server],
 )
 
 #' @export
@@ -36,7 +37,14 @@ ces_ui <- function(id) {
       ces_biodiversity_ui(
         ns("ces_biodiversity")
       )
+    ),
+    nav_panel(
+    title = "Recreation & Biodiversity",
+    icon = icon("tree"),
+    ces_rp_biodiversity_ui(
+      ns("ces_rp_biodiversity")
     )
+  )
   )
 }
 
@@ -48,6 +56,7 @@ ces_server <- function(id) {
     
     ces_rp_server("ces_rp")
     ces_biodiversity_server("ces_biodiversity")
+    ces_rp_biodiversity_server("ces_rp_biodiversity")
 
   })
 }

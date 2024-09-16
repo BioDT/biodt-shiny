@@ -884,9 +884,14 @@
     },
     "leaflet.extras": {
       "Package": "leaflet.extras",
-      "Version": "2.0.1",
-      "Source": "Repository",
-      "Repository": "PPM",
+      "Version": "2.0.1.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "trafficonese",
+      "RemoteRepo": "leaflet.extras",
+      "RemoteRef": "master",
+      "RemoteSha": "91b6fb07c383b286cd665b0a654ccc5c5242660a",
       "Requirements": [
         "R",
         "htmltools",
@@ -895,7 +900,7 @@
         "magrittr",
         "stringr"
       ],
-      "Hash": "1626fb22ec9e788f66c1d08fd863da4c"
+      "Hash": "daf59bcfc0496c76ab417591aea6c786"
     },
     "leaflet.providers": {
       "Package": "leaflet.providers",

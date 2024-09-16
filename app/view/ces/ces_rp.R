@@ -62,8 +62,7 @@ ces_rp_server <- function(id) {
         NULL
       })
 
-      hard_pal <- colorBin("YlGnBu", values(hard_rec), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE)
-      soft_pal <- colorBin("YlGnBu", values(soft_rec), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE)
+      pal <- colorBin("YlGnBu", values(hard_rec), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE)
 
       plot <- leaflet() |>
         addTiles(group = "Open Street Map") |>
@@ -71,9 +70,9 @@ ces_rp_server <- function(id) {
         addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
         setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
         setMaxBounds(lng1 = -3.860, lat1 = 56.870, lng2 = -3.000, lat2 = 57.290) |>
-        addRasterImage(hard_rec, group = "Hard recreationalist", opacity = 0.75, colors = hard_pal, options = tileOptions(zIndex = 1000)) |>
-        addRasterImage(soft_rec, group = "Soft recreationalist", opacity = 0.75, colors = soft_pal, options = tileOptions(zIndex = 1000)) |>
-        addLegend(pal = hard_pal, values = values(hard_rec), title = "Recreation Potential (Hard)", position = "bottomright") |>
+        addRasterImage(hard_rec, group = "Hard recreationalist", opacity = 0.75, colors = pal, options = tileOptions(zIndex = 1000)) |>
+        addRasterImage(soft_rec, group = "Soft recreationalist", opacity = 0.75, colors = pal, options = tileOptions(zIndex = 1000)) |>
+        addLegend(pal = pal, values = values(hard_rec), title = "Recreation", position = "bottomright") |>
         hideGroup("Hard recreationalist") |>
         hideGroup("Soft recreationalist")
 
