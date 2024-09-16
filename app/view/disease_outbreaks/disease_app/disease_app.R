@@ -39,7 +39,7 @@ disease_app_server <- function(id, r) {
     # coordinates <- grassland_dynamics_location_server("location")
 
     # # MAP itself ----
-    disease_map_server()
+    disease_map_server("disease_map")
 
     # # Output PLOT ----
     # grassland_dynamics_outputplot_server("outputplot")
