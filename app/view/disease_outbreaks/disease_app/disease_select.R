@@ -20,9 +20,10 @@ disease_select_ui <- function(id, theme, i18n) {
       ),
       card_body(
         selectInput(
-          inputId = "disease_map_name",
-          label = "The name of disease map:",
-          choices = c("Mosaic_final", "outfirst_infection")
+          "disease_map_select",
+          label = "Select disease map:",
+          choices = c("Mosaic_final", "outfirst_infection"),
+          multiple = FALSE
         )
       )
     )
