@@ -13,6 +13,10 @@ jobs:
       - name: Setup system dependencies
         run: |
           packages=(
+            libgdal-dev
+            libcurl4-openssl-dev
+            libproj-dev
+            libudunits2-dev
             # List each package on a separate line.
           )
           sudo apt-get update
