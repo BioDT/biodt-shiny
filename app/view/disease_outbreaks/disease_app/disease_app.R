@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, tags],
+  shiny[NS, tagList, moduleServer, tags, reactiveVal],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -35,15 +35,15 @@ disease_app_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    #map <- reactive(NULL)
+    # Variables ----
+    tif_map <- reactiveVal()
+    tif_map_path <- reactiveVal()
 
-    # # LOCATION settings ----
-    # coordinates <- grassland_dynamics_location_server("location")
+    # selection of raster map
+    selected_tif_map_path <- disease_select_server("disease_select")
+    print(selected_tif_map_path)
 
-    # # MAP itself ----
-    disease_map_server("disease_map")
-
-    # # Output PLOT ----
-    # grassland_dynamics_outputplot_server("outputplot")
+    # MAP itself ----
+    disease_map_server("disease_map", tif_map, selected_tif_map_path)
   })
 }

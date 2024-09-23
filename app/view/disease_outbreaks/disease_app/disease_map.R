@@ -1,7 +1,11 @@
 box::use(
-  shiny[NS, moduleServer, tags],
+  shiny[NS, moduleServer, tags, observeEvent],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
+)
+
+box::use(
+  app/logic/honeybee/honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map]
 )
 
 #' @export
@@ -26,23 +30,13 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id, map, map_switch) {
+disease_map_server <- function(id, map, map_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$map_output <- renderLeaflet({
-      leaflet(
-        options = leafletOptions(
-          zoomControl = TRUE,
-          min_zoom = 3
-        )
-      ) |>
-        addTiles() |>
-        setView(
-          lng = 12.0,
-          lat = 51.0,
-          zoom = 10
-        )
+    observeEvent(map_selected(), {
+        print(map_selected())
     })
+
   })
 }

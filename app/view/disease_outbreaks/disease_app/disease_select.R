@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, selectInput, bootstrapPage, tags],
+  shiny[moduleServer, NS, tagList, selectInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive],
   bslib[card, card_header, card_body],
 )
 
@@ -31,9 +31,18 @@ disease_select_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-disease_select_server <- function(id, map_switch) {
+disease_select_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    out <- reactiveVal()
+
+    observeEvent(input$disease_map_select, {
+      print(input$disease_map_select)
+      
+      out <- input$disease_map_select
+    })
+
+    reactive(out())
   })
 }
