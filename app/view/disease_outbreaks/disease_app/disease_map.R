@@ -35,7 +35,7 @@ disease_map_server <- function(id, map, map_selected) {
     ns <- session$ns
 
     observeEvent(map_selected(), {
-        print(map_selected())
+      
     })
 
   })

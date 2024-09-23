@@ -40,10 +40,10 @@ disease_app_server <- function(id, r) {
     tif_map_path <- reactiveVal()
 
     # selection of raster map
-    selected_tif_map_path <- disease_select_server("disease_select")
-    print(selected_tif_map_path)
+    tif_map <- disease_select_server("disease_select")
+    print(tif_map)
 
     # MAP itself ----
-    disease_map_server("disease_map", tif_map, selected_tif_map_path)
+    disease_map_server("disease_map", tif_map())
   })
 }
