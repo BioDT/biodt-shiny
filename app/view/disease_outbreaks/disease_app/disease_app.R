@@ -36,14 +36,14 @@ disease_app_server <- function(id, r) {
     ns <- session$ns
 
     # Variables ----
-    tif_map <- reactiveVal()
-    tif_map_path <- reactiveVal()
+    tif_map <- reactiveVal(NULL)
+    tif_map_path <- reactiveVal(NULL)
 
     # selection of raster map
-    tif_map <- disease_select_server("disease_select")
-    print(tif_map)
+    disease_select_server("disease_select")
+    # print(tif_map_name)
 
     # MAP itself ----
-    disease_map_server("disease_map", tif_map())
+    disease_map_server("disease_map", map_selected = tif_map())
   })
 }

@@ -1,11 +1,11 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent],
+  shiny[NS, moduleServer, tags, observeEvent, reactive],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
 )
 
 box::use(
-  app/logic/honeybee/honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map]
+  app/logic/disease_outbreaks/disease_leaflet_map[read_disease_outbreak_raster, make_full_tif_map_path, disease_outbreak_leaflet_map]
 )
 
 #' @export
@@ -34,8 +34,11 @@ disease_map_server <- function(id, map, map_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observeEvent(map_selected(), {
-      
+    map <- reactive(map_selected)
+
+
+    observeEvent(map(), {
+      print(map())
     })
 
   })

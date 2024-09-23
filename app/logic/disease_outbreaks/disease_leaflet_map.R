@@ -21,7 +21,7 @@ disease_outbreak_leaflet_map <- function(id, tif_map, tif_map_path, tif_map_repr
 
   # load tif raster, hardcoded for prototype (terra)
   tif_map_path() |>
-    read_disease_outbreak_raster |>
+    read_disease_outbreak_raster() |>
     tif_map()
 
   # project to right CRS (terra)
