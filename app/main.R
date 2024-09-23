@@ -28,7 +28,7 @@ shiny$enableBookmarking("server")
 #' @export
 biodt_theme <- bs_theme(
   version = 5,
-  primary = "#bc6c25",
+  primary = "#A86200",
   secondary = "#414f2f",
   info = "#DDA15E",
   warning = "#6E3E18",
