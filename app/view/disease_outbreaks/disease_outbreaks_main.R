@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, icon, NS],
+  shiny[moduleServer, icon, NS, reactiveVal, observeEvent],
   bslib[navset_tab, nav_panel],
 )
 
@@ -13,6 +13,7 @@ box::use(
 disease_outbreaks_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
+    id = ns("tab"),
     # Info Page ---
     nav_panel(
       title = i18n$translate("Info"),
@@ -24,9 +25,11 @@ disease_outbreaks_main_ui <- function(id, i18n) {
     ),
     nav_panel(
       title = i18n$translate("Disease Outbreaks"),
+      value = "Disease Outbreaks",
       icon = icon("bugs"),
       disease_app_ui(
-        ns("disease_app"), i18n
+        ns("disease_app"),
+        i18n
       )
     ),
     nav_panel(
@@ -46,6 +49,19 @@ disease_outbreaks_main_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    disease_app_server("disease_app")
+    disease_selected <- reactiveVal(FALSE)
+
+    observeEvent(
+      input$tab,
+      {
+        if (input$tab == "Disease Outbreaks") {
+          disease_selected(TRUE)
+        } else {
+          disease_selected(FALSE)
+        }
+      }
+    )
+
+    disease_app_server("disease_app", disease_selected)
   })
 }

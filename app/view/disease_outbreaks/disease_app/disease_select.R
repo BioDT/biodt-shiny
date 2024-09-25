@@ -31,21 +31,28 @@ disease_select_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-disease_select_server <- function(id) {
+disease_select_server <- function(id, disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     out <- reactiveVal()
 
+    events <- reactive({
+      disease_selected()
+      input$disease_map_select
+    })
+
     observeEvent(
-      input$disease_map_select,
+      events(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
     {
-      out <- input$disease_map_select
-
+      if( disease_selected() ){
+        input$disease_map_select |>
+          out()
+      }
       # print(out)
     })
 
-    reactive(out())
+    return(out)
   })
 }
