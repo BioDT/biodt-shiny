@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent, reactive],
+  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
 )
@@ -24,21 +24,22 @@ disease_map_ui <- function(id, i18n) {
     card_body(
       leafletOutput(
         ns("map_output")
-      )
+      ),
+      actionButton(ns("runMap"), "Click here", )
     )
   )
 }
 
 #' @export
-disease_map_server <- function(id, map, map_selected) {
+disease_map_server <- function(id, map_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    map <- reactive(map_selected)
-
-
-    observeEvent(map(), {
-      print(map())
+    observeEvent(input$runMap,
+      ignoreInit = TRUE,
+    {
+      print("\ndisease_map_server\n")
+      print(map_selected())
     })
 
   })
