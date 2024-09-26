@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton],
+  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
 )
@@ -34,6 +34,9 @@ disease_map_server <- function(id, map_selected, disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    tif_map_path <- ""
+    tif_map_ok_prjct <- reactiveVal()
+
     events <- reactive({
       disease_selected()
       map_selected()
@@ -45,6 +48,13 @@ disease_map_server <- function(id, map_selected, disease_selected) {
       if (disease_selected()) {
         print(map_selected())
         print(disease_selected())
+
+        # which one of the two tif maps is going to be selected
+        tif_map_path <- make_full_tif_map_path(map_selected())          
+
+        print(tif_map_path)
+
+        leaflet_map <- disease_outbreak_leaflet_map("map_output", tif_map_path)
       }
     })
 

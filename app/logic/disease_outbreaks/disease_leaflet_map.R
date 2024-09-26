@@ -10,17 +10,18 @@ read_disease_outbreak_raster <- function(map_path) {
 
 #' @export
 make_full_tif_map_path <- function(map_name) {
-    return(paste0("app/data/disease_outbreak/", map_name, ".tif"))
+  return(paste0("app/data/disease_outbreak/", map_name, ".tif"))
 }
 
 #' @export
-disease_outbreak_leaflet_map <- function(id, tif_map, tif_map_path, tif_map_reprojected) {
-  # which one of the two tif maps is going to be selected
-  make_full_tif_map_path() |>
-    tif_map_path()
+disease_outbreak_leaflet_map <- function(id, tif_map_full_path) {
+  tif_map <- reactiveVal()
+  tif_map_reprojected <- reactiveVal()
+
+  print(tif_map_full_path())
 
   # load tif raster, hardcoded for prototype (terra)
-  tif_map_path() |>
+  tif_map_full_path() |>
     read_disease_outbreak_raster() |>
     tif_map()
 
