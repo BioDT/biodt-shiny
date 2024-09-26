@@ -25,7 +25,6 @@ disease_map_ui <- function(id, i18n) {
       leafletOutput(
         ns("map_output")
       ),
-      actionButton(ns("runMap"), "Click here", )
     )
   )
 }
@@ -45,6 +44,7 @@ disease_map_server <- function(id, map_selected, disease_selected) {
     {
       if (disease_selected()) {
         print(map_selected())
+        print(disease_selected())
       }
     })
 

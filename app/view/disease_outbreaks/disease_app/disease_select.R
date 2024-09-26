@@ -50,7 +50,6 @@ disease_select_server <- function(id, disease_selected) {
         input$disease_map_select |>
           out()
       }
-      # print(out)
     })
 
     return(out)

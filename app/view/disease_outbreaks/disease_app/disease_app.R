@@ -35,14 +35,12 @@ disease_app_server <- function(id, disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-
     # Variables ----
     tif_map <- reactiveVal(NULL)
     tif_map_path <- reactiveVal(NULL)
 
     # selection of raster map
     tif_map_path(disease_select_server("disease_select", disease_selected))
-    #print(tif_map_name())
 
     # MAP itself ----
     disease_map_server(
