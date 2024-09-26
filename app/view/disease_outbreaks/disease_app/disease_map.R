@@ -5,7 +5,7 @@ box::use(
 )
 
 box::use(
-  app/logic/disease_outbreaks/disease_leaflet_map[read_disease_outbreak_raster, make_full_tif_map_path, disease_outbreak_leaflet_map]
+  app/logic/disease_outbreaks/disease_leaflet_map[read_disease_outbreak_raster, disease_outbreak_leaflet_map]
 )
 
 #' @export
@@ -42,6 +42,8 @@ disease_map_server <- function(id, map_selected, disease_selected) {
       map_selected()
     })
 
+
+
     observeEvent(events(),
       ignoreInit = TRUE,
     {
@@ -50,11 +52,13 @@ disease_map_server <- function(id, map_selected, disease_selected) {
         print(disease_selected())
 
         # which one of the two tif maps is going to be selected
-        tif_map_path <- make_full_tif_map_path(map_selected())          
+        tif_map_path <- paste0("app/data/disease_outbreak/", map_selected()(), ".tif")         
 
         print(tif_map_path)
 
-        leaflet_map <- disease_outbreak_leaflet_map("map_output", tif_map_path)
+        map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)
+
+        output$map_output <- renderLeaflet(map_output)
       }
     })
 
