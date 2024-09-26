@@ -42,7 +42,8 @@ disease_map_server <- function(id, map_selected, disease_selected) {
       map_selected()
     })
 
-
+    # TODO ----
+    # 1. incializovat mapu zde, pred observe
 
     observeEvent(events(),
       ignoreInit = TRUE,
@@ -55,6 +56,11 @@ disease_map_server <- function(id, map_selected, disease_selected) {
         tif_map_path <- paste0("app/data/disease_outbreak/", map_selected()(), ".tif")         
 
         print(tif_map_path)
+
+        # TODO ----
+        # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
+        # 3. -""- - vrstvu infection - ano/ne
+        # oboji pomoci leaflet proxy
 
         map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)
 
