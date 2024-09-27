@@ -1,8 +1,8 @@
 box::use(
-  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, uiOutput, renderUI, htmlOutput, selectizeInput],
+  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags],
   bslib[card, nav_select, card_title, card_body],
   leaflet[leaflet, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, setView, addTiles, addRasterImage, hideGroup, showGroup, clearGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds, labelFormat],
-  leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions],
+  leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
   terra[rast, values, crop, app, ifel, ext, as.polygons, sprc, merge, mean],
   waiter[Waiter],
   DT[renderDT, DTOutput],
@@ -12,16 +12,25 @@ box::use(
   utils[read.csv],
   stats[setNames],
   shinyjs[useShinyjs, runjs],
-  shinyWidgets[virtualSelectInput, pickerInput],
+  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput]
 )
 
 
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
-
+  
   tagList(
     fluidRow(
+      tags$head(
+        tags$style(HTML("
+  .dropdown-menu {
+    position: static !important;
+  }
+"))
+        
+      ),
+      
       column(
         12, # Enlarge the map to full width
         card(
@@ -37,135 +46,199 @@ ces_rp_biodiversity_ui <- function(id) {
   )
 }
 
+
 # Server function
 ces_rp_biodiversity_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- "app/data/ces"
-
+    
     # Waiter for loading screens
     w <- Waiter$new(
       color = "rgba(256,256,256,0.9)"
     )
-
+    
     # Define colours
     recreation_alpha <- 0.5
     biodiversity_alpha <- 0.6
-    pal <- colorBin("viridis", c(0,1), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE, alpha = biodiversity_alpha)
+    pal <- colorBin("viridis", c(0, 1), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE, alpha = biodiversity_alpha)
     biodiversity_pal <- colorBin("magma", c(0, 1), bins = c(0, 0.25, 0.5, 0.75, 1), na.color = "transparent", reverse = FALSE, alpha = recreation_alpha)
-
-
+    
     # Load species list and SDM files
     cairngorms_sp_list <- read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
     all_sdm_files <- list.files(paste0(ces_path, "/sdms"), full.names = TRUE)
     taxon_ids_from_file_names <- list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
       map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
     files_and_ids <- data.frame(files = all_sdm_files, ids = taxon_ids_from_file_names)
-
-    # Reactive expression to render the species selector as HTML using pickerInput
-    species_selector_html <- reactive({
-      species_include <- filter(cairngorms_sp_list, speciesKey %in% files_and_ids$ids)
-
-      as.character(
-        pickerInput(
-          ns("species_selector"),
-          "Select species:",
-          choices = paste0(species_include$common_name, " (", species_include$sci_name, ")"),
-          selected = NULL,
-          multiple = TRUE,
-          options = list(
-            `live-search` = TRUE
-          )
+    
+    # Load recreation rasters
+    hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
+    soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
+    
+    group_selector_html <- as.character(
+      pickerInput(
+        ns("species_group_selector"),
+        "Select species group:",
+        choices = c(
+          "All biodiversity" = "all",
+          "Mammals" = "mammals",
+          "Birds" = "birds",
+          "Plants" = "plants",
+          "Insects" = "insects"),
+        selected = "all",
+        multiple = FALSE,
+        width = "400px"
+      )
+    )
+    
+    species_selector_html <- as.character(
+      pickerInput(
+        ns("species_selector"),
+        "Select species:",
+        choices = NULL,
+        selected = NULL,
+        multiple = TRUE,
+        width = "400px",
+        options = list(
+          `live-search` = TRUE
         )
       )
-    })
-
-    # Reactive expression to get the raster images based on user selections
-    rec_pot_map <- reactive({
-      w$show()
-      hard_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
-      soft_rec <- rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
-
-      plot <- leaflet() |>
-        addTiles(group = "Open Street Map") |>
-        addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
-        addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
-        setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
-        setMaxBounds(lng1 = -3.860, lat1 = 56.870, lng2 = -3.000, lat2 = 57.290) |>
-        addRasterImage(hard_rec, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-        addRasterImage(soft_rec, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-        addLegend(
-          pal = biodiversity_pal, values = c(0, 1), title = "Biodiversity", position = "bottomright",
-          labFormat = labelFormat(prefix = "", suffix = "", between = " - ")
-        ) |>
-        addLegend(pal = pal, values = values(hard_rec), title = "Recreation", position = "bottomright") |>
-        # hideGroup("Hard recreationalist") |>
-        # hideGroup("Soft recreationalist") |>
-        addGroupedLayersControl(
-          baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
-          overlayGroups = list(
-            "Recreationalist" = c("Nothing", "Hard", "Soft"),
-            "Biodiversity" = c("Biodiversity hotspots", "Focal species")
-          ),
-          options = groupedLayersControlOptions(
-            collapsed = FALSE,
-            exclusiveGroups = "Recreationalist",
-            groupsCollapsable = FALSE
-          )
-        ) |>
-        addControl(
-          html = HTML(species_selector_html()),
-          position = "topleft"
+    )
+    
+    recreation_slider_html <- as.character(
+      sliderTextInput(
+        inputId = ns("recreation_potential_slider"),
+        label = "Filter Recreation Potential:",
+        choices = seq(0, 1, by = 0.1),
+        selected = c(0, 1),
+        grid = FALSE,
+        width = "300px"
+      )
+    )
+    
+    species_occurrence_slider_html <- as.character(
+      sliderTextInput(
+        inputId = ns("species_occurrence_slider"),
+        label = "Filter Species Occurrence:",
+        choices = seq(0, 1, by = 0.1),
+        selected = c(0, 1),
+        grid = FALSE,
+        width = "300px"
+      )
+    )
+    
+    # Create the initial leaflet map
+    rec_pot_map <- leaflet() |>
+      addTiles(group = "Open Street Map") |>
+      addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
+      addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
+      setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
+      addControlGPS(
+        options = gpsOptions(
+          position = "topleft",
+          activate = TRUE, 
+          autoCenter = TRUE,
+          setView = TRUE)) |>
+      addRasterImage(hard_rec, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
+      addRasterImage(soft_rec, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
+      addLegend(
+        pal = biodiversity_pal, values = c(0, 1), title = "Biodiversity", position = "bottomright",
+        labFormat = labelFormat(prefix = "", suffix = "", between = " - ")
+      ) |>
+      addLegend(pal = pal, values = terra::values(hard_rec), title = "Recreation", position = "bottomright") |>
+      addControl(
+        html = HTML(group_selector_html),
+        position = "topleft"
+      ) |>
+      addControl(
+        html = HTML(species_occurrence_slider_html),
+        position = "bottomright"
+      ) |>
+      addControl(
+        html = HTML(recreation_slider_html),
+        position = "bottomright"
+      ) |>
+      addGroupedLayersControl(
+        position = "bottomright",
+        baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
+        overlayGroups = list(
+          "Recreationalist" = c("Nothing", "Hard", "Soft"),
+          "Biodiversity" = c("Biodiversity hotspots", "Focal species")
+        ),
+        options = groupedLayersControlOptions(
+          collapsed = FALSE,
+          exclusiveGroups = "Recreationalist",
+          groupsCollapsable = FALSE
         )
-
-      w$hide()
-      plot
-    })
-
+      ) |> 
+      addControl(
+        html = HTML(species_selector_html),
+        position = "topleft")
+    
+    # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({
-      rec_pot_map()
+      rec_pot_map
     })
-
-    # Use shinyjs to link the HTML select input with Shiny's reactivity
-    observeEvent(input$species_selector, ignoreNULL = FALSE, {
+    
+    # Update species selector when group is selected
+    observeEvent(input$species_group_selector, {
+      group_selected <- input$species_group_selector
+      
+      species_include <- cairngorms_sp_list |>
+        mutate(in_group = (cairngorms_sp_list |> pull(group_selected))) |>
+        filter(speciesKey %in% files_and_ids$ids, in_group == TRUE)
+      
+      species_choices <- paste0(species_include$common_name, " (", species_include$sci_name, ")")
+      
+      updatePickerInput(
+        session,
+        "species_selector",
+        selected = NULL,
+        choices = species_choices
+      )
+    })
+    
+    # Helper function to update species layer
+    updateSpeciesLayer <- function() {
       if (is.null(input$species_selector) || length(input$species_selector) == 0) {
-        # Clear the map if no species are selected
-        leafletProxy(ns("combined_map_plot")) |>
-          clearGroup("Focal species")
+        leafletProxy(ns("combined_map_plot")) |> clearGroup("Focal species")
       } else {
-        # Extract scientific names from the selection
         selected_species <- sub(".*\\(([^)]+)\\)", "\\1", input$species_selector)
-
-        # Get the species keys that match the selected scientific names
         selected_species_ids <- filter(cairngorms_sp_list, sci_name %in% selected_species) |> pull(speciesKey)
-
-        # Remove previously added species layers to avoid duplication
-        leafletProxy(ns("combined_map_plot")) |>
-          clearGroup("Focal species")
-
-        # Initialize an empty list to store rasters
+        
+        leafletProxy(ns("combined_map_plot")) |> clearGroup("Focal species")
+        
         rasters_to_merge <- list()
-
+        
         for (id in selected_species_ids) {
           file_path <- files_and_ids$files[files_and_ids$ids == id]
-
+          
           if (file.exists(file_path)) {
-            rast_to_add <- rast(file_path)[[1]]
-            rast_to_add <- ifel(rast_to_add < 0.1, NA, rast_to_add)
-
-            # Append to the list of rasters to merge
-            rasters_to_merge <- suppressWarnings(append(rasters_to_merge, rast_to_add))
+            rast_to_add <- terra::rast(file_path)[[1]]
+            rast_to_add_vals <- terra::values(rast_to_add)
+            rast_to_add_filtered <- ifelse(
+              rast_to_add_vals >= input$species_occurrence_slider[1] &
+                rast_to_add_vals <= input$species_occurrence_slider[2],
+              rast_to_add_vals, NA)
+            terra::values(rast_to_add) <- rast_to_add_filtered
+            
+            rasters_to_merge <- c(rasters_to_merge, list(rast_to_add))
           } else {
             warning(paste("File not found for species ID:", id))
           }
         }
-
-        # Merge all selected rasters into a single raster using 'sprc' and 'merge'
+        
         if (length(rasters_to_merge) > 0) {
-          # Merge the rasters
-          merged_raster <- terra::mean(rasters_to_merge)
-
-          # Add the merged raster to the map
+          if (length(rasters_to_merge) == 1) {
+            merged_raster <- rasters_to_merge[[1]]
+          } else {
+            rasters_stack <- terra::rast(rasters_to_merge)
+            merged_raster <- terra::app(rasters_stack, fun = mean, na.rm = TRUE)
+          }
+          
+          # Set zero values to NA to prevent black squares
+          merged_raster[merged_raster == 0] <- NA
+          
           leafletProxy(ns("combined_map_plot")) |>
             addRasterImage(
               merged_raster,
@@ -176,23 +249,50 @@ ces_rp_biodiversity_server <- function(id) {
               opacity = biodiversity_alpha
             )
         }
-
-        # Show the "Focal species" group in the layers control
-        leafletProxy(ns("combined_map_plot")) |>
-          showGroup("Focal species")
+        
+        leafletProxy(ns("combined_map_plot")) |> showGroup("Focal species")
       }
+    }
+    
+    # Observe event to update the map when the species occurrence slider changes
+    observeEvent(input$species_occurrence_slider, ignoreNULL = FALSE, {
+      updateSpeciesLayer()
     })
-
-    # Ensure mutual exclusivity of the Hard and Soft recreationalist layers
-    # observeEvent(input$combined_map_plot_groups, {
-    #   if ("Hard recreationalist" %in% input$combined_map_plot_groups) {
-    #     leafletProxy(ns("combined_map_plot")) |>
-    #       hideGroup("Soft recreationalist")
-    #   }
-    #   if ("Soft recreationalist" %in% input$combined_map_plot_groups) {
-    #     leafletProxy(ns("combined_map_plot")) |>
-    #       hideGroup("Hard recreationalist")
-    #   }
-    # })
+    
+    # Observe event to update the map when the species selector changes
+    observeEvent(input$species_selector, ignoreNULL = FALSE, {
+      updateSpeciesLayer()
+    })
+    
+    # Observe event to update the map when the recreation potential slider changes
+    observeEvent(input$recreation_potential_slider, {
+      # Create copies of the original rasters
+      hard_rec_filtered_raster <- hard_rec
+      soft_rec_filtered_raster <- soft_rec
+      
+      # Apply the filter based on the recreation potential slider
+      hard_rec_vals <- terra::values(hard_rec)
+      soft_rec_vals <- terra::values(soft_rec)
+      
+      hard_rec_filtered <- ifelse(
+        hard_rec_vals >= input$recreation_potential_slider[1] &
+          hard_rec_vals <= input$recreation_potential_slider[2],
+        hard_rec_vals, NA)
+      soft_rec_filtered <- ifelse(
+        soft_rec_vals >= input$recreation_potential_slider[1] &
+          soft_rec_vals <= input$recreation_potential_slider[2],
+        soft_rec_vals, NA)
+      
+      # Update the raster values in the copies
+      terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
+      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+      
+      # Update the map with the filtered rasters
+      leafletProxy(ns("combined_map_plot")) |>
+        clearGroup(c("Hard", "Soft")) |>
+        addRasterImage(hard_rec_filtered_raster, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
+        addRasterImage(soft_rec_filtered_raster, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha)
+    })
+    
   })
 }
