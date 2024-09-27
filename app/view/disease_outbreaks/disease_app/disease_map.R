@@ -5,7 +5,7 @@ box::use(
 )
 
 box::use(
-  app/logic/disease_outbreaks/disease_leaflet_map[read_disease_outbreak_raster, disease_outbreak_leaflet_map]
+  app/logic/disease_outbreaks/disease_leaflet_map[read_disease_outbreak_raster]
 )
 
 #' @export
