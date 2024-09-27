@@ -44,27 +44,32 @@ disease_map_server <- function(id, map_selected, disease_selected) {
 
     # TODO ----
     # 1. incializovat mapu zde, pred observe
+    leaflet_map <- leaflet() |>
+      addTiles() |>
+      setView(
+          lng = 11.8787,
+          lat = 51.3919,
+          zoom = 4
+      )
+
+    output$map_output <- renderLeaflet(leaflet_map)
 
     observeEvent(events(),
       ignoreInit = TRUE,
     {
       if (disease_selected()) {
-        print(map_selected())
-        print(disease_selected())
+        # print(map_selected())
+        # print(disease_selected())
 
         # which one of the two tif maps is going to be selected
         tif_map_path <- paste0("app/data/disease_outbreak/", map_selected()(), ".tif")         
-
         print(tif_map_path)
 
         # TODO ----
         # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
         # 3. -""- - vrstvu infection - ano/ne
         # oboji pomoci leaflet proxy
-
-        map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)
-
-        output$map_output <- renderLeaflet(map_output)
+        # map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)
       }
     })
 

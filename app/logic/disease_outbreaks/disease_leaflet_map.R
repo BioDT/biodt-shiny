@@ -9,24 +9,14 @@ read_disease_outbreak_raster <- function(map_path) {
 }
 
 #' @export
-disease_outbreak_leaflet_map <- function(id, tif_map_full_path) {
-
-
-  print(tif_map_full_path)
-
+add_map_layer <- function(id, tif_map_full_path) {
   # load tif raster, hardcoded for prototype (terra)
   tif_map_projected <- tif_map_full_path |>
     read_disease_outbreak_raster() |>
       project("epsg:3857")
 
   # create leaflet map itself
-  leaflet_map <- leaflet() |>
-    addTiles() |>
-    setView(
-        lng = 11.8787,
-        lat = 51.3919,
-        zoom = 4
-    ) |>
+  leaflet() |>
     addRasterImage(
         tif_map_projected,
         opacity = 0.6,
