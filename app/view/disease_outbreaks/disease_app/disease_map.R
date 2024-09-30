@@ -1,7 +1,8 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal],
+  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput],
   bslib[card, card_header, card_body],
-  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
+  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy],
+  terra[rast, project]
 )
 
 box::use(
@@ -25,6 +26,17 @@ disease_map_ui <- function(id, i18n) {
       leafletOutput(
         ns("map_output")
       ),
+    ),
+    tags$h2("show layer(s):"),
+    checkboxInput(
+      ns("Mosaic_final"),
+      label = "Population Europe ('Mosaic_final.tif')",
+      value = FALSE
+    ),
+    checkboxInput(
+      ns("Mosaic_final"),
+      label = "Outfirst infection ('outfirst_infection.tif')",
+      value = FALSE
     )
   )
 }
@@ -42,8 +54,6 @@ disease_map_server <- function(id, map_selected, disease_selected) {
       map_selected()
     })
 
-    # TODO ----
-    # 1. incializovat mapu zde, pred observe
     leaflet_map <- leaflet() |>
       addTiles() |>
       setView(
@@ -58,12 +68,14 @@ disease_map_server <- function(id, map_selected, disease_selected) {
       ignoreInit = TRUE,
     {
       if (disease_selected()) {
-        # print(map_selected())
-        # print(disease_selected())
-
         # which one of the two tif maps is going to be selected
         tif_map_path <- paste0("app/data/disease_outbreak/", map_selected()(), ".tif")         
         print(tif_map_path)
+
+        tif_map_projected <- tif_map_path |>
+          read_disease_outbreak_raster() |>
+          project("epsg:3857")
+
 
         # TODO ----
         # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
