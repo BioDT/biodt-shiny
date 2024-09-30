@@ -45,7 +45,7 @@ disease_app_server <- function(id, disease_selected) {
     # MAP itself ----
     disease_map_server(
       "disease_map",
-      map_selected = tif_map_path,
+      #map_selected = tif_map_path,
       disease_selected = disease_selected
     )
   })

@@ -1,7 +1,7 @@
 box::use(
   shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput],
   bslib[card, card_header, card_body],
-  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy],
+  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage],
   terra[rast, project]
 )
 
@@ -42,7 +42,7 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id, map_selected, disease_selected) {
+disease_map_server <- function(id, population_raster_selected, disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -51,7 +51,8 @@ disease_map_server <- function(id, map_selected, disease_selected) {
 
     events <- reactive({
       disease_selected()
-      map_selected()
+      population_raster_selected()
+      # outfirst_infection()
     })
 
     leaflet_map <- leaflet() |>
@@ -67,23 +68,31 @@ disease_map_server <- function(id, map_selected, disease_selected) {
     observeEvent(events(),
       ignoreInit = TRUE,
     {
-      if (disease_selected()) {
+      if (population_raster_selected() == "") {
         # which one of the two tif maps is going to be selected
-        tif_map_path <- paste0("app/data/disease_outbreak/", map_selected()(), ".tif")         
+        tif_map_path <- paste0("app/data/disease_outbreak/", "Mosaic_final.tif")         
         print(tif_map_path)
 
         tif_map_projected <- tif_map_path |>
           read_disease_outbreak_raster() |>
           project("epsg:3857")
 
+        leafletProxy("map_output", data = tif_map_projected) |>
+          addRasterImage(
+            tif_map_projected,
+            opacity = 0.6,
+            project = FALSE,
+          )
+        }
 
         # TODO ----
         # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
         # 3. -""- - vrstvu infection - ano/ne
         # oboji pomoci leaflet proxy
         # map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)
-      }
+      
     })
+
 
   })
 }
