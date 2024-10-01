@@ -22,15 +22,6 @@ ces_rp_biodiversity_ui <- function(id) {
   
   tagList(
     fluidRow(
-      tags$head(
-        tags$style(HTML("
-  .dropdown-menu {
-    position: static !important;
-  }
-"))
-        
-      ),
-      
       column(
         12, # Enlarge the map to full width
         card(
@@ -49,6 +40,7 @@ ces_rp_biodiversity_ui <- function(id) {
 
 # Server function
 ces_rp_biodiversity_server <- function(id) {
+
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- "app/data/ces"
@@ -57,6 +49,8 @@ ces_rp_biodiversity_server <- function(id) {
     w <- Waiter$new(
       color = "rgba(256,256,256,0.9)"
     )
+    
+    w$show()
     
     # Define colours
     recreation_alpha <- 0.5
@@ -75,7 +69,7 @@ ces_rp_biodiversity_server <- function(id) {
     hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
     soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
     
-    group_selector_html <- as.character(
+    group_species_selector_html <-  tagList(
       pickerInput(
         ns("species_group_selector"),
         "Select species group:",
@@ -88,11 +82,9 @@ ces_rp_biodiversity_server <- function(id) {
         selected = "all",
         multiple = FALSE,
         width = "400px"
-      )
-    )
+      ),
     
-    species_selector_html <- as.character(
-      pickerInput(
+     pickerInput(
         ns("species_selector"),
         "Select species:",
         choices = NULL,
@@ -105,7 +97,9 @@ ces_rp_biodiversity_server <- function(id) {
       )
     )
     
-    recreation_slider_html <- as.character(
+    # Generate the slider input using tagList
+    recreation_occurence_slider_html <- tagList(
+      
       sliderTextInput(
         inputId = ns("recreation_potential_slider"),
         label = "Filter Recreation Potential:",
@@ -113,18 +107,15 @@ ces_rp_biodiversity_server <- function(id) {
         selected = c(0, 1),
         grid = FALSE,
         width = "300px"
-      )
-    )
-    
-    species_occurrence_slider_html <- as.character(
+      ),
+      
       sliderTextInput(
         inputId = ns("species_occurrence_slider"),
         label = "Filter Species Occurrence:",
         choices = seq(0, 1, by = 0.1),
         selected = c(0, 1),
         grid = FALSE,
-        width = "300px"
-      )
+        width = "300px")
     )
     
     # Create the initial leaflet map
@@ -147,15 +138,11 @@ ces_rp_biodiversity_server <- function(id) {
       ) |>
       addLegend(pal = pal, values = terra::values(hard_rec), title = "Recreation", position = "bottomright") |>
       addControl(
-        html = HTML(group_selector_html),
+        html = as.character(group_species_selector_html),
         position = "topleft"
       ) |>
       addControl(
-        html = HTML(species_occurrence_slider_html),
-        position = "bottomright"
-      ) |>
-      addControl(
-        html = HTML(recreation_slider_html),
+        html = as.character(recreation_occurence_slider_html),
         position = "bottomright"
       ) |>
       addGroupedLayersControl(
@@ -170,18 +157,19 @@ ces_rp_biodiversity_server <- function(id) {
           exclusiveGroups = "Recreationalist",
           groupsCollapsable = FALSE
         )
-      ) |> 
-      addControl(
-        html = HTML(species_selector_html),
-        position = "topleft")
+      )
+    
+    w$hide()
     
     # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({
+      
       rec_pot_map
     })
     
     # Update species selector when group is selected
     observeEvent(input$species_group_selector, {
+      
       group_selected <- input$species_group_selector
       
       species_include <- cairngorms_sp_list |>
@@ -256,16 +244,29 @@ ces_rp_biodiversity_server <- function(id) {
     
     # Observe event to update the map when the species occurrence slider changes
     observeEvent(input$species_occurrence_slider, ignoreNULL = FALSE, {
+      
+      w$show()
+      
       updateSpeciesLayer()
+      
+      w$hide()
     })
     
     # Observe event to update the map when the species selector changes
     observeEvent(input$species_selector, ignoreNULL = FALSE, {
+      
+      w$show()
+      
       updateSpeciesLayer()
+      
+      w$hide()
     })
     
     # Observe event to update the map when the recreation potential slider changes
     observeEvent(input$recreation_potential_slider, {
+      
+      w$show()
+      
       # Create copies of the original rasters
       hard_rec_filtered_raster <- hard_rec
       soft_rec_filtered_raster <- soft_rec
@@ -292,7 +293,10 @@ ces_rp_biodiversity_server <- function(id) {
         clearGroup(c("Hard", "Soft")) |>
         addRasterImage(hard_rec_filtered_raster, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
         addRasterImage(soft_rec_filtered_raster, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha)
-    })
+    
+      w$hide()
+      
+      })
     
   })
 }
