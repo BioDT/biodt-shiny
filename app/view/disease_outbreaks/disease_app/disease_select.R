@@ -9,7 +9,7 @@ disease_select_ui <- function(id, theme, i18n) {
   bootstrapPage(
     theme = theme,
     card(
-      class = "me-md-3 card-shadow overflow-hidden",
+      class = "me-md-3 card-shadow overflow-hidden mt-2",
       title = "select_map",
       full_screen = FALSE,
       card_header(
