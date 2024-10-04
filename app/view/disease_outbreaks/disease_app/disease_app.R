@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, tags, reactiveVal, reactive],
+  shiny[NS, tagList, moduleServer, tags, reactiveVal, reactive, observeEvent],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -40,7 +40,13 @@ disease_app_server <- function(id, disease_selected) {
     tif_map_path <- reactiveVal(NULL)
 
     # selection of raster map
-    tif_map_path(disease_select_server("disease_select", disease_selected))
+    # tif_map_path(disease_select_server("disease_select", disease_selected))
+
+      tif_map_path(disease_select_server("disease_select", disease_selected))
+    
+    observeEvent(tif_map_path(), {
+      print(tif_map_path())
+    })
 
     # MAP itself ----
     disease_map_server(

@@ -27,17 +27,17 @@ disease_map_ui <- function(id, i18n) {
         ns("map_output")
       ),
     ),
-    tags$h2("show layer(s):"),
-    checkboxInput(
-      ns("Mosaic_final"),
-      label = "Population Europe ('Mosaic_final.tif')",
-      value = FALSE
-    ),
-    checkboxInput(
-      ns("Mosaic_final"),
-      label = "Outfirst infection ('outfirst_infection.tif')",
-      value = FALSE
-    )
+    # tags$h2("show layer(s):"),
+    # checkboxInput(
+    #   ns("Mosaic_final"),
+    #   label = "Population Europe ('Mosaic_final.tif')",
+    #   value = FALSE
+    # ),
+    # checkboxInput(
+    #   ns("Mosaic_final"),
+    #   label = "Outfirst infection ('outfirst_infection.tif')",
+    #   value = FALSE
+    # )
   )
 }
 

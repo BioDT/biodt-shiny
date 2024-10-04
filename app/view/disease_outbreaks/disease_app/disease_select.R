@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, selectInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive],
+  shiny[moduleServer, NS, tagList, checkboxInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive],
   bslib[card, card_header, card_body],
 )
 
@@ -15,15 +15,19 @@ disease_select_ui <- function(id, theme, i18n) {
       card_header(
         tags$h2(
           class = "card_title",
-          "Disease Map Select"
+          "Show layer(s):"
         )
       ),
       card_body(
-        selectInput(
-          ns("disease_map_select"),
-          label = "Select disease map:",
-          choices = c("Mosaic_final", "outfirst_infection"),
-          multiple = FALSE
+        checkboxInput(
+          ns("mosaic_final"),
+          label = "Population in whole Europe ('Mosaic_final.tif')",
+          value = FALSE
+        ),
+        checkboxInput(
+          ns("outfirst_infection"),
+          label = "Outfirst infection ('outfirst_infection.tif')",
+          value = FALSE
         )
       )
     )
@@ -38,7 +42,8 @@ disease_select_server <- function(id, disease_selected) {
 
     events <- reactive({
       disease_selected()
-      input$disease_map_select
+      input$mosaic_final
+      input$outfirst_infection
     })
 
     observeEvent(
@@ -47,8 +52,14 @@ disease_select_server <- function(id, disease_selected) {
       ignoreNULL = TRUE,
     {
       if( disease_selected() ){
-        input$disease_map_select |>
-          out()
+        if (input$mosaic_final) {
+          "mosaic_final" |>
+            out()
+        }
+        if (input$outfirst_infection) {
+          "outfirst_infection" |>
+            out()
+        }
       }
     })
 
