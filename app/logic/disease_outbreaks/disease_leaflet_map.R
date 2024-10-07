@@ -1,6 +1,6 @@
 box::use(
   terra[rast, project],
-  leaflet[leaflet, addTiles, addRasterImage, setView, leafletProxy]
+  leaflet[leaflet, addTiles, addRasterImage, setView, leafletProxy, removeImage]
 )
 
 #' @export
@@ -17,5 +17,18 @@ add_map_layer <- function(map_output_id, projected_tif, opa) {
       projected_tif,
       opacity = opa,
       project = FALSE,
+      layerId = paste0("layer-", names(projected_tif)),
+      group = paste0("layer-", names(projected_tif))
+    )
+}
+
+# TODO rework
+#' @export
+remove_map_layer <- function(map_output_id, layer_id) {
+  print(map_output_id)
+  print(layer_id)
+  leafletProxy(map_output_id) |>
+    removeImage(
+      layerId = layer_id
     )
 }

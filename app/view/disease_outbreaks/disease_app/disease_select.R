@@ -1,6 +1,11 @@
 box::use(
-  shiny[moduleServer, NS, tagList, checkboxInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive],
+  shiny[moduleServer, NS, tagList, checkboxInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive, actionButton],
   bslib[card, card_header, card_body],
+  leaflet[clearImages, leafletProxy]
+)
+
+box::use(
+  app/logic/disease_outbreaks/disease_leaflet_map[remove_map_layer]
 )
 
 #' @export
@@ -24,11 +29,21 @@ disease_select_ui <- function(id, theme, i18n) {
           label = "Population in whole Europe ('Mosaic_final.tif')",
           value = FALSE
         ),
+        actionButton(
+          ns("clearMosaic"),
+          "clear",
+          class = "btn btn-outline-warning btn-sm"
+        ),
         checkboxInput(
           ns("outfirst_infection"),
           label = "Outfirst infection ('outfirst_infection.tif')",
           value = FALSE
-        )
+        ),
+        actionButton(
+          ns("clearInfection"),
+          "clear",
+          class = "btn btn-outline-warning btn-sm"
+        ),
       )
     )
   )
@@ -50,16 +65,30 @@ disease_select_server <- function(id, tab_disease_selected) {
       events(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
-    {      
+    {
         if (input$mosaic_final == TRUE) {
           "Mosaic_final" |>
             out()
         }
+
         if (input$outfirst_infection == TRUE) {
           "outfirst_infection" |>
             out()
         }
+
     })
+
+    observeEvent(
+      input$clearMosaic,
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      {
+        print(input$clearMosaic)
+        # TODO fix here, to pass proper namespaced ID of the leaflet map
+        leafletProxy("map_output") |>
+          clearImages()
+      }
+    )
 
     reactive(out())
   })

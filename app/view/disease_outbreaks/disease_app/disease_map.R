@@ -1,7 +1,7 @@
 box::use(
   shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput],
   bslib[card, card_header, card_body],
-  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage],
+  leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage, clearImages],
   terra[rast, project]
 )
 
@@ -60,7 +60,7 @@ disease_map_server <- function(id, tab_disease_selected, map_filename) {
     {      
       tif_map_projected <- read_and_project_raster(map_filename())
 
-      print(tif_map_projected)
+      #print(tif_map_projected)
 
       add_map_layer("map_output", tif_map_projected, 0.6)
 
@@ -70,6 +70,8 @@ disease_map_server <- function(id, tab_disease_selected, map_filename) {
         # oboji pomoci leaflet proxy
         # map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)      
     })
+
+    # TODO LAST - call the remove_map_layer from this module
 
   })
 }
