@@ -27,17 +27,6 @@ disease_map_ui <- function(id, i18n) {
         ns("map_output")
       ),
     ),
-    # tags$h2("show layer(s):"),
-    # checkboxInput(
-    #   ns("Mosaic_final"),
-    #   label = "Population Europe ('Mosaic_final.tif')",
-    #   value = FALSE
-    # ),
-    # checkboxInput(
-    #   ns("Mosaic_final"),
-    #   label = "Outfirst infection ('outfirst_infection.tif')",
-    #   value = FALSE
-    # )
   )
 }
 
@@ -72,23 +61,13 @@ disease_map_server <- function(id, disease_selected, map_filename) {
       tif_map_projected <- read_and_project_raster(map_filename())
 
       print(tif_map_projected)
-      
-      # if (population_raster_selected() == "") {
-      #   # which one of the two tif maps is going to be selected
-      #   tif_map_path <- paste0("app/data/disease_outbreak/", "Mosaic_final.tif")         
-      #   print(tif_map_path)
 
-      #   tif_map_projected <- tif_map_path |>
-      #     read_disease_outbreak_raster() |>
-      #     project("epsg:3857")
-
-      #   leafletProxy("map_output", data = tif_map_projected) |>
-      #     addRasterImage(
-      #       tif_map_projected,
-      #       opacity = 0.6,
-      #       project = FALSE,
-      #     )
-      #   }
+      leafletProxy("map_output", data = tif_map_projected) |>
+        addRasterImage(
+          tif_map_projected,
+          opacity = 0.8,
+          project = FALSE,
+        )
 
         # TODO ----
         # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
