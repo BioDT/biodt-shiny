@@ -4,8 +4,10 @@ box::use(
 )
 
 #' @export
-read_disease_outbreak_raster <- function(map_path) {
-    map_raster <- rast(map_path)
+read_and_project_raster <- function(map_filename) {
+  map_full_path <- paste0("app/data/disease_outbreak/", map_filename, ".tif")
+
+  map_raster <- rast(map_full_path) |> project("epsg:3857")
 }
 
 #' @export

@@ -51,11 +51,11 @@ disease_select_server <- function(id, disease_selected) {
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
     {      
-        if (input$mosaic_final) {
-          "mosaic_final" |>
+        if (input$mosaic_final == TRUE) {
+          "Mosaic_final" |>
             out()
         }
-        if (input$outfirst_infection) {
+        if (input$outfirst_infection == TRUE) {
           "outfirst_infection" |>
             out()
         }

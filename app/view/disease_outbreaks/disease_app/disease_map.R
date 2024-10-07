@@ -6,7 +6,7 @@ box::use(
 )
 
 box::use(
-  app/logic/disease_outbreaks/disease_leaflet_map[read_disease_outbreak_raster]
+  app/logic/disease_outbreaks/disease_leaflet_map[read_and_project_raster]
 )
 
 #' @export
@@ -68,11 +68,11 @@ disease_map_server <- function(id, disease_selected, map_filename) {
 
     observeEvent(events(),
       ignoreInit = TRUE,
-    {
-      
-      map_full_path <- paste0("app/data/disease_outbreak/", map_filename(), ".tif")
-      print(map_full_path)
+    {      
+      tif_map_projected <- read_and_project_raster(map_filename())
 
+      print(tif_map_projected)
+      
       # if (population_raster_selected() == "") {
       #   # which one of the two tif maps is going to be selected
       #   tif_map_path <- paste0("app/data/disease_outbreak/", "Mosaic_final.tif")         
