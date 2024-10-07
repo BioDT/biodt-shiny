@@ -38,7 +38,7 @@ disease_select_ui <- function(id, theme, i18n) {
 disease_select_server <- function(id, disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    out <- reactiveVal()
+    out <- reactiveVal(NULL)
 
     events <- reactive({
       disease_selected()
@@ -50,8 +50,7 @@ disease_select_server <- function(id, disease_selected) {
       events(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
-    {
-      if( disease_selected() ){
+    {      
         if (input$mosaic_final) {
           "mosaic_final" |>
             out()
@@ -60,9 +59,8 @@ disease_select_server <- function(id, disease_selected) {
           "outfirst_infection" |>
             out()
         }
-      }
     })
 
-    return(out)
+    reactive(out())
   })
 }

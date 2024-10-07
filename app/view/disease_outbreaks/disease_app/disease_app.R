@@ -24,7 +24,6 @@ disease_app_ui <- function(id, i18n) {
       disease_select_ui(
         ns("disease_select"), i18n
       ),
-      # tags$h3(i18n$translate("Location")),
     ),
     tags$h3(i18n$translate("Output Plot"))
   )
@@ -35,25 +34,15 @@ disease_app_server <- function(id, disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Variables ----
-    tif_map <- reactiveVal(NULL)
-    tif_map_path <- reactiveVal(NULL)
-
-    # selection of raster map
-    # tif_map_path(disease_select_server("disease_select", disease_selected))
-
-      tif_map_path(disease_select_server("disease_select", disease_selected))
-    
-    observeEvent(tif_map_path(), {
-      print(tif_map_path())
-    })
+    map_filename <- disease_select_server("disease_select", disease_selected)    
 
     # MAP itself ----
     disease_map_server(
       "disease_map",
       #map_selected = tif_map_path,
-      population_raster_selected = tif_map,
-      disease_selected = disease_selected
+      #population_raster_selected = tif_map,
+      disease_selected = disease_selected,
+      map_filename
     )
   })
 }
