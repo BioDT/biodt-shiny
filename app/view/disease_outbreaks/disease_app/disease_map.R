@@ -6,7 +6,7 @@ box::use(
 )
 
 box::use(
-  app/logic/disease_outbreaks/disease_leaflet_map[read_and_project_raster]
+  app/logic/disease_outbreaks/disease_leaflet_map[read_and_project_raster, add_map_layer]
 )
 
 #' @export
@@ -62,12 +62,7 @@ disease_map_server <- function(id, disease_selected, map_filename) {
 
       print(tif_map_projected)
 
-      leafletProxy("map_output", data = tif_map_projected) |>
-        addRasterImage(
-          tif_map_projected,
-          opacity = 0.8,
-          project = FALSE,
-        )
+      add_map_layer("map_output", tif_map_projected, 0.6)
 
         # TODO ----
         # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
