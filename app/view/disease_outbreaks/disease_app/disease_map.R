@@ -31,7 +31,7 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id, disease_selected, map_filename) {
+disease_map_server <- function(id, tab_disease_selected, map_filename) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -39,7 +39,7 @@ disease_map_server <- function(id, disease_selected, map_filename) {
     tif_map_ok_prjct <- reactiveVal()
 
     events <- reactive({
-      disease_selected()
+      tab_disease_selected()
       # population_raster_selected()
       # outfirst_infection()
       map_filename()

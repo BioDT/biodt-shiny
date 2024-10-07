@@ -35,13 +35,13 @@ disease_select_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-disease_select_server <- function(id, disease_selected) {
+disease_select_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     out <- reactiveVal(NULL)
 
     events <- reactive({
-      disease_selected()
+      tab_disease_selected()
       input$mosaic_final
       input$outfirst_infection
     })

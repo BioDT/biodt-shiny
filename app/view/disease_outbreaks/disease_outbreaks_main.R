@@ -49,19 +49,19 @@ disease_outbreaks_main_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    disease_selected <- reactiveVal(FALSE)
+    tab_disease_selected <- reactiveVal(FALSE)
 
     observeEvent(
       input$tab,
       {
         if (input$tab == "Disease Outbreaks") {
-          disease_selected(TRUE)
+          tab_disease_selected(TRUE)
         } else {
-          disease_selected(FALSE)
+          tab_disease_selected(FALSE)
         }
       }
     )
 
-    disease_app_server("disease_app", disease_selected)
+    disease_app_server("disease_app", tab_disease_selected)
   })
 }

@@ -30,18 +30,18 @@ disease_app_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_app_server <- function(id, disease_selected) {
+disease_app_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    map_filename <- disease_select_server("disease_select", disease_selected)    
+    map_filename <- disease_select_server("disease_select", tab_disease_selected)    
 
     # MAP itself ----
     disease_map_server(
       "disease_map",
       #map_selected = tif_map_path,
       #population_raster_selected = tif_map,
-      disease_selected = disease_selected,
+      tab_disease_selected = tab_disease_selected,
       map_filename
     )
   })
