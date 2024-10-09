@@ -131,6 +131,7 @@ ces_rp_biodiversity_server <- function(id) {
           autoCenter = TRUE,
           setView = TRUE)) |>
       addRasterImage(hard_rec, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
+      hideGroup("Hard") |>
       addRasterImage(soft_rec, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
       addLegend(
         pal = biodiversity_pal, values = c(0, 1), title = "Biodiversity", position = "bottomright",
