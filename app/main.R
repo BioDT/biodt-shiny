@@ -1,6 +1,6 @@
 box::use(
   shiny,
-  bslib[nav_select, bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel],
+  bslib[nav_select, bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel, page],
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
@@ -46,7 +46,8 @@ i18n$set_translation_language("en")
 #' @export
 ui <- function(id) {
   ns <- shiny$NS(id)
-  shiny$bootstrapPage(
+  page(
+  #shiny$bootstrapPage(
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
