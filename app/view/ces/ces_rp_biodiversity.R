@@ -138,11 +138,11 @@ ces_rp_biodiversity_server <- function(id) {
       ) |>
       addLegend(pal = pal, values = terra::values(hard_rec), title = "Recreation", position = "bottomright") |>
       addControl(
-        html = as.character(group_species_selector_html),
+        html = group_species_selector_html,
         position = "topleft"
       ) |>
       addControl(
-        html = as.character(recreation_occurence_slider_html),
+        html = recreation_occurence_slider_html,
         position = "bottomright"
       ) |>
       addGroupedLayersControl(
