@@ -29,21 +29,15 @@ disease_select_ui <- function(id, theme, i18n) {
           label = "Population in whole Europe ('Mosaic_final.tif')",
           value = FALSE
         ),
-        actionButton(
-          ns("clearMosaic"),
-          "clear",
-          class = "btn btn-outline-warning btn-sm"
-        ),
         checkboxInput(
           ns("outfirst_infection"),
           label = "Outfirst infection ('outfirst_infection.tif')",
           value = FALSE
         ),
-        actionButton(
-          ns("clearInfection"),
-          "clear",
-          class = "btn btn-outline-warning btn-sm"
-        ),
+      ),
+      actionButton(
+        ns("clearAllLayers"),
+        label = "clear layers"
       )
     )
   )
@@ -64,8 +58,8 @@ disease_select_server <- function(id, tab_disease_selected) {
     observeEvent(
       events(),
       ignoreInit = TRUE,
-      ignoreNULL = TRUE,
-    {
+      ignoreNULL = FALSE,
+    {        
         if (input$mosaic_final == TRUE) {
           "Mosaic_final" |>
             out()
@@ -75,16 +69,13 @@ disease_select_server <- function(id, tab_disease_selected) {
           "outfirst_infection" |>
             out()
         }
-
     })
 
     observeEvent(
-      input$clearMosaic,
+      input$clearAllLayers,
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        print(input$clearMosaic)
-        # TODO fix here, to pass proper namespaced ID of the leaflet map
         leafletProxy("map_output") |>
           clearImages()
       }

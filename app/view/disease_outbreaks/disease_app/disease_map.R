@@ -27,6 +27,11 @@ disease_map_ui <- function(id, i18n) {
         ns("map_output")
       ),
     ),
+        checkboxInput(
+          ns("outfirst_infection"),
+          label = "Outfirst infection ('outfirst_infection.tif')",
+          value = FALSE
+        ),
   )
 }
 
@@ -60,18 +65,21 @@ disease_map_server <- function(id, tab_disease_selected, map_filename) {
     {      
       tif_map_projected <- read_and_project_raster(map_filename())
 
-      #print(tif_map_projected)
-
       add_map_layer("map_output", tif_map_projected, 0.6)
 
+      
+      # observeEvent(input$outfirst_infection, {
+      #   #print(input$outfirst_infection)
+      #   leafletProxy(ns("map_output")) |>
+      #     removeImage(layerId = "")
+      #       #layerId = layer_id
+      #     #)
+      # })
         # TODO ----
         # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
         # 3. -""- - vrstvu infection - ano/ne
         # oboji pomoci leaflet proxy
         # map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)      
     })
-
-    # TODO LAST - call the remove_map_layer from this module
-
   })
 }

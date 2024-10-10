@@ -12,13 +12,14 @@ read_and_project_raster <- function(map_filename) {
 
 #' @export
 add_map_layer <- function(map_output_id, projected_tif, opa) {
+  layer_id <- paste0("layerId-", names(projected_tif))  
+  # print(layer_id)
   leafletProxy(map_output_id, data = projected_tif) |>
     addRasterImage(
       projected_tif,
       opacity = opa,
       project = FALSE,
-      layerId = paste0("layer-", names(projected_tif)),
-      group = paste0("layer-", names(projected_tif))
+      layerId = layer_id
     )
 }
 
@@ -26,7 +27,6 @@ add_map_layer <- function(map_output_id, projected_tif, opa) {
 #' @export
 remove_map_layer <- function(map_output_id, layer_id) {
   print(map_output_id)
-  print(layer_id)
   leafletProxy(map_output_id) |>
     removeImage(
       layerId = layer_id
