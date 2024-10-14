@@ -2,7 +2,9 @@ box::use(
   shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput, updateCheckboxInput],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage, clearImages],
-  terra[rast, project]
+  terra[rast, project],
+  waiter[Waiter],
+  app/logic/waiter[waiter_text]
 )
 
 box::use(
@@ -38,6 +40,16 @@ disease_map_ui <- function(id, i18n) {
 #' @export
 disease_map_server <- function(id, tab_disease_selected, map_filename) {
   moduleServer(id, function(input, output, session) {
+    msg <- 
+      waiter_text(message = tags$h3("Loading...",
+                                    style = "color: #414f2f;"
+      ))
+    
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
+    
     ns <- session$ns
 
     tif_map_path <- ""
@@ -61,9 +73,11 @@ disease_map_server <- function(id, tab_disease_selected, map_filename) {
     observeEvent(events(),
       ignoreInit = TRUE,
       {
+        w$show()
         tif_map_projected <- read_and_project_raster(map_filename())
 
         add_map_layer("map_output", tif_map_projected, 0.9)
+        w$hide()
       }
     )
 
