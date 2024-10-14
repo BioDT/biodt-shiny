@@ -35,10 +35,6 @@ disease_select_ui <- function(id, theme, i18n) {
           value = FALSE
         ),
       ),
-      actionButton(
-        ns("clearAllLayers"),
-        label = "clear layers"
-      )
     )
   )
 }
@@ -58,7 +54,7 @@ disease_select_server <- function(id, tab_disease_selected) {
     observeEvent(
       events(),
       ignoreInit = TRUE,
-      ignoreNULL = FALSE,
+      ignoreNULL = TRUE,
     {        
         if (input$mosaic_final == TRUE) {
           "Mosaic_final" |>
@@ -70,16 +66,6 @@ disease_select_server <- function(id, tab_disease_selected) {
             out()
         }
     })
-
-    observeEvent(
-      input$clearAllLayers,
-      ignoreInit = TRUE,
-      ignoreNULL = TRUE,
-      {
-        leafletProxy("map_output") |>
-          clearImages()
-      }
-    )
 
     reactive(out())
   })

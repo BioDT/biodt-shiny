@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput],
+  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput, updateCheckboxInput],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage, clearImages],
   terra[rast, project]
@@ -27,11 +27,11 @@ disease_map_ui <- function(id, i18n) {
         ns("map_output")
       ),
     ),
-        checkboxInput(
-          ns("outfirst_infection"),
-          label = "Outfirst infection ('outfirst_infection.tif')",
-          value = FALSE
-        ),
+    actionButton(
+      ns("clearAllLayers"),
+      label = "clear layers",
+      width = "200px"
+    )
   )
 }
 
@@ -45,41 +45,34 @@ disease_map_server <- function(id, tab_disease_selected, map_filename) {
 
     events <- reactive({
       tab_disease_selected()
-      # population_raster_selected()
-      # outfirst_infection()
       map_filename()
     })
 
     leaflet_map <- leaflet() |>
       addTiles() |>
       setView(
-          lng = 11.8787,
-          lat = 51.3919,
-          zoom = 4
+        lng = 11.8787,
+        lat = 51.3919,
+        zoom = 4
       )
 
     output$map_output <- renderLeaflet(leaflet_map)
 
     observeEvent(events(),
       ignoreInit = TRUE,
-    {      
-      tif_map_projected <- read_and_project_raster(map_filename())
+      {
+        tif_map_projected <- read_and_project_raster(map_filename())
 
-      add_map_layer("map_output", tif_map_projected, 0.6)
+        add_map_layer("map_output", tif_map_projected, 0.9)
+      }
+    )
 
-      
-      # observeEvent(input$outfirst_infection, {
-      #   #print(input$outfirst_infection)
-      #   leafletProxy(ns("map_output")) |>
-      #     removeImage(layerId = "")
-      #       #layerId = layer_id
-      #     #)
-      # })
-        # TODO ----
-        # 2. disease_outbreak_leaflet_map rozdelit na min. dve funkce, ktere budou brat jako 1. arg mapu, jako druhy "vrstvu mozaic" - ano/ne
-        # 3. -""- - vrstvu infection - ano/ne
-        # oboji pomoci leaflet proxy
-        # map_output <- disease_outbreak_leaflet_map("map_output", tif_map_path)      
-    })
+    observeEvent(input$clearAllLayers,
+      ignoreInit = TRUE,
+      {
+        leafletProxy("map_output") |>
+          clearImages()
+      }
+    )
   })
 }
