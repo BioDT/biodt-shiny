@@ -248,7 +248,7 @@ server <- function(id) {
       session_dir
     )
     # Grassland pDT ----
-    # grassland_main_server("grassland_main")
+    grassland_main_server("grassland_main")
 
     ces_server(
       "ces_main"
