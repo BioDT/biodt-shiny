@@ -37,7 +37,7 @@ disease_app_server <- function(id, tab_disease_selected) {
 
     # Variables ----
     map <- reactiveVal()
-    leaflet_map <- reactiveVal(NULL)
+    leaflet_map <- reactiveVal()
 
     observeEvent(tab_disease_selected(),
       ignoreInit = TRUE,
@@ -51,14 +51,15 @@ disease_app_server <- function(id, tab_disease_selected) {
             add_control = TRUE,
             main_map_features = TRUE,
           )  |>
-          leaflet_map()        
-      }
-    )   
+          leaflet_map()
 
-    # MAP itself ----
-    disease_map_server(
-      "disease_map",
-      leaflet_map = leaflet_map,
+        # MAP itself ----
+        disease_map_server(
+          "disease_map",
+          leaflet_map = leaflet_map,
+        ) 
+      }
     )
+
   })
 }
