@@ -4,31 +4,35 @@ box::use(
 )
 
 #' @export
-read_and_project_raster <- function(map_filename) {
-  map_full_path <- paste0("app/data/disease_outbreak/", map_filename, ".tif")
-
+read_and_project_raster <- function(map_full_path) {
   map_raster <- rast(map_full_path) |> project("epsg:3857")
 }
 
 #' @export
-add_map_layer <- function(map_output_id, projected_tif, opa) {
-  layer_id <- paste0("layerId-", names(projected_tif))  
-  print("added map layer with id:")
-  print(layer_id)
-  leafletProxy(map_output_id, data = projected_tif) |>
+disease_leaflet_map <- function(map_raster,
+                                add_control = TRUE, 
+                                main_map_features = TRUE) {
+  
+  leaflet_map <- leaflet() |>
+    addTiles() |>
+    setView(
+      lng = 11.8787,
+      lat = 51.3919,
+      zoom = 4
+    ) |>
     addRasterImage(
-      projected_tif,
-      opacity = opa,
+      map_raster,
+      opacity = 0.9,
       project = FALSE,
-      layerId = layer_id
+      group = "Disease layer"
+    ) |>
+    addRasterLegend(
+      map_raster,
+      opacity = 0.9,
+      position = "bottomright",
+      group = "Diseaselayer",
+      className = "info legend Diseaselayer"
     )
-}
 
-#' @export
-remove_map_layer <- function(map_output_id, layer_id) {
-  print(map_output_id)
-  leafletProxy(map_output_id) |>
-    removeImage(
-      layerId = layer_id
-    )
+    return(leaflet_map)
 }

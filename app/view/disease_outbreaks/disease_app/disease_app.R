@@ -7,6 +7,7 @@ box::use(
 box::use(
   app/view/disease_outbreaks/disease_app/disease_map[disease_map_ui, disease_map_server],
   app/view/disease_outbreaks/disease_app/disease_select[disease_select_ui, disease_select_server],
+  app/logic/disease_outbreaks/disease_leaflet_map[read_and_project_raster, disease_leaflet_map]
 )
 
 
@@ -34,15 +35,30 @@ disease_app_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    map_filename <- disease_select_server("disease_select", tab_disease_selected)    
+    # Variables ----
+    map <- reactiveVal()
+    leaflet_map <- reactiveVal()
+
+    observeEvent(tab_disease_selected(),
+      ignoreInit = TRUE,
+      {        
+        "app/data/disease_outbreak/Mosaic_final.tif" |>
+          read_and_project_raster() |>
+          map()
+
+        map() |>
+          disease_leaflet_map(
+            add_control = TRUE,
+            main_map_features = TRUE,
+          )  |>
+          leaflet_map()        
+      }
+    )   
 
     # MAP itself ----
     disease_map_server(
       "disease_map",
-      #map_selected = tif_map_path,
-      #population_raster_selected = tif_map,
       tab_disease_selected = tab_disease_selected,
-      map_filename
     )
   })
 }

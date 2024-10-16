@@ -20,21 +20,10 @@ disease_select_ui <- function(id, theme, i18n) {
       card_header(
         tags$h2(
           class = "card_title",
-          "Show layer(s):"
+          "File input"
         )
       ),
-      card_body(
-        checkboxInput(
-          ns("mosaic_final"),
-          label = "Population in whole Europe ('Mosaic_final.tif')",
-          value = FALSE
-        ),
-        checkboxInput(
-          ns("outfirst_infection"),
-          label = "Outfirst infection ('outfirst_infection.tif')",
-          value = FALSE
-        ),
-      ),
+      card_body(),
     )
   )
 }
