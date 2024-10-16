@@ -33,14 +33,15 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id) {
+disease_map_server <- function(id, leaflet_map) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    
-
-
-
+    observeEvent(leaflet_map(), {
+      req(leaflet_map())
+      output_map <- leaflet_map()
+      output$map_output <- renderLeaflet(output_map)
+    })
 
   })
 }
