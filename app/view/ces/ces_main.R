@@ -53,6 +53,8 @@ ces_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # add observeEvent(input$tab) and put that value in reactiveVal variable, that will be passed to module servers, where You can observeEvent that value change.
+    # Check whether the data are not loaded twice: once in cer_rp, second time in ces_rp_biodiversity and same with biodiversity, then it would be better to load them here and pass them downstream
     
     ces_rp_server("ces_rp")
     ces_biodiversity_server("ces_biodiversity")
