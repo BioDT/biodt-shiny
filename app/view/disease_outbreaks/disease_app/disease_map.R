@@ -4,7 +4,8 @@ box::use(
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage, clearImages],
   terra[rast, project],
   waiter[Waiter],
-  app/logic/waiter[waiter_text]
+  app/logic/waiter[waiter_text],
+  waiter[Waiter],
 )
 
 box::use(
@@ -36,11 +37,22 @@ disease_map_ui <- function(id, i18n) {
 disease_map_server <- function(id, leaflet_map) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+        # Define waiter ----
+    msg <- waiter_text(message = tags$h3("Loading data...",
+        style = "color: #414f2f;"
+      ))
+
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
 
     observeEvent(leaflet_map(), {
       req(leaflet_map())
+      w$show()
       output_map <- leaflet_map()
       output$map_output <- renderLeaflet(output_map)
+      w$hide()
     })
 
   })
