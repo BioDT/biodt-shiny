@@ -122,26 +122,26 @@
 
   .irs-bar,
   .irs-shadow {
-    background: #DDA15E;
-    border-color: #DDA15E;
-    color: #DDA15E;
+    background: #A86200;
+    border-color: #A86200;
+    color: #A86200;
   }
 
   .irs-handle {
-    background: #DDA15E;
-    border-color: #DDA15E;
-    color: #DDA15E;
+    background: #A86200;
+    border-color: #A86200;
+    color:#A86200;
   }
 
   .irs-single {
-    background: #DDA15E;
-    border-color: #DDA15E;
+    background: #A86200;
+    border-color: #A86200;
   }
 }
 
 .irs--shiny .irs-handle.state_hover,
 .irs--shiny .irs-handle:hover {
-  background: #DDA15E;
+  background: #A86200;
 }
 /* END slider inputs color fix (for awesome inputs which were removed) */
 
@@ -152,8 +152,8 @@
 }
 /* shiny checkbox color fix */
 .shiny-input-checkbox {
-  background-color: #DDA15E !important;
-  border-color: #DDA15E !important;
+  background-color: #A86200 !important;
+  border-color: #A86200 !important;
 }
 
 
@@ -189,7 +189,7 @@
         font-weight: 600;
         margin-bottom: 20px;
         font-size: 1rem;
-        color: #bc6c25;
+        color: #A86200;
         display: inline-block;
         padding-left: 50px;
         background: url("../img/title_tail.svg") no-repeat left top;

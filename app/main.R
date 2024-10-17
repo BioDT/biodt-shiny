@@ -28,7 +28,7 @@ shiny$enableBookmarking("server")
 #' @export
 biodt_theme <- bs_theme(
   version = 5,
-  primary = "#bc6c25",
+  primary = "#A86200",
   secondary = "#414f2f",
   info = "#DDA15E",
   warning = "#6E3E18",
@@ -56,7 +56,8 @@ ui <- function(id) {
       useWaiter(),
       useHostess(),
       use_cicerone(),
-      usei18n(i18n)
+      usei18n(i18n),
+      includeScript("app/js/tab-index.js") 
     ),
     waiterShowOnLoad(
       html = spin_loaders(
