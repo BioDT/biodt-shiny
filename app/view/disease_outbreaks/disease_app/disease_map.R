@@ -48,8 +48,8 @@ disease_map_server <- function(id, leaflet_map) {
     )
 
     observeEvent(leaflet_map(), {
-      req(leaflet_map())
       w$show()
+      req(leaflet_map())      
       output_map <- leaflet_map()
       output$map_output <- renderLeaflet(output_map)
       w$hide()
