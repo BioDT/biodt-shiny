@@ -146,19 +146,25 @@ ces_rp_biodiversity_server <- function(id) {
         html = recreation_occurence_slider_html,
         position = "bottomright"
       ) |>
+      addTiles(
+        urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+        attribution = "GBIF",
+        group = "Biodiversity data"
+      ) |>
       addGroupedLayersControl(
         position = "bottomright",
         baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
         overlayGroups = list(
           "Recreationalist" = c("Nothing", "Hard", "Soft"),
-          "Biodiversity" = c("Biodiversity hotspots", "Focal species")
+          "Biodiversity" = c("Biodiversity data", "Focal species")
         ),
         options = groupedLayersControlOptions(
           collapsed = FALSE,
           exclusiveGroups = "Recreationalist",
           groupsCollapsable = FALSE
         )
-      )
+      ) |>
+      hideGroup("Biodiversity data")
     
     w$hide()
     
