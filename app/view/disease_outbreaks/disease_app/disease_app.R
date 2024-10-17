@@ -49,14 +49,14 @@ disease_app_server <- function(id, tab_disease_selected) {
         map() |>
           disease_leaflet_map(
             add_control = TRUE,
-            main_map_features = TRUE,
+            main_map_features = TRUE
           )  |>
           leaflet_map()
 
         # MAP itself ----
         disease_map_server(
           "disease_map",
-          leaflet_map = leaflet_map,
+          leaflet_map = leaflet_map
         ) 
       }
     )

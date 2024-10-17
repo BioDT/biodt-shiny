@@ -1,6 +1,6 @@
 box::use(
   terra[rast, project],
-  leaflet[leaflet, addTiles, addRasterImage, setView, leafletProxy, removeImage]
+  leaflet[leaflet, addTiles, addRasterImage, setView, leafletProxy, removeImage, addRasterLegend, addLegend]
 )
 
 #' @export
@@ -25,14 +25,14 @@ disease_leaflet_map <- function(map_raster,
       opacity = 0.9,
       project = FALSE,
       group = "Disease layer"
-    ) |>
-    addRasterLegend(
-      map_raster,
-      opacity = 0.9,
-      position = "bottomright",
-      group = "Diseaselayer",
-      className = "info legend Diseaselayer"
-    )
+    ) # |>
+    # addLegend(
+    #   map_raster,
+    #   opacity = 0.9,
+    #   position = "bottomright",
+    #   group = "Diseaselayer",
+    #   className = "info legend Diseaselayer"
+    # )
 
     return(leaflet_map)
 }

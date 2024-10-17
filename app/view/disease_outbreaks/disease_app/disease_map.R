@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput, updateCheckboxInput],
+  shiny[NS, moduleServer, tags, observeEvent, reactive, actionButton, reactiveVal, checkboxInput, updateCheckboxInput, req],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles, leafletProxy, addRasterImage, clearImages],
   terra[rast, project],
