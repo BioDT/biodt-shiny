@@ -34,7 +34,7 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id, leaflet_map) {
+disease_map_server <- function(id, leaflet_map, new_tif_upload) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
         # Define waiter ----
@@ -55,5 +55,18 @@ disease_map_server <- function(id, leaflet_map) {
       w$hide()
     })
 
+    observeEvent(new_tif_upload(), {
+      new_tif_rast <- new_tif_upload() |>
+                        read_and_project_raster()
+      
+      req(new_tif_rast)
+      leafletProxy("map_output") |>
+        addRasterImage(
+        new_tif_rast,
+        opacity = 1,
+        project = FALSE,
+        group = "File upload"
+      )
+    })
   })
 }

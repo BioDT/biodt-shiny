@@ -1,11 +1,7 @@
 box::use(
-  shiny[moduleServer, NS, tagList, checkboxInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive, actionButton],
+  shiny[moduleServer, NS, tagList, checkboxInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive, actionButton, fileInput, req, validate, need],
   bslib[card, card_header, card_body],
-  leaflet[clearImages, leafletProxy]
-)
-
-box::use(
-  # app/logic/disease_outbreaks/disease_leaflet_map[remove_map_layer]
+  leaflet[clearImages, leafletProxy],
 )
 
 #' @export
@@ -23,7 +19,9 @@ disease_select_ui <- function(id, theme, i18n) {
           "File input"
         )
       ),
-      card_body(),
+      card_body(
+        fileInput(ns("tif_file"), "Choose .tif file", accept = ".tif"),
+      ),
     )
   )
 }
@@ -34,26 +32,12 @@ disease_select_server <- function(id, tab_disease_selected) {
     ns <- session$ns
     out <- reactiveVal(NULL)
 
-    events <- reactive({
-      tab_disease_selected()
-      input$mosaic_final
-      input$outfirst_infection
-    })
-
     observeEvent(
-      events(),
+      input$tif_file,
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
-    {        
-        if (input$mosaic_final == TRUE) {
-          "Mosaic_final" |>
-            out()
-        }
-
-        if (input$outfirst_infection == TRUE) {
-          "outfirst_infection" |>
-            out()
-        }
+    {
+      out(input$tif_file$datapath)      
     })
 
     reactive(out())

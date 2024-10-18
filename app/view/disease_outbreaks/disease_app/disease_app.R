@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, tags, reactiveVal, reactive, observeEvent],
+  shiny[NS, tagList, moduleServer, tags, reactiveVal, reactive, observeEvent, req],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -39,6 +39,8 @@ disease_app_server <- function(id, tab_disease_selected) {
     map <- reactiveVal()
     leaflet_map <- reactiveVal()
 
+    new_tif_upload <- disease_select_server("disease_select", tab_disease_selected())
+    
     observeEvent(tab_disease_selected(),
       ignoreInit = TRUE,
       {        
@@ -56,7 +58,8 @@ disease_app_server <- function(id, tab_disease_selected) {
         # MAP itself ----
         disease_map_server(
           "disease_map",
-          leaflet_map = leaflet_map
+          leaflet_map = leaflet_map,
+          new_tif_upload
         ) 
       }
     )
