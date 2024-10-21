@@ -2,6 +2,8 @@ box::use(
   shiny[NS, tagList, moduleServer, tags, reactiveVal, reactive, observeEvent, req],
   bslib[layout_column_wrap],
   htmltools[css],
+  waiter[Waiter],
+  app/logic/waiter[waiter_text],
 )
 
 box::use(
@@ -33,8 +35,17 @@ disease_app_ui <- function(id, i18n) {
 #' @export
 disease_app_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
+    
+    # Define waiter ----
+    msg <- waiter_text(message = tags$h3("Loading data...",
+      style = "color: #414f2f;"
+    ))
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )  
 
+    ns <- session$ns
     # Variables ----
     map <- reactiveVal()
     leaflet_map <- reactiveVal()
@@ -44,6 +55,8 @@ disease_app_server <- function(id, tab_disease_selected) {
     observeEvent(tab_disease_selected(),
       ignoreInit = TRUE,
       {        
+        w$show()
+
         "app/data/disease_outbreak/Mosaic_final.tif" |>
           read_and_project_raster() |>
           map()
@@ -55,6 +68,8 @@ disease_app_server <- function(id, tab_disease_selected) {
           )  |>
           leaflet_map()
 
+        w$hide()
+        
         # MAP itself ----
         disease_map_server(
           "disease_map",
