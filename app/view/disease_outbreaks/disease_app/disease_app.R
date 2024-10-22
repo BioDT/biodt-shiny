@@ -8,7 +8,7 @@ box::use(
 box::use(
   app / view / disease_outbreaks / disease_app / disease_map[disease_map_ui, disease_map_server],
   app / view / disease_outbreaks / disease_app / disease_choose_file[disease_choose_file_ui, disease_choose_file_server],
-  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster, disease_leaflet_map],
+  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster, disease_leaflet_map_basic],
   app / logic / waiter[waiter_text],
 )
 
@@ -61,7 +61,7 @@ disease_app_server <- function(id, tab_disease_selected) {
           map()
 
         map() |>
-          disease_leaflet_map(
+          disease_leaflet_map_basic(
             add_control = TRUE,
             main_map_features = TRUE
           ) |>
@@ -69,13 +69,13 @@ disease_app_server <- function(id, tab_disease_selected) {
 
         w$hide()
 
-        # MAP itself ----
-        disease_map_server(
-          "disease_map",
-          leaflet_map = leaflet_map,
-          new_tif_upload
-        )
       }
+    )
+
+    disease_map_server(
+      "disease_map",
+      leaflet_map = leaflet_map,
+      new_tif_upload = new_tif_upload
     )
   })
 }

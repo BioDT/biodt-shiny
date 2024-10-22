@@ -9,7 +9,7 @@ read_and_project_raster <- function(map_full_path) {
 }
 
 #' @export
-disease_leaflet_map <- function(map_raster,
+disease_leaflet_map_basic <- function(map_raster,
                                 add_control = TRUE,
                                 main_map_features = TRUE) {
   leaflet_map <- leaflet() |>
@@ -33,3 +33,33 @@ disease_leaflet_map <- function(map_raster,
 
   return(leaflet_map)
 }
+
+#' @export
+disease_leaflet_with_output_layer <- function(map_output_id, input_raster, output_raster) {
+    print(input_raster)
+    
+    leafletProxy(map_output_id) |> # hint: leafletProxy, removeImage, addRasterLegend, addLegend,
+      clearImages() |>
+      clearControls() |>
+      addRasterImage(
+        input_raster,
+        opacity = 0.5,
+        project = FALSE,
+        options = tileOptions(zIndex = 100),
+        group = "Input layer",
+        layerId = "inputLayer"
+      ) |>
+      addRasterImage(
+        output_raster,
+        opacity = 0.5,
+        project = FALSE,
+        options = tileOptions(zIndex = 101),
+        group = "Output layer",
+        layerId = "outputLayer"
+      ) |>
+      addLayersControl(
+        overlayGroups = c("Input layer", "Output layer"),
+        options = layersControlOptions(collapsed = FALSE)
+      )
+}
+

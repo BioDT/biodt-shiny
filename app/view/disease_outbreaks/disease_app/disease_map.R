@@ -5,7 +5,7 @@ box::use(
 )
 
 box::use(
-  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster]
+  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster, disease_leaflet_with_output_layer]
 )
 
 #' @export
@@ -41,17 +41,11 @@ disease_map_server <- function(id, leaflet_map, new_tif_upload) {
     })
 
     observeEvent(new_tif_upload(), {
-      new_tif_rast <- new_tif_upload() |>
+      new_tif_raster <- new_tif_upload() |>
         read_and_project_raster()
 
-      req(new_tif_rast)
-      leafletProxy("map_output") |> # hint: leafletProxy, removeImage, addRasterLegend, addLegend,
-        addRasterImage(
-          new_tif_rast,
-          opacity = 1,
-          project = FALSE,
-          group = "File upload"
-        )
+      req(new_tif_raster)
+      disease_leaflet_with_output_layer("map_output", leaflet_map(), new_tif_raster)
     })
   })
 }
