@@ -19,12 +19,13 @@ box::use(
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
-  
   tagList(
+     tagList(
     fluidRow(
       column(
         12, # Enlarge the map to full width
         card(
+          id = "biodiversity-page",
           title = "combined_map",
           full_screen = TRUE,
           card_title("Recreation & Biodiversity Mapping"),
@@ -36,8 +37,6 @@ ces_rp_biodiversity_ui <- function(id) {
     )
   )
 }
-
-
 # Server function
 ces_rp_biodiversity_server <- function(id) {
 
@@ -64,7 +63,6 @@ ces_rp_biodiversity_server <- function(id) {
     taxon_ids_from_file_names <- list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
       map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
     files_and_ids <- data.frame(files = all_sdm_files, ids = taxon_ids_from_file_names)
-    
     # Load recreation rasters
     hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
     soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
@@ -92,9 +90,12 @@ ces_rp_biodiversity_server <- function(id) {
         multiple = TRUE,
         width = "400px",
         options = list(
-          `live-search` = TRUE
+          `live-search` = TRUE,
+          `size` = 5,                
+          `dropdownAlignRight` = FALSE
         )
-      )
+      ),
+     
     )
     
     # Generate the slider input using tagList
@@ -115,7 +116,9 @@ ces_rp_biodiversity_server <- function(id) {
         choices = seq(0, 1, by = 0.1),
         selected = c(0, 1),
         grid = FALSE,
-        width = "300px")
+        width = "300px",
+        )
+      
     )
     
     # Create the initial leaflet map
@@ -131,7 +134,6 @@ ces_rp_biodiversity_server <- function(id) {
           autoCenter = TRUE,
           setView = TRUE)) |>
       addRasterImage(hard_rec, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-      hideGroup("Hard") |>
       addRasterImage(soft_rec, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
       addLegend(
         pal = biodiversity_pal, values = c(0, 1), title = "Biodiversity", position = "bottomright",
@@ -139,11 +141,11 @@ ces_rp_biodiversity_server <- function(id) {
       ) |>
       addLegend(pal = pal, values = terra::values(hard_rec), title = "Recreation", position = "bottomright") |>
       addControl(
-        html = group_species_selector_html,
+        html = as.character(group_species_selector_html),
         position = "topleft"
       ) |>
       addControl(
-        html = recreation_occurence_slider_html,
+        html = as.character(recreation_occurence_slider_html),
         position = "bottomright"
       ) |>
       addTiles(
