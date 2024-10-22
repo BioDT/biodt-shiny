@@ -19,7 +19,12 @@ box::use(
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
-   tagList( 
+  useShinyjs()
+  
+  tags$head(
+    tags$script(src = "../app/js/stop-scroll.js")
+  )
+     tagList(
     fluidRow(
       column(
         12, # Enlarge the map to full width
