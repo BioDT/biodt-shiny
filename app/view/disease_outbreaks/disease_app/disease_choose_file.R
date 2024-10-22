@@ -1,11 +1,10 @@
 box::use(
-  shiny[moduleServer, NS, tagList, checkboxInput, bootstrapPage, tags, observeEvent, reactiveVal, reactive, actionButton, fileInput, req, validate, need],
+  shiny[moduleServer, NS, bootstrapPage, tags, observeEvent, reactiveVal, reactive, fileInput],
   bslib[card, card_header, card_body],
-  leaflet[clearImages, leafletProxy],
 )
 
 #' @export
-disease_select_ui <- function(id, theme, i18n) {
+disease_choose_file_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   bootstrapPage(
     theme = theme,
@@ -27,7 +26,7 @@ disease_select_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-disease_select_server <- function(id, tab_disease_selected) {
+disease_choose_file_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     out <- reactiveVal(NULL)
@@ -36,9 +35,10 @@ disease_select_server <- function(id, tab_disease_selected) {
       input$tif_file,
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
-    {
-      out(input$tif_file$datapath)      
-    })
+      {
+        out(input$tif_file$datapath)
+      }
+    )
 
     reactive(out())
   })

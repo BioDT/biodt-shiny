@@ -1,15 +1,15 @@
 box::use(
-  shiny[NS, tagList, moduleServer, tags, reactiveVal, reactive, observeEvent, req],
+  shiny[NS, tagList, moduleServer, tags, reactiveVal, observeEvent],
   bslib[layout_column_wrap],
   htmltools[css],
   waiter[Waiter],
-  app/logic/waiter[waiter_text],
 )
 
 box::use(
-  app/view/disease_outbreaks/disease_app/disease_map[disease_map_ui, disease_map_server],
-  app/view/disease_outbreaks/disease_app/disease_select[disease_select_ui, disease_select_server],
-  app/logic/disease_outbreaks/disease_leaflet_map[read_and_project_raster, disease_leaflet_map]
+  app / view / disease_outbreaks / disease_app / disease_map[disease_map_ui, disease_map_server],
+  app / view / disease_outbreaks / disease_app / disease_choose_file[disease_choose_file_ui, disease_choose_file_server],
+  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster, disease_leaflet_map],
+  app / logic / waiter[waiter_text],
 )
 
 
@@ -24,7 +24,7 @@ disease_app_ui <- function(id, i18n) {
       disease_map_ui(
         ns("disease_map"), i18n
       ),
-      disease_select_ui(
+      disease_choose_file_ui(
         ns("disease_select"), i18n
       ),
     ),
@@ -35,7 +35,6 @@ disease_app_ui <- function(id, i18n) {
 #' @export
 disease_app_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
-    
     # Define waiter ----
     msg <- waiter_text(message = tags$h3("Loading data...",
       style = "color: #414f2f;"
@@ -43,18 +42,18 @@ disease_app_server <- function(id, tab_disease_selected) {
     w <- Waiter$new(
       html = msg,
       color = "rgba(256,256,256,0.9)"
-    )  
+    )
 
     ns <- session$ns
     # Variables ----
     map <- reactiveVal()
     leaflet_map <- reactiveVal()
 
-    new_tif_upload <- disease_select_server("disease_select", tab_disease_selected())
-    
+    new_tif_upload <- disease_choose_file_server("disease_select", tab_disease_selected())
+
     observeEvent(tab_disease_selected(),
       ignoreInit = TRUE,
-      {        
+      {
         w$show()
 
         "app/data/disease_outbreak/Mosaic_final.tif" |>
@@ -65,19 +64,18 @@ disease_app_server <- function(id, tab_disease_selected) {
           disease_leaflet_map(
             add_control = TRUE,
             main_map_features = TRUE
-          )  |>
+          ) |>
           leaflet_map()
 
         w$hide()
-        
+
         # MAP itself ----
         disease_map_server(
           "disease_map",
           leaflet_map = leaflet_map,
           new_tif_upload
-        ) 
+        )
       }
     )
-
   })
 }

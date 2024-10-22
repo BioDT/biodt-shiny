@@ -1,6 +1,6 @@
 box::use(
   terra[rast, project],
-  leaflet[tileOptions, leaflet, addTiles, addRasterImage, setView, leafletProxy, removeImage, addRasterLegend, addLegend, addLayersControl],
+  leaflet[tileOptions, leaflet, addTiles, addRasterImage, setView, addLayersControl, layersControlOptions],
 )
 
 #' @export
@@ -17,7 +17,7 @@ disease_leaflet_map <- function(map_raster,
     setView(
       lng = 12.3601,
       lat = 51.3402,
-      zoom = 4
+      zoom = 5
     ) |>
     addRasterImage(
       map_raster,
@@ -27,7 +27,8 @@ disease_leaflet_map <- function(map_raster,
       group = "Input layer"
     ) |>
     addLayersControl(
-      overlayGroups = c("Input layer")
+      overlayGroups = c("Input layer"),
+      options = layersControlOptions(collapsed = FALSE)
     )
 
   return(leaflet_map)
