@@ -19,11 +19,6 @@ box::use(
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
-  useShinyjs()
-  
-  tags$head(
-    tags$script(src = "../app/js/stop-scroll.js")
-  )
      tagList(
     fluidRow(
       column(
@@ -41,8 +36,6 @@ ces_rp_biodiversity_ui <- function(id) {
     )
   )
 }
-
-
 # Server function
 ces_rp_biodiversity_server <- function(id) {
 
