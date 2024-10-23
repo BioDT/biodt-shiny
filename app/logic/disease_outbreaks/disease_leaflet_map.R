@@ -1,6 +1,6 @@
 box::use(
   terra[rast, project],
-  leaflet[tileOptions, leaflet, addTiles, addRasterImage, setView, addLayersControl, layersControlOptions],
+  leaflet[tileOptions, leaflet, addTiles, addRasterImage, setView, addLayersControl, layersControlOptions, addControl, getMapData, addProviderTiles],
 )
 
 #' @export
@@ -13,7 +13,7 @@ disease_leaflet_map_basic <- function(map_raster,
                                 add_control = TRUE,
                                 main_map_features = TRUE) {
   leaflet_map <- leaflet() |>
-    addTiles() |>
+    addTiles(group = "Default (OpenStreetMap)") |>
     setView(
       lng = 12.3601,
       lat = 51.3402,
@@ -27,6 +27,9 @@ disease_leaflet_map_basic <- function(map_raster,
       group = "Input layer"
     ) |>
     addLayersControl(
+      baseGroups = c(
+        "Default (OpenStreetMap)",
+      ),
       overlayGroups = c("Input layer"),
       options = layersControlOptions(collapsed = FALSE)
     )
@@ -34,9 +37,13 @@ disease_leaflet_map_basic <- function(map_raster,
   return(leaflet_map)
 }
 
+# TODO
+#  leaflet(quakes) %>% addTiles() %>%
+#     fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
+
 #' @export
 disease_leaflet_with_output_layer <- function(map_output_id, input_raster, output_raster) {
-    print(input_raster)
+
     
     leafletProxy(map_output_id) |> # hint: leafletProxy, removeImage, addRasterLegend, addLegend,
       clearImages() |>
