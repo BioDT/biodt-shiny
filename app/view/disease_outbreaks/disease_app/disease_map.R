@@ -1,11 +1,11 @@
 box::use(
   shiny[NS, moduleServer, tags, observeEvent, req],
   bslib[card, card_header, card_body],
-  leaflet[leafletOutput, renderLeaflet, leafletProxy, addRasterImage],
+  leaflet[leafletOutput, renderLeaflet, leafletProxy, addRasterImage, addLayersControl, layersControlOptions, tileOptions, clearControls, clearImages],
 )
 
 box::use(
-  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster, disease_leaflet_with_output_layer]
+  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster]
 )
 
 #' @export
@@ -30,7 +30,7 @@ disease_map_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_map_server <- function(id, leaflet_map, new_tif_upload) {
+disease_map_server <- function(id, map_original, leaflet_map, new_tif_upload) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -45,7 +45,29 @@ disease_map_server <- function(id, leaflet_map, new_tif_upload) {
         read_and_project_raster()
 
       req(new_tif_raster)
-      disease_leaflet_with_output_layer("map_output", leaflet_map(), new_tif_raster)
+      leafletProxy("map_output") |>
+        clearImages() |>
+        clearControls() |>
+        addRasterImage(
+          map_original(),
+          opacity = 0.5,
+          project = FALSE,
+          options = tileOptions(zIndex = 100),
+          group = "Input layer",
+          layerId = "inputLayer"
+        ) |>
+        addRasterImage(
+          new_tif_raster,
+          opacity = 0.5,
+          project = FALSE,
+          options = tileOptions(zIndex = 101),
+          group = "Output layer",
+          layerId = "outputLayer"
+        ) |>
+        addLayersControl(
+          overlayGroups = c("Input layer", "Output layer"),
+          options = layersControlOptions(collapsed = FALSE)
+        )
     })
   })
 }

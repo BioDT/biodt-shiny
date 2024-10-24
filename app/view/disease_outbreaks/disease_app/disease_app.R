@@ -73,6 +73,7 @@ disease_app_server <- function(id, tab_disease_selected) {
 
     disease_map_server(
       "disease_map",
+      map_original = map,
       leaflet_map = leaflet_map,
       new_tif_upload = new_tif_upload
     )
