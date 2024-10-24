@@ -15,7 +15,7 @@ disease_choose_file_ui <- function(id, theme, i18n) {
       card_header(
         tags$h2(
           class = "card_title",
-          "File input"
+          "Upload a file with raster"
         )
       ),
       card_body(

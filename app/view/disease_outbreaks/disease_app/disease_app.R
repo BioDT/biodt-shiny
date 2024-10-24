@@ -55,7 +55,6 @@ disease_app_server <- function(id, tab_disease_selected) {
       ignoreInit = TRUE,
       {
         w$show()
-
         "app/data/disease_outbreak/Mosaic_final.tif" |>
           read_and_project_raster() |>
           map()

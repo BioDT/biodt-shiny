@@ -13,7 +13,7 @@ disease_leaflet_map_basic <- function(map_raster,
                                 add_control = TRUE,
                                 main_map_features = TRUE) {
   leaflet_map <- leaflet() |>
-    addTiles(group = "Default (OpenStreetMap)") |>
+    addTiles(group = "Default layer (OpenStreetMap)") |>
     setView(
       lng = 12.3601,
       lat = 51.3402,
@@ -28,7 +28,7 @@ disease_leaflet_map_basic <- function(map_raster,
     ) |>
     addLayersControl(
       baseGroups = c(
-        "Default (OpenStreetMap)",
+        "Default layer (OpenStreetMap)"
       ),
       overlayGroups = c("Input layer"),
       options = layersControlOptions(collapsed = FALSE)
@@ -36,10 +36,6 @@ disease_leaflet_map_basic <- function(map_raster,
 
   return(leaflet_map)
 }
-
-# TODO
-#  leaflet(quakes) %>% addTiles() %>%
-#     fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
 
 #' @export
 disease_leaflet_with_output_layer <- function(map_output_id, input_raster, output_raster) {
@@ -49,7 +45,7 @@ disease_leaflet_with_output_layer <- function(map_output_id, input_raster, outpu
       clearImages() |>
       clearControls() |>
       addRasterImage(
-        input_raster,
+        # input_raster,
         opacity = 0.5,
         project = FALSE,
         options = tileOptions(zIndex = 100),
