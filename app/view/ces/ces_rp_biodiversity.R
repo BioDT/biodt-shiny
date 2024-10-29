@@ -1,7 +1,7 @@
 box::use(
   shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags],
   bslib[card, nav_select, card_title, card_body],
-  leaflet[leaflet, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, setView, addTiles, addRasterImage, hideGroup, showGroup, clearGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds, labelFormat],
+  leaflet[leaflet, leafletOptions, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, setView, addTiles, addRasterImage, hideGroup, showGroup, clearGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds, labelFormat],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
   terra[rast, values, crop, app, ifel, ext, as.polygons, sprc, merge, mean],
   waiter[Waiter],
@@ -20,17 +20,18 @@ box::use(
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
   tagList(
-     tagList(
-    fluidRow(
-      column(
-        12, # Enlarge the map to full width
-        card(
-          id = "biodiversity-page",
-          title = "combined_map",
-          full_screen = TRUE,
-          card_title("Recreation & Biodiversity Mapping"),
-          card_body(
-            leafletOutput(ns("combined_map_plot"), height = 800, width = "100%")
+    tagList(
+      fluidRow(
+        column(
+          12, # Enlarge the map to full width
+          card(
+            id = "biodiversity-page",
+            title = "combined_map",
+            full_screen = TRUE,
+            card_title("Recreation & Biodiversity Mapping"),
+            card_body(
+              leafletOutput(ns("combined_map_plot"), height = 800, width = "100%")
+            )
           )
         )
       )
@@ -82,6 +83,8 @@ ces_rp_biodiversity_server <- function(id) {
         width = "400px"
       ),
 
+      pickerInput(
+
      pickerInput(
         ns("species_selector"),
         "Select species:",
@@ -122,7 +125,14 @@ ces_rp_biodiversity_server <- function(id) {
     )
 
     # Create the initial leaflet map
-    rec_pot_map <- leaflet() |>
+    rec_pot_map <- leaflet(options = leafletOptions(
+      scrollWheelZoom = FALSE,
+      dragging = TRUE,
+      touchZoom = TRUE,
+      doubleClickZoom = FALSE,
+      closePopupOnClick = FALSE,
+      bounceAtZoomLimits = FALSE
+    )) |>
       addTiles(group = "Open Street Map") |>
       addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
       addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
@@ -306,6 +316,9 @@ ces_rp_biodiversity_server <- function(id) {
       w$hide()
 
       })
+
+
+    })
 
   })
 }
