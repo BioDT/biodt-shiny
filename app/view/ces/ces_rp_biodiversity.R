@@ -83,7 +83,6 @@ ces_rp_biodiversity_server <- function(id) {
         width = "400px"
       ),
 
-      pickerInput(
 
      pickerInput(
         ns("species_selector"),
@@ -98,8 +97,7 @@ ces_rp_biodiversity_server <- function(id) {
           `dropdownAlignRight` = FALSE
         )
       ),
-
-    )
+  )
 
     # Generate the slider input using tagList
     recreation_occurence_slider_html <- tagList(
@@ -319,6 +317,4 @@ ces_rp_biodiversity_server <- function(id) {
 
 
     })
-
-  })
 }
