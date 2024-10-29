@@ -1,4 +1,4 @@
-name: Rhino Test
+name: Rhino Test - lint R, JS and Sass, build JS & Sass and finally run R unit tests & Cypress e2e tests
 on: push
 permissions:
   contents: read
@@ -19,8 +19,8 @@ jobs:
             libudunits2-dev
             # List each package on a separate line.
           )
-          sudo apt-get update
-          sudo apt-get install --yes "${packages[@]}"
+          sudo apt update
+          sudo apt install --yes "${packages[@]}"
 
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
