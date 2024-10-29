@@ -41,3 +41,44 @@ beekeeper_runsimulation_ui <- function(id, i18n) {
     ),
   )
 }
+
+#' @export
+beekeeper_runsimulation_server <- function(
+    id,
+    coordinates,
+    lookup,
+    parameters,
+    landuse_map,
+    session_dir) {
+  moduleServer(id, function(input, output, session) {
+    # Define waiter ---- TO ADD later
+
+    # Prepare directory for results ----
+    # Non-persistent data solution
+    # Making a beekeeper dir in the shared folder
+    temp_dir <- session_dir |>
+      file.path("beekeeper")
+
+    experiment_list <- reactiveVal(
+      c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
+    )
+    counter <- reactiveVal(0)
+
+    # Run workflow button ----
+    observeEvent(
+      coordinates(),
+      ignoreNULL = FALSE,
+      {
+        if (!is_empty(coordinates()) &
+          !is_empty(lookup()) &
+          !is_empty(parameters())) {
+          enable("run_simulation")
+        } else {
+          disable("run_simulation")
+        }
+      }
+    )
+
+
+  })
+}
