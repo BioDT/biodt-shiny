@@ -13,6 +13,7 @@ box::use(
   app/view/honeybee/beekeeper_param[honeybee_param_ui, honeybee_param_server],
   app/view/honeybee/beekeeper_lookup[honeybee_lookup_ui, honeybee_lookup_server],
   app/view/honeybee/beekeeper_plot[beekeeper_plot_ui, beekeeper_plot_server],
+  app/view/honeybee/beekeeper_runsimulation[beekeeper_runsimulation_ui],
   app/logic/honeybee/honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map],
   app/logic/waiter[waiter_text],
 )
@@ -42,6 +43,10 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
       ),
       honeybee_lookup_ui(
         ns("beekeeper_lookup"),
+        i18n
+      ),
+      beekeeper_runsimulation_ui(
+        ns("beekeeper_runsimulation"),
         i18n
       ),
       beekeeper_plot_ui(
