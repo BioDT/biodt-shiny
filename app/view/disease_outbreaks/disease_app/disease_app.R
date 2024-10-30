@@ -1,23 +1,17 @@
 box::use(
-  shiny[NS, tagList, moduleServer, tags],
+  shiny[NS, tagList, moduleServer, tags, reactiveVal, observeEvent],
   bslib[layout_column_wrap],
   htmltools[css],
+  waiter[Waiter],
 )
 
-# box::use(
-#   app/view/grassland/grassland_dynamics/grassland_dynamics_inputmap[
-#     grassland_dynamics_inputmap_ui,
-#     grassland_dynamics_inputmap_server
-#   ],
-#   app/view/grassland/grassland_dynamics/grassland_dynamics_location[
-#     grassland_dynamics_location_ui,
-#     grassland_dynamics_location_server
-#   ],
-#   app/view/grassland/grassland_dynamics/grassland_dynamics_outputplot[
-#     grassland_dynamics_outputplot_ui,
-#     grassland_dynamics_outputplot_server
-#   ],
-# )
+box::use(
+  app / view / disease_outbreaks / disease_app / disease_map[disease_map_ui, disease_map_server],
+  app / view / disease_outbreaks / disease_app / disease_choose_file[disease_choose_file_ui, disease_choose_file_server],
+  app / logic / disease_outbreaks / disease_leaflet_map[read_and_project_raster, disease_leaflet_map_basic],
+  app / logic / waiter[waiter_text],
+)
+
 
 #' @export
 disease_app_ui <- function(id, i18n) {
@@ -27,25 +21,61 @@ disease_app_ui <- function(id, i18n) {
       width = NULL,
       fill = FALSE,
       style = css(grid_template_columns = "3fr 1fr"),
-      tags$h3(i18n$translate("Input map")),
-      tags$h3(i18n$translate("Location")),
+      disease_map_ui(
+        ns("disease_map"), i18n
+      ),
+      disease_choose_file_ui(
+        ns("disease_select"), i18n
+      ),
     ),
     tags$h3(i18n$translate("Output Plot"))
   )
 }
 
 #' @export
-disease_app_server <- function(id, r) {
+disease_app_server <- function(id, tab_disease_selected) {
   moduleServer(id, function(input, output, session) {
+    # Define waiter ----
+    msg <- waiter_text(message = tags$h3("Loading data...",
+      style = "color: #414f2f;"
+    ))
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
+
     ns <- session$ns
+    # Variables ----
+    map <- reactiveVal()
+    leaflet_map <- reactiveVal()
 
-    # # LOCATION settings ----
-    # coordinates <- grassland_dynamics_location_server("location")
+    new_tif_upload <- disease_choose_file_server("disease_select", tab_disease_selected())
 
-    # # MAP itself ----
-    # grassland_dynamics_inputmap_server("inputmap", coordinates)
+    observeEvent(tab_disease_selected(),
+      ignoreInit = TRUE,
+      {
+        w$show()
+        "app/data/disease_outbreak/Mosaic_final.tif" |>
+          read_and_project_raster() |>
+          map()
 
-    # # Output PLOT ----
-    # grassland_dynamics_outputplot_server("outputplot")
+        map() |>
+          disease_leaflet_map_basic(
+            add_control = TRUE,
+            main_map_features = TRUE
+          ) |>
+          leaflet_map()
+
+        w$hide()
+
+      }
+    )
+
+    disease_map_server(
+      "disease_map",
+      map_original = map,
+      leaflet_map = leaflet_map,
+      new_tif_upload = new_tif_upload
+    )
   })
 }

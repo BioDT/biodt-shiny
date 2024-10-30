@@ -41,9 +41,8 @@ disease_info_ui <- function(id, i18n) {
   )
 }
 
-#' @export
-disease_info_server <- function(id) {
-  moduleServer(id, function(input, output, session) {
+# disease_info_server <- function(id) {
+#   moduleServer(id, function(input, output, session) {
 
-  })
-}
+#   })
+# }

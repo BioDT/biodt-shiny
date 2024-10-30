@@ -175,7 +175,7 @@ ui <- function(id) {
           nav_panel(
             title = i18n$translate("Disease Outbreaks"),
             class = "p-0",
-            disease_outbreaks_main_ui(ns("disease_outbreaks_main_ui"), i18n)
+            disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
           )
         },
       ),
@@ -255,6 +255,8 @@ server <- function(id) {
     ces_server(
       "ces_main"
     )
+
+    disease_outbreaks_main_server("disease_outbreaks_main")
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
