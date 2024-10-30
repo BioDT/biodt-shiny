@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, actionButton, observeEvent, req],
+  shiny[NS, moduleServer, tags, fluidRow, column, actionButton, reactiveVal, observeEvent],
   bslib[card, card_header, card_body],
   shinyjs[disabled, disable, enable],
   purrr[is_empty],
@@ -10,7 +10,7 @@ box::use(
   app/logic/waiter[waiter_text],
 )
 
-#' @export 
+#' @export
 beekeeper_runsimulation_ui <- function(id, i18n) {
   ns <- NS(id)
   card(
@@ -32,8 +32,8 @@ beekeeper_runsimulation_ui <- function(id, i18n) {
               ns("run_simulation"),
               label = i18n$translate("Run simulation"),
               width = "100%",
-              class = "btn-secondary",
-              style = "max-width: 200px"
+              class = "btn-secondary btn-lg",
+              style = "max-width: 300px"
             )
           )
         )
@@ -51,6 +51,7 @@ beekeeper_runsimulation_server <- function(
     landuse_map,
     session_dir) {
   moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     # Define waiter ---- TO ADD later
 
     # Prepare directory for results ----

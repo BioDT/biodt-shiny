@@ -30,15 +30,15 @@ beekeeper_control_ui <- function(id, i18n) {
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
-          disabled(
-            actionButton(
-              ns("run_simulation"),
-              label = i18n$translate("Run simulation"),
-              width = "100%",
-              class = "btn-secondary",
-              style = "max-width: 200px"
-            )
-          )
+          # disabled(
+          #   actionButton(
+          #     ns("run_simulation"),
+          #     label = i18n$translate("Run simulation"),
+          #     width = "100%",
+          #     class = "btn-secondary",
+          #     style = "max-width: 200px"
+          #   )
+          # )
         )
       )
     ),
