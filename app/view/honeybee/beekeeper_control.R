@@ -30,6 +30,7 @@ beekeeper_control_ui <- function(id, i18n) {
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
+          # TODO remove
           # disabled(
           #   actionButton(
           #     ns("run_simulation"),
@@ -109,28 +110,28 @@ beekeeper_control_server <- function(
     # Prepare directory for results ----
     # Non-persistent data solution
     # Making a beekeeper dir in the shared folder
-    temp_dir <- session_dir |>
-      file.path("beekeeper")
+    # TO REMOVE temp_dir <- session_dir |>
+    #   file.path("beekeeper")
 
-    experiment_list <- reactiveVal(
-      c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
-    )
-    counter <- reactiveVal(0)
+    # TO REMOVE experiment_list <- reactiveVal(
+    #   c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
+    # )
+    # counter <- reactiveVal(0)
 
     # Run workflow button ----
-    observeEvent(
-      coordinates(),
-      ignoreNULL = FALSE,
-      {
-        if (!is_empty(coordinates()) &
-          !is_empty(lookup()) &
-          !is_empty(parameters())) {
-          enable("run_simulation")
-        } else {
-          disable("run_simulation")
-        }
-      }
-    )
+    # TO REMOVE observeEvent(
+    #  coordinates(),
+    #  ignoreNULL = FALSE,
+    #  {
+    #    if (!is_empty(coordinates()) &
+    #      !is_empty(lookup()) &
+    #      !is_empty(parameters())) {
+    #      enable("run_simulation")
+    #    } else {
+    #      disable("run_simulation")
+    #    }
+    #  }
+    #)
 
     # Workflow execution ----
     observeEvent(
@@ -231,19 +232,19 @@ beekeeper_control_server <- function(
         system(docker_call)
 
         # Update output data ----
-        new_out <- file.path(run_dir, "output", "output_id1_iter1.csv")
-        names(new_out) <- paste("Run", counter())
-        if (file.exists(new_out)) {
-          new_list <- experiment_list() |>
-            c(new_out)
-          experiment_list(new_list)
-        }
+        # TO REMOVE new_out <- file.path(run_dir, "output", "output_id1_iter1.csv")
+        # names(new_out) <- paste("Run", counter())
+        # if (file.exists(new_out)) {
+        #   new_list <- experiment_list() |>
+        #     c(new_out)
+        #   experiment_list(new_list)
+        # }
 
         # Hide waiter ----
         w$hide()
       }
     )
 
-    reactive(experiment_list())
+    # reactive(experiment_list())
   })
 }

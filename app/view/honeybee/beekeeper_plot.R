@@ -109,6 +109,7 @@ beekeeper_plot_server <- function(
       }
     )
 
+    print("[OK] beekeeper_plot.R - before observeEvent(experiment_list(),")
     observeEvent(experiment_list(),
       ignoreInit = TRUE,
       ignoreNULL = TRUE,

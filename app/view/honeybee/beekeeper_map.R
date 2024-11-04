@@ -198,6 +198,7 @@ honeybee_map_server <- function(id,
 
     output$map_coordinates <- renderUI(coordinates_text())
 
+    print("[OK] beekeeper_map.R - before observeEvent(experiment_list(), {")
     observeEvent(experiment_list(), {
       # Add code to add awesomemarker to the map with the name of the list values in the label.
       new_name <- names(experiment_list)[length(experiment_list)]

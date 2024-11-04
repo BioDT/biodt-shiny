@@ -60,6 +60,9 @@ beekeeper_runsimulation_server <- function(
     temp_dir <- session_dir |>
       file.path("beekeeper")
 
+    # this variable represents all runs of simulation in order in which they were
+    # chronologicaly run by user; "Example" is dummy hardcoded example for
+    # demonstration purpose 
     experiment_list <- reactiveVal(
       c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
     )
@@ -77,6 +80,118 @@ beekeeper_runsimulation_server <- function(
         } else {
           disable("run_simulation")
         }
+      }
+    )
+
+    # Workflow execution ----
+    observeEvent(
+      input$run_simulation,
+      {
+        # Start waiter ----
+        # TODO w$show()
+
+        # Check data ----
+        req(
+          coordinates(),
+          lookup(),
+          parameters()
+        )
+
+        counter(counter() + 1)
+
+        # Prepare folder structure ----
+        if (!dir.exists(session_dir)) {
+          dir.create(session_dir)
+        }
+        if (!dir.exists(temp_dir)) {
+          dir.create(temp_dir)
+        }
+
+        run_dir <- file.path(
+          temp_dir,
+          Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S")
+        )
+        dir.create(run_dir)
+
+        lookup_file <- file.path(run_dir, "lookup_table.csv")
+        parameters_file <- file.path(run_dir, "parameters.csv")
+        locations_file <- file.path(run_dir, "locations.csv")
+        simulation_file <- file.path(run_dir, "simulation.csv")
+        map_file <- file.path(run_dir, "map.tif")
+
+        # Prepare input data ----
+        bee_location <- coordinates() |>
+          vect(
+            geom = c("lon", "lat"),
+            crs = "EPSG:4326"
+          ) |>
+          project(landuse_map())
+
+        # create buffer around Beehave Location
+        clip_buffer <- buffer(bee_location,
+          width = 5000
+        )
+        # ... and clip raster to buffer
+        location_area <- crop(
+          landuse_map(),
+          clip_buffer
+        )
+
+        # BEWARE !!!!!!!!!!!!
+        # HARDCODED paths follows
+
+        file_copy(file.path("app", "data", "honeybee", "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
+          file.path(run_dir, "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
+          overwrite = TRUE
+        )
+
+        writeRaster(
+          location_area,
+          map_file
+        )
+
+        write.csv(lookup(),
+          file = lookup_file,
+          row.names = FALSE
+        )
+
+        write.csv(parameters()$parameters,
+          file = parameters_file,
+          row.names = FALSE
+        )
+
+        write.csv(parameters()$simulation,
+          file = simulation_file,
+          row.names = FALSE
+        )
+
+        write.csv(
+          data.frame(
+            id = 1
+          ) |>
+            cbind(coordinates()),
+          file = locations_file,
+          row.names = FALSE
+        )
+        # Run workflow ----
+        # docker_call <- paste0('docker run -v "/Users/martinovic/resilio/IT4I/Projects/BioDT/WP6/uc-pollinators/scripts/cloud/":"/scripts" -v "/Users/martinovic/resilio/IT4I/Projects/BioDT/WP6/uc-pollinators/R":"/R" -v "/Users/martinovic/git/biodt-shiny/', run_dir,'":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
+        # Execute docker run, no socket should be needed for this
+
+        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
+
+        system(docker_call)
+
+        # Update output data ----
+        new_out <- file.path(run_dir, "output", "output_id1_iter1.csv")
+        names(new_out) <- paste("Run", counter())
+        if (file.exists(new_out)) {
+          new_list <- experiment_list() |>
+            c(new_out)
+          experiment_list(new_list)
+        }
+
+        # Hide waiter ----
+        # TODO w$hide()
       }
     )
 

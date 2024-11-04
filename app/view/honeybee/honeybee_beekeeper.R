@@ -134,16 +134,16 @@ honeybee_beekeeper_server <- function(id,
     )
 
     # Execution ----
-    experiment_list <- beekeeper_control_server(
+    beekeeper_control_server(
       "beekeeper_control",
-      coordinates,
-      lookup,
-      parameters,
-      map,
-      session_dir
+      # coordinates,
+      # lookup,
+      # parameters,
+      # map,
+      # session_dir
     )
 
-    beekeeper_runsimulation_server(
+    experiment_list <- beekeeper_runsimulation_server(
       "beekeeper_runsimulation",
       coordinates,
       lookup,
