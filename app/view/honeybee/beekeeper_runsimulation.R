@@ -10,7 +10,7 @@ box::use(
 )
 
 box::use(
-  app/logic/waiter[waiter_text],
+  app / logic / waiter[waiter_text],
 )
 
 #' @export
@@ -26,7 +26,8 @@ beekeeper_runsimulation_ui <- function(id, i18n) {
           class = "col-md-8 col-sm-12 me-auto",
           tags$h2(
             class = "card_title",
-            i18n$translate("When you are finished with setting parameters and with selecting the location, run your simulation:")),
+            i18n$translate("When you are finished with setting parameters and with selecting the location, run your simulation:")
+          ),
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
@@ -55,7 +56,29 @@ beekeeper_runsimulation_server <- function(
     session_dir) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    # Define waiter ---- TO ADD later
+    # Define waiter ----
+    msg <- waiter_text(
+      message = tagList(
+        tags$h3("Computing Beehave simulation...",
+          style = "color: #414f2f;"
+        ),
+        tags$br(),
+        tags$h4("This operation takes some time.",
+          style = "color: #414f2f;"
+        ),
+        tags$h4("You can expect it to run for 2 to 4 minutes.",
+          style = "color: #414f2f;"
+        ),
+        tags$h4("Please do not close the tab during this time. You can browse other tabs.",
+          style = "color: #414f2f;"
+        )
+      ),
+    )
+
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
 
     # Prepare directory for results ----
     # Non-persistent data solution
@@ -65,7 +88,7 @@ beekeeper_runsimulation_server <- function(
 
     # this variable represents all runs of simulation in order in which they were
     # chronologicaly run by user; "Example" is dummy hardcoded example for
-    # demonstration purpose 
+    # demonstration purpose
     experiment_list <- reactiveVal(
       c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
     )
@@ -91,7 +114,7 @@ beekeeper_runsimulation_server <- function(
       input$run_simulation,
       {
         # Start waiter ----
-        # TODO w$show()
+        w$show()
 
         # Check data ----
         req(
@@ -194,7 +217,7 @@ beekeeper_runsimulation_server <- function(
         }
 
         # Hide waiter ----
-        # TODO w$hide()
+        w$hide()
       }
     )
 
