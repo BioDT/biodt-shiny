@@ -8,13 +8,14 @@ box::use(
 )
 
 box::use(
-  app/view/honeybee/beekeeper_control[beekeeper_control_ui, beekeeper_control_server],
-  app/view/honeybee/beekeeper_map[honeybee_map_ui, honeybee_map_server],
-  app/view/honeybee/beekeeper_param[honeybee_param_ui, honeybee_param_server],
-  app/view/honeybee/beekeeper_lookup[honeybee_lookup_ui, honeybee_lookup_server],
-  app/view/honeybee/beekeeper_plot[beekeeper_plot_ui, beekeeper_plot_server],
-  app/logic/honeybee/honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map],
-  app/logic/waiter[waiter_text],
+  app / view / honeybee / beekeeper_control[beekeeper_control_ui, beekeeper_control_server],
+  app / view / honeybee / beekeeper_map[honeybee_map_ui, honeybee_map_server],
+  app / view / honeybee / beekeeper_param[honeybee_param_ui, honeybee_param_server],
+  app / view / honeybee / beekeeper_lookup[honeybee_lookup_ui, honeybee_lookup_server],
+  app / view / honeybee / beekeeper_plot[beekeeper_plot_ui, beekeeper_plot_server],
+  app / view / honeybee / beekeeper_runsimulation[beekeeper_runsimulation_ui, beekeeper_runsimulation_server],
+  app / logic / honeybee / honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map],
+  app / logic / waiter[waiter_text],
 )
 
 #' @export
@@ -25,7 +26,7 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
       beekeeper_control_ui(
         ns("beekeeper_control"),
         i18n
-      ),
+      ), # UI module at the top of the given pDT, describing to users step by step what to do, when interacting with the app
       layout_column_wrap(
         width = NULL,
         fill = FALSE,
@@ -42,6 +43,10 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
       ),
       honeybee_lookup_ui(
         ns("beekeeper_lookup"),
+        i18n
+      ),
+      beekeeper_runsimulation_ui(
+        ns("beekeeper_runsimulation"),
         i18n
       ),
       beekeeper_plot_ui(
@@ -128,9 +133,12 @@ honeybee_beekeeper_server <- function(id,
       lookup_table = lookup_table
     )
 
+
+    beekeeper_control_server("beekeeper_control") # an old module, it was refactored as the module beekeeper_runsimulation.R, probably it doesn't even be here
+
     # Execution ----
-    experiment_list <- beekeeper_control_server(
-      "beekeeper_control",
+    experiment_list <- beekeeper_runsimulation_server(
+      "beekeeper_runsimulation",
       coordinates,
       lookup,
       parameters,

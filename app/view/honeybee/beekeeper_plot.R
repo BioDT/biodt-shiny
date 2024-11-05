@@ -8,8 +8,8 @@ box::use(
 )
 
 box::use(
-  app/logic/waiter[waiter_text],
-  app/logic/honeybee/honeybee_beekeeper_plot[honeybee_beekeeper_plot, read_plot_data],
+  app / logic / waiter[waiter_text],
+  app / logic / honeybee / honeybee_beekeeper_plot[honeybee_beekeeper_plot, read_plot_data],
 )
 
 #' @export
@@ -32,7 +32,8 @@ beekeeper_plot_ui <- function(
       card_header(
         tags$h2(
           class = "card_title",
-          card_header)
+          card_header
+        )
       ),
       tags$div(
         class = "row",
@@ -131,8 +132,8 @@ beekeeper_plot_server <- function(
     # })
 
     output$download_data <- downloadHandler(
-      filename = function() { 
-        paste0("honeybee_", names(experiment_list())[experiment_list() == input$experiment], "_", str_replace_all(str_replace_all(str_remove(Sys.time(), "\\.(.*)"), ":", "-"), " ", "_"),".csv")
+      filename = function() {
+        paste0("honeybee_", names(experiment_list())[experiment_list() == input$experiment], "_", str_replace_all(str_replace_all(str_remove(Sys.time(), "\\.(.*)"), ":", "-"), " ", "_"), ".csv")
       },
       content = function(file) {
         write_csv(plot_data(), file)
