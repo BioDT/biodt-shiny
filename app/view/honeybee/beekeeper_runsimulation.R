@@ -1,9 +1,12 @@
 box::use(
-  shiny[NS, moduleServer, tags, fluidRow, column, actionButton, reactiveVal, observeEvent],
+  shiny[NS, moduleServer, tags, tagList, fluidRow, actionButton, reactiveVal, observeEvent, reactive, req],
   bslib[card, card_header, card_body],
   shinyjs[disabled, disable, enable],
+  terra[vect, project, buffer, crop, writeRaster],
   purrr[is_empty],
   waiter[Waiter],
+  fs[file_copy],
+  utils[write.csv],
 )
 
 box::use(
@@ -195,6 +198,6 @@ beekeeper_runsimulation_server <- function(
       }
     )
 
-
+    reactive(experiment_list())
   })
 }
