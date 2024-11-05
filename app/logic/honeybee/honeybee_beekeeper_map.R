@@ -52,7 +52,6 @@ honeybee_leaflet_map <- function(map_raster,
       group = "Beehavelayers",
       className = "info legend Beehavelayers"
     )
-
   if (main_map_features) {
     leaflet_map <- leaflet_map |>
       addRasterImage(

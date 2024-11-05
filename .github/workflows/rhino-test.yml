@@ -23,8 +23,8 @@ jobs:
           packages=(
             # List each package on a separate line.
           )
-          sudo apt-get update
-          sudo apt-get install --yes "${packages[@]}"
+          sudo apt update
+          sudo apt install --yes "${packages[@]}"
 
       - name: Setup R
         uses: r-lib/actions/setup-r@v2

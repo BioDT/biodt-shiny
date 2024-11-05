@@ -1,6 +1,6 @@
 box::use(
   shiny,
-  bslib[nav_select, bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel],
+  bslib[nav_select, bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel, page],
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
@@ -28,7 +28,7 @@ shiny$enableBookmarking("server")
 #' @export
 biodt_theme <- bs_theme(
   version = 5,
-  primary = "#bc6c25",
+  primary = "#A86200",
   secondary = "#414f2f",
   info = "#DDA15E",
   warning = "#6E3E18",
@@ -46,7 +46,8 @@ i18n$set_translation_language("en")
 #' @export
 ui <- function(id) {
   ns <- shiny$NS(id)
-  shiny$bootstrapPage(
+  page(
+  #shiny$bootstrapPage(
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
@@ -55,7 +56,8 @@ ui <- function(id) {
       useWaiter(),
       useHostess(),
       use_cicerone(),
-      usei18n(i18n)
+      usei18n(i18n),
+      includeScript("app/js/tab-index.js") 
     ),
     waiterShowOnLoad(
       html = spin_loaders(
@@ -248,7 +250,7 @@ server <- function(id) {
       session_dir
     )
     # Grassland pDT ----
-    # grassland_main_server("grassland_main")
+    grassland_main_server("grassland_main")
 
     ces_server(
       "ces_main"
