@@ -26,7 +26,7 @@ beekeeper_runsimulation_ui <- function(id, i18n) {
           class = "col-md-8 col-sm-12 me-auto",
           tags$h2(
             class = "card_title",
-            i18n$translate("When you are finished, run your simulation by clicking the button:")),
+            i18n$translate("When you are finished with setting parameters and with selecting the location, run your simulation:")),
         ),
         tags$div(
           class = "col-md-4 col-sm-12 d-flex flex-row justify-content-end",
