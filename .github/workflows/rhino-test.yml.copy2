@@ -1,5 +1,13 @@
-name: Rhino Test (taken from Rhino Showcase app)
-on: push
+name: Rhino Test
+on:
+  # Run on pushes to 'main' branch
+  push:
+    branches:
+      - main
+  # Run on any opened pull request
+  pull_request:
+  # Run manually via GitHub Actions website
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -13,13 +21,10 @@ jobs:
       - name: Setup system dependencies
         run: |
           packages=(
-            libcurl4-openssl-dev
-            libgdal-dev
-            libproj-dev
-            libudunits2-dev
+            # List each package on a separate line.
           )
-          sudo apt-get update
-          sudo apt-get install --yes "${packages[@]}"
+          sudo apt update
+          sudo apt install --yes "${packages[@]}"
 
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
