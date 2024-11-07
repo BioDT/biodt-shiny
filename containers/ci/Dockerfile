@@ -1,0 +1,20 @@
+FROM docker.io/rocker/r-ver:4.4.1
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -qy && \
+    apt-get install -qy \
+        libgdal-dev \
+        libcurl4-openssl-dev \
+        libproj-dev \
+        libudunits2-dev \
+        && \
+    apt-get clean
+
+RUN Rscript -e 'install.packages("remotes")' && \
+    Rscript -e 'remotes::install_version("renv", version = "1.0.7")'
+
+COPY renv.lock /biodt/renv.lock
+RUN cd /biodt && \
+    Rscript -e 'renv::restore()'
+
