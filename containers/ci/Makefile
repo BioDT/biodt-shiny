@@ -8,9 +8,11 @@ build: Dockerfile renv.lock
 		--label "org.opencontainers.image.description=BioDT Shiny CI environment" \
 		-t ${IMAGE_ROOT}/${IMAGE}:${IMAGE_VERSION} \
 		.
+	docker image tag ${IMAGE_ROOT}/${IMAGE}:${IMAGE_VERSION} ${IMAGE_ROOT}/${IMAGE}:latest
 
 push:
 	docker push ${IMAGE_ROOT}/${IMAGE}:${IMAGE_VERSION}
+	docker push ${IMAGE_ROOT}/${IMAGE}:latest
 
 renv.lock: ../../renv.lock
 	cp -v $< $@
