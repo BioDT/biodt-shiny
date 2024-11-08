@@ -32,3 +32,15 @@ COPY renv.lock /biodt/renv.lock
 RUN cd /biodt && \
     Rscript -e 'renv::restore()'
 
+ARG NODE_VERSION=22.11.0
+
+RUN mkdir -p /opt && \
+    cd /opt && \
+    curl -O https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz && \
+    curl -O https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt && \
+    sha256sum -c SHASUMS256.txt --ignore-missing && \
+    tar xf node-v$NODE_VERSION-linux-x64.tar.xz && \
+    rm node-v$NODE_VERSION-linux-x64.tar.xz SHASUMS256.txt && \
+    ln -s node-v$NODE_VERSION-linux-x64 node
+
+ENV PATH=/opt/node/bin:$PATH
