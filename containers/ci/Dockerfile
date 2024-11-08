@@ -4,10 +4,24 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -qy && \
     apt-get install -qy \
-        libgdal-dev \
+        curl \
+        gdal-bin \
+        gdal-data \
+        git \
         libcurl4-openssl-dev \
+        libgdal-dev \
+        libgeos-dev \
+        libicu-dev \
+        libpng-dev \
         libproj-dev \
+        libsqlite3-dev \
+        libssl-dev \
         libudunits2-dev \
+        libxt6 \
+        make \
+        pandoc \
+        zlib1g-dev \
+        xvfb \
         && \
     apt-get clean
 
