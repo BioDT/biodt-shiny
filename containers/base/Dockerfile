@@ -59,3 +59,10 @@ RUN apt-get update -qy && \
         xvfb \
         && \
     apt-get clean
+
+# Docker
+RUN apt-get update -qy && \
+    apt-get install -qy \
+        docker.io \
+        && \
+    apt-get clean
