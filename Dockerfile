@@ -1,4 +1,4 @@
-FROM biodt-shiny-base AS biodt-shiny
+FROM ghcr.io/biodt/shiny-base:latest
 
 # Copy application code
 COPY . .
