@@ -7,15 +7,10 @@ jobs:
     name: Run linters and tests
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/biodt/shiny-ci:0.1.0
+      image: ghcr.io/biodt/shiny-base:latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
 
       - name: Lint R
         if: always()
