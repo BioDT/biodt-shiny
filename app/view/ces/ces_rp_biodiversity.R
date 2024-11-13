@@ -124,7 +124,7 @@ ces_rp_biodiversity_server <- function(id) {
 
     # Create the initial leaflet map
     rec_pot_map <- leaflet(options = leafletOptions(
-      scrollWheelZoom = FALSE,
+      scrollWheelZoom = TRUE,
       dragging = TRUE,
       touchZoom = TRUE,
       doubleClickZoom = FALSE,
