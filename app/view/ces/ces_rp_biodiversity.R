@@ -127,7 +127,7 @@ ces_rp_biodiversity_server <- function(id) {
       scrollWheelZoom = TRUE,
       dragging = TRUE,
       touchZoom = TRUE,
-      doubleClickZoom = FALSE,
+      doubleClickZoom = TRUE,
       closePopupOnClick = FALSE,
       bounceAtZoomLimits = FALSE
     )) |>
