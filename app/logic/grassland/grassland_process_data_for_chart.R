@@ -1,5 +1,7 @@
 box::use(
-  readr[read_delim]
+  readr[read_delim],
+  echarty,
+  dplyr
 )
 
 dir_with_grasslands_data <- "app/data/grassland"
@@ -8,7 +10,7 @@ dir_project1_example <- paste0("app/data/grassland", "/simulations/project1/outp
 get_paths_of_all_files <- list.files(dir_project1_example, full.names = TRUE)
 
 #' export
-read_grass_simulations <- function(filename,
+process_grassland_data <- function(filename,
                                    stack,
                                    column_types = list(
                                      Date = "D",
@@ -47,3 +49,34 @@ read_grass_simulations <- function(filename,
   
   return(series_list)
 }
+
+simulations <- NULL
+for (i in 1:2){#length(filepaths_results)) {
+  filepath <- filepaths_results[i]
+  simulations <- simulations |>
+    c(process_grassland_data(filepath, i))
+}
+
+
+time <- input_data <- readr::read_delim(
+  file = filepaths_results[1],
+  skip = 0,
+  trim_ws = TRUE,
+  delim = "\t",
+  escape_double = FALSE,
+  col_names = TRUE,
+  col_types = list(
+    Date = "D",
+    DayCount = "-",
+    PFT = "-",
+    Fraction = "-",
+    NumberPlants = "-"
+  )
+)$Date |> unique()
+
+# simulations <- purrr::map(filepaths_results,
+#                           read_grass_simulations)
+
+# Prepare tooltip formatter
+kl <- length(simulations) - 1 
+formatter <- paste0('{a',kl,'} at time {b', kl,'} <br /> {c',kl,'}')
