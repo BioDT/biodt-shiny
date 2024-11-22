@@ -6,6 +6,10 @@ box::use(
   stats[na.omit],
 )
 
+box::use(
+  app/logic/grassland/grassland_process_data_for_chart[process_grassland_data]
+)
+
 #' @export
 read_plot_data <- function(input_filepath) {
   print("reading data")
