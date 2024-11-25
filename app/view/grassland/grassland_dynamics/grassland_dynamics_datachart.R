@@ -26,8 +26,7 @@ grassland_dynamics_datachart_ui <- function(
         class = "card_title",
         i18n$translate("PFTs Chart"))
     ),
-    card_body(
-      #column(12, ecs.output("pft_chart"))
+
       ecs.output(
         ns("pft_chart"),
         width = plot_width,
@@ -41,6 +40,8 @@ grassland_dynamics_datachart_ui <- function(
 grassland_dynamics_datachart_server <- function(id) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+# TODO!!!!
 
   # output$pft_chart <- ecs.render({
   #   p <- ec.init()
