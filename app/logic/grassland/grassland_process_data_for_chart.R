@@ -4,14 +4,10 @@ box::use(
   dplyr
 )
 
-dir_with_grasslands_data <- "app/data/grassland"
-dir_project1_example <- paste0("app/data/grassland", "/simulations/project1/output")
+
 
 #' @export
-filepaths_results <- list.files(dir_project1_example, full.names = TRUE)
-
-#' @export
-process_grassland_data <- function(filename,
+grassland_data_plot <- function(filename,
                                    stack,
                                    column_types = list(
                                      Date = "D",
@@ -22,6 +18,10 @@ process_grassland_data <- function(filename,
                                    )) {
   
   colors <- c('#008000', '#800000', '#000080')
+  dir_with_grasslands_data <- "app/data/grassland"
+  dir_project1_example <- paste0("app/data/grassland", "/simulations/project1/output")
+
+  filepaths_results <- list.files(dir_project1_example, full.names = TRUE)
   
   input_data <- read_delim(
     file = filename,
