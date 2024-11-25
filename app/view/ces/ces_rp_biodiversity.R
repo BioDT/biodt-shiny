@@ -65,8 +65,8 @@ ces_rp_biodiversity_server <- function(id) {
       map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
     files_and_ids <- data.frame(files = all_sdm_files, ids = taxon_ids_from_file_names)
     # Load recreation rasters
-    hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
-    soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
+    hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))
+    soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
 
     group_species_selector_html <-  tagList(
       pickerInput(
