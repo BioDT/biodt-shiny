@@ -44,3 +44,4 @@ test.R
 background.R
 docker-compose.yml
 Dockerfile_old
+.vscode/settings.json

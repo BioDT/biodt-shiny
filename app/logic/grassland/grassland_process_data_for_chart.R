@@ -18,13 +18,11 @@ grassland_data_plot <- function(filename,
   type = 'bar',
   grassland_pft_column_types
 ) {
-  
+  filepaths_results <- list.files("app/data/grassland/simulations/project1/output/")
   colors <- c('#008000', '#800000', '#000080')
 
-  dir_with_grasslands_data <- "app/data/grassland"
-  dir_project1_example <- paste0("app/data/grassland", "/simulations/project1/output")
-  filepaths_results <- list.files(dir_project1_example, full.names = TRUE)
-  
+  req(filepaths_results)
+
   input_data <- read_delim(
     file = filename,
     skip = 0,
