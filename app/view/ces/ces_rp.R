@@ -9,7 +9,7 @@ box::use(
 #' @export
 ces_rp_ui <- function(id) {
   ns <- NS(id)
-  
+
   tagList(
     card(
       title = "rec_pot_map",
@@ -37,26 +37,26 @@ ces_rp_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- "app/data/ces"
-    
+
     # Create a waiter for the map container
     w <- Waiter$new(
       color = "rgba(256,256,256,0.9)"
     )
-        
+
     rec_pot_map <- reactive({
       # Show the waiter
       w$show()
 
       # Load the raster files
       hard_rec <- tryCatch({
-        rast(paste0(ces_path, "/RP_maps/recreation_potential_HR_4326_agg.tif"))
+        rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))
       }, error = function(e) {
         showNotification(e$message, type = "error", closeButton = TRUE, duration = NULL)
         NULL
       })
 
       soft_rec <- tryCatch({
-        rast(paste0(ces_path, "/RP_maps/recreation_potential_SR_4326_agg.tif"))
+        rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
       }, error = function(e) {
         showNotification(e$message, type = "error", closeButton = TRUE, duration = NULL)
         NULL
@@ -77,7 +77,7 @@ ces_rp_server <- function(id) {
         hideGroup("Soft recreationalist")
 
       w$hide()
-      
+
       # Hide the waiter after rendering the map
       plot
     })
