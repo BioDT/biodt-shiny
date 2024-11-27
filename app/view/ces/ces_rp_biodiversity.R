@@ -134,6 +134,7 @@ ces_rp_biodiversity_server <- function(id) {
       addTiles(group = "Open Street Map") |>
       addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
       addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
+      addProviderTiles(providers$Stadia.StamenTonerLite, providerTileOptions(zIndex = -1000), group = "Greyscale") |>
       setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
       addControlGPS(
         options = gpsOptions(
@@ -164,7 +165,7 @@ ces_rp_biodiversity_server <- function(id) {
       ) |>
       addGroupedLayersControl(
         position = "bottomright",
-        baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
+        baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map","Greyscale"),
         overlayGroups = list(
           "Recreationalist" = c("Nothing", "Hard", "Soft"),
           "Biodiversity" = c("Biodiversity data", "Focal species")
