@@ -27,6 +27,7 @@ ces_rp_biodiversity_ui <- function(id) {
       ),
       tags$style(HTML("
       
+      
         .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-gps .gps-button  {
             display: flex;
             justify-content: center;
