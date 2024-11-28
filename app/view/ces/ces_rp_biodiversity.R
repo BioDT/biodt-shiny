@@ -19,50 +19,9 @@ box::use(
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
+  ns <- NS(id)
   tagList(
-    tags$head(
-      tags$link(
-        rel = "stylesheet",
-        href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      ),
-      tags$style(HTML("
-      
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-gps .gps-button  {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: none;
-        }
-        
-        .leaflet-control-zoom-in:before {
-            content: '\\2B'; /* Unicode for + */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900; /* Ensure the correct weight */
-            font-size: 20px;
-            color: red;
-            background: white;
-            background-image: none;
-        
-        }
-        
-        .leaflet-control-zoom-out:before {
-            content: '\\F068'; /* Font Awesome Unicode for minus */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            font-size: 20px;
-            color: blue;
-            background: white;
-            background-image: none;
-        }
-        
-        .gps-button:before {
-            content: '\\F601'; /* Unicode for location icon */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900; /* Use the correct font weight */
-            font-size: 20px;
-      "))
-    ),
-  tagList(
+    tagList(
       fluidRow(
         column(
           12, # Enlarge the map to full width
