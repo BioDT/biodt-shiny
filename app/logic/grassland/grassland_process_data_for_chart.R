@@ -34,7 +34,7 @@ grassland_data_plot <- function(filename,
   )
 
   simulations <- NULL
-  for (i in 1:2){#length(filepaths_results)) {
+  for (i in 1:length(filepaths_results)) {
     filepath <- filepaths_results[i]
     simulations <- simulations |>
       c(process_grassland_data(filepath, i))
@@ -56,12 +56,12 @@ grassland_data_plot <- function(filename,
     )
   )$Date |> unique()
 
-  kl <- length(simulations) - 1 
+  kl <- length(simulations) - 1
   formatter <- paste0('{a',kl,'} at time {b', kl,'} <br /> {c',kl,'}')
 
-  series_list <- list()  
+  series_list <- list()
   for (pft in unique(input_data$PFT)) {
-    series_list[[length(series_list) + 1]] <- 
+    series_list[[length(series_list) + 1]] <-
         list(name = paste0("PFT", pft),
              type = type,
              stack = stack,
@@ -71,7 +71,7 @@ grassland_data_plot <- function(filename,
              emphasis = list(disabled = TRUE),
              data = unname(as.list(unlist(input_data[input_data$PFT == pft, "Fraction"]))))
   }
-  
+
   return(series_list)
 }
 
@@ -98,5 +98,5 @@ grassland_data_plot <- function(filename,
 #                           read_grass_simulations)
 
 # Prepare tooltip formatter
-# kl <- length(simulations) - 1 
+# kl <- length(simulations) - 1
 # formatter <- paste0('{a',kl,'} at time {b', kl,'} <br /> {c',kl,'}')
