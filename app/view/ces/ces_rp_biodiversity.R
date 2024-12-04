@@ -176,30 +176,40 @@ ces_rp_biodiversity_server <- function(id) {
         )
       ) |>
       hideGroup("Biodiversity data") |>
-    onRender("
-    function(el, x) {
-      var map = this;
-      var grayscale = false;
+    onRender(
+"
+  function(el, x) {
+    var map = this;
+    var grayscale = false;
 
-      L.Control.GrayScaleControl = L.Control.extend({
-        onAdd: function(map) {
-          var btn = L.DomUtil.create('button', 'btn btn-default');
-          btn.innerHTML = 'Toggle Grayscale';
-          btn.onclick = function() {
-            grayscale = !grayscale;
-            map.eachLayer(function(layer){
-              if(layer instanceof L.TileLayer){
-                layer.getContainer().style.filter = grayscale ? 'grayscale(100%)' : 'none';
-              }
-            });
-          };
-          return btn;
-        }
-      });
-
-      new L.Control.GrayScaleControl({ position: 'topright' }).addTo(map);
+    function applyGrayscale(layer) {
+      if (layer instanceof L.TileLayer) {
+        layer.getContainer().style.filter = grayscale ? 'grayscale(100%)' : 'none';
+      }
     }
-  ")
+
+    function toggleGrayscale() {
+      grayscale = !grayscale;
+      map.eachLayer(applyGrayscale);
+    }
+
+    map.on('layeradd', function(e) {
+      applyGrayscale(e.layer);
+    });
+
+    L.Control.GrayScaleControl = L.Control.extend({
+      onAdd: function(map) {
+        var btn = L.DomUtil.create('button', 'btn btn-default');
+        btn.innerHTML = 'Toggle Grayscale';
+        btn.onclick = toggleGrayscale;
+        return btn;
+      }
+    });
+
+    new L.Control.GrayScaleControl({ position: 'topright' }).addTo(map);
+  }
+"
+)
 
     w$hide()
 
