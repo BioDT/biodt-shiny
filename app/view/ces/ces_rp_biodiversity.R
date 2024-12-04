@@ -12,7 +12,8 @@ box::use(
   utils[read.csv],
   stats[setNames],
   shinyjs[useShinyjs, runjs],
-  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput]
+  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput],
+  htmlwidgets[onRender],
 )
 
 
@@ -163,7 +164,7 @@ ces_rp_biodiversity_server <- function(id) {
       ) |>
       addGroupedLayersControl(
         position = "bottomright",
-        baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map","Greyscale"),
+        baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
         overlayGroups = list(
           "Recreationalist" = c("Nothing", "Hard", "Soft"),
           "Biodiversity" = c("Biodiversity data", "Focal species")
@@ -175,7 +176,7 @@ ces_rp_biodiversity_server <- function(id) {
         )
       ) |>
       hideGroup("Biodiversity data") |>
-    htmlwidgets::onRender("
+    onRender("
     function(el, x) {
       var map = this;
       var grayscale = false;
