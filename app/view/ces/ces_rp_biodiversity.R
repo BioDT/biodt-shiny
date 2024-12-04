@@ -19,8 +19,6 @@ box::use(
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
-  ns <- NS(id)
-  tagList(
     tagList(
       fluidRow(
         column(
@@ -37,7 +35,6 @@ ces_rp_biodiversity_ui <- function(id) {
         )
       )
     )
-  )
 }
 # Server function
 ces_rp_biodiversity_server <- function(id) {
@@ -56,7 +53,7 @@ ces_rp_biodiversity_server <- function(id) {
     # Define colours
     recreation_alpha <- 0.5
     biodiversity_alpha <- 0.6
-    pal <- colorBin("viridis", c(0, 1), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE, alpha = biodiversity_alpha)
+    pal <- colorBin("viridis", c(0, 1.5), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE, alpha = biodiversity_alpha)
     biodiversity_pal <- colorBin("magma", c(0, 1), bins = c(0, 0.25, 0.5, 0.75, 1), na.color = "transparent", reverse = FALSE, alpha = recreation_alpha)
 
     # Load species list and SDM files
@@ -135,7 +132,7 @@ ces_rp_biodiversity_server <- function(id) {
       addTiles(group = "Open Street Map") |>
       addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
       addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
-      addProviderTiles(providers$Stadia.StamenTonerLite, providerTileOptions(zIndex = -1000), group = "Greyscale") |>
+      # addProviderTiles(providers$Stadia.StamenTonerLite, providerTileOptions(zIndex = -1000), group = "Greyscale") |>
       setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
       addControlGPS(
         options = gpsOptions(
@@ -177,7 +174,31 @@ ces_rp_biodiversity_server <- function(id) {
           groupsCollapsable = FALSE
         )
       ) |>
-      hideGroup("Biodiversity data")
+      hideGroup("Biodiversity data") |>
+    htmlwidgets::onRender("
+    function(el, x) {
+      var map = this;
+      var grayscale = false;
+
+      L.Control.GrayScaleControl = L.Control.extend({
+        onAdd: function(map) {
+          var btn = L.DomUtil.create('button', 'btn btn-default');
+          btn.innerHTML = 'Toggle Grayscale';
+          btn.onclick = function() {
+            grayscale = !grayscale;
+            map.eachLayer(function(layer){
+              if(layer instanceof L.TileLayer){
+                layer.getContainer().style.filter = grayscale ? 'grayscale(100%)' : 'none';
+              }
+            });
+          };
+          return btn;
+        }
+      });
+
+      new L.Control.GrayScaleControl({ position: 'topright' }).addTo(map);
+    }
+  ")
 
     w$hide()
 
