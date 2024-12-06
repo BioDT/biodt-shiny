@@ -114,6 +114,7 @@ ui <- function(id) {
           nav_panel(
             class = "p-0",
             title = i18n$translate("Grassland Dynamics"),
+            value = "Grassland",
             grassland_main_ui(
               ns("grassland_main"),
               i18n

@@ -70,8 +70,11 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  class = "w-100",
-                  i18n$translate("Grassland Biodiversity Dynamics")
+                    actionLink(
+                      class = "w-100",
+                      inputId = ns("grassland_selector"),
+                      i18n$translate("Grassland Biodiversity Dynamics")
+                    )
                 ),
                 tags$li(
                   class = "w-100",
@@ -221,6 +224,14 @@ mod_info_server <- function(id, r, main_session) {
       )
       nav_select("honeybee_main-tab",
         selected = "Beekeeper",
+        session = main_session
+      )
+    })
+
+    observeEvent(input$grassland_selector, {
+      print("actionlink 'Grassland' selected")
+      nav_select("navbar",
+        selected = "Grassland",
         session = main_session
       )
     })
