@@ -1,6 +1,5 @@
 box::use(
   readr[read_delim],
-  echarty,
   dplyr[pull],
   purrr[map_chr],
   echarty[ec.init]
