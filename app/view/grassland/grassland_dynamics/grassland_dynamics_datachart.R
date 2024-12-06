@@ -2,10 +2,12 @@ box::use(
   shiny[NS, moduleServer, tags],
   bslib[card, card_header, card_body],
   echarty[ecs.output, ecs.render],
+  waiter[Waiter],
 )
 
 box::use(
-  app / logic / grassland / grassland_echart_modular[generate_chart]
+  app / logic / grassland / grassland_echart_modular[generate_chart],
+    app / logic / waiter[waiter_text],
 )
 
 #' @export
@@ -36,6 +38,18 @@ grassland_dynamics_datachart_ui <- function(
 #' @export
 grassland_dynamics_datachart_server <- function(id) { # nolint
   moduleServer(id, function(input, output, session) {
+    # Define waiter ----
+    msg <- list(
+      waiter_text(message = tags$h3("Loading and processing data - PFT data from simulations...",
+        style = "color: #414f2f;"
+      ))
+    )
+    w <- Waiter$new(
+      html = msg[[1]],
+      color = "rgba(256,256,256,0.9)"
+    )
+    w$show()
+
     ns <- session$ns
 
     # Parameters for chart ----
@@ -55,5 +69,8 @@ grassland_dynamics_datachart_server <- function(id) { # nolint
         return_series = FALSE
       )
     })
+    
+    w$hide()
+
   })
 }
