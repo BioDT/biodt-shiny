@@ -19,31 +19,32 @@ read_grass_simulations <- function(
     colors = c("#00aa00", "#a00000", "#0000a0"),
     stack = NULL,
     series_opacity = 0.2) {
-  input_data <- read_delim(
-    file = filename,
-    skip = 0,
-    trim_ws = TRUE,
-    delim = "\t",
-    escape_double = FALSE,
-    col_names = TRUE,
-    col_types = column_types
-  )
+    
+    input_data <- read_delim(
+      file = filename,
+      skip = 0,
+      trim_ws = TRUE,
+      delim = "\t",
+      escape_double = FALSE,
+      col_names = TRUE,
+      col_types = column_types
+    )
 
-  series_list <- list()
-  pft_list <- sort(unique(input_data$PFT))
-  for (i in seq_along(pft_list)) {
-    series_list[[length(series_list) + 1]] <-
-      list(
-        name = paste("PFT", pft_list[i]),
-        type = plot_type[1],
-        stack = stack,
-        color = colors[i],
-        symbol = "none",
-        showSymbol = FALSE,
-        emphasis = list(disabled = TRUE),
-        data = unname(as.list(unlist(input_data[input_data$PFT == pft_list[i], "Fraction"])))
-      )
-  }
+    series_list <- list()
+    pft_list <- sort(unique(input_data$PFT))
+    for (i in seq_along(pft_list)) {
+      series_list[[length(series_list) + 1]] <-
+        list(
+          name = paste("PFT", pft_list[i]),
+          type = plot_type[1],
+          stack = stack,
+          color = colors[i],
+          symbol = "none",
+          showSymbol = FALSE,
+          emphasis = list(disabled = TRUE),
+          data = unname(as.list(unlist(input_data[input_data$PFT == pft_list[i], "Fraction"])))
+        )
+    }
 
   return(series_list)
 }
@@ -56,12 +57,13 @@ generate_chart <- function(
     colors = c("#00aa00", "#a00000", "#0000d3"),
     colors_series = c("#b4e4b4", "#dfa7a7", "#9c9cdf"),
     return_series = FALSE) {
-  if (plot_type == "bar") {
-    plot_series <- "mean"
-    stack <- "total"
-  } else if (plot_type == "line") {
-    stack <- NULL
-  }
+
+    if (plot_type == "bar") {
+      plot_series <- "mean"
+      stack <- "total"
+    } else if (plot_type == "line") {
+      stack <- NULL
+    }
 
   final_simulations <- NULL
   simulations <- NULL
@@ -183,7 +185,7 @@ generate_chart <- function(
 
 
 # Parameters ----
-filepaths_results <- list.files("data/simulations/project1/output/", full.names = TRUE)
+filepaths_results <- list.files("app/data/grassland/simulations/project1/output/", full.names = TRUE)
 plot_type <- "line"
 plot_series <- "all"
 stack <- "total"

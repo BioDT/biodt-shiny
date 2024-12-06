@@ -1,12 +1,11 @@
 box::use(
   shiny[NS, moduleServer, tags],
   bslib[card, card_header, card_body],
-  echarty[ecs.output, ecs.render, ec.init],
-  readr[read_delim]
+  echarty[ecs.output, ecs.render],
 )
 
 box::use(
-  app/logic/grassland/grassland_process_data_for_chart[grassland_data_plot]
+  app / logic / grassland / grassland_echart_modular[generate_chart]
 )
 
 #' @export
@@ -39,10 +38,22 @@ grassland_dynamics_datachart_server <- function(id) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-# TODO!!!!
-# output$pft_chart <- ecs.render({
-#   p <- ec.init()
+    # Parameters for chart ----
+    filepaths_results <- list.files("app/data/grassland/simulations/project1/output", full.names = TRUE)
+    stack <- "total"
+    series_opacity <- 0.01
+    colors <- c("#00ab4a", "#ae0000", "#003fc8")
+    colors_series <- c("#b4e4b4", "#dfa7a7", "#9c9cdf")
 
+    output$pft_chart <- ecs.render({
+      generate_chart(
+        filepaths = filepaths_results,
+        plot_type = "line",
+        plot_series = "mean",
+        colors = colors,
+        colors_series = colors_series,
+        return_series = FALSE
+      )
+    })
   })
-
 }
