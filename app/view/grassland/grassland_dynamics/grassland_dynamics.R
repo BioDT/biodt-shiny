@@ -17,6 +17,10 @@ box::use(
     grassland_dynamics_outputplot_ui,
     grassland_dynamics_outputplot_server
   ],
+  app/view/grassland/grassland_dynamics/grassland_dynamics_datachart[
+    grassland_dynamics_datachart_ui,
+    grassland_dynamics_datachart_server
+  ],
 )
 
 #' @export
@@ -30,7 +34,8 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_inputmap_ui(ns("inputmap"), i18n),
       grassland_dynamics_location_ui(ns("location"), i18n),
     ),
-    grassland_dynamics_outputplot_ui(ns("outputplot"), i18n)
+    grassland_dynamics_outputplot_ui(ns("outputplot"), i18n),
+    grassland_dynamics_datachart_ui(ns("datachart"), i18n) # UI wrapper for the chart of use case's variable(s) (currently "PFTs")
   )
 }
 
@@ -47,5 +52,8 @@ grassland_dynamics_server <- function(id, r) {
 
     # Output PLOT ----
     grassland_dynamics_outputplot_server("outputplot")
+
+    # Module with logic for a displaying of Grassland's data
+    grassland_dynamics_datachart_server("datachart")
   })
 }

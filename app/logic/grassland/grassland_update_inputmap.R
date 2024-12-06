@@ -2,7 +2,7 @@ box::use(
   leaflet[addTiles, setView, addMarkers, leafletProxy],
 )
 
-#' export
+#' @export
 grassland_update_map <- function(map_id, map_attributes) {
   if (
     is.numeric(map_attributes$lng) ||
