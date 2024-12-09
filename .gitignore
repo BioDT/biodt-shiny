@@ -32,10 +32,16 @@ vignettes/*.pdf
 renv
 # Data for pDTs
 local_data
-app/data
+app/data/ces
+app/data/cwr
+app/data/data
+app/data/ces
+app/data/disease_outbreak
+app/data/honeybee
 shared
 # Testing script
 test.R
 background.R
 docker-compose.yml
 Dockerfile_old
+.vscode/settings.json

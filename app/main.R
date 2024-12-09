@@ -114,6 +114,7 @@ ui <- function(id) {
           nav_panel(
             class = "p-0",
             title = i18n$translate("Grassland Dynamics"),
+            value = "Grassland",
             grassland_main_ui(
               ns("grassland_main"),
               i18n
@@ -250,7 +251,9 @@ server <- function(id) {
       session_dir
     )
     # Grassland pDT ----
-    grassland_main_server("grassland_main")
+    grassland_main_server(
+      "grassland_main"
+    )
 
     ces_server(
       "ces_main"
