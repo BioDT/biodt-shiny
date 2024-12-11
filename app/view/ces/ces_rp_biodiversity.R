@@ -51,11 +51,11 @@ ces_rp_biodiversity_server <- function(id) {
 
     w$show()
 
-    # Define colours
-    recreation_alpha <- 0.5
-    biodiversity_alpha <- 0.6
-    pal <- colorBin("viridis", c(0, 1.5), bins = c(0, 0.25, 0.3, 0.33, 0.36, 0.39, 0.45, 1), na.color = "transparent", reverse = FALSE, alpha = biodiversity_alpha)
-    biodiversity_pal <- colorBin("magma", c(0, 1), bins = c(0, 0.25, 0.5, 0.75, 1), na.color = "transparent", reverse = FALSE, alpha = recreation_alpha)
+    biodiversity_alpha <- 1
+    biodiversity_pal <- colorBin("PuBuGn", c(0, 1), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = biodiversity_alpha)
+
+    recreation_alpha <- 0.8
+    pal <- colorBin("YlOrBr", c(0, 1.5), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = recreation_alpha)
 
     # Load species list and SDM files
     cairngorms_sp_list <- read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
@@ -285,7 +285,7 @@ ces_rp_biodiversity_server <- function(id) {
               group = "Focal species",
               layerId = "merged_species_raster",
               colors = biodiversity_pal,
-              options = tileOptions(zIndex = 1000),
+              options = tileOptions(zIndex = 1001),
               opacity = biodiversity_alpha
             )
         }
@@ -343,8 +343,8 @@ ces_rp_biodiversity_server <- function(id) {
       # Update the map with the filtered rasters
       leafletProxy(ns("combined_map_plot")) |>
         clearGroup(c("Hard", "Soft")) |>
-        addRasterImage(hard_rec_filtered_raster, project = FALSE, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-        addRasterImage(soft_rec_filtered_raster, project = FALSE, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha)
+        addRasterImage(hard_rec_filtered_raster, project = FALSE, group = "Hard", colors = pal, options = tileOptions(zIndex = 999), opacity = recreation_alpha) |>
+        addRasterImage(soft_rec_filtered_raster, project = FALSE, group = "Soft", colors = pal, options = tileOptions(zIndex = 999), opacity = recreation_alpha)
 
       w$hide()
 
