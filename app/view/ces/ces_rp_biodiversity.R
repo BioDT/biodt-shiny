@@ -96,6 +96,7 @@ ces_rp_biodiversity_ui <- function(id) {
       column(
         12, # Enlarge the map to full width
         card(
+          
           id = "biodiversity-page",
           title = "combined_map",
           full_screen = TRUE,
