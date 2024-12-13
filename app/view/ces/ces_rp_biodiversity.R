@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags],
+  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, sliderInput],
   bslib[card, nav_select, card_title, card_body],
   leaflet[leaflet, leafletOptions, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, setView, addTiles, addRasterImage, hideGroup, showGroup, clearGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds, labelFormat],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
@@ -27,6 +27,35 @@ ces_rp_biodiversity_ui <- function(id) {
       ),
       tags$style(HTML("
       
+      .toggle-button {
+      margin-top: 20px;
+      position: absolute;
+      right: 315px; 
+      z-index: 1001;
+      background: #0056b3; 
+      color: #fff; 
+      border: none;
+      padding: 8px 15px; 
+      cursor: pointer;
+      border-radius: 5px; 
+      font-size: 14px; 
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+      transition: background-color 0.3s ease, box-shadow 0.3s ease; 
+    }
+      
+       .sidebar {
+          width: 300px;
+          height: 100%;
+          background: rgba(248, 249, 250, 0.9);
+          position: absolute;
+          right: 0;
+          z-index: 1000;
+          padding: 15px;
+          border-left: 1px solid #ccc;
+          overflow: auto;
+          transition: transform 0.3s ease-in-out;
+          display: block;
+       }
       
         .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-gps .gps-button  {
             display: flex;
@@ -63,18 +92,33 @@ ces_rp_biodiversity_ui <- function(id) {
             font-size: 20px;
       "))
     ),
-  tagList(
-      fluidRow(
-        column(
-          12, # Enlarge the map to full width
-          card(
-            id = "biodiversity-page",
-            title = "combined_map",
-            full_screen = TRUE,
-            card_title("Recreation & Biodiversity Mapping"),
-            card_body(
-              leafletOutput(ns("combined_map_plot"), height = 800, width = "100%")
-            )
+    fluidRow(
+      column(
+        12, # Enlarge the map to full width
+        card(
+          id = "biodiversity-page",
+          title = "combined_map",
+          full_screen = TRUE,
+          card_title("Recreation & Biodiversity Mapping"),
+          card_body(
+            leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
+            actionButton("toggleSidebar", "Toggle Sidebar", class = "toggle-button"),
+            tags$div(
+              class = "sidebar",
+              id = "sidebar",
+              tags$h3("Sidebar"),
+              tags$p("Use the sliders below to filter the data:"),
+             sliderInput(
+                ns("recreation_potential_slider"),
+                label = "Filter Recreation Potential:",
+                min = 0, max = 1, value = c(0, 1), step = 0.1
+              ),
+              sliderInput(
+                ns("species_occurrence_slider"),
+                label = "Filter Species Occurrence:",
+                min = 0, max = 1, value = c(0, 1), step = 0.1
+              )
+            ),
           )
         )
       )
@@ -227,7 +271,7 @@ ces_rp_biodiversity_server <- function(id) {
 
       rec_pot_map
     })
-
+    
     # Update species selector when group is selected
     observeEvent(input$species_group_selector, {
 
