@@ -32,7 +32,7 @@ ces_rp_biodiversity_ui <- function(id) {
       position: absolute;
       right: 315px; 
       z-index: 1001;
-      background: #0056b3; 
+      background: #414F2F; 
       color: #fff; 
       border: none;
       padding: 8px 15px; 
