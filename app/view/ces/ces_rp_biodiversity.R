@@ -16,7 +16,6 @@ box::use(
   htmlwidgets[onRender],
 )
 
-
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
@@ -37,6 +36,7 @@ ces_rp_biodiversity_ui <- function(id) {
       )
     )
 }
+
 # Server function
 ces_rp_biodiversity_server <- function(id) {
 
@@ -82,7 +82,6 @@ ces_rp_biodiversity_server <- function(id) {
         width = "400px"
       ),
 
-
      pickerInput(
         ns("species_selector"),
         "Select species:",
@@ -116,9 +115,14 @@ ces_rp_biodiversity_server <- function(id) {
         choices = seq(0, 1, by = 0.1),
         selected = c(0, 1),
         grid = FALSE,
-        width = "300px",
-        )
+        width = "300px"
+        ),
 
+      actionButton(
+      inputId = ns("apply_filters"),
+      label = "Apply filters",
+      class = "btn-primary"
+    )
     )
 
     # Create the initial leaflet map
@@ -294,39 +298,23 @@ ces_rp_biodiversity_server <- function(id) {
       }
     }
 
-    # Observe event to update the map when the species occurrence slider changes
-    observeEvent(input$species_occurrence_slider, ignoreNULL = FALSE, {
+  # Observe event to update the map when the species selector changes
+  observeEvent(input$species_selector, ignoreNULL = FALSE, {
 
+    w$show()
+
+    updateSpeciesLayer()
+
+    w$hide()
+  })
+
+ # Observe event for "Apply filters" button
+    observeEvent(input$apply_filters, {
       w$show()
 
-      updateSpeciesLayer()
-
-      w$hide()
-    })
-
-    # Observe event to update the map when the species selector changes
-    observeEvent(input$species_selector, ignoreNULL = FALSE, {
-
-      w$show()
-
-      updateSpeciesLayer()
-
-      w$hide()
-    })
-
-    # Observe event to update the map when the recreation potential slider changes
-    observeEvent(input$recreation_potential_slider, {
-
-      w$show()
-
-      # Create copies of the original rasters
-      hard_rec_filtered_raster <- hard_rec
-      soft_rec_filtered_raster <- soft_rec
-
-      # Apply the filter based on the recreation potential slider
+      # Update recreation raster layers
       hard_rec_vals <- terra::values(hard_rec)
       soft_rec_vals <- terra::values(soft_rec)
-
       hard_rec_filtered <- ifelse(
         hard_rec_vals >= input$recreation_potential_slider[1] &
           hard_rec_vals <= input$recreation_potential_slider[2],
@@ -335,21 +323,19 @@ ces_rp_biodiversity_server <- function(id) {
         soft_rec_vals >= input$recreation_potential_slider[1] &
           soft_rec_vals <= input$recreation_potential_slider[2],
         soft_rec_vals, NA)
+      terra::values(hard_rec) <- hard_rec_filtered
+      terra::values(soft_rec) <- soft_rec_filtered
 
-      # Update the raster values in the copies
-      terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
-      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
-
-      # Update the map with the filtered rasters
       leafletProxy(ns("combined_map_plot")) |>
         clearGroup(c("Hard", "Soft")) |>
-        addRasterImage(hard_rec_filtered_raster, project = FALSE, group = "Hard", colors = pal, options = tileOptions(zIndex = 999), opacity = recreation_alpha) |>
-        addRasterImage(soft_rec_filtered_raster, project = FALSE, group = "Soft", colors = pal, options = tileOptions(zIndex = 999), opacity = recreation_alpha)
+        addRasterImage(hard_rec, group = "Hard", project = FALSE, colors = pal, options = tileOptions(zIndex = 999), opacity = recreation_alpha) |>
+        addRasterImage(soft_rec, group = "Soft", project = FALSE, colors = pal, options = tileOptions(zIndex = 999), opacity = recreation_alpha)
+
+      # Update species layer
+      updateSpeciesLayer()
 
       w$hide()
-
-      })
-
+    })
 
     })
 }

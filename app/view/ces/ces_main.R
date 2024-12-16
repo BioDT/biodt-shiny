@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, icon, NS,showNotification],
+  shiny[moduleServer, icon, NS,showNotification, reactiveVal, observeEvent],
   bslib[navset_tab, nav_panel],
 )
 
@@ -26,6 +26,7 @@ ces_ui <- function(id) {
     ),
     nav_panel(
       title = "Recreation potential",
+      value = "Recreation potential",
       icon = icon("person-walking"),
       ces_rp_ui(
         ns("ces_rp")
@@ -33,6 +34,7 @@ ces_ui <- function(id) {
     ),
     nav_panel(
       title = "Biodiversity",
+      value = "Biodiversity",
       icon = icon("tree"),
       ces_biodiversity_ui(
         ns("ces_biodiversity")
@@ -40,6 +42,7 @@ ces_ui <- function(id) {
     ),
     nav_panel(
     title = "Recreation & Biodiversity",
+    value = "Recreation & Biodiversity",
     icon = icon("tree"),
     ces_rp_biodiversity_ui(
       ns("ces_rp_biodiversity")
@@ -55,10 +58,22 @@ ces_server <- function(id) {
     
     # add observeEvent(input$tab) and put that value in reactiveVal variable, that will be passed to module servers, where You can observeEvent that value change.
     # Check whether the data are not loaded twice: once in cer_rp, second time in ces_rp_biodiversity and same with biodiversity, then it would be better to load them here and pass them downstream
-    
-    ces_rp_server("ces_rp")
-    ces_biodiversity_server("ces_biodiversity")
-    ces_rp_biodiversity_server("ces_rp_biodiversity")
+
+    ces_selected <- reactiveVal(FALSE)
+
+    observeEvent(
+      input$tab,
+      {
+        if (input$tab == "Recreation & Biodiversity" ||
+          input$tab == "Recreation potential" ||
+          input$tab == "Biodiversity"
+        ) {
+          ces_rp_server("ces_rp")
+          ces_biodiversity_server("ces_biodiversity")
+          ces_rp_biodiversity_server("ces_rp_biodiversity")
+        }
+      }
+    )    
 
   })
 }
