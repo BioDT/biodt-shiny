@@ -56,24 +56,24 @@ ces_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # add observeEvent(input$tab) and put that value in reactiveVal variable, that will be passed to module servers, where You can observeEvent that value change.
-    # Check whether the data are not loaded twice: once in cer_rp, second time in ces_rp_biodiversity and same with biodiversity, then it would be better to load them here and pass them downstream
-
+    # Reactive value to track if the tabs were selected
     ces_selected <- reactiveVal(FALSE)
 
-    observeEvent(
-      input$tab,
-      {
-        if (input$tab == "Recreation & Biodiversity" ||
+    observeEvent(input$tab, {
+      # Check if the tab matches any of the specified tabs
+      if (!ces_selected() && (input$tab == "Recreation & Biodiversity" ||
           input$tab == "Recreation potential" ||
-          input$tab == "Biodiversity"
-        ) {
-          ces_rp_server("ces_rp")
-          ces_biodiversity_server("ces_biodiversity")
-          ces_rp_biodiversity_server("ces_rp_biodiversity")
-        }
+          input$tab == "Biodiversity")) {
+        
+        # Set ces_selected to TRUE if it's not already TRUE
+        ces_selected(TRUE) 
       }
-    )    
+    })
+
+    # Call downstream module servers only the first time
+    ces_rp_server("ces_rp")
+    ces_biodiversity_server("ces_biodiversity")
+    ces_rp_biodiversity_server("ces_rp_biodiversity", ces_selected = ces_selected)
 
   })
 }
