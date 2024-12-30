@@ -54,7 +54,6 @@ ces_rp_biodiversity_ui <- function(id) {
           background: #fff;
           position: fixed;
           right: -300px; /* Initially hidden off-screen */
-          top: 0;
           z-index: 1000;
           padding: 15px;
           border-left: 1px solid #ccc;
@@ -65,6 +64,23 @@ ces_rp_biodiversity_ui <- function(id) {
         .sidebar.active {
           right: 0; /* Show sidebar */
         }
+        
+          .close-button {
+        background: #f44336; /* Red */
+        color: #ffffff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 14px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .close-button:hover {
+        background: #d32f2f; /* Darker red */
+    }
       
         .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-gps .gps-button  {
             display: flex;

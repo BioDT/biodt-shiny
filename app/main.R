@@ -51,6 +51,7 @@ ui <- function(id) {
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
+      includeScript("app/js/sidebar-toggle.js"),
       shiny$tags$link(rel = "shortcut icon", href = "static/favicon.ico"),
       useShinyjs(),
       useWaiter(),
@@ -58,7 +59,6 @@ ui <- function(id) {
       use_cicerone(),
       usei18n(i18n),
       includeScript("app/js/tab-index.js"),
-      includeScript("app/js/sidebar_toggle.js")
     ),
     waiterShowOnLoad(
       html = spin_loaders(
