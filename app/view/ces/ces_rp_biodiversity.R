@@ -29,11 +29,15 @@ ces_rp_biodiversity_ui <- function(id) {
       
       .button-container {
        display: flex;
+       flex-direction: column;
           gap: 10px;
           position: absolute;
-          top: 20px;
-          right: 315px; 
+          right: 16px; 
           z-index: 1001;
+      }
+      
+      .button-container.moved {
+       right: 300px; /* Adjust this value based on sidebar width */
       }
       
       .toggle-button {
@@ -42,7 +46,6 @@ ces_rp_biodiversity_ui <- function(id) {
           border: none;
           padding: 8px 15px; 
           cursor: pointer;
-          border-radius: 5px; 
           font-size: 14px; 
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
           transition: background-color 0.3s ease, box-shadow 0.3s ease;
@@ -52,17 +55,18 @@ ces_rp_biodiversity_ui <- function(id) {
           width: 300px;
           height: 100%;
           background: #fff;
-          position: fixed;
+          position: absolute;
           right: -300px; /* Initially hidden off-screen */
           z-index: 1000;
           padding: 15px;
           border-left: 1px solid #ccc;
           overflow-y: auto;
-          transition: right 0.3s ease-in-out;
+          display: none;
         }
         
         .sidebar.active {
           right: 0; /* Show sidebar */
+          display: block;
         }
         
           .close-button {

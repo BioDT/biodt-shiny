@@ -1,6 +1,19 @@
+function toggleSidebar(type) {
+    const sidebar = document.getElementById('sidebar');
+    const buttonContainer = document.querySelector('.button-container');
+    if (sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+        buttonContainer.classList.remove('moved');
+    } else {
+        sidebar.classList.add('active');
+        buttonContainer.classList.add('moved');
+    }
+}
+
 // Expose toggleSidebar and closeSidebar to the global scope
 window.toggleSidebar = function(contentType) {
     $("#sidebar").removeClass("active");
+    $(".button-container").removeClass("moved");
 
     if (contentType === "sliders") {
         $("#sidebar").html(`
@@ -28,17 +41,18 @@ window.toggleSidebar = function(contentType) {
         }
     }
 
-    // Add close button functionality
     $("#closeSidebar").click(function() {
         window.closeSidebar();
     });
 
     $("#sidebar").addClass("active");
+    $(".button-container").addClass("moved");
 };
 
 // Function to close the sidebar
 window.closeSidebar = function() {
     $("#sidebar").removeClass("active");
+    $(".button-container").removeClass("moved");
 };
 
 // Attach button click handlers
@@ -51,7 +65,6 @@ $(document).ready(function() {
         window.toggleSidebar('species');
     });
 
-    // Close sidebar when clicking outside of it
     $(document).click(function(event) {
         if (!$(event.target).closest('#sidebar, .toggle-button').length) {
             window.closeSidebar();

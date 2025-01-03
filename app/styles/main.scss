@@ -1,3 +1,18 @@
+:focus {
+  outline: 3px solid #02C9F8;
+  outline-offset: 2px;
+}
+
+.navbar-nav .nav-link:focus {
+    outline: 3px solid #02C9F8;  /* Same focus color */
+    outline-offset: 2px;
+}
+
+.bslib-sidebar-layout .sidebar a:focus {
+    outline: 3px solid #02C9F8;
+    outline-offset: 2px;
+}
+
 .bslib-page-fill {
   overflow: auto;
 }
