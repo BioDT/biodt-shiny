@@ -21,16 +21,12 @@ ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
   tagList(
     tags$head(
-      tags$link(
-        rel = "stylesheet",
-        href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      ),
       tags$style(HTML("
       
       .button-container {
        display: flex;
        flex-direction: column;
-          gap: 10px;
+          gap: 8px;
           position: absolute;
           right: 16px; 
           z-index: 1001;
@@ -46,9 +42,10 @@ ces_rp_biodiversity_ui <- function(id) {
           border: none;
           padding: 8px 15px; 
           cursor: pointer;
-          font-size: 14px; 
+          font-size: 15px; 
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
           transition: background-color 0.3s ease, box-shadow 0.3s ease;
+           border-radius: 5px 0 0 5px;
     }
       
         .sidebar {
@@ -61,12 +58,12 @@ ces_rp_biodiversity_ui <- function(id) {
           padding: 15px;
           border-left: 1px solid #ccc;
           overflow-y: auto;
-          display: none;
+          visibility:hidden; 
         }
         
         .sidebar.active {
           right: 0; /* Show sidebar */
-          display: block;
+         visibility: visible;
         }
         
           .close-button {
@@ -85,40 +82,16 @@ ces_rp_biodiversity_ui <- function(id) {
     .close-button:hover {
         background: #d32f2f; /* Darker red */
     }
-      
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out, .leaflet-control-gps .gps-button  {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: none;
-        }
-        
-        .leaflet-control-zoom-in:before {
-            content: '\\2B'; /* Unicode for + */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900; /* Ensure the correct weight */
-            font-size: 20px;
-            color: red;
-            background: white;
-            background-image: none;
-        
-        }
-        
-        .leaflet-control-zoom-out:before {
-            content: '\\F068'; /* Font Awesome Unicode for minus */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            font-size: 20px;
-            color: blue;
-            background: white;
-            background-image: none;
-        }
-        
-        .gps-button:before {
-            content: '\\F601'; /* Unicode for location icon */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900; /* Use the correct font weight */
-            font-size: 20px;
+    
+    .leaflet-touch .leaflet-bar a {
+    background-color: #414f2f;
+    color: white;
+    }
+
+.leaflet-control-gps .gps-button {
+background-potion: top;
+}
+
       "))
     ),
     fluidRow(
@@ -137,8 +110,8 @@ ces_rp_biodiversity_ui <- function(id) {
             
             tags$div(
               class = "button-container",
-              actionButton(ns("toggleSliders"), "Sliders", class = "toggle-button"),
-              actionButton(ns("toggleSpecies"), "Species", class = "toggle-button")
+              actionButton(ns("toggleSliders"), "Recreation Potential", class = "toggle-button"),
+              actionButton(ns("toggleSpecies"), "Biodiversity", class = "toggle-button")
               # You can add more buttons here as needed.
             ),
             
