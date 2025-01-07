@@ -21,6 +21,12 @@ ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
   tagList(
     tags$head(
+      
+      tags$link(
+        rel = "stylesheet", 
+        href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      ),
+      
       tags$style(HTML("
       
       .button-container {
@@ -42,11 +48,47 @@ ces_rp_biodiversity_ui <- function(id) {
           border: none;
           padding: 8px 15px; 
           cursor: pointer;
-          font-size: 15px; 
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
           transition: background-color 0.3s ease, box-shadow 0.3s ease;
-           border-radius: 5px 0 0 5px;
-    }
+          border-radius: 5px 0 0 5px;
+      }
+      
+      .toggle-button i {
+        font-size: 1.5rem;
+      }
+    
+         .toggle-button:hover {
+          background-color: #556B2F;
+      }
+    
+      .toggle-button[title] {
+          position: relative;
+      }
+  
+
+        .toggle-button[title]::after {
+            content: attr(title);
+            position: absolute;
+            right: 100%; /* Position it to the left of the button */
+            top: 50%;
+            transform: translateY(-50%) translateX(-10px); /* Adjust tooltip to the left */
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 10;
+            min-width: 120px; /* Ensure minimum width */
+            word-wrap: break-word; /* Avoid text overflow */
+            font-size: 1rem;
+        }
+      
+        .toggle-button[title]:hover::after {
+            opacity: 1;
+        }
       
         .sidebar {
           width: 300px;
@@ -55,32 +97,31 @@ ces_rp_biodiversity_ui <- function(id) {
           position: absolute;
           right: -300px; /* Initially hidden off-screen */
           z-index: 1000;
-          padding: 15px;
+          padding: 40px 15px;
           border-left: 1px solid #ccc;
           overflow-y: auto;
-          visibility:hidden; 
-        }
+          display: none;
+         }
         
         .sidebar.active {
           right: 0; /* Show sidebar */
-         visibility: visible;
+          display: block;
         }
         
-          .close-button {
-        background: #f44336; /* Red */
-        color: #ffffff;
-        border: none;
-        padding: 5px 10px;
+        .close-button {
+        background: transparent;  
+        color: #f44336;  
+        border: none; 
+        padding: 0;  
         cursor: pointer;
-        border-radius: 5px;
-        font-size: 14px;
+        font-size: 1.5rem;
         position: absolute;
-        top: 10px;
-        right: 10px;
-    }
-    
+        right: 20px;
+        top: 0;
+      }
+
     .close-button:hover {
-        background: #d32f2f; /* Darker red */
+      color: #d32f2f;  /* Darker red icon on hover */
     }
     
     .leaflet-touch .leaflet-bar a {
@@ -110,8 +151,8 @@ background-potion: top;
             
             tags$div(
               class = "button-container",
-              actionButton(ns("toggleSliders"), "Recreation Potential", class = "toggle-button"),
-              actionButton(ns("toggleSpecies"), "Biodiversity", class = "toggle-button")
+              actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
+              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity")
               # You can add more buttons here as needed.
             ),
             
