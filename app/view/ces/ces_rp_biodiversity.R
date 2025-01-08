@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, sliderInput, uiOutput],
+  shiny[tags, moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, sliderInput, uiOutput],
   bslib[card, nav_select, card_title, card_body],
   leaflet[leaflet, leafletOptions, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, setView, addTiles, addRasterImage, hideGroup, showGroup, clearGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds, labelFormat],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
@@ -14,7 +14,6 @@ box::use(
   shinyjs[useShinyjs, runjs],
   shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput]
 )
-
 
 # UI function
 ces_rp_biodiversity_ui <- function(id) {
@@ -153,21 +152,47 @@ background-potion: top;
               class = "button-container",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
               actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity")
-              # You can add more buttons here as needed.
-            ),
-            
+            ),            
             # Single Sidebar
             tags$div(
               class = "sidebar",
-              id = "sidebar", 
-              uiOutput(ns("sidebar_content"))  # Content rendered dynamically
+              id = "sidebar",
+                tags$div(
+                  id = "slidersSidebar",
+                  class = "d-none",
+                  tags$h3("Sliders Sidebar"),
+                  tags$p("Use the sliders below to filter the data:"),
+                  sliderTextInput(
+                    inputId = ns("recreation_potential_slider"),
+                    label = "Filter Recreation Potential:",
+                    choices = seq(0, 1, by = 0.1),
+                    selected = c(0, 1),
+                    grid = FALSE,
+                  ),
+                  sliderTextInput(
+                    inputId = ns("species_occurrence_slider"),
+                    label = "Filter Species Occurrence:",
+                    choices = seq(0, 1, by = 0.1),
+                    selected = c(0, 1),
+                    grid = FALSE,
+                  )
+                ),
+                # species content
+                tags$div(
+                  id = "speciesSidebar",
+                  class = "d-none",
+                  tags$h3("Species Sidebar"),
+                  tags$p("Select Species:"),
+                  selectInput("species_selector", label = "Species:", choices = NULL, multiple = TRUE)
+                )
+              )
             )
             ),
           )
         )
       )
-    )
 }
+
 # Server function
 ces_rp_biodiversity_server <- function(id) {
 
@@ -184,36 +209,18 @@ ces_rp_biodiversity_server <- function(id) {
     
     # Logic for handling the Sliders button click
     observeEvent(input$toggleSliders, {
-      runjs('toggleSidebar("sliders")')  # Call JS to toggle the sidebar for sliders content
+      runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for sliders content
+      runjs('App.activeRecreation()')
+      #runjs('App.deactSpecies')
     })
     
     # Logic for handling the Species button click
     observeEvent(input$toggleSpecies, {
-      runjs('toggleSidebar("species")')  # Call JS to toggle the sidebar for species content
+      runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for species content
+      runjs('App.activeSpecies()')
+      #runjs('deactRecreation()')
     })
     
-    # Server logic for dynamically generating the content for the sidebar
-    output$sidebar_content <- renderUI({
-      req(input$toggleSliders, input$toggleSpecies)
-      
-      # Conditional content based on which button was pressed
-      if (input$toggleSliders > input$toggleSpecies) {
-        # Show sliders content
-        tagList(
-          tags$h3("Sliders Sidebar"),
-          tags$p("Use the sliders below to filter the data:"),
-          sliderInput("recreation_potential_slider", label = "Filter Recreation Potential:", min = 0, max = 1, value = c(0, 1), step = 0.1),
-          sliderInput("species_occurrence_slider", label = "Filter Species Occurrence:", min = 0, max = 1, value = c(0, 1), step = 0.1)
-        )
-      } else {
-        # Show species content
-        tagList(
-          tags$h3("Species Sidebar"),
-          tags$p("Select Species:"),
-          selectInput("species_selector", label = "Species:", choices = NULL, multiple = TRUE)
-        )
-      }
-    })
     # Define colours
     recreation_alpha <- 0.5
     biodiversity_alpha <- 0.6
@@ -261,29 +268,6 @@ ces_rp_biodiversity_server <- function(id) {
       ),
   )
 
-    # Generate the slider input using tagList
-    recreation_occurence_slider_html <- tagList(
-
-      sliderTextInput(
-        inputId = ns("recreation_potential_slider"),
-        label = "Filter Recreation Potential:",
-        choices = seq(0, 1, by = 0.1),
-        selected = c(0, 1),
-        grid = FALSE,
-        width = "300px"
-      ),
-
-      sliderTextInput(
-        inputId = ns("species_occurrence_slider"),
-        label = "Filter Species Occurrence:",
-        choices = seq(0, 1, by = 0.1),
-        selected = c(0, 1),
-        grid = FALSE,
-        width = "300px",
-        )
-
-    )
-
     # Create the initial leaflet map
     rec_pot_map <- leaflet(options = leafletOptions(
       scrollWheelZoom = TRUE,
@@ -315,10 +299,10 @@ ces_rp_biodiversity_server <- function(id) {
         html = group_species_selector_html,
         position = "topleft"
       ) |>
-      addControl(
-        html = recreation_occurence_slider_html,
-        position = "bottomright"
-      ) |>
+      # addControl(
+      #   html = recreation_occurence_slider_html,
+      #   position = "bottomright"
+      # ) |>
       addTiles(
         urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
         attribution = "GBIF",
