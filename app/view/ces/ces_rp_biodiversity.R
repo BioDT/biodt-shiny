@@ -183,7 +183,32 @@ background-potion: top;
                   class = "d-none",
                   tags$h3("Species Sidebar"),
                   tags$p("Select Species:"),
-                  selectInput("species_selector", label = "Species:", choices = NULL, multiple = TRUE)
+                  pickerInput(
+                    ns("species_group_selector"),
+                    "Select species group:",
+                    choices = c(
+                      "All biodiversity" = "all",
+                      "Mammals" = "mammals",
+                      "Birds" = "birds",
+                      "Plants" = "plants",
+                      "Insects" = "insects"),
+                    selected = "all",
+                    multiple = FALSE,
+                    width = "400px"
+                  ),
+                  pickerInput(
+                    ns("species_selector"),
+                    "Select species:",
+                    choices = NULL,
+                    selected = NULL,
+                    multiple = TRUE,
+                    width = "400px",
+                    options = list(
+                      `live-search` = TRUE,
+                      `size` = 5,
+                      `dropdownAlignRight` = FALSE
+                    )
+                  )
                 )
               )
             )
@@ -299,10 +324,6 @@ ces_rp_biodiversity_server <- function(id) {
         html = group_species_selector_html,
         position = "topleft"
       ) |>
-      # addControl(
-      #   html = recreation_occurence_slider_html,
-      #   position = "bottomright"
-      # ) |>
       addTiles(
         urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
         attribution = "GBIF",
