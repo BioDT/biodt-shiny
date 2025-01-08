@@ -51,7 +51,6 @@ ui <- function(id) {
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
-      includeScript("app/js/sidebar-toggle.js"),
       shiny$tags$link(rel = "shortcut icon", href = "static/favicon.ico"),
       useShinyjs(),
       useWaiter(),
@@ -228,12 +227,12 @@ server <- function(id) {
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
-    
+
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
     })
-    
+
     # Info page ----
     mod_info_server(
       "info",
@@ -244,7 +243,7 @@ server <- function(id) {
       "cwr_main",
       i18n
     )
-    
+
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",
