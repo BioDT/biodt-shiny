@@ -1,7 +1,7 @@
 box::use(
-  shiny[tags, moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, sliderInput, uiOutput],
+  shiny[tags, moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, sliderInput, uiOutput, reactiveVal],
   bslib[card, nav_select, card_title, card_body],
-  leaflet[leaflet, leafletOptions, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, setView, addTiles, addRasterImage, hideGroup, showGroup, clearGroup, addProviderTiles, providerTileOptions, providers, tileOptions, addLegend, setMaxBounds, labelFormat],
+  leaflet[addRasterImage, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, showGroup, clearGroup, setMaxBounds, labelFormat, tileOptions],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
   terra[rast, values, crop, app, ifel, ext, as.polygons, sprc, merge, mean],
   waiter[Waiter],
@@ -13,6 +13,10 @@ box::use(
   stats[setNames],
   shinyjs[useShinyjs, runjs],
   shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput]
+)
+
+box::use(
+  app/logic/ces/ces_map[disease_leaflet_map]
 )
 
 # UI function
@@ -222,10 +226,11 @@ background-potion: top;
 
 # Server function
 ces_rp_biodiversity_server <- function(id) {
-
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- "app/data/ces"
+    
+    rec_pot_map <- reactiveVal()
 
     # Waiter for loading screens
     w <- Waiter$new(
@@ -268,56 +273,38 @@ ces_rp_biodiversity_server <- function(id) {
     soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
 
     # Create the initial leaflet map
-    rec_pot_map <- leaflet(options = leafletOptions(
-      scrollWheelZoom = TRUE,
-      dragging = TRUE,
-      touchZoom = TRUE,
-      doubleClickZoom = TRUE,
-      closePopupOnClick = FALSE,
-      bounceAtZoomLimits = FALSE
-    )) |>
-      addTiles(group = "Open Street Map") |>
-      addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
-      addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
-      setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
-      addControlGPS(
-        options = gpsOptions(
-          position = "topleft",
-          activate = TRUE,
-          autoCenter = TRUE,
-          setView = TRUE)) |>
-      addRasterImage(hard_rec, group = "Hard", project = FALSE, colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-        hideGroup("Hard") |>
-      addRasterImage(soft_rec, group = "Soft", project = FALSE, colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-      addLegend(
-        pal = biodiversity_pal, values = c(0, 1), title = "Biodiversity", position = "bottomright",
-        labFormat = labelFormat(prefix = "", suffix = "", between = " - ")
-      ) |>
-      addLegend(pal = pal, values = terra::values(hard_rec), title = "Recreation", position = "bottomright") |>
-      addControl(
-        html = group_species_selector_html,
-        position = "topleft"
-      ) |>
-      addTiles(
-        urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
-        attribution = "GBIF",
-        group = "Biodiversity data"
-      ) |>
-      addGroupedLayersControl(
-        position = "bottomright",
-        baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
-        overlayGroups = list(
-          "Recreationalist" = c("Nothing", "Hard", "Soft"),
-          "Biodiversity" = c("Biodiversity data", "Focal species")
-        ),
-        options = groupedLayersControlOptions(
-          collapsed = FALSE,
-          exclusiveGroups = "Recreationalist",
-          groupsCollapsable = FALSE
-        )
-      ) |>
-      hideGroup("Biodiversity data")
-
+    # rec_pot_map <- leaflet() |>
+      # addControl(
+      #  html = group_species_selector_html,
+      #  position = "topleft"
+      #) |>
+      # addTiles(
+      #   urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+      #   attribution = "GBIF",
+      #   group = "Biodiversity data"
+      # ) |>
+      # addGroupedLayersControl(
+      #   position = "bottomright",
+      #   baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
+      #   overlayGroups = list(
+      #     "Recreationalist" = c("Nothing", "Hard", "Soft"),
+      #     "Biodiversity" = c("Biodiversity data", "Focal species")
+      #   ),
+      #   options = groupedLayersControlOptions(
+      #     collapsed = FALSE,
+      #     exclusiveGroups = "Recreationalist",
+      #     groupsCollapsable = FALSE
+      #   )
+      # )
+    
+    rec_pot_map <- disease_leaflet_map(
+      hard_rec,
+      soft_rec,
+      palette = pal,
+      biodiversity_palette = biodiversity_pal,
+      rec_opacity = recreation_alpha
+    )
+    
     w$hide()
 
     # Render the map in leaflet
