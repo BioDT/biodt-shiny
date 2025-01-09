@@ -96,7 +96,7 @@ ces_rp_biodiversity_ui <- function(id) {
           position: absolute;
           right: -300px; /* Initially hidden off-screen */
           z-index: 1000;
-          padding: 40px 15px;
+          padding: 30px 15px;
           border-left: 1px solid #ccc;
           overflow-y: auto;
           display: none;
@@ -108,10 +108,10 @@ ces_rp_biodiversity_ui <- function(id) {
         }
 
         .close-button {
-        background: transparent;
+        background: none;
         color: #f44336;
         border: none;
-        padding: 0;
+        padding: 5px 10px 5px 10px;
         cursor: pointer;
         font-size: 1.5rem;
         position: absolute;
@@ -121,6 +121,7 @@ ces_rp_biodiversity_ui <- function(id) {
 
     .close-button:hover {
       color: #d32f2f;  /* Darker red icon on hover */
+      background: none;
     }
 
     .leaflet-touch .leaflet-bar a {
@@ -157,6 +158,13 @@ background-potion: top;
             tags$div(
               class = "sidebar",
               id = "sidebar",
+              actionButton(
+                ns("closeButton"),
+                class = "close-button",
+                HTML('<i class="fa-solid fa-x"></i>'),
+                title = "Close Sidebar"
+              ),
+              # sliders content 
                 tags$div(
                   id = "slidersSidebar",
                   class = "d-none",
@@ -241,6 +249,11 @@ ces_rp_biodiversity_server <- function(id) {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for species content
       runjs('App.activeSpecies()')
       #runjs('deactRecreation()')
+    })
+    
+    # Logic for basic sidebar closing
+    observeEvent(input$closeButton, {
+      runjs('App.toggleSidebar()')  
     })
 
     # Define colours
