@@ -139,16 +139,12 @@ background-potion: top;
       column(
         12, # Enlarge the map to full width
         card(
-
           id = "biodiversity-page",
           title = "combined_map",
           full_screen = TRUE,
-
           card_title("Recreation & Biodiversity Mapping"),
-
           card_body(
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
-
             tags$div(
               class = "button-container",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
@@ -190,7 +186,8 @@ background-potion: top;
                   id = "speciesSidebar",
                   class = "d-none",
                   tags$h3("Species Sidebar"),
-                   pickerInput(
+                  tags$p("Select Species:"),
+                  pickerInput(
                     ns("species_group_selector"),
                     "Select species group:",
                     choices = c(
@@ -202,7 +199,7 @@ background-potion: top;
                     selected = "all",
                     multiple = FALSE
                   ),
-                 pickerInput(
+                  pickerInput(
                     ns("species_selector"),
                     "Select species:",
                     choices = NULL,
@@ -241,14 +238,12 @@ ces_rp_biodiversity_server <- function(id) {
     observeEvent(input$toggleSliders, {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for sliders content
       runjs('App.activeRecreation()')
-      #runjs('App.deactSpecies')
     })
 
     # Logic for handling the Species button click
     observeEvent(input$toggleSpecies, {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for species content
       runjs('App.activeSpecies()')
-      #runjs('deactRecreation()')
     })
     
     # Logic for basic sidebar closing
@@ -271,37 +266,6 @@ ces_rp_biodiversity_server <- function(id) {
     # Load recreation rasters
     hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))
     soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
-
-    group_species_selector_html <-  tagList(
-    #   pickerInput(
-    #     ns("species_group_selector"),
-    #     "Select species group:",
-    #     choices = c(
-    #       "All biodiversity" = "all",
-    #       "Mammals" = "mammals",
-    #       "Birds" = "birds",
-    #       "Plants" = "plants",
-    #       "Insects" = "insects"),
-    #     selected = "all",
-    #     multiple = FALSE,
-    #     width = "400px"
-    #   ),
-
-
-    #  pickerInput(
-    #     ns("species_selector"),
-    #     "Select species:",
-    #     choices = NULL,
-    #     selected = NULL,
-    #     multiple = TRUE,
-    #     width = "400px",
-    #     options = list(
-    #       `live-search` = TRUE,
-    #       `size` = 5,
-    #       `dropdownAlignRight` = FALSE
-    #     )
-    #   ),
-  )
 
     # Create the initial leaflet map
     rec_pot_map <- leaflet(options = leafletOptions(
@@ -334,10 +298,6 @@ ces_rp_biodiversity_server <- function(id) {
         html = group_species_selector_html,
         position = "topleft"
       ) |>
-      # addControl(
-      #   html = recreation_occurence_slider_html,
-      #   position = "bottomright"
-      # ) |>
       addTiles(
         urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
         attribution = "GBIF",
