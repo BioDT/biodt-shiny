@@ -51,7 +51,6 @@ ui <- function(id) {
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
-      includeScript("app/js/sidebar-toggle.js"),
       shiny$tags$link(rel = "shortcut icon", href = "static/favicon.ico"),
       useShinyjs(),
       useWaiter(),
