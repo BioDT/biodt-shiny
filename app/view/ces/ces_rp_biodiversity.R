@@ -20,50 +20,50 @@ ces_rp_biodiversity_ui <- function(id) {
   ns <- NS(id)
   tagList(
     tags$head(
-      
+
       tags$link(
-        rel = "stylesheet", 
+        rel = "stylesheet",
         href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
       ),
-      
+
       tags$style(HTML("
-      
+
       .button-container {
        display: flex;
        flex-direction: column;
           gap: 8px;
           position: absolute;
-          right: 16px; 
+          right: 16px;
           z-index: 1001;
       }
-      
+
       .button-container.moved {
        right: 300px; /* Adjust this value based on sidebar width */
       }
-      
+
       .toggle-button {
-          background: #414F2F; 
-          color: #ffffff; 
+          background: #414F2F;
+          color: #ffffff;
           border: none;
-          padding: 8px 15px; 
+          padding: 8px 15px;
           cursor: pointer;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
           transition: background-color 0.3s ease, box-shadow 0.3s ease;
           border-radius: 5px 0 0 5px;
       }
-      
+
       .toggle-button i {
         font-size: 1.5rem;
       }
-    
+
          .toggle-button:hover {
           background-color: #556B2F;
       }
-    
+
       .toggle-button[title] {
           position: relative;
       }
-  
+
 
         .toggle-button[title]::after {
             content: attr(title);
@@ -84,11 +84,11 @@ ces_rp_biodiversity_ui <- function(id) {
             word-wrap: break-word; /* Avoid text overflow */
             font-size: 1rem;
         }
-      
+
         .toggle-button[title]:hover::after {
             opacity: 1;
         }
-      
+
         .sidebar {
           width: 300px;
           height: 100%;
@@ -101,17 +101,17 @@ ces_rp_biodiversity_ui <- function(id) {
           overflow-y: auto;
           display: none;
          }
-        
+
         .sidebar.active {
           right: 0; /* Show sidebar */
           display: block;
         }
-        
+
         .close-button {
-        background: transparent;  
-        color: #f44336;  
-        border: none; 
-        padding: 0;  
+        background: transparent;
+        color: #f44336;
+        border: none;
+        padding: 0;
         cursor: pointer;
         font-size: 1.5rem;
         position: absolute;
@@ -122,7 +122,7 @@ ces_rp_biodiversity_ui <- function(id) {
     .close-button:hover {
       color: #d32f2f;  /* Darker red icon on hover */
     }
-    
+
     .leaflet-touch .leaflet-bar a {
     background-color: #414f2f;
     color: white;
@@ -138,21 +138,17 @@ background-potion: top;
       column(
         12, # Enlarge the map to full width
         card(
-          
           id = "biodiversity-page",
           title = "combined_map",
           full_screen = TRUE,
-          
           card_title("Recreation & Biodiversity Mapping"),
-          
           card_body(
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
-            
             tags$div(
               class = "button-container",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
               actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity")
-            ),            
+            ),
             # Single Sidebar
             tags$div(
               class = "sidebar",
@@ -193,8 +189,7 @@ background-potion: top;
                       "Plants" = "plants",
                       "Insects" = "insects"),
                     selected = "all",
-                    multiple = FALSE,
-                    width = "400px"
+                    multiple = FALSE
                   ),
                   pickerInput(
                     ns("species_selector"),
@@ -202,7 +197,6 @@ background-potion: top;
                     choices = NULL,
                     selected = NULL,
                     multiple = TRUE,
-                    width = "400px",
                     options = list(
                       `live-search` = TRUE,
                       `size` = 5,
@@ -231,21 +225,19 @@ ces_rp_biodiversity_server <- function(id) {
     )
 
     w$show()
-    
+
     # Logic for handling the Sliders button click
     observeEvent(input$toggleSliders, {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for sliders content
       runjs('App.activeRecreation()')
-      #runjs('App.deactSpecies')
     })
-    
+
     # Logic for handling the Species button click
     observeEvent(input$toggleSpecies, {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for species content
       runjs('App.activeSpecies()')
-      #runjs('deactRecreation()')
     })
-    
+
     # Define colours
     recreation_alpha <- 0.5
     biodiversity_alpha <- 0.6
@@ -261,37 +253,6 @@ ces_rp_biodiversity_server <- function(id) {
     # Load recreation rasters
     hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))
     soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
-
-    group_species_selector_html <-  tagList(
-      pickerInput(
-        ns("species_group_selector"),
-        "Select species group:",
-        choices = c(
-          "All biodiversity" = "all",
-          "Mammals" = "mammals",
-          "Birds" = "birds",
-          "Plants" = "plants",
-          "Insects" = "insects"),
-        selected = "all",
-        multiple = FALSE,
-        width = "400px"
-      ),
-
-
-     pickerInput(
-        ns("species_selector"),
-        "Select species:",
-        choices = NULL,
-        selected = NULL,
-        multiple = TRUE,
-        width = "400px",
-        options = list(
-          `live-search` = TRUE,
-          `size` = 5,
-          `dropdownAlignRight` = FALSE
-        )
-      ),
-  )
 
     # Create the initial leaflet map
     rec_pot_map <- leaflet(options = leafletOptions(
@@ -351,7 +312,7 @@ ces_rp_biodiversity_server <- function(id) {
 
       rec_pot_map
     })
-    
+
     # Update species selector when group is selected
     observeEvent(input$species_group_selector, {
 
