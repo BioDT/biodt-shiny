@@ -237,9 +237,6 @@ ces_rp_biodiversity_server <- function(id) {
     msg <- list(
       waiter_text(message = tags$h3("Loading data...",
                                     style = "color: #414f2f;"
-      )),
-      waiter_text(message = tags$h3("Computing Beehave simulation...",
-                                    style = "color: #414f2f;"
       ))
     )
     w <- Waiter$new(
