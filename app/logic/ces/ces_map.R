@@ -1,9 +1,13 @@
 box::use(
-  leaflet[leaflet, leafletOptions, addTiles, addProviderTiles, setView, addLegend, hideGroup, labelFormat, addRasterImage, tileOptions, providers, providerTileOptions],
+  leaflet[leaflet, leafletOptions, addTiles, addProviderTiles, setView, addLegend, hideGroup, labelFormat, addRasterImage, tileOptions, providers, providerTileOptions, addControl],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
+  terra[rast]
 )
 
-
+#' @export
+read_recreation_tifs <- function(map_path) {
+  map_raster <- rast(map_path)
+}
 
 #' @export
 disease_leaflet_map <- function(
@@ -11,7 +15,8 @@ disease_leaflet_map <- function(
     soft_rec,
     palette,
     biodiversity_palette,
-    rec_opacity
+    rec_opacity,
+    selector_html
 ) {
   leaflet_map <- leaflet(
       options = leafletOptions(
@@ -29,6 +34,10 @@ disease_leaflet_map <- function(
     addRasterImage(hard_rec, group = "Hard", project = FALSE, colors = palette, options = tileOptions(zIndex = 1000), opacity = rec_opacity) |>
       hideGroup("Hard") |>
     addRasterImage(soft_rec, group = "Soft", project = FALSE, colors = palette, options = tileOptions(zIndex = 1000), opacity = rec_opacity) |>
+    # addControl(
+    #  html = selector_html,
+    #  position = "topleft"
+    # ) |>
     addControlGPS(
       options = gpsOptions(
         position = "topleft",
@@ -44,8 +53,20 @@ disease_leaflet_map <- function(
       urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
       attribution = "GBIF",
       group = "Biodiversity data"
-    ) |>
-      hideGroup("Biodiversity data")
-  
-  return(leaflet_map)
+    ) |> 
+    hideGroup("Biodiversity data")
+    # |>
+    # addGroupedLayersControl(
+    #   position = "bottomright",
+    #   baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
+    #   overlayGroups = list(
+    #     "Recreationalist" = c("Nothing", "Hard", "Soft"),
+    #     "Biodiversity" = c("Biodiversity data", "Focal species")
+    #   ),
+    #   options = groupedLayersControlOptions(
+    #     collapsed = FALSE,
+    #     exclusiveGroups = "Recreationalist",
+    #     groupsCollapsable = FALSE
+    #   )
+    # )
 }

@@ -16,7 +16,8 @@ box::use(
 )
 
 box::use(
-  app/logic/ces/ces_map[disease_leaflet_map]
+  app/logic/ces/ces_map[disease_leaflet_map, read_recreation_tifs],
+  app / logic / waiter[waiter_text],
 )
 
 # UI function
@@ -233,12 +234,19 @@ ces_rp_biodiversity_server <- function(id) {
     rec_pot_map <- reactiveVal()
 
     # Waiter for loading screens
+    msg <- list(
+      waiter_text(message = tags$h3("Loading data...",
+                                    style = "color: #414f2f;"
+      )),
+      waiter_text(message = tags$h3("Computing Beehave simulation...",
+                                    style = "color: #414f2f;"
+      ))
+    )
     w <- Waiter$new(
+      html = msg[[1]],
       color = "rgba(256,256,256,0.9)"
     )
-
-    w$show()
-
+    
     # Logic for handling the Sliders button click
     observeEvent(input$toggleSliders, {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for sliders content
@@ -256,6 +264,7 @@ ces_rp_biodiversity_server <- function(id) {
       runjs('App.toggleSidebar()')  
     })
 
+    w$show()
     # Define colours
     recreation_alpha <- 0.5
     biodiversity_alpha <- 0.6
@@ -268,35 +277,13 @@ ces_rp_biodiversity_server <- function(id) {
     taxon_ids_from_file_names <- list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
       map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
     files_and_ids <- data.frame(files = all_sdm_files, ids = taxon_ids_from_file_names)
-    # Load recreation rasters
-    hard_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))
-    soft_rec <- terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
 
-    # Create the initial leaflet map
-    # rec_pot_map <- leaflet() |>
-      # addControl(
-      #  html = group_species_selector_html,
-      #  position = "topleft"
-      #) |>
-      # addTiles(
-      #   urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
-      #   attribution = "GBIF",
-      #   group = "Biodiversity data"
-      # ) |>
-      # addGroupedLayersControl(
-      #   position = "bottomright",
-      #   baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
-      #   overlayGroups = list(
-      #     "Recreationalist" = c("Nothing", "Hard", "Soft"),
-      #     "Biodiversity" = c("Biodiversity data", "Focal species")
-      #   ),
-      #   options = groupedLayersControlOptions(
-      #     collapsed = FALSE,
-      #     exclusiveGroups = "Recreationalist",
-      #     groupsCollapsable = FALSE
-      #   )
-      # )
-    
+    # Load recreation rasters
+    hard_rec_path <- paste0(ces_path, "/RP_maps/rec_hard_new.tif")
+    soft_rec_path <- paste0(ces_path, "/RP_maps/rec_soft_new.tif")
+    hard_rec <- read_recreation_tifs(map_path = hard_rec_path)
+    soft_rec <- read_recreation_tifs(map_path = soft_rec_path)
+
     rec_pot_map <- disease_leaflet_map(
       hard_rec,
       soft_rec,
@@ -306,10 +293,9 @@ ces_rp_biodiversity_server <- function(id) {
     )
     
     w$hide()
-
+    
     # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({
-
       rec_pot_map
     })
 
