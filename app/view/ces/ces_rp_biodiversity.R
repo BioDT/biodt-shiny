@@ -170,18 +170,11 @@ background-potion: top;
                 tags$div(
                   id = "slidersSidebar",
                   class = "d-none",
-                  tags$h3("Recreation Potential & Species Occurrence Filters"),
+                  tags$h3("Recreation Potential Filter"),
                   tags$p("Use the sliders below to filter the data:"),
                   sliderTextInput(
                     inputId = ns("recreation_potential_slider"),
                     label = "Filter Recreation Potential:",
-                    choices = seq(0, 1, by = 0.1),
-                    selected = c(0, 1),
-                    grid = FALSE,
-                  ),
-                  sliderTextInput(
-                    inputId = ns("species_occurrence_slider"),
-                    label = "Filter Species Occurrence:",
                     choices = seq(0, 1, by = 0.1),
                     selected = c(0, 1),
                     grid = FALSE,
@@ -216,6 +209,14 @@ background-potion: top;
                       `size` = 5,
                       `dropdownAlignRight` = FALSE
                     )
+                  ),
+                  tags$h3("Species Occurrence Filter"),
+                  sliderTextInput(
+                    inputId = ns("species_occurrence_slider"),
+                    label = "Filter Species Occurrence:",
+                    choices = seq(0, 1, by = 0.1),
+                    selected = c(0, 1),
+                    grid = FALSE,
                   )
                 )
               )
