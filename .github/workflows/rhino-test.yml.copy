@@ -1,4 +1,4 @@
-name: Rhino Test (taken from Rhino Showcase app)
+name: Rhino Test
 on: push
 permissions:
   contents: read
@@ -13,10 +13,11 @@ jobs:
       - name: Setup system dependencies
         run: |
           packages=(
-            libcurl4-openssl-dev
             libgdal-dev
+            libcurl4-openssl-dev
             libproj-dev
             libudunits2-dev
+            # List each package on a separate line.
           )
           sudo apt-get update
           sudo apt-get install --yes "${packages[@]}"

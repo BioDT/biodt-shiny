@@ -1,5 +1,7 @@
-box::use(shiny[NS, fillPage, div, p, moduleServer, tags, h1, fluidRow, observeEvent, actionLink],
-         bslib[card, card_header, card_body, bs_theme, nav_select], )
+box::use(
+  shiny[NS, fillPage, div, p, moduleServer, tags, h1, fluidRow, observeEvent, actionLink],
+  bslib[card, card_header, card_body, bs_theme, nav_select],
+)
 
 box::use(app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server], )
 
