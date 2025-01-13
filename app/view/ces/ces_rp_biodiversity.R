@@ -169,7 +169,7 @@ background-potion: top;
                 tags$div(
                   id = "slidersSidebar",
                   class = "d-none",
-                  tags$h3("Sliders Sidebar"),
+                  tags$h3("Recreation Potential & Species Occurrence Filters"),
                   tags$p("Use the sliders below to filter the data:"),
                   sliderTextInput(
                     inputId = ns("recreation_potential_slider"),
@@ -190,8 +190,8 @@ background-potion: top;
                 tags$div(
                   id = "speciesSidebar",
                   class = "d-none",
-                  tags$h3("Species Sidebar"),
-                  tags$p("Select Species:"),
+                  tags$h3("Species Selection"),
+                  tags$p("Select species:"),
                   pickerInput(
                     ns("species_group_selector"),
                     "Select species group:",
