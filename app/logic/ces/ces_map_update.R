@@ -37,7 +37,7 @@ ces_update_map <- function(
         species_raster,
         group = "Focal species",
         layerId = "merged_species_raster",
-        colors = biodiversity_palette,
+        colors = biodiversity_palette(),
         options = tileOptions(zIndex = 1000),
         opacity = 0.6
       )
@@ -46,7 +46,7 @@ ces_update_map <- function(
   if  (leaflet_proxy_type == "filter_recreation") {
     leafletProxy(map_id) |>
       clearGroup(c("Hard", "Soft")) |>
-      addRasterImage(hard_recreationists_raster, group = "Hard", colors = recreation_palette, options = tileOptions(zIndex = 1000), opacity = 0.5) |>
-      addRasterImage(soft_recreationists_raster, group = "Soft", colors = recreation_palette, options = tileOptions(zIndex = 1000), opacity = 0.5)
+      addRasterImage(hard_recreationists_raster, group = "Hard", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5) |>
+      addRasterImage(soft_recreationists_raster, group = "Soft", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
   }
 }

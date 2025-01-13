@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, icon, NS,showNotification],
+  shiny[moduleServer, icon, NS,showNotification, reactiveVal, observeEvent],
   bslib[navset_tab, nav_panel],
 )
 
@@ -25,7 +25,16 @@ ces_ui <- function(id) {
       )
     ),
     nav_panel(
+      title = "Recreation & Biodiversity",
+      value = "Recreation & Biodiversity",
+      icon = icon("tree"),
+      ces_rp_biodiversity_ui(
+        ns("ces_rp_biodiversity")
+      )
+    ),
+    nav_panel(
       title = "Recreation potential",
+      value = "Recreation potential",
       icon = icon("person-walking"),
       ces_rp_ui(
         ns("ces_rp")
@@ -33,18 +42,12 @@ ces_ui <- function(id) {
     ),
     nav_panel(
       title = "Biodiversity",
+      value = "Biodiversity",
       icon = icon("tree"),
       ces_biodiversity_ui(
         ns("ces_biodiversity")
       )
     ),
-    nav_panel(
-    title = "Recreation & Biodiversity",
-    icon = icon("tree"),
-    ces_rp_biodiversity_ui(
-      ns("ces_rp_biodiversity")
-    )
-  )
   )
 }
 
@@ -53,12 +56,24 @@ ces_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # add observeEvent(input$tab) and put that value in reactiveVal variable, that will be passed to module servers, where You can observeEvent that value change.
-    # Check whether the data are not loaded twice: once in cer_rp, second time in ces_rp_biodiversity and same with biodiversity, then it would be better to load them here and pass them downstream
-    
+    # Reactive value to track if the tabs were selected
+    ces_selected <- reactiveVal(FALSE)
+
+    observeEvent(input$tab, {
+      # Check if the tab matches any of the specified tabs
+      if (!ces_selected() && (input$tab == "Recreation & Biodiversity" ||
+          input$tab == "Recreation potential" ||
+          input$tab == "Biodiversity")) {
+        
+        # Set ces_selected to TRUE if it's not already TRUE
+        ces_selected(TRUE) 
+      }
+    })
+
+    # Call downstream module servers only the first time
     ces_rp_server("ces_rp")
     ces_biodiversity_server("ces_biodiversity")
-    ces_rp_biodiversity_server("ces_rp_biodiversity")
+    ces_rp_biodiversity_server("ces_rp_biodiversity", ces_selected = ces_selected)
 
   })
 }

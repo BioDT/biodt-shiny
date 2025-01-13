@@ -114,13 +114,13 @@ ui <- function(id) {
           nav_panel(
             class = "p-0",
             title = i18n$translate("Grassland Dynamics"),
+            value = "Grassland",
             grassland_main_ui(
               ns("grassland_main"),
               i18n
             )
           )
         },
-        # if (env_active == "dev") {
           nav_panel(
             class = "p-0",
             title = i18n$translate("Cultural Ecosystem Services"),
@@ -129,7 +129,6 @@ ui <- function(id) {
               ns("ces_main")
             )
           ),
-        # },
         if (env_active == "dev") {
           nav_item(
             ## Species response to environment - menu subitem ----
@@ -250,7 +249,9 @@ server <- function(id) {
       session_dir
     )
     # Grassland pDT ----
-    grassland_main_server("grassland_main")
+    grassland_main_server(
+      "grassland_main"
+    )
 
     ces_server(
       "ces_main"

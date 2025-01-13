@@ -70,8 +70,8 @@ ces_rp_server <- function(id) {
         addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
         setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
         setMaxBounds(lng1 = -3.860, lat1 = 56.870, lng2 = -3.000, lat2 = 57.290) |>
-        addRasterImage(hard_rec, group = "Hard recreationalist", opacity = 0.75, colors = pal, options = tileOptions(zIndex = 1000)) |>
-        addRasterImage(soft_rec, group = "Soft recreationalist", opacity = 0.75, colors = pal, options = tileOptions(zIndex = 1000)) |>
+        addRasterImage(hard_rec, project =FALSE, group = "Hard recreationalist", opacity = 0.75, colors = pal, options = tileOptions(zIndex = 1000)) |>
+        addRasterImage(soft_rec, project =FALSE, group = "Soft recreationalist", opacity = 0.75, colors = pal, options = tileOptions(zIndex = 1000)) |>
         addLegend(pal = pal, values = values(hard_rec), title = "Recreation", position = "bottomright") |>
         hideGroup("Hard recreationalist") |>
         hideGroup("Soft recreationalist")
