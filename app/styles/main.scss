@@ -1,3 +1,18 @@
+:focus {
+  outline: 3px solid #02C9F8;
+  outline-offset: 2px;
+}
+
+.navbar-nav .nav-link:focus {
+    outline: 3px solid #02C9F8;  /* Same focus color */
+    outline-offset: 2px;
+}
+
+.bslib-sidebar-layout .sidebar a:focus {
+    outline: 3px solid #02C9F8;
+    outline-offset: 2px;
+}
+
 .bslib-page-fill {
   overflow: auto;
 }
@@ -55,27 +70,6 @@
     color: rgb(235, 235, 235)
   }
 }
-
-/* START help button */
-.help-button {
-  width: 70px;
-  height: 70px;
-  text-align: center;
-  padding: 10px 0;
-  font-size: 12px;
-  line-height: 1.428571429;
-  border-radius: 26.25px;
-  box-shadow: 0 2px 2px #888888;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  span {
-    margin: -1rem -1rem;
-  }
-}
-
-/* END help button */
 
 /* highlight nav-item */
 

@@ -25,6 +25,14 @@ ces_ui <- function(id) {
       )
     ),
     nav_panel(
+      title = "Recreation & Biodiversity",
+      value = "Recreation & Biodiversity",
+      icon = icon("tree"),
+      ces_rp_biodiversity_ui(
+        ns("ces_rp_biodiversity")
+      )
+    ),
+    nav_panel(
       title = "Recreation potential",
       value = "Recreation potential",
       icon = icon("person-walking"),
@@ -40,14 +48,6 @@ ces_ui <- function(id) {
         ns("ces_biodiversity")
       )
     ),
-    nav_panel(
-    title = "Recreation & Biodiversity",
-    value = "Recreation & Biodiversity",
-    icon = icon("tree"),
-    ces_rp_biodiversity_ui(
-      ns("ces_rp_biodiversity")
-    )
-  )
   )
 }
 

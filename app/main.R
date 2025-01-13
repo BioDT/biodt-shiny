@@ -57,7 +57,7 @@ ui <- function(id) {
       useHostess(),
       use_cicerone(),
       usei18n(i18n),
-      includeScript("app/js/tab-index.js") 
+      includeScript("app/js/tab-index.js"),
     ),
     waiterShowOnLoad(
       html = spin_loaders(
@@ -121,7 +121,6 @@ ui <- function(id) {
             )
           )
         },
-        # if (env_active == "dev") {
           nav_panel(
             class = "p-0",
             title = i18n$translate("Cultural Ecosystem Services"),
@@ -130,7 +129,6 @@ ui <- function(id) {
               ns("ces_main")
             )
           ),
-        # },
         if (env_active == "dev") {
           nav_item(
             ## Species response to environment - menu subitem ----
