@@ -17,7 +17,8 @@ box::use(
 
 box::use(
   app/logic/ces/ces_map[disease_leaflet_map, read_recreation_tifs],
-  app / logic / waiter[waiter_text],
+  app/logic/ces/ces_map_update[ces_update_map],
+  app / logic / waiter[waiter_text],  
 )
 
 # UI function
@@ -34,8 +35,8 @@ ces_rp_biodiversity_ui <- function(id) {
       tags$style(HTML("
 
       .button-container {
-       display: flex;
-       flex-direction: column;
+          display: flex;
+          flex-direction: column;
           gap: 8px;
           position: absolute;
           right: 16px;
@@ -61,7 +62,7 @@ ces_rp_biodiversity_ui <- function(id) {
         font-size: 1.5rem;
       }
 
-         .toggle-button:hover {
+      .toggle-button:hover {
           background-color: #556B2F;
       }
 
@@ -105,7 +106,7 @@ ces_rp_biodiversity_ui <- function(id) {
           border-left: 1px solid #ccc;
           overflow-y: auto;
           display: none;
-         }
+        }
 
         .sidebar.active {
           right: 0; /* Show sidebar */
@@ -318,12 +319,12 @@ ces_rp_biodiversity_server <- function(id) {
     # Helper function to update species layer
     updateSpeciesLayer <- function() {
       if (is.null(input$species_selector) || length(input$species_selector) == 0) {
-        leafletProxy(ns("combined_map_plot")) |> clearGroup("Focal species")
+        ces_update_map("clear_species", ns("combined_map_plot"))
       } else {
         selected_species <- sub(".*\\(([^)]+)\\)", "\\1", input$species_selector)
         selected_species_ids <- filter(cairngorms_sp_list, sci_name %in% selected_species) |> pull(speciesKey)
 
-        leafletProxy(ns("combined_map_plot")) |> clearGroup("Focal species")
+        ces_update_map("clear_species", ns("combined_map_plot"))
 
         rasters_to_merge <- list()
 
@@ -356,18 +357,15 @@ ces_rp_biodiversity_server <- function(id) {
           # Set zero values to NA to prevent black squares
           merged_raster[merged_raster == 0] <- NA
 
-          leafletProxy(ns("combined_map_plot")) |>
-            addRasterImage(
-              merged_raster,
-              group = "Focal species",
-              layerId = "merged_species_raster",
-              colors = biodiversity_pal,
-              options = tileOptions(zIndex = 1000),
-              opacity = biodiversity_alpha
-            )
+          ces_update_map(
+            "add_species", 
+            ns("combined_map_plot"), 
+            merged_raster, 
+            biodiversity_pal            
+          )
         }
 
-        leafletProxy(ns("combined_map_plot")) |> showGroup("Focal species")
+        ces_update_map("show_species", ns("combined_map_plot"))
       }
     }
 
@@ -418,10 +416,13 @@ ces_rp_biodiversity_server <- function(id) {
       terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
 
       # Update the map with the filtered rasters
-      leafletProxy(ns("combined_map_plot")) |>
-        clearGroup(c("Hard", "Soft")) |>
-        addRasterImage(hard_rec_filtered_raster, group = "Hard", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha) |>
-        addRasterImage(soft_rec_filtered_raster, group = "Soft", colors = pal, options = tileOptions(zIndex = 1000), opacity = recreation_alpha)
+      ces_update_map(
+        "filter_recreation", 
+        ns("combined_map_plot"), 
+        hard_recreationists_raster = hard_rec_filtered_raster,
+        soft_recreationists_raster = soft_rec_filtered_raster,
+        recreation_palette = pal
+      )
 
       w$hide()
 
