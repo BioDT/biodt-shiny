@@ -403,9 +403,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     # Observe event to update the map when the species selector changes
     observeEvent(input$species_selector, ignoreNULL = FALSE, {
-
       w$show()
-
       updateSpeciesLayer()
 
       w$hide()
@@ -414,7 +412,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     # Observe event for "Apply filters" button
     observeEvent(input$apply_filter_recre, {
       w$show()
-
       # Update recreation raster layers
       hard_rec_vals <- terra::values(key_files()$hard_rec)
       soft_rec_vals <- terra::values(key_files()$soft_rec)
@@ -442,15 +439,11 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         recreation_palette = recreation_pal
       )
 
-      # Update species layer
-      #updateSpeciesLayer()
-
       w$hide()
     })
 
     observeEvent(input$apply_filter_species, {
       w$show()
-
       updateSpeciesLayer()
 
       w$hide()
