@@ -74,3 +74,20 @@ update_recreation <- function(
       addRasterImage(hard_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
   }
 }
+
+#' @export
+update_base_layers <- function(layer_selected, map_id) {
+  if (layer_selected == "") {
+    leafletProxy(map_id) |>
+      addTiles(group = "BaseLayer")
+  }
+
+  if (layer_selected == "Open Street Map") {
+
+  }
+}
+
+#' @export
+update_species_biodiversity <- function(diversity_species_selected, map_id) {
+  
+}
