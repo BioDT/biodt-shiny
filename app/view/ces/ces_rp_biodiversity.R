@@ -17,8 +17,8 @@ box::use(
 
 box::use(
   app / logic / ces / ces_map[disease_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map],
-  app / logic / waiter[waiter_text],  
+  app / logic / ces / ces_map_update[ces_update_map, update_recreation],
+  app / logic / waiter[waiter_text],
 )
 
 # UI function
@@ -166,7 +166,7 @@ background-potion: top;
                 HTML('<i class="fa-solid fa-x"></i>'),
                 title = "Close Sidebar"
               ),
-              # sliders content 
+              # sliders content
                 tags$div(
                   id = "slidersSidebar",
                   class = "d-none",
@@ -227,6 +227,16 @@ background-potion: top;
                     inputId = ns("apply_filter_species"),
                     label = "Apply filter",
                     class = "btn-primary"
+                  ),
+                  radioButtons(
+                    inputId = ns("recreation_potential"),
+                    label = "Recreation Potential Layer",
+                    selected = "Soft",
+                    choices = list(
+                      Soft = "Soft",
+                      Hard = "Hard",
+                      Empty = "Empty"
+                    )
                   )
                 )
               )
@@ -242,7 +252,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- "app/data/ces"
-    
+
     # Create reactive variables outside of observeEvent
     key_files <- reactiveVal()
     rec_pot_map <- reactiveVal()
@@ -261,7 +271,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       html = msg[[1]],
       color = "rgba(256,256,256,0.9)"
     )
-    
+
     # Logic for handling the Sliders button click
     observeEvent(input$toggleSliders, {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for sliders content
@@ -273,10 +283,10 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for species content
       runjs('App.activeSpecies()')
     })
-    
+
     # Logic for basic sidebar closing
     observeEvent(input$closeButton, {
-      runjs('App.toggleSidebar()')  
+      runjs('App.toggleSidebar()')
     })
 
     # Only trigger when ces_selected() becomes TRUE (after which the value will not change).
@@ -297,7 +307,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
                       hard_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif")),
                       soft_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
       )
-      
+
       key_files(key_files_list)
 
       rec_pot_map_plot <- disease_leaflet_map(
@@ -311,25 +321,25 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       w$hide()
     }, ignoreInit = TRUE)
-    
+
     # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({
       req(rec_pot_map())
-      
+
       rec_pot_map()
     })
-    
+
     # Update species selector when group is selected
     observeEvent(input$species_group_selector, {
-      
+
       group_selected <- input$species_group_selector
-      
+
       species_include <- key_files()$cairngorms_sp_list |>
         mutate(in_group = (key_files()$cairngorms_sp_list |> pull(group_selected))) |>
         filter(speciesKey %in% key_files()$files_and_ids$ids, in_group == TRUE)
-      
+
       species_choices <- paste0(species_include$common_name, " (", species_include$sci_name, ")")
-      
+
       updatePickerInput(
         session,
         "species_selector",
@@ -337,7 +347,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         choices = species_choices
       )
     }, ignoreInit = TRUE)
-    
+
     # Helper function to update species layer
     updateSpeciesLayer <- function() {
       if (is.null(input$species_selector) || length(input$species_selector) == 0) {
@@ -349,10 +359,10 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         ces_update_map("clear_species", ns("combined_map_plot"))
 
         rasters_to_merge <- list()
-        
+
         for (id in selected_species_ids) {
           file_path <- key_files()$files_and_ids$files[key_files()$files_and_ids$ids == id]
-          
+
           if (file.exists(file_path)) {
             rast_to_add <- terra::rast(file_path)[[1]]
             rast_to_add_vals <- terra::values(rast_to_add)
@@ -361,13 +371,13 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
                 rast_to_add_vals <= input$species_occurrence_slider[2],
               rast_to_add_vals, NA)
             terra::values(rast_to_add) <- rast_to_add_filtered
-            
+
             rasters_to_merge <- c(rasters_to_merge, list(rast_to_add))
           } else {
             warning(paste("File not found for species ID:", id))
           }
         }
-        
+
         if (length(rasters_to_merge) > 0) {
           if (length(rasters_to_merge) == 1) {
             merged_raster <- rasters_to_merge[[1]]
@@ -375,14 +385,14 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
             rasters_stack <- terra::rast(rasters_to_merge)
             merged_raster <- terra::app(rasters_stack, fun = mean, na.rm = TRUE)
           }
-          
+
           # Set zero values to NA to prevent black squares
           merged_raster[merged_raster == 0] <- NA
 
           ces_update_map(
-            "add_species", 
-            ns("combined_map_plot"), 
-            merged_raster, 
+            "add_species",
+            ns("combined_map_plot"),
+            merged_raster,
             biodiversity_pal
           )
         }
@@ -393,18 +403,18 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     # Observe event to update the map when the species selector changes
     observeEvent(input$species_selector, ignoreNULL = FALSE, {
-      
+
       w$show()
-      
+
       updateSpeciesLayer()
-      
+
       w$hide()
     })
-    
+
     # Observe event for "Apply filters" button
     observeEvent(input$apply_filter_recre, {
       w$show()
-      
+
       # Update recreation raster layers
       hard_rec_vals <- terra::values(key_files()$hard_rec)
       soft_rec_vals <- terra::values(key_files()$soft_rec)
@@ -416,7 +426,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         soft_rec_vals >= input$recreation_potential_slider[1] &
           soft_rec_vals <= input$recreation_potential_slider[2],
         soft_rec_vals, NA)
-      
+
       # duplicate the raster adn replace with the hard and soft recreation values
       hard_rec_filtered_raster <- key_files()$hard_rec
       soft_rec_filtered_raster <- key_files()$soft_rec
@@ -425,8 +435,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       # Update the map with the filtered rasters
       ces_update_map(
-        "filter_recreation", 
-        ns("combined_map_plot"), 
+        "filter_recreation",
+        ns("combined_map_plot"),
         hard_recreationists_raster = hard_rec_filtered_raster,
         soft_recreationists_raster = soft_rec_filtered_raster,
         recreation_palette = recreation_pal
@@ -440,11 +450,43 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     observeEvent(input$apply_filter_species, {
       w$show()
-      
+
       updateSpeciesLayer()
-      
+
       w$hide()
     }, ignoreNULL = FALSE, ignoreInit = TRUE)
-    
+
+    observeEvent(input$recreation_potential, {
+      w$show()
+
+      # Update recreation raster layers
+      hard_rec_vals <- terra::values(key_files()$hard_rec)
+      soft_rec_vals <- terra::values(key_files()$soft_rec)
+      hard_rec_filtered <- ifelse(
+        hard_rec_vals >= input$recreation_potential_slider[1] &
+          hard_rec_vals <= input$recreation_potential_slider[2],
+        hard_rec_vals, NA)
+      soft_rec_filtered <- ifelse(
+        soft_rec_vals >= input$recreation_potential_slider[1] &
+          soft_rec_vals <= input$recreation_potential_slider[2],
+        soft_rec_vals, NA)
+
+      # duplicate the raster adn replace with the hard and soft recreation values
+      hard_rec_filtered_raster <- key_files()$hard_rec
+      soft_rec_filtered_raster <- key_files()$soft_rec
+      terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
+      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+
+      update_recreation(
+        input$recreation_potential,
+        ns("combined_map_plot"),
+        soft_recreationists_raster = soft_rec_filtered_raster,
+        hard_recreationists_raster = hard_rec_filtered_raster,
+        recreation_palette = recreation_pal
+      )
+
+      w$hide()
+    }, ignoreNULL = FALSE, ignoreInit = TRUE)
+
   })
 }

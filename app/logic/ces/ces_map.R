@@ -32,9 +32,9 @@ disease_leaflet_map <- function(
         activate = TRUE,
         autoCenter = TRUE,
         setView = TRUE)) |>
-    addRasterImage(key_files()$hard_rec, group = "Hard", project = FALSE, colors = recre_palette(), options = tileOptions(zIndex = 1000), opacity = rec_opacity()) |>
-    hideGroup("Hard") |>
-    addRasterImage(key_files()$soft_rec, group = "Soft", project = FALSE, colors = recre_palette(), options = tileOptions(zIndex = 1000), opacity = rec_opacity()) |>
+    # addRasterImage(key_files()$hard_rec, group = "RP", project = FALSE, colors = recre_palette(), options = tileOptions(zIndex = 1000), opacity = rec_opacity()) |>
+    # hideGroup("Hard") |>
+    addRasterImage(key_files()$soft_rec, group = "RP", project = FALSE, colors = recre_palette(), options = tileOptions(zIndex = 1000), opacity = rec_opacity()) |>
     addLegend(
       pal = biodiversity_palette(), values = c(0, 1), title = "Biodiversity", position = "bottomright",
       labFormat = labelFormat(prefix = "", suffix = "", between = " - ")
@@ -44,20 +44,20 @@ disease_leaflet_map <- function(
       urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
       attribution = "GBIF",
       group = "Biodiversity data"
-    ) |> 
-    addGroupedLayersControl(
-      position = "bottomleft",
-      baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
-      overlayGroups = list(
-        "Recreationalist" = c("Nothing", "Hard", "Soft"),
-        "Biodiversity" = c("Biodiversity data", "Focal species")
-      ),
-      options = groupedLayersControlOptions(
-        collapsed = TRUE,
-        exclusiveGroups = "Recreationalist",
-        groupsCollapsable = FALSE
-      )
     ) |>
+    # addGroupedLayersControl(
+    #   position = "bottomleft",
+    #   baseGroups = c("Open Street Map", "ESRI World Imagery", "Open Topo Map"),
+    #   overlayGroups = list(
+    #     "Recreationalist" = c("Nothing", "Hard", "Soft"),
+    #     "Biodiversity" = c("Biodiversity data", "Focal species")
+    #   ),
+    #   options = groupedLayersControlOptions(
+    #     collapsed = TRUE,
+    #     exclusiveGroups = "Recreationalist",
+    #     groupsCollapsable = FALSE
+    #   )
+    # ) |>
     hideGroup("Biodiversity data") |>
     onRender(
       "

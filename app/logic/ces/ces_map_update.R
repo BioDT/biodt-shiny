@@ -18,16 +18,16 @@ ces_update_map <- function(
     species_raster,
     biodiversity_palette,
     hard_recreationists_raster,
-    soft_recreationists_raster,    
+    soft_recreationists_raster,
     recreation_palette
   ) {
   if  (leaflet_proxy_type == "clear_species") {
-    leafletProxy(map_id) |> 
+    leafletProxy(map_id) |>
       clearGroup("Focal species")
   }
 
   if  (leaflet_proxy_type == "show_species") {
-    leafletProxy(map_id) |> 
+    leafletProxy(map_id) |>
       showGroup("Focal species")
   }
 
@@ -43,10 +43,34 @@ ces_update_map <- function(
       )
   }
 
-  if  (leaflet_proxy_type == "filter_recreation") {
+  # if  (leaflet_proxy_type == "filter_recreation") {
+  #   leafletProxy(map_id) |>
+  #     clearGroup(c("Hard", "Soft")) |>
+  #     addRasterImage(hard_recreationists_raster, group = "Hard", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5) #|>
+  #     # addRasterImage(soft_recreationists_raster, group = "Soft", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+  # }
+}
+
+#' @export
+update_recreation <- function(
+  recreation_selection,
+  map_id,
+  soft_recreationists_raster,
+  hard_recreationists_raster,
+  recreation_palette
+){
+  leafletProxy(map_id) |>
+    clearGroup(c("RP"))
+
+  if (recreation_selection == "Soft"){
+    print("soft")
     leafletProxy(map_id) |>
-      clearGroup(c("Hard", "Soft")) |>
-      addRasterImage(hard_recreationists_raster, group = "Hard", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5) |>
-      addRasterImage(soft_recreationists_raster, group = "Soft", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+      addRasterImage(soft_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+  }
+
+  if (recreation_selection == "Hard"){
+    print("hard")
+    leafletProxy(map_id) |>
+      addRasterImage(hard_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
   }
 }
