@@ -184,6 +184,7 @@ background-potion: top;
                     label = "Apply filter",
                     class = "btn-primary"
                   ),
+                  tags$h4("Species Selection"),
                   pickerInput(
                     ns("species_group_selector"),
                     "Select species group:",
@@ -196,7 +197,6 @@ background-potion: top;
                     selected = "all",
                     multiple = FALSE
                   ),
-                  tags$h4("Species Selection"),
                   pickerInput(
                     ns("species_selector"),
                     "Select species:",
