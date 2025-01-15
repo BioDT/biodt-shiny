@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, reactiveVal],
+  shiny[moduleServer, NS, tagList, column, fluidRow, verbatimTextOutput, actionButton, observe, observeEvent, radioButtons, checkboxInput, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, reactiveVal],
   bslib[card, nav_select, card_title, card_body],
   leaflet[addRasterImage, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, showGroup, clearGroup, setMaxBounds, labelFormat, tileOptions],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
@@ -12,12 +12,12 @@ box::use(
   utils[read.csv],
   stats[setNames],
   shinyjs[useShinyjs, runjs],
-  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput],
+  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput, awesomeCheckbox],
 )
 
 box::use(
   app / logic / ces / ces_map[disease_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers],
+  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity],
   app / logic / waiter[waiter_text],
 )
 
@@ -184,7 +184,7 @@ background-potion: top;
                     label = "Apply filter",
                     class = "btn-primary"
                   ),
-                  tags$h4("Species Selection"),
+                  tags$h4("Species Selection", class = "mt-3"),
                   pickerInput(
                     ns("species_group_selector"),
                     "Select species group:",
@@ -209,7 +209,7 @@ background-potion: top;
                       `dropdownAlignRight` = FALSE
                     )
                   ),
-                  tags$h4("Species Occurrence"),
+                  tags$h4("Species Occurrence", class = "mt-3"),
                   sliderTextInput(
                     inputId = ns("species_occurrence_slider"),
                     label = "Filter Species Occurrence:",
@@ -227,10 +227,10 @@ background-potion: top;
                 tags$div(
                   id = "speciesSidebar",
                   class = "d-none",
-
+                  tags$h4("Recreation Potential"),
                   radioButtons(
                     inputId = ns("recreation_potential"),
-                    label = "Recreation Potential Layer",
+                    label = "Select recreationist type:",
                     selected = "Soft",
                     choices = list(
                       Soft = "Soft",
@@ -238,16 +238,23 @@ background-potion: top;
                       Empty = "Empty"
                     )
                   ),
+                  tags$h4("Base Map Layer", class = "mt-3"),
                   radioButtons(
                     inputId = ns("map_base_layers"),
-                    label = "Choose base map",
+                    label = "Choose base map:",
                     choices = list(
                       "Open Street Map",
                       "ESRI World Imagery",
                       "Open Topo Map"
                     ),
                     selected = "Open Street Map"
-                  )
+                  ),
+                  tags$h4("Biodiversity Data", class = "mt-3"),
+                  checkboxInput(
+                    inputId = ns("biodiversity"),
+                    label = "show biodiversity data",
+                    value = FALSE
+                  ),
                 )
               )
             )
@@ -271,6 +278,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     biodiversity_pal <- reactiveVal()
     recreation_pal <- reactiveVal()
     layer_selected <- reactiveVal()
+    biodiversity_data_selected <- reactiveVal(FALSE)
 
     # Waiter for loading screens
     msg <- list(
@@ -490,16 +498,23 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       )
 
       w$hide()
-    }, ignoreNULL = FALSE, ignoreInit = TRUE)
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
     observeEvent(input$map_base_layers, {
       w$show()
       layer_selected(input$map_base_layers)
-      
       update_base_layers(layer_selected(), ns("combined_map_plot"))
 
       w$hide()
-    })
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
+    
+    observeEvent(input$biodiversity, {
+      w$show()
+      biodiversity_data_selected(input$biodiversity)
+      update_species_biodiversity(biodiversity_data_selected(), ns("combined_map_plot"))
+    
+      w$hide()
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
   })
 }
