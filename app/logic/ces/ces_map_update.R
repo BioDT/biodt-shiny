@@ -91,5 +91,15 @@ update_base_layers <- function(layer_selected, map_id) {
 
 #' @export
 update_species_biodiversity <- function(diversity_species_selected, map_id) {
-  
+  leafletProxy(map_id) |>
+    clearGroup("biodiversity")
+
+  if (diversity_species_selected == TRUE) {
+    leafletProxy(map_id) |>
+      addTiles(
+        urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+        attribution = "GBIF",
+        group = "biodiversity"
+      )
+  }
 }

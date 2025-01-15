@@ -36,12 +36,12 @@ disease_leaflet_map <- function(
       labFormat = labelFormat(prefix = "", suffix = "", between = " - ")
     ) |>
     addLegend(pal = recre_palette(), values = terra::values(key_files()$hard_rec), title = "Recreation", position = "bottomright") |>
-    addTiles(
-      urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
-      attribution = "GBIF",
-      group = "Biodiversity data"
-    ) |>
-    hideGroup("Biodiversity data") |>
+    # addTiles(
+    #   urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
+    #   attribution = "GBIF",
+    #   group = "Biodiversity data"
+    # ) |>
+    # hideGroup("Biodiversity data") |>
     onRender(
       "
       function(el, x) {
