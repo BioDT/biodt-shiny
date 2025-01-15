@@ -21,9 +21,7 @@ disease_leaflet_map <- function(
       closePopupOnClick = FALSE,
       bounceAtZoomLimits = FALSE
     )) |>
-    addTiles(group = "Open Street Map") |>
-    addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery") |>
-    addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map") |>
+    addTiles(group = "baseLayer") |>
     # addProviderTiles(providers$Stadia.StamenTonerLite, providerTileOptions(zIndex = -1000), group = "Greyscale") |>
     setView(lng = -3.5616, lat = 57.0492, zoom = 9) |>
     addControlGPS(

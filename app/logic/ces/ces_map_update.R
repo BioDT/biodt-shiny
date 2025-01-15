@@ -1,6 +1,6 @@
 box::use(
   leaflet[leaflet, leafletProxy, leafletOptions, addTiles, addProviderTiles, setView, addLegend, hideGroup, clearGroup, showGroup, labelFormat, addRasterImage, tileOptions, providers, providerTileOptions, addControl],
-  leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
+  # leaflet.extras[groupedLayersControlOptions, addControlGPS, gpsOptions],
 )
 
 # The function updates all various possibilities of CES recreation & biodiverstiy map
@@ -42,13 +42,6 @@ ces_update_map <- function(
         opacity = 0.6
       )
   }
-
-  # if  (leaflet_proxy_type == "filter_recreation") {
-  #   leafletProxy(map_id) |>
-  #     clearGroup(c("Hard", "Soft")) |>
-  #     addRasterImage(hard_recreationists_raster, group = "Hard", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5) #|>
-  #     # addRasterImage(soft_recreationists_raster, group = "Soft", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
-  # }
 }
 
 #' @export
@@ -63,13 +56,11 @@ update_recreation <- function(
     clearGroup(c("RP"))
 
   if (recreation_selection == "Soft"){
-    print("soft")
     leafletProxy(map_id) |>
       addRasterImage(soft_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
   }
 
   if (recreation_selection == "Hard"){
-    print("hard")
     leafletProxy(map_id) |>
       addRasterImage(hard_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
   }
@@ -77,13 +68,24 @@ update_recreation <- function(
 
 #' @export
 update_base_layers <- function(layer_selected, map_id) {
-  if (layer_selected == "") {
-    leafletProxy(map_id) |>
-      addTiles(group = "BaseLayer")
-  }
+  leafletProxy(map_id) |>
+    clearGroup("baseLayer")
 
   if (layer_selected == "Open Street Map") {
+    leafletProxy(map_id) |>
+      addTiles(layerId = "osm", group = "baseLayer")
+  }
 
+  if (layer_selected == "ESRI World Imagery") {
+    leafletProxy(map_id) |>
+      addProviderTiles(providers$Esri.WorldImagery, group = "baseLayer")
+      # addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery")
+  }
+
+  if (layer_selected == "Open Topo Map") {
+    leafletProxy(map_id) |>
+      addProviderTiles(providers$OpenTopoMap, group = "baseLayer")
+      # addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map")
   }
 }
 

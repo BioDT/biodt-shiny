@@ -17,7 +17,7 @@ box::use(
 
 box::use(
   app / logic / ces / ces_map[disease_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map, update_recreation],
+  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers],
   app / logic / waiter[waiter_text],
 )
 
@@ -237,6 +237,16 @@ background-potion: top;
                       Hard = "Hard",
                       Empty = "Empty"
                     )
+                  ),
+                  radioButtons(
+                    inputId = ns("map_base_layers"),
+                    label = "Choose base map",
+                    choices = list(
+                      "Open Street Map",
+                      "ESRI World Imagery",
+                      "Open Topo Map"
+                    ),
+                    selected = "Open Street Map"
                   )
                 )
               )
@@ -260,6 +270,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     recreation_alpha <- reactiveVal(0.8)
     biodiversity_pal <- reactiveVal()
     recreation_pal <- reactiveVal()
+    layer_selected <- reactiveVal()
 
     # Waiter for loading screens
     msg <- list(
@@ -480,6 +491,15 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       w$hide()
     }, ignoreNULL = FALSE, ignoreInit = TRUE)
+
+    observeEvent(input$map_base_layers, {
+      w$show()
+      layer_selected(input$map_base_layers)
+      
+      update_base_layers(layer_selected(), ns("combined_map_plot"))
+
+      w$hide()
+    })
 
   })
 }
