@@ -6,7 +6,7 @@ box::use(
 )
 
 #' @export
-disease_leaflet_map <- function(
+ces_leaflet_map <- function(
     recre_palette,
     biodiversity_palette,
     rec_opacity,
@@ -60,14 +60,14 @@ disease_leaflet_map <- function(
           btn = document.getElementById('grayscale-toggle')
           var icon = btn.querySelector('i');
             if (grayscale) {
-                  icon.className = 'fa-solid fa-droplet'; 
+                  icon.className = 'fa-solid fa-droplet';
                   console.log('click happened');
                 } else {
-                  icon.className = 'fa-solid fa-droplet-slash'; 
+                  icon.className = 'fa-solid fa-droplet-slash';
                    console.log('no click');
                 }
         }
-        
+
 
         map.on('layeradd', function(e) {
           applyGrayscale(e.layer);
@@ -78,15 +78,15 @@ disease_leaflet_map <- function(
             var btn = L.DomUtil.create('button', 'btn btn-default action-button toggle-button shiny-bound-input');
             btn.title = 'Toggle Grayscale';
             btn.id = 'grayscale-toggle';
-  
+
             var icon = document.createElement('i');
             icon.className = 'fa-solid fa-droplet-slash';
-            
+
             btn.appendChild(icon);
-            
+
             btn.onclick = toggleGrayscale;
-            
-            
+
+
             var container = document.querySelector('.button-container');
             container.appendChild(btn);
           }

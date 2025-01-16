@@ -16,7 +16,7 @@ box::use(
 )
 
 box::use(
-  app / logic / ces / ces_map[disease_leaflet_map],
+  app / logic / ces / ces_map[ces_leaflet_map],
   app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity, add_species, show_focal_species],
   app / logic / waiter[waiter_text],
 )
@@ -179,7 +179,7 @@ ces_rp_biodiversity_ui <- function(id) {
                     inputId = ns("recreation_potential_slider"),
                     label = "Filter Recreation Potential:",
                     choices = seq(0, 1, by = 0.1),
-                    selected = c(0, 1),
+                    selected = 0.5,#c(0, 1),
                     grid = FALSE,
                   ),
                   actionButton(
@@ -217,7 +217,7 @@ ces_rp_biodiversity_ui <- function(id) {
                     inputId = ns("species_occurrence_slider"),
                     label = "Filter Species Occurrence:",
                     choices = seq(0, 1, by = 0.1),
-                    selected = c(0, 1),
+                    selected = 0.5,# c(0, 1),
                     grid = FALSE,
                   ),
                   actionButton(
@@ -340,7 +340,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       key_files(key_files_list)
 
-      rec_pot_map_plot <- disease_leaflet_map(
+      rec_pot_map_plot <- ces_leaflet_map(
         recre_palette = recreation_pal,
         biodiversity_palette = biodiversity_pal,
         rec_opacity = recreation_alpha,
@@ -397,8 +397,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
             rast_to_add <- terra::rast(file_path)[[1]]
             rast_to_add_vals <- terra::values(rast_to_add)
             rast_to_add_filtered <- ifelse(
-              rast_to_add_vals >= input$species_occurrence_slider[1] &
-                rast_to_add_vals <= input$species_occurrence_slider[2],
+              rast_to_add_vals >= input$species_occurrence_slider,
               rast_to_add_vals, NA)
             terra::values(rast_to_add) <- rast_to_add_filtered
 
@@ -447,12 +446,10 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       hard_rec_vals <- terra::values(key_files()$hard_rec)
       soft_rec_vals <- terra::values(key_files()$soft_rec)
       hard_rec_filtered <- ifelse(
-        hard_rec_vals >= input$recreation_potential_slider[1] &
-          hard_rec_vals <= input$recreation_potential_slider[2],
+        hard_rec_vals >= input$recreation_potential_slider,
         hard_rec_vals, NA)
       soft_rec_filtered <- ifelse(
-        soft_rec_vals >= input$recreation_potential_slider[1] &
-          soft_rec_vals <= input$recreation_potential_slider[2],
+        soft_rec_vals >= input$recreation_potential_slider,
         soft_rec_vals, NA)
 
       # duplicate the raster adn replace with the hard and soft recreation values
@@ -500,12 +497,10 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       hard_rec_vals <- terra::values(key_files()$hard_rec)
       soft_rec_vals <- terra::values(key_files()$soft_rec)
       hard_rec_filtered <- ifelse(
-        hard_rec_vals >= input$recreation_potential_slider[1] &
-          hard_rec_vals <= input$recreation_potential_slider[2],
+        hard_rec_vals >= input$recreation_potential_slider,
         hard_rec_vals, NA)
       soft_rec_filtered <- ifelse(
-        soft_rec_vals >= input$recreation_potential_slider[1] &
-          soft_rec_vals <= input$recreation_potential_slider[2],
+        soft_rec_vals >= input$recreation_potential_slider,
         soft_rec_vals, NA)
 
       # duplicate the raster adn replace with the hard and soft recreation values
