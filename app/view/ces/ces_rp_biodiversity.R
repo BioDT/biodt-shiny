@@ -17,7 +17,7 @@ box::use(
 
 box::use(
   app / logic / ces / ces_map[disease_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity],
+  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity, add_species, show_focal_species],
   app / logic / waiter[waiter_text],
 )
 
@@ -222,6 +222,12 @@ background-potion: top;
                     label = "Apply filter",
                     class = "btn-primary"
                   ),
+                  tags$h4("Focal Species", class = "mt-3"),
+                  checkboxInput(
+                    inputId = ns("focal_species"),
+                    label = "show focal species",
+                    value = FALSE
+                  ),
                 ),
                 # species content
                 tags$div(
@@ -279,6 +285,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     recreation_pal <- reactiveVal()
     layer_selected <- reactiveVal()
     biodiversity_data_selected <- reactiveVal(FALSE)
+    focal_species_merged_raster <- reactiveVal()
 
     # Waiter for loading screens
     msg <- list(
@@ -407,9 +414,9 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
           # Set zero values to NA to prevent black squares
           merged_raster[merged_raster == 0] <- NA
+          focal_species_merged_raster(merged_raster)
 
-          ces_update_map(
-            "add_species",
+          add_species(
             ns("combined_map_plot"),
             merged_raster,
             biodiversity_pal
@@ -467,6 +474,18 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       w$hide()
     }, ignoreNULL = FALSE, ignoreInit = TRUE)
+
+    observeEvent(input$focal_species, {
+      w$show()
+      show_focal_species(
+        input$focal_species,
+        ns("combined_map_plot"),
+        focal_species_merged_raster,
+        biodiversity_pal
+      )
+      
+      w$hide()
+    }, ignoreInit = TRUE)
 
     observeEvent(input$recreation_potential, {
       w$show()
