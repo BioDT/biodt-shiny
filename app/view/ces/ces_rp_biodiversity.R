@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, column, fluidRow, actionButton, observe, observeEvent, radioButtons, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, reactiveVal],
+  shiny[moduleServer, NS, tagList, column, fluidRow, verbatimTextOutput, actionButton, observe, observeEvent, radioButtons, checkboxInput, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, reactiveVal],
   bslib[card, nav_select, card_title, card_body],
   leaflet[addRasterImage, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, showGroup, clearGroup, setMaxBounds, labelFormat, tileOptions],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
@@ -12,12 +12,12 @@ box::use(
   utils[read.csv],
   stats[setNames],
   shinyjs[useShinyjs, runjs],
-  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput],
+  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput, awesomeCheckbox],
 )
 
 box::use(
   app / logic / ces / ces_map[disease_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map, update_recreation],
+  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity, add_species, show_focal_species],
   app / logic / waiter[waiter_text],
 )
 
@@ -56,6 +56,8 @@ ces_rp_biodiversity_ui <- function(id) {
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
           transition: background-color 0.3s ease, box-shadow 0.3s ease;
           border-radius: 5px 0 0 5px;
+          width: 60px;
+          height: 50px;
       }
 
       .toggle-button i {
@@ -135,9 +137,9 @@ ces_rp_biodiversity_ui <- function(id) {
     color: white;
     }
 
-.leaflet-control-gps .gps-button {
-background-potion: top;
-}
+    .leaflet-control-gps .gps-button {
+    background-potion: top;
+    }
 
       "))
     ),
@@ -154,7 +156,8 @@ background-potion: top;
             tags$div(
               class = "button-container",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
-              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity")
+              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity"),
+              #actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
             ),
             # Single Sidebar
             tags$div(
@@ -170,7 +173,7 @@ background-potion: top;
                 tags$div(
                   id = "slidersSidebar",
                   class = "d-none",
-                  tags$h3("Recreation Potential Filter"),
+                  tags$h4("Recreation Potential Filter"),
                   tags$p("Use the sliders below to filter the data:"),
                   sliderTextInput(
                     inputId = ns("recreation_potential_slider"),
@@ -183,14 +186,8 @@ background-potion: top;
                     inputId = ns("apply_filter_recre"),
                     label = "Apply filter",
                     class = "btn-primary"
-                  )
-                ),
-                # species content
-                tags$div(
-                  id = "speciesSidebar",
-                  class = "d-none",
-                  tags$h3("Species Selection"),
-                  tags$p("Select species:"),
+                  ),
+                  tags$h4("Species Selection", class = "mt-3"),
                   pickerInput(
                     ns("species_group_selector"),
                     "Select species group:",
@@ -215,7 +212,7 @@ background-potion: top;
                       `dropdownAlignRight` = FALSE
                     )
                   ),
-                  tags$h3("Species Occurrence Filter"),
+                  tags$h4("Species Occurrence", class = "mt-3"),
                   sliderTextInput(
                     inputId = ns("species_occurrence_slider"),
                     label = "Filter Species Occurrence:",
@@ -228,16 +225,45 @@ background-potion: top;
                     label = "Apply filter",
                     class = "btn-primary"
                   ),
+                  tags$h4("Focal Species", class = "mt-3"),
+                  checkboxInput(
+                    inputId = ns("focal_species"),
+                    label = "show focal species",
+                    value = FALSE
+                  ),
+                ),
+                # species content
+                tags$div(
+                  id = "speciesSidebar",
+                  class = "d-none",
+                  tags$h4("Recreation Potential"),
                   radioButtons(
                     inputId = ns("recreation_potential"),
-                    label = "Recreation Potential Layer",
+                    label = "Select recreationist type:",
                     selected = "Soft",
                     choices = list(
                       Soft = "Soft",
                       Hard = "Hard",
                       Empty = "Empty"
                     )
-                  )
+                  ),
+                  tags$h4("Base Map Layer", class = "mt-3"),
+                  radioButtons(
+                    inputId = ns("map_base_layers"),
+                    label = "Choose base map:",
+                    choices = list(
+                      "Open Street Map",
+                      "ESRI World Imagery",
+                      "Open Topo Map"
+                    ),
+                    selected = "Open Street Map"
+                  ),
+                  tags$h4("Biodiversity Data", class = "mt-3"),
+                  checkboxInput(
+                    inputId = ns("biodiversity"),
+                    label = "show biodiversity data",
+                    value = FALSE
+                  ),
                 )
               )
             )
@@ -260,6 +286,10 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     recreation_alpha <- reactiveVal(0.8)
     biodiversity_pal <- reactiveVal()
     recreation_pal <- reactiveVal()
+    layer_selected <- reactiveVal()
+    biodiversity_data_selected <- reactiveVal(FALSE)
+    focal_species_merged_raster <- reactiveVal()
+    species_added <- reactiveVal(FALSE)
 
     # Waiter for loading screens
     msg <- list(
@@ -388,9 +418,10 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
           # Set zero values to NA to prevent black squares
           merged_raster[merged_raster == 0] <- NA
+          focal_species_merged_raster(merged_raster)
 
-          ces_update_map(
-            "add_species",
+          species_added(TRUE)
+          add_species(
             ns("combined_map_plot"),
             merged_raster,
             biodiversity_pal
@@ -449,6 +480,19 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       w$hide()
     }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
+    observeEvent(input$focal_species, {
+      w$show()
+      show_focal_species(
+        input$focal_species,
+        species_added,
+        ns("combined_map_plot"),
+        focal_species_merged_raster,
+        biodiversity_pal
+      )
+      
+      w$hide()
+    }, ignoreInit = TRUE)
+
     observeEvent(input$recreation_potential, {
       w$show()
 
@@ -479,7 +523,23 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       )
 
       w$hide()
-    }, ignoreNULL = FALSE, ignoreInit = TRUE)
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
+    observeEvent(input$map_base_layers, {
+      w$show()
+      layer_selected(input$map_base_layers)
+      update_base_layers(layer_selected(), ns("combined_map_plot"))
+
+      w$hide()
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
+
+    
+    observeEvent(input$biodiversity, {
+      w$show()
+      biodiversity_data_selected(input$biodiversity)
+      update_species_biodiversity(biodiversity_data_selected(), ns("combined_map_plot"))
+    
+      w$hide()
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
   })
 }

@@ -32,22 +32,22 @@ ces_ui <- function(id) {
         ns("ces_rp_biodiversity")
       )
     ),
-    nav_panel(
-      title = "Recreation potential",
-      value = "Recreation potential",
-      icon = icon("person-walking"),
-      ces_rp_ui(
-        ns("ces_rp")
-      )
-    ),
-    nav_panel(
-      title = "Biodiversity",
-      value = "Biodiversity",
-      icon = icon("tree"),
-      ces_biodiversity_ui(
-        ns("ces_biodiversity")
-      )
-    ),
+    # nav_panel(
+    #   title = "Recreation potential",
+    #   value = "Recreation potential",
+    #   icon = icon("person-walking"),
+    #   ces_rp_ui(
+    #     ns("ces_rp")
+    #   )
+    # ),
+    # nav_panel(
+    #   title = "Biodiversity",
+    #   value = "Biodiversity",
+    #   icon = icon("tree"),
+    #   ces_biodiversity_ui(
+    #     ns("ces_biodiversity")
+    #   )
+    # ),
   )
 }
 
@@ -61,9 +61,10 @@ ces_server <- function(id) {
 
     observeEvent(input$tab, {
       # Check if the tab matches any of the specified tabs
-      if (!ces_selected() && (input$tab == "Recreation & Biodiversity" ||
-          input$tab == "Recreation potential" ||
-          input$tab == "Biodiversity")) {
+      if (!ces_selected() && (input$tab == "Recreation & Biodiversity"
+          # || input$tab == "Recreation potential" ||
+          # input$tab == "Biodiversity"
+      )) {
         
         # Set ces_selected to TRUE if it's not already TRUE
         ces_selected(TRUE) 
