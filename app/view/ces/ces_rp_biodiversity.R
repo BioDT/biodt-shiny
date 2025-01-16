@@ -155,8 +155,8 @@ ces_rp_biodiversity_ui <- function(id) {
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
             tags$div(
               class = "button-container",
-              actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
-              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity"),
+              actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Hiker Settings"),
+              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-layer-group"></i>'), class = "toggle-button", title = "Map Layers"),
               #actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
             ),
             # Single Sidebar
