@@ -155,7 +155,7 @@ ces_rp_biodiversity_ui <- function(id) {
               class = "button-container",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
               actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity"),
-              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Greyscale map")
+              #actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
             ),
             # Single Sidebar
             tags$div(
