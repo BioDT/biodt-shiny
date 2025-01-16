@@ -197,7 +197,7 @@ ces_rp_biodiversity_ui <- function(id) {
                       "Birds" = "birds",
                       "Plants" = "plants",
                       "Insects" = "insects"),
-                    selected = "all",
+                    selected = "mammals",
                     multiple = FALSE
                   ),
                   pickerInput(
@@ -212,7 +212,7 @@ ces_rp_biodiversity_ui <- function(id) {
                       `dropdownAlignRight` = FALSE
                     )
                   ),
-                  tags$h4("Species Occurrence", class = "mt-3"),
+                  # tags$h4("Species Occurrence", class = "mt-3"),
                   sliderTextInput(
                     inputId = ns("species_occurrence_slider"),
                     label = "Filter Species Occurrence:",
@@ -225,10 +225,10 @@ ces_rp_biodiversity_ui <- function(id) {
                     label = "Apply filter",
                     class = "btn-primary"
                   ),
-                  tags$h4("Focal Species", class = "mt-3"),
+                  # tags$h4("Focal Species", class = "mt-3"),
                   checkboxInput(
                     inputId = ns("focal_species"),
-                    label = "show focal species",
+                    label = "Show Species Occurence",
                     value = FALSE
                   ),
                 ),
@@ -261,7 +261,7 @@ ces_rp_biodiversity_ui <- function(id) {
                   tags$h4("Biodiversity Data", class = "mt-3"),
                   checkboxInput(
                     inputId = ns("biodiversity"),
-                    label = "show biodiversity data",
+                    label = "Biodiversity Occurence Density Layer(GBIF)",
                     value = FALSE
                   ),
                 )
@@ -489,7 +489,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         focal_species_merged_raster,
         biodiversity_pal
       )
-      
+
       w$hide()
     }, ignoreInit = TRUE)
 
@@ -533,12 +533,12 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       w$hide()
     }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
-    
+
     observeEvent(input$biodiversity, {
       w$show()
       biodiversity_data_selected(input$biodiversity)
       update_species_biodiversity(biodiversity_data_selected(), ns("combined_map_plot"))
-    
+
       w$hide()
     }, ignoreNULL = TRUE, ignoreInit = TRUE)
   })
