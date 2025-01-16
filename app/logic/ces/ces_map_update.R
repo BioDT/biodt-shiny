@@ -135,7 +135,7 @@ show_focal_species <- function(
         layerId = "merged_species_raster",
         colors = biodiversity_palette(),
         options = tileOptions(zIndex = 1000),
-        opacity = 1
+        opacity = 0.6
       )
     
     leafletProxy(map_id) |> showGroup("focal_species")
