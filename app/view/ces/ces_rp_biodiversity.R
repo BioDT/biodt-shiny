@@ -56,6 +56,8 @@ ces_rp_biodiversity_ui <- function(id) {
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
           transition: background-color 0.3s ease, box-shadow 0.3s ease;
           border-radius: 5px 0 0 5px;
+          width: 60px;
+          height: 50px;
       }
 
       .toggle-button i {
