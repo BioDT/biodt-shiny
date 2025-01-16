@@ -117,6 +117,7 @@ update_species_biodiversity <- function(diversity_species_selected, map_id) {
 #' @export
 show_focal_species <- function(
   focal_species_checkbox,
+  species_added,
   map_id,
   merged_raster,
   biodiversity_palette
@@ -126,7 +127,7 @@ show_focal_species <- function(
       clearGroup("focal_species")
   }
 
-  if (focal_species_checkbox == TRUE) {
+  if (focal_species_checkbox == TRUE && species_added() == TRUE) {
     leafletProxy(map_id) |>
       addRasterImage(
         merged_raster(),

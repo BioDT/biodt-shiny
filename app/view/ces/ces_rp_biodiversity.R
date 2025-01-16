@@ -287,6 +287,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     layer_selected <- reactiveVal()
     biodiversity_data_selected <- reactiveVal(FALSE)
     focal_species_merged_raster <- reactiveVal()
+    species_added <- reactiveVal(FALSE)
 
     # Waiter for loading screens
     msg <- list(
@@ -417,6 +418,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
           merged_raster[merged_raster == 0] <- NA
           focal_species_merged_raster(merged_raster)
 
+          species_added(TRUE)
           add_species(
             ns("combined_map_plot"),
             merged_raster,
@@ -480,6 +482,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       w$show()
       show_focal_species(
         input$focal_species,
+        species_added,
         ns("combined_map_plot"),
         focal_species_merged_raster,
         biodiversity_pal
