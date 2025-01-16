@@ -65,14 +65,23 @@ disease_leaflet_map <- function(
 
         L.Control.GrayScaleControl = L.Control.extend({
           onAdd: function(map) {
-            var btn = L.DomUtil.create('button', 'btn btn-default');
-            btn.innerHTML = 'Toggle Grayscale';
+            var btn = L.DomUtil.create('button', 'btn btn-default action-button toggle-button shiny-bound-input');
+            btn.title = 'Toggle Grayscale';
+  
+            var icon = document.createElement('i');
+            icon.className = 'fa-solid fa-droplet-slash';
+            
+            btn.appendChild(icon);
+            
             btn.onclick = toggleGrayscale;
-            return btn;
+            
+            
+            var container = document.querySelector('.button-container');
+            container.appendChild(btn);
           }
         });
 
-        new L.Control.GrayScaleControl({ position: 'bottomleft' }).addTo(map);
+        new L.Control.GrayScaleControl().addTo(map);
       }"
     )
 }
