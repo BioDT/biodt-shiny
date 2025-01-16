@@ -1,234 +1,135 @@
 {
-  "languages": ["en", "cz"],
+  "languages": ["en", "cz", "fi"],
   "translation": [
     {
       "en": "Hello Shiny!",
-      "cz": "Ahoj Shiny!"
+      "cz": "Ahoj Shiny!",
+      "fi": "Hei Shiny!"
     },
     {
       "en": "Prototype",
-      "cz": "Prototyp"
+      "cz": "Prototyp",
+      "fi": "Prototyyppi"
     },
     {
       "en": "Digital Twins",
-      "cz": "Digitálních dvojčat"
+      "cz": "Digitálních dvojčat",
+      "fi": "Digitaaliset kaksoset"
     },
     {
       "en": "Language:",
-      "cz": "Jazyk:"
+      "cz": "Jazyk:",
+      "fi": "Kieli:"
     },
     {
       "en": "Info",
-      "cz": "Informace"
+      "cz": "Informace",
+      "fi": "Tiedot"
     },
     {
       "en": "Digital Twin",
-      "cz": "Digitální dvojče"
+      "cz": "Digitální dvojče",
+      "fi": "Digitaalinen kaksonen"
     },
     {
       "en": "Species response to environmental change",
-      "cz": "Reakce druhů na změny životního prostředí"
+      "cz": "Reakce druhů na změny životního prostředí",
+      "fi": "Lajien vaste ympäristön muutoksiin"
     },
     {
       "en": "Grassland Dynamics",
-      "cz": "Dynamika travních porostů"
+      "cz": "Dynamika travních porostů",
+      "fi": "Niittyjen dynamiikka"
     },
     {
       "en": "Grassland Biodiversity Dynamics",
-      "cz": "Dynamika biodiverzity travních porostů"
+      "cz": "Dynamika biodiverzity travních porostů",
+      "fi": "Niittyjen biodiversiteetin dynamiikka"
     },
     {
       "en": "Forest/Bird Biodiversity Dynamics",
-      "cz": "Dynamika biodiverzity lesních porostů a ptáků"
+      "cz": "Dynamika biodiverzity lesních porostů a ptáků",
+      "fi": "Metsien ja lintujen biodiversiteetin dynamiikka"
     },
     {
       "en": "Real-time Bird Monitoring with Citizen Science Data",
-      "cz": "Monitorování ptáků v reálném čase pomocí dat 'Citizen Science'"
+      "cz": "Monitorování ptáků v reálném čase pomocí dat 'Citizen Science'",
+      "fi": "Lintujen reaaliaikainen seuranta kansalaistieteen tiedoilla"
     },
     {
       "en": "Cultural Ecosystem Services",
-      "cz": "Služby kulturních ekosystémů"
+      "cz": "Služby kulturních ekosystémů",
+      "fi": "Kulttuuriset ekosysteemipalvelut"
     },
     {
       "en": "Genetically detected biodiversity",
-      "cz": "Geneticky detekovaná biodiverzita"
+      "cz": "Geneticky detekovaná biodiverzita",
+      "fi": "Geneettisesti havaittu biodiversiteetti"
     },
     {
       "en": "Crop Wild Relatives and Genetic Resources for Food Security",
-      "cz": "Plodiny divoce žijících příbuzných a genetické zdroje pro zajištění potravin"
+      "cz": "Plodiny divoce žijících příbuzných a genetické zdroje pro zajištění potravin",
+      "fi": "Viljelykasvien villit sukulaiset ja geneettiset resurssit ruokaturvaa varten"
     },
     {
       "en": "Genetically Detected Biodiversity in Cryptic Habitats",
-      "cz": "Geneticky detekovaná biodiverzita v kryptických biotopech"
+      "cz": "Geneticky detekovaná biodiverzita v kryptických biotopech",
+      "fi": "Geneettisesti havaittu biodiversiteetti piilohabitaateissa"
     },
     {
       "en": "DNA Detected Biodiversity, Poorly Known Habitats",
-      "cz": "Biodiverzita zjištěná přes DNA, málo známé biotopy"
+      "cz": "Biodiverzita zjištěná přes DNA, málo známé biotopy",
+      "fi": "DNA:lla havaittu biodiversiteetti, vähän tunnetut habitaatit"
     },
     {
       "en": "Dynamics and threats from and for species of policy concern",
-      "cz": "Dynamika a hrozby od politicky významných druhů a pro ně"
+      "cz": "Dynamika a hrozby od politicky významných druhů a pro ně",
+      "fi": "Dynaamiset uhat ja vaikutukset tärkeille lajeille"
     },
     {
       "en": "Invasive Species",
-      "cz": "Invazní druhy"
+      "cz": "Invazní druhy",
+      "fi": "Vieraslajit"
     },
     {
       "en": "Species interactions with each other and with humans",
-      "cz": "Interakce druhů mezi sebou a s lidmi"
+      "cz": "Interakce druhů mezi sebou a s lidmi",
+      "fi": "Lajien vuorovaikutus keskenään ja ihmisten kanssa"
     },
     {
       "en": "Pollinators (Honeybee)",
-      "cz": "Opylovači (včelí med 'Honeybee')"
+      "cz": "Opylovači (včelí med 'Honeybee')",
+      "fi": "Pölyttäjät (Mehiläinen)"
     },
     {
       "en": "Honeybee",
-      "cz": "Včelí med 'Honeybee'"
+      "cz": "Včelí med 'Honeybee'",
+      "fi": "Mehiläinen"
     },
     {
       "en": "Disease Outbreaks",
-      "cz": "Ohniska onemocnění"
+      "cz": "Ohniska onemocnění",
+      "fi": "Taudinpurkaukset"
     },
     {
       "en": "Acknowledgements",
-      "cz": "Poděkování"
+      "cz": "Poděkování",
+      "fi": "Kiitokset"
     },
     {
       "en": "Input map",
-      "cz": "Vstupní mapa"
+      "cz": "Vstupní mapa",
+      "fi": "Syötekartta"
     },
     {
       "en": "Location",
-      "cz": "Zadej lokaci"
+      "cz": "Zadej lokaci",
+      "fi": "Sijainti"
     },
     {
       "en": "Output Plot",
-      "cz": "Výstupní graf"
-    },
-    {
-      "en": "The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics.",
-      "cz": "Prototyp digitálního dvojčete umožní pokročilé modelování simulací i predikcí, prostřednictvím praktických případů použití, které řeší kritické problémy související s dynamikou globální biologické diverzity."
-    },
-    {
-      "en": "BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration.",
-      "cz": "BioDT, s využitím principů FAIR dat, těžící ze síly superpočítače LUMI kombinované s digitální infrastrukturou, prediktivním modelováním a AI, usnadňuje vytváření 'evidence-based' řešení pro ochranu a obnovu biodiverzity."
-      
-    },
-    {
-      "en": "The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth.",
-      "cz": "BioDT reaguje na klíčovou politickou iniciativu, která pochází z Evropské unie i z mezinárodního společenství, včetně evropské Strategie pro biodiverzitu 2030, evropského Green Dealu, Udržitelného rozvoje Spojených národů a Destination Earth."
-    },
-    {
-      "en": "Subheading - Disease Outbreaks",
-      "cz": "Podnadpis - Ohniska onemocnění"
-    },
-    {
-      "en": "[EN] Lorem ipsum...",
-      "cz": "[CZ] Lorem ipsum..."
-    },
-    {
-      "en": "Grassland",
-      "cz": "Travní porosty"
-    },
-    {
-      "en": "Background - scientific breakthroughs:",
-      "cz": "Pozadí - vědecké objevy:"
-    },
-    {
-      "en": "Describe temporal biodiversity dynamics for different local grassland sites by a regionally transferable model (GRASSMIND), i.e. with a generic parameterization such that separate site-specific model calibration is avoided ('biodiversity' represented in the model by 4 plant functional groups: grasses, small herbs, tall herbs, legumes).",
-      "cz": "Popisuje časovou dynamiku biodiverzity pro různé lokální travní porosty prostřednictvím modelu ('GRASSMIND'), který je regionálně přenosný. Tj. s generickou parametrizací takovou, že brání separátní kalibraci modelu specifického pro dané místo ('biodiverzita' reprezentovaná v modelu čtyřmi funkčními skupinami rostlin: trávy, drobné byliny, vysoké byliny, luštěniny)." 
-    },
-    {
-      "en": "Project temporal changes in biodiversity dynamics (e.g. due to climate change or climate extremes) and provide scenario-based (management) options for mitigating undesired effects.",
-      "cz": "Projektuje časové změny v dynamice biodiverzity (např. v důsledku klimatické změny nebo klimatických extrémů) a poskytuje možnosti (řízení) založené na scénářích pro zmírnění nežádoucích účinků."
-    },
-    {
-      "en": "Choose location type:",
-      "cz": "Vyber typ lokace:"
-    },
-    {
-      "en": "Latitude",
-      "cz": "Zeměpisná šířka"
-    },
-    {
-      "en": "Longitude",
-      "cz": "Zeměpisná délka"
-    },
-    {
-      "en": "Update Map Location",
-      "cz": "Aktualizace polohy na mapě"
-    },
-    {
-      "en": "Model Output",
-      "cz": "Výstup modelu"
-    },
-    {
-      "en": "Choose output dataset",
-      "cz": "Vyberte výstupní dataset"
-    },
-    {
-      "en": "Choose output files",
-      "cz": "Vyberte výstupní soubory"
-    },
-    {
-      "en": "Show results",
-      "cz": "Ukaž výsledky"
-    },
-    {
-      "en": "Honeybee Prototype Digital Twin (DT)",
-      "cz": "Prototyp digitálního dvojčete Honeybee"
-    },
-    {
-      "en": "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE.",
-      "cz": "Prototyp digitálního (pDT) HONEYBEE je založen na mechanistickém simulačním modelu BEEHAVE."
-    },
-    {
-      "en": "Model descriptions of BEEHAVE and additional information can be found on",
-      "cz": "Popis modelu BEEHAVE a další informace naleznete na"
-    },
-    {
-      "en": "The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,",
-      "cz": "Prototyp digitálního dvojčete Honeybee potřebuje informace o zdrojích květin. Jako ukázkový příklad používáme mapu krajinného pokryvu, poskytnutou viz Preidl et al. (2020,"
-    },
-    {
-      "en": "Source code and scripts of the pDT can be found at ",
-      "cz": "Zdrojový kód a skripty pDT lze nalézt na "
-    },
-    {
-      "en": "Start prototyping",
-      "cz": "Začněte prototypovat"
-    },
-    {
-      "en": "Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd (",
-      "cz": "Údaje o počasí jsou poskytovány Deutscher Wetterdienst (DWD) pomocí rozhraní API, poskytovaného R balíkem rdwd ("
-    },
-    {
-      "en": "Beekeeper",
-      "cz": "Včelař"
-    },
-    {
-      "en": "Contributors",
-      "cz": "Přispěvatelé"
-    },
-    {
-      "en": "CONTRIBUTORS",
-      "cz": "PŘISPĚVATELÉ"
-    },
-    {
-      "en": "Honeybee Beekeeper Case",
-      "cz": "Beekeeper - prototyp Včelař"
-    },
-    {
-      "en": "Run simulation",
-      "cz": "Spustit simulaci"
-    },
-    {
-      "en": "Select point on the map by first clicking the placement icon",
-      "cz": "Vyberte bod na mapě kliknutím na ikonu umístění"
-    },
-    {
-      "en": "Simulation length (in years):",
-      "cz": "Délka simulace (počet let):"
+      "cz": "Výstupní graf",
+      "fi": "Tulosaineisto"
     }
   ]
 }

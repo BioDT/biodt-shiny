@@ -23,25 +23,33 @@ ces_update_map <- function(
   ) {
   if  (leaflet_proxy_type == "clear_species") {
     leafletProxy(map_id) |>
-      clearGroup("Focal species")
+      clearGroup("focal_species")
   }
 
   if  (leaflet_proxy_type == "show_species") {
     leafletProxy(map_id) |>
-      showGroup("Focal species")
+      showGroup("focal_species")
   }
+}
 
-  if  (leaflet_proxy_type == "add_species") {
-    leafletProxy(map_id) |>
-      addRasterImage(
-        species_raster,
-        group = "Focal species",
-        layerId = "merged_species_raster",
-        colors = biodiversity_palette(),
-        options = tileOptions(zIndex = 1000),
-        opacity = 0.6
-      )
-  }
+#' @export
+add_species <- function(
+  map_id,
+  species_raster,
+  biodiversity_palette
+) {
+  leafletProxy(map_id) |>
+    clearGroup("focal_species")
+
+  leafletProxy(map_id) |>
+    addRasterImage(
+      species_raster,
+      group = "focal_species",
+      layerId = "merged_species_raster",
+      colors = biodiversity_palette(),
+      options = tileOptions(zIndex = 1000),
+      opacity = 0.6
+    )
 }
 
 #' @export
@@ -51,7 +59,7 @@ update_recreation <- function(
   soft_recreationists_raster,
   hard_recreationists_raster,
   recreation_palette
-){
+) {
   leafletProxy(map_id) |>
     clearGroup(c("RP"))
 
@@ -103,5 +111,33 @@ update_species_biodiversity <- function(diversity_species_selected, map_id) {
         attribution = "GBIF",
         group = "biodiversity"
       )
+  }
+}
+
+#' @export
+show_focal_species <- function(
+  focal_species_checkbox,
+  species_added,
+  map_id,
+  merged_raster,
+  biodiversity_palette
+) {
+  if (focal_species_checkbox == FALSE) {
+    leafletProxy(map_id) |>
+      clearGroup("focal_species")
+  }
+
+  if (focal_species_checkbox == TRUE && species_added() == TRUE) {
+    leafletProxy(map_id) |>
+      addRasterImage(
+        merged_raster(),
+        group = "focal_species",
+        layerId = "merged_species_raster",
+        colors = biodiversity_palette(),
+        options = tileOptions(zIndex = 1000),
+        opacity = 1
+      )
+    
+    leafletProxy(map_id) |> showGroup("focal_species")
   }
 }
