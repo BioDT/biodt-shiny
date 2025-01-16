@@ -135,9 +135,9 @@ ces_rp_biodiversity_ui <- function(id) {
     color: white;
     }
 
-.leaflet-control-gps .gps-button {
-background-potion: top;
-}
+    .leaflet-control-gps .gps-button {
+    background-potion: top;
+    }
 
       "))
     ),
@@ -154,7 +154,8 @@ background-potion: top;
             tags$div(
               class = "button-container",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Recreation potential"),
-              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity")
+              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Biodiversity"),
+              actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Greyscale map")
             ),
             # Single Sidebar
             tags$div(
