@@ -57,7 +57,17 @@ disease_leaflet_map <- function(
         function toggleGrayscale() {
           grayscale = !grayscale;
           map.eachLayer(applyGrayscale);
+          btn = document.getElementById('grayscale-toggle')
+          var icon = btn.querySelector('i');
+            if (grayscale) {
+                  icon.className = 'fa-solid fa-droplet'; 
+                  console.log('click happened');
+                } else {
+                  icon.className = 'fa-solid fa-droplet-slash'; 
+                   console.log('no click');
+                }
         }
+        
 
         map.on('layeradd', function(e) {
           applyGrayscale(e.layer);
@@ -67,6 +77,7 @@ disease_leaflet_map <- function(
           onAdd: function(map) {
             var btn = L.DomUtil.create('button', 'btn btn-default action-button toggle-button shiny-bound-input');
             btn.title = 'Toggle Grayscale';
+            btn.id = 'grayscale-toggle';
   
             var icon = document.createElement('i');
             icon.className = 'fa-solid fa-droplet-slash';
