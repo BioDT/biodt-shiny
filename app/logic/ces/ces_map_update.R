@@ -56,22 +56,24 @@ add_species <- function(
 update_recreation <- function(
   recreation_selection,
   map_id,
-  soft_recreationists_raster,
-  hard_recreationists_raster,
+  input_raster,
+  # soft_recreationists_raster,
+  # hard_recreationists_raster,
   recreation_palette
 ) {
   leafletProxy(map_id) |>
-    clearGroup(c("RP"))
+    clearGroup(c("RP")) |>
+    addRasterImage(input_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
 
-  if (recreation_selection == "Soft"){
-    leafletProxy(map_id) |>
-      addRasterImage(soft_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
-  }
+  # # if (recreation_selection == "Soft"){
+  #   leafletProxy(map_id) |>
+  #     addRasterImage(soft_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+  # # }
 
-  if (recreation_selection == "Hard"){
-    leafletProxy(map_id) |>
-      addRasterImage(hard_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
-  }
+  # if (recreation_selection == "Hard"){
+  #   leafletProxy(map_id) |>
+  #     addRasterImage(hard_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+  # }
 }
 
 #' @export
@@ -137,7 +139,7 @@ show_focal_species <- function(
         options = tileOptions(zIndex = 1000),
         opacity = 0.6
       )
-    
+
     leafletProxy(map_id) |> showGroup("focal_species")
   }
 }

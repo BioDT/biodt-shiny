@@ -340,11 +340,20 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       key_files(key_files_list)
 
+      soft_rec_vals <- terra::values(key_files()$soft_rec)
+      soft_rec_filtered <- ifelse(
+        soft_rec_vals >= input$recreation_potential_slider,
+        soft_rec_vals, NA)
+
+      # duplicate the raster adn replace with the hard and soft recreation values
+      soft_rec_filtered_raster <- key_files()$soft_rec
+      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+
       rec_pot_map_plot <- ces_leaflet_map(
         recre_palette = recreation_pal,
         biodiversity_palette = biodiversity_pal,
         rec_opacity = recreation_alpha,
-        key_files = key_files
+        soft_rec_filt = soft_rec_filtered_raster
       )
 
       rec_pot_map(rec_pot_map_plot)
@@ -440,35 +449,55 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     })
 
     # Observe event for "Apply filters" button
-    observeEvent(input$apply_filter_recre, {
+    observeEvent(
+      ignoreInit = TRUE,
+      {
+        input$apply_filter_recre
+        input$recreation_potential
+      }, {
       w$show()
+        print(input$recreation_potential)
       # Update recreation raster layers
-      hard_rec_vals <- terra::values(key_files()$hard_rec)
-      soft_rec_vals <- terra::values(key_files()$soft_rec)
-      hard_rec_filtered <- ifelse(
-        hard_rec_vals >= input$recreation_potential_slider,
-        hard_rec_vals, NA)
-      soft_rec_filtered <- ifelse(
-        soft_rec_vals >= input$recreation_potential_slider,
-        soft_rec_vals, NA)
+      if (input$recreation_potential == "Soft") {
+        rec_vals <- key_files()$soft_rec
+      } else if (input$recreation_potential == "Hard") {
+        rec_vals <- key_files()$hard_rec
+      } else {
+        rec_vals <- NA
+      }
 
-      # duplicate the raster adn replace with the hard and soft recreation values
-      hard_rec_filtered_raster <- key_files()$hard_rec
-      soft_rec_filtered_raster <- key_files()$soft_rec
-      terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
-      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+      rec_vals[rec_vals < input$recreation_potential_slider] <- NA
+      # rec_filtered <- ifelse(
+      #   rec_vals >= input$recreation_potential_slider,
+      #   rec_vals, NA) #|> terra::values()
+
+      # hard_rec_vals <- terra::values(key_files()$hard_rec)
+      # soft_rec_vals <- terra::values(key_files()$soft_rec)
+      # hard_rec_filtered <- ifelse(
+      #   hard_rec_vals >= input$recreation_potential_slider,
+      #   hard_rec_vals, NA)
+      # soft_rec_filtered <- ifelse(
+      #   soft_rec_vals >= input$recreation_potential_slider,
+      #   soft_rec_vals, NA)
+
+      # # duplicate the raster adn replace with the hard and soft recreation values
+      # hard_rec_filtered_raster <- key_files()$hard_rec
+      # soft_rec_filtered_raster <- key_files()$soft_rec
+      # terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
+      # terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
 
       # Update the map with the filtered rasters
-      ces_update_map(
+      update_recreation(
         "filter_recreation",
         ns("combined_map_plot"),
-        hard_recreationists_raster = hard_rec_filtered_raster,
-        soft_recreationists_raster = soft_rec_filtered_raster,
+        # hard_recreationists_raster = hard_rec_filtered_raster,
+        # soft_recreationists_raster = soft_rec_filtered_raster,
+        input_raster = rec_vals,
         recreation_palette = recreation_pal
       )
 
       w$hide()
-    })
+      })
 
     observeEvent(input$apply_filter_species, {
       w$show()
@@ -490,35 +519,35 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       w$hide()
     }, ignoreInit = TRUE)
 
-    observeEvent(input$recreation_potential, {
-      w$show()
+    # observeEvent(input$recreation_potential, {
+    #   w$show()
 
-      # Update recreation raster layers
-      hard_rec_vals <- terra::values(key_files()$hard_rec)
-      soft_rec_vals <- terra::values(key_files()$soft_rec)
-      hard_rec_filtered <- ifelse(
-        hard_rec_vals >= input$recreation_potential_slider,
-        hard_rec_vals, NA)
-      soft_rec_filtered <- ifelse(
-        soft_rec_vals >= input$recreation_potential_slider,
-        soft_rec_vals, NA)
+    #   # Update recreation raster layers
+    #   hard_rec_vals <- terra::values(key_files()$hard_rec)
+    #   soft_rec_vals <- terra::values(key_files()$soft_rec)
+    #   hard_rec_filtered <- ifelse(
+    #     hard_rec_vals >= input$recreation_potential_slider,
+    #     hard_rec_vals, NA)
+    #   soft_rec_filtered <- ifelse(
+    #     soft_rec_vals >= input$recreation_potential_slider,
+    #     soft_rec_vals, NA)
 
-      # duplicate the raster adn replace with the hard and soft recreation values
-      hard_rec_filtered_raster <- key_files()$hard_rec
-      soft_rec_filtered_raster <- key_files()$soft_rec
-      terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
-      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+    #   # duplicate the raster adn replace with the hard and soft recreation values
+    #   hard_rec_filtered_raster <- key_files()$hard_rec
+    #   soft_rec_filtered_raster <- key_files()$soft_rec
+    #   terra::values(hard_rec_filtered_raster) <- hard_rec_filtered
+    #   terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
 
-      update_recreation(
-        input$recreation_potential,
-        ns("combined_map_plot"),
-        soft_recreationists_raster = soft_rec_filtered_raster,
-        hard_recreationists_raster = hard_rec_filtered_raster,
-        recreation_palette = recreation_pal
-      )
+    #   update_recreation(
+    #     input$recreation_potential,
+    #     ns("combined_map_plot"),
+    #     soft_recreationists_raster = soft_rec_filtered_raster,
+    #     hard_recreationists_raster = hard_rec_filtered_raster,
+    #     recreation_palette = recreation_pal
+    #   )
 
-      w$hide()
-    }, ignoreNULL = TRUE, ignoreInit = TRUE)
+    #   w$hide()
+    # }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
     observeEvent(input$map_base_layers, {
       w$show()
