@@ -12,7 +12,6 @@ export function toggleSidebar() {
 
 export function activeRecreation() {
   let recre = document.getElementById("slidersSidebar")
-  console.log(recre)
   recre.classList.remove("d-none")
   recre.classList.add("d-block")
   let species = document.getElementById("speciesSidebar")
@@ -22,12 +21,10 @@ export function activeRecreation() {
 export function deactRecreation() {
   let recre = document.getElementById("slidersSidebar")
   recre.classList.add("d-none")
-  console.log(recre)
 }
 
 export function activeSpecies() {
   let species = document.getElementById("speciesSidebar")
-  console.log(species)
   species.classList.remove("d-none")
   species.classList.add("d-block")
   let recre = document.getElementById("slidersSidebar")
@@ -37,5 +34,4 @@ export function activeSpecies() {
 export function deactSpecies() {
   let species = document.getElementById("speciesSidebar")
   species.classList.add("d-none")
-  console.log(species)
 }
