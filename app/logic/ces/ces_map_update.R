@@ -33,6 +33,12 @@ ces_update_map <- function(
 }
 
 #' @export
+clear_species <- function(map_id) {
+  leafletProxy(map_id) |>
+    clearGroup("focal_species")
+}
+
+#' @export
 add_species <- function(
   map_id,
   species_raster,

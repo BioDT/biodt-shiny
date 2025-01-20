@@ -11,13 +11,13 @@ box::use(
   cli[hash_md5],
   utils[read.csv],
   stats[setNames],
-  shinyjs[useShinyjs, runjs],
+  shinyjs[useShinyjs, runjs, disabled],
   shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput, awesomeCheckbox],
 )
 
 box::use(
   app / logic / ces / ces_map[ces_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity, add_species, show_focal_species],
+  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity, add_species, clear_species],
   app / logic / waiter[waiter_text],
 )
 
@@ -217,7 +217,7 @@ ces_rp_biodiversity_ui <- function(id) {
                     inputId = ns("species_occurrence_slider"),
                     label = "Filter Species Occurrence:",
                     choices = seq(0, 1, by = 0.1),
-                    selected = 0.5,# c(0, 1),
+                    selected = 0.5,
                     grid = FALSE,
                   ),
                   actionButton(
@@ -225,11 +225,12 @@ ces_rp_biodiversity_ui <- function(id) {
                     label = "Apply filter",
                     class = "btn-primary"
                   ),
-                  # tags$h4("Focal Species", class = "mt-3"),
-                  checkboxInput(
-                    inputId = ns("focal_species"),
-                    label = "Show Species Occurence",
-                    value = FALSE
+                  disabled(
+                    checkboxInput(
+                      inputId = ns("species_occurence"),
+                      label = "Show Species Occurence",
+                      value = TRUE
+                    )
                   ),
                 ),
                 # species content
@@ -290,6 +291,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     biodiversity_data_selected <- reactiveVal(FALSE)
     focal_species_merged_raster <- reactiveVal()
     species_added <- reactiveVal(FALSE)
+    species_selected <- reactiveVal(FALSE)
 
     # Waiter for loading screens
     msg <- list(
@@ -390,6 +392,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     # Helper function to update species layer
     updateSpeciesLayer <- function() {
       if (is.null(input$species_selector) || length(input$species_selector) == 0) {
+        species_selected(FALSE)
         ces_update_map("clear_species", ns("combined_map_plot"))
       } else {
         selected_species <- sub(".*\\(([^)]+)\\)", "\\1", input$species_selector)
@@ -429,6 +432,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
           focal_species_merged_raster(merged_raster)
 
           species_added(TRUE)
+          species_selected(TRUE)
           add_species(
             ns("combined_map_plot"),
             merged_raster,
@@ -441,11 +445,34 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     }
 
     # Observe event to update the map when the species selector changes
-    observeEvent(input$species_selector, ignoreNULL = FALSE, {
+    observeEvent(input$species_selector, {
       w$show()
       updateSpeciesLayer()
 
       w$hide()
+    })
+
+    observeEvent(species_selected(), {
+      if (species_selected() == TRUE) {
+        runjs(paste0('
+          let species_checkbox_element = document.getElementById("', ns("species_occurence"), '")
+          species_checkbox_element.disabled = false
+        '))
+      }
+      if (species_selected() == FALSE) {
+        runjs(paste0('          
+          species_checkbox_element.disabled = true
+        '))
+      }
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$species_occurence, {
+      if (input$species_occurence == TRUE && species_selected() == TRUE) {
+        updateSpeciesLayer()
+      }
+      if (input$species_occurence == FALSE) {
+        clear_species(ns("combined_map_plot"))
+      }
     })
 
     # Observe event for "Apply filters" button
@@ -456,7 +483,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         input$recreation_potential
       }, {
       w$show()
-        print(input$recreation_potential)
       # Update recreation raster layers
       if (input$recreation_potential == "Soft") {
         rec_vals <- key_files()$soft_rec
@@ -506,18 +532,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       w$hide()
     }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
-    observeEvent(input$focal_species, {
-      w$show()
-      show_focal_species(
-        input$focal_species,
-        species_added,
-        ns("combined_map_plot"),
-        focal_species_merged_raster,
-        biodiversity_pal
-      )
-
-      w$hide()
-    }, ignoreInit = TRUE)
 
     # observeEvent(input$recreation_potential, {
     #   w$show()
