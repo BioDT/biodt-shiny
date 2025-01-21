@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, column, fluidRow, verbatimTextOutput, actionButton, observe, observeEvent, radioButtons, checkboxInput, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, htmlOutput, selectizeInput, tags, reactiveVal],
+  shiny[moduleServer, NS, tagList, column, fluidRow, verbatimTextOutput, actionButton, observe, observeEvent, radioButtons, checkboxInput, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, uiOutput, htmlOutput, selectizeInput, tags, reactiveVal],
   bslib[card, nav_select, card_title, card_body],
   leaflet[addRasterImage, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, showGroup, clearGroup, setMaxBounds, labelFormat, tileOptions],
   leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
@@ -12,7 +12,7 @@ box::use(
   utils[read.csv],
   stats[setNames],
   shinyjs[useShinyjs, runjs, disabled],
-  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput, awesomeCheckbox],
+  shinyWidgets[virtualSelectInput, pickerInput, sliderTextInput, updatePickerInput, pickerOptions, awesomeCheckbox],
 )
 
 box::use(
@@ -197,8 +197,9 @@ ces_rp_biodiversity_ui <- function(id) {
                       "Birds" = "birds",
                       "Plants" = "plants",
                       "Insects" = "insects"),
-                    selected = "all",
-                    multiple = FALSE
+                    selected = NULL,
+                    multiple = TRUE,
+                    options = pickerOptions(maxOptions = 1)
                   ),
                   pickerInput(
                     ns("species_selector"),
@@ -212,7 +213,7 @@ ces_rp_biodiversity_ui <- function(id) {
                       `dropdownAlignRight` = FALSE
                     )
                   ),
-                  # tags$h4("Species Occurrence", class = "mt-3"),
+                  tags$h4("Species Occurrence", class = "mt-3"),
                   sliderTextInput(
                     inputId = ns("species_occurrence_slider"),
                     label = "Filter Species Occurrence:",
@@ -296,6 +297,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     species_ids_list <- reactiveVal()
     cairngorms_species_list_full <- reactiveVal()
     species_include <- reactiveVal()
+    species_choices <- reactiveVal()
+    species_include_filtered <- reactiveVal()
 
     # Waiter for loading screens
     msg <- list(
@@ -326,56 +329,61 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     })
 
     # Only trigger when ces_selected() becomes TRUE (after which the value will not change).
-    observeEvent(ces_selected(), {
-      w$show()
+    observeEvent(
+      ces_selected(),
+      ignoreInit = TRUE,
+      {
+        # w$show()
 
-      # Create palettes
-      biodiversity_pal(colorBin("PuBuGn", c(0, 1), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 1))
-      recreation_pal(colorBin("YlOrBr", c(0, 1.5), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 0.8))
+        # Create palettes
+        biodiversity_pal(colorBin("PuBuGn", c(0, 1), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 1))
+        recreation_pal(colorBin("YlOrBr", c(0, 1.5), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 0.8))
 
-      species_files_list(list.files(paste0(ces_path, "/sdms"), full.names = TRUE))
-      species_ids_list(list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
-                            purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x)))
-      cairngorms_species_list_full(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
-      # Load key files
-      key_files_list <- list(cairngorms_sp_list = read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")),
-                      files_and_ids = data.frame(
-                        files = list.files(paste0(ces_path, "/sdms"), full.names = TRUE),
-                        ids = list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
-                          purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
-                      ),
-                      hard_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif")),
-                      soft_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
-      )
+        species_files_list(list.files(paste0(ces_path, "/sdms"), full.names = TRUE))
+        species_ids_list(list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
+                              purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x)))
+        cairngorms_species_list_full(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
+        # Load key files
+        key_files_list <- list(cairngorms_sp_list = read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")),
+                        files_and_ids = data.frame(
+                          files = list.files(paste0(ces_path, "/sdms"), full.names = TRUE),
+                          ids = list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
+                            purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
+                        ),
+                        hard_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif")),
+                        soft_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
+        )
 
-      key_files(key_files_list)
+        key_files(key_files_list)
 
-      soft_rec_vals <- terra::values(key_files()$soft_rec)
-      soft_rec_filtered <- ifelse(
-        soft_rec_vals >= input$recreation_potential_slider,
-        soft_rec_vals, NA)
+        soft_rec_vals <- terra::values(key_files()$soft_rec)
+        soft_rec_filtered <- ifelse(
+          soft_rec_vals >= input$recreation_potential_slider,
+          soft_rec_vals, NA)
 
-      # duplicate the raster adn replace with the hard and soft recreation values
-      soft_rec_filtered_raster <- key_files()$soft_rec
-      terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+        # duplicate the raster adn replace with the hard and soft recreation values
+        soft_rec_filtered_raster <- key_files()$soft_rec
+        terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
 
-      rec_pot_map_plot <- ces_leaflet_map(
-        recre_palette = recreation_pal,
-        biodiversity_palette = biodiversity_pal,
-        rec_opacity = recreation_alpha,
-        soft_rec_filt = soft_rec_filtered_raster
-      )
+        rec_pot_map_plot <- ces_leaflet_map(
+          recre_palette = recreation_pal,
+          biodiversity_palette = biodiversity_pal,
+          rec_opacity = recreation_alpha,
+          soft_rec_filt = soft_rec_filtered_raster
+        )
 
-      rec_pot_map(rec_pot_map_plot)
+        rec_pot_map(rec_pot_map_plot)
 
-      # pre-load Cairngorms's list of species
-      species_include(
-        cairngorms_species_list_full() |>
-          mutate(in_group = (cairngorms_species_list_full() |> pull("all")))
-      )
+        # pre-load Cairngorms's list of species
+        species_include(
+          cairngorms_species_list_full() |>
+            mutate(in_group = (cairngorms_species_list_full() |> pull("all")))
+        )
 
-      w$hide()
-    }, ignoreInit = TRUE)
+        print("First time CES opened")
+        # w$hide()
+      }
+    )
 
     # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({
@@ -385,24 +393,36 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     })
 
     # Update species selector when group is selected
-    observeEvent(input$species_group_selector, ignoreInit = TRUE, {
+    observeEvent(
+      {input$species_group_selector
+        species_include()
+        cairngorms_species_list_full()}, {
+        req(input$species_group_selector, species_include(), cairngorms_species_list_full())
+        species_include_filtered <- species_include() |>
+          mutate(in_group = (cairngorms_species_list_full() |>
+                              pull(input$species_group_selector))
+                ) |>
+          filter(speciesKey %in% species_ids_list(), in_group == TRUE)
 
-      group_selected <- input$species_group_selector
+        species_choices(paste0(species_include_filtered$common_name, " (", species_include_filtered$sci_name, ")"))
+      }
+    )
 
-      species_include_filtered <- species_include() |>
-        mutate(in_group = (cairngorms_species_list_full() |> pull(group_selected))) |>
-        filter(speciesKey %in% species_ids_list(), in_group == TRUE)
-      
-
-      species_choices <- paste0(species_include_filtered$common_name, " (", species_include_filtered$sci_name, ")")
-
+    observeEvent(
+      species_choices(),
+    {
+      req(species_choices())
+      print("Updating species selector!")
+      print(species_choices())
       updatePickerInput(
         session,
         "species_selector",
-        selected = NULL,
-        choices = species_choices
+        # selected = NULL,
+        selected = species_choices()[1],
+        choices = species_choices()
       )
     })
+
 
     # Helper function to update species layer
     updateSpeciesLayer <- function() {
@@ -463,7 +483,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     observeEvent(input$species_selector, {
       w$show()
       updateSpeciesLayer()
-
       w$hide()
     })
 
@@ -475,7 +494,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         '))
       }
       if (species_selected() == FALSE) {
-        runjs(paste0('          
+        runjs(paste0('
           species_checkbox_element.disabled = true
         '))
       }
@@ -594,5 +613,5 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       w$hide()
     }, ignoreNULL = TRUE, ignoreInit = TRUE)
-  })
+      })
 }
