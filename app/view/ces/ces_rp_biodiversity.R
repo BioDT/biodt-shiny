@@ -138,7 +138,7 @@ ces_rp_biodiversity_ui <- function(id) {
     }
 
     .leaflet-control-gps .gps-button {
-    background-potion: top;
+    background-position: top;
     }
 
       "))
