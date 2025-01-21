@@ -17,7 +17,7 @@ box::use(
 
 box::use(
   app / logic / ces / ces_map[ces_leaflet_map],
-  app / logic / ces / ces_map_update[clear_species, update_recreation, update_base_layers, update_species_biodiversity, add_species],
+  app / logic / ces / ces_map_update[clear_species, update_recreation, update_base_layers, update_species_biodiversity, add_species, show_species],
   app / logic / waiter[waiter_text],
 )
 
@@ -197,7 +197,7 @@ ces_rp_biodiversity_ui <- function(id) {
                       "Birds" = "birds",
                       "Plants" = "plants",
                       "Insects" = "insects"),
-                    selected = "mammals",
+                    selected = "all",
                     multiple = FALSE
                   ),
                   pickerInput(
@@ -292,6 +292,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     focal_species_merged_raster <- reactiveVal()
     species_added <- reactiveVal(FALSE)
     species_selected <- reactiveVal(FALSE)
+    species_files_list <- reactiveVal()
+    species_ids_list <- reactiveVal()
 
     # Waiter for loading screens
     msg <- list(
@@ -329,6 +331,9 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       biodiversity_pal(colorBin("PuBuGn", c(0, 1), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 1))
       recreation_pal(colorBin("YlOrBr", c(0, 1.5), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 0.8))
 
+      species_files_list(list.files(paste0(ces_path, "/sdms"), full.names = TRUE))
+      species_ids_list(list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
+                            purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x)))
       # Load key files
       key_files_list <- list(cairngorms_sp_list = read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")),
                       files_and_ids = data.frame(
@@ -377,7 +382,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       species_include <- key_files()$cairngorms_sp_list |>
         mutate(in_group = (key_files()$cairngorms_sp_list |> pull(group_selected))) |>
-        filter(speciesKey %in% key_files()$files_and_ids$ids, in_group == TRUE)
+        filter(speciesKey %in% species_ids_list(), in_group == TRUE)
 
       species_choices <- paste0(species_include$common_name, " (", species_include$sci_name, ")")
 
@@ -398,12 +403,12 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         selected_species <- sub(".*\\(([^)]+)\\)", "\\1", input$species_selector)
         selected_species_ids <- filter(key_files()$cairngorms_sp_list, sci_name %in% selected_species) |> pull(speciesKey)
 
-        clear_species("clear_species", ns("combined_map_plot"))
+        clear_species(ns("combined_map_plot"))
 
         rasters_to_merge <- list()
 
         for (id in selected_species_ids) {
-          file_path <- key_files()$files_and_ids$files[key_files()$files_and_ids$ids == id]
+          file_path <- species_files_list()[species_ids_list() == id]
 
           if (file.exists(file_path)) {
             rast_to_add <- terra::rast(file_path)[[1]]
@@ -440,7 +445,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
           )
         }
 
-        #ces_update_map("show_species", ns("combined_map_plot"))
         show_species(ns("combined_map_plot"))
       }
     }
