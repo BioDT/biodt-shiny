@@ -17,7 +17,7 @@ box::use(
 
 box::use(
   app / logic / ces / ces_map[ces_leaflet_map],
-  app / logic / ces / ces_map_update[ces_update_map, update_recreation, update_base_layers, update_species_biodiversity, add_species, clear_species],
+  app / logic / ces / ces_map_update[clear_species, update_recreation, update_base_layers, update_species_biodiversity, add_species],
   app / logic / waiter[waiter_text],
 )
 
@@ -393,12 +393,12 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     updateSpeciesLayer <- function() {
       if (is.null(input$species_selector) || length(input$species_selector) == 0) {
         species_selected(FALSE)
-        ces_update_map("clear_species", ns("combined_map_plot"))
+        clear_species(ns("combined_map_plot"))
       } else {
         selected_species <- sub(".*\\(([^)]+)\\)", "\\1", input$species_selector)
         selected_species_ids <- filter(key_files()$cairngorms_sp_list, sci_name %in% selected_species) |> pull(speciesKey)
 
-        ces_update_map("clear_species", ns("combined_map_plot"))
+        clear_species("clear_species", ns("combined_map_plot"))
 
         rasters_to_merge <- list()
 
@@ -440,7 +440,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
           )
         }
 
-        ces_update_map("show_species", ns("combined_map_plot"))
+        #ces_update_map("show_species", ns("combined_map_plot"))
+        show_species(ns("combined_map_plot"))
       }
     }
 

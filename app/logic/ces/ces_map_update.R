@@ -1,35 +1,11 @@
 box::use(
   leaflet[leaflet, leafletProxy, leafletOptions, addTiles, addProviderTiles, setView, addLegend, hideGroup, clearGroup, showGroup, labelFormat, addRasterImage, tileOptions, providers, providerTileOptions, addControl],
-  # leaflet.extras[groupedLayersControlOptions, addControlGPS, gpsOptions],
 )
 
-# The function updates all various possibilities of CES recreation & biodiverstiy map
-# Which leafletProxy call is run is BASED ON VARIBLE `leaflet_proxy_type`
-# `leaflet_proxy_type` can take these values:
-# - "clear_species" - clears species group
-# - "show_species" - shows species group
-# - "add_species" - adds raster with species
-# - "filter_recreation" - updates map with the filtered recreation potential
-# - "add_layers" - adds radio buttons with selection of different map layers
 #' @export
-ces_update_map <- function(
-    leaflet_proxy_type,
-    map_id,
-    species_raster,
-    biodiversity_palette,
-    hard_recreationists_raster,
-    soft_recreationists_raster,
-    recreation_palette
-  ) {
-  if  (leaflet_proxy_type == "clear_species") {
-    leafletProxy(map_id) |>
-      clearGroup("focal_species")
-  }
-
-  if  (leaflet_proxy_type == "show_species") {
-    leafletProxy(map_id) |>
-      showGroup("focal_species")
-  }
+show_species <- function(map_id) {
+  leafletProxy(map_id) |>
+    showGroup("focal_species")
 }
 
 #' @export
