@@ -294,6 +294,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     species_selected <- reactiveVal(FALSE)
     species_files_list <- reactiveVal()
     species_ids_list <- reactiveVal()
+    cairngorms_species_list_full <- reactiveVal()
+    species_include <- reactiveVal()
 
     # Waiter for loading screens
     msg <- list(
@@ -334,6 +336,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       species_files_list(list.files(paste0(ces_path, "/sdms"), full.names = TRUE))
       species_ids_list(list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
                             purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x)))
+      cairngorms_species_list_full(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
       # Load key files
       key_files_list <- list(cairngorms_sp_list = read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")),
                       files_and_ids = data.frame(
@@ -365,6 +368,12 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
       rec_pot_map(rec_pot_map_plot)
 
+      # pre-load Cairngorms's list of species
+      species_include(
+        cairngorms_species_list_full() |>
+          mutate(in_group = (cairngorms_species_list_full() |> pull("all")))
+      )
+
       w$hide()
     }, ignoreInit = TRUE)
 
@@ -376,15 +385,16 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     })
 
     # Update species selector when group is selected
-    observeEvent(input$species_group_selector, {
+    observeEvent(input$species_group_selector, ignoreInit = TRUE, {
 
       group_selected <- input$species_group_selector
 
-      species_include <- key_files()$cairngorms_sp_list |>
-        mutate(in_group = (key_files()$cairngorms_sp_list |> pull(group_selected))) |>
+      species_include_filtered <- species_include() |>
+        mutate(in_group = (cairngorms_species_list_full() |> pull(group_selected))) |>
         filter(speciesKey %in% species_ids_list(), in_group == TRUE)
+      
 
-      species_choices <- paste0(species_include$common_name, " (", species_include$sci_name, ")")
+      species_choices <- paste0(species_include_filtered$common_name, " (", species_include_filtered$sci_name, ")")
 
       updatePickerInput(
         session,
@@ -392,7 +402,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         selected = NULL,
         choices = species_choices
       )
-    }, ignoreInit = TRUE)
+    })
 
     # Helper function to update species layer
     updateSpeciesLayer <- function() {
@@ -401,7 +411,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         clear_species(ns("combined_map_plot"))
       } else {
         selected_species <- sub(".*\\(([^)]+)\\)", "\\1", input$species_selector)
-        selected_species_ids <- filter(key_files()$cairngorms_sp_list, sci_name %in% selected_species) |> pull(speciesKey)
+        selected_species_ids <- filter(cairngorms_species_list_full(), sci_name %in% selected_species) |> pull(speciesKey)
 
         clear_species(ns("combined_map_plot"))
 
@@ -440,7 +450,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
           species_selected(TRUE)
           add_species(
             ns("combined_map_plot"),
-            merged_raster,
+            focal_species_merged_raster(),
             biodiversity_pal
           )
         }
