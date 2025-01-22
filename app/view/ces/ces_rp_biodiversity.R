@@ -413,7 +413,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     {
       req(species_choices())
       print("Updating species selector!")
-      print(species_choices())
       updatePickerInput(
         session,
         "species_selector",
