@@ -44,9 +44,14 @@ update_recreation <- function(
   recreation_palette
 ) {
   leafletProxy(map_id) |>
-    clearGroup(c("RP")) |>
-    addRasterImage(input_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+    clearGroup(c("RP"))
 
+  # print(input_raster)
+  # print(!is.na(input_raster))
+  if (!is.null(input_raster)) {
+  leafletProxy(map_id) |>
+    addRasterImage(input_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+  }
   # # if (recreation_selection == "Soft"){
   #   leafletProxy(map_id) |>
   #     addRasterImage(soft_recreationists_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)

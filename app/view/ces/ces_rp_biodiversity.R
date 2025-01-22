@@ -272,7 +272,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         runjs(paste0('
           let species_selector = document.getElementById("', ns("species_selector"), '")
           let species_selector_btn = species_selector.nextElementSibling
-          species_selector_btn.disabled = true      
+          species_selector_btn.disabled = true
         '))
 
         print("First time CES opened")
@@ -309,7 +309,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         let species_selector = document.getElementById("', ns("species_selector"), '")
         let species_selector_btn = species_selector.nextElementSibling
 
-        let species_group_selector = document.getElementById("', ns("species_group_selector"), '")          
+        let species_group_selector = document.getElementById("', ns("species_group_selector"), '")
         if (species_group_selector.value > 0) {
           species_selector_btn.disabled = false
         }
@@ -428,13 +428,14 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       # Update recreation raster layers
       if (input$recreation_potential == "Soft") {
         rec_vals <- key_files()$soft_rec
+        rec_vals[rec_vals < input$recreation_potential_slider] <- NA
       } else if (input$recreation_potential == "Hard") {
         rec_vals <- key_files()$hard_rec
+        rec_vals[rec_vals < input$recreation_potential_slider] <- NA
       } else {
-        rec_vals <- NA
+        rec_vals <- NULL
       }
 
-      rec_vals[rec_vals < input$recreation_potential_slider] <- NA
       # rec_filtered <- ifelse(
       #   rec_vals >= input$recreation_potential_slider,
       #   rec_vals, NA) #|> terra::values()
