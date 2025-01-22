@@ -380,6 +380,13 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
             mutate(in_group = (cairngorms_species_list_full() |> pull("all")))
         )
 
+        # make species_selector combobox button disable on CES init
+        runjs(paste0('
+          let species_selector = document.getElementById("', ns("species_selector"), '")
+          let species_selector_btn = species_selector.nextElementSibling
+          species_selector_btn.disabled = true      
+        '))
+
         print("First time CES opened")
         # w$hide()
       }
@@ -407,6 +414,20 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         species_choices(paste0(species_include_filtered$common_name, " (", species_include_filtered$sci_name, ")"))
       }
     )
+
+    # disable species selector based on whether species_group_selector has value
+    observeEvent(input$species_group_selector, ignoreInit = TRUE, {
+      runjs(paste0('
+        let species_selector = document.getElementById("', ns("species_selector"), '")
+        let species_selector_btn = species_selector.nextElementSibling
+
+        let species_group_selector = document.getElementById("', ns("species_group_selector"), '")          
+        if (species_group_selector.value > 0) {
+          species_selector_btn.disabled = false
+        }
+      '))
+    })
+
 
     observeEvent(
       species_choices(),
