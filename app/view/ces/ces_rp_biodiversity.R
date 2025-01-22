@@ -333,8 +333,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
       ces_selected(),
       ignoreInit = TRUE,
       {
-        # w$show()
-
+        w$show()
         # Create palettes
         biodiversity_pal(colorBin("PuBuGn", c(0, 1), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 1))
         recreation_pal(colorBin("YlOrBr", c(0, 1.5), bins = seq(0, 1, length.out = 5 + 1), na.color = "transparent", reverse = FALSE, alpha = 0.8))
@@ -388,7 +387,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         '))
 
         print("First time CES opened")
-        # w$hide()
+        w$hide()
       }
     )
 
