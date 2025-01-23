@@ -32,10 +32,10 @@ ces_leaflet_map <- function(
         setView = TRUE)) |>
     addRasterImage(soft_rec_filt, group = "RP", project = FALSE, colors = recre_palette(), options = tileOptions(zIndex = 1000), opacity = 0.5) |>
     addLegend(
-      pal = biodiversity_palette(), values = c(0, 1), title = "Biodiversity", position = "bottomright",
+      pal = biodiversity_palette(), values = c(0, 1), title = "Biodiversity", position = "bottomleft",
       labFormat = labelFormat(prefix = "", suffix = "", between = " - ")
     ) |>
-    addLegend(pal = recre_palette(), values = c(0,1), title = "Recreation", position = "bottomright") |>
+    addLegend(pal = recre_palette(), values = c(0,1), title = "Recreation", position = "bottomleft") |>
     # addTiles(
     #   urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
     #   attribution = "GBIF",
