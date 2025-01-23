@@ -38,7 +38,7 @@ ces_rp_biodiversity_ui <- function(id) {
         card(
           id = "biodiversity-page",
           title = "combined_map",
-          full_screen = TRUE,
+          full_screen = FALSE,
           card_title("Recreation & Biodiversity Mapping"),
           card_body(
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
