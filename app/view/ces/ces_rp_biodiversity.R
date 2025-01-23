@@ -38,7 +38,7 @@ ces_rp_biodiversity_ui <- function(id) {
         card(
           id = "biodiversity-page",
           title = "combined_map",
-          full_screen = TRUE,
+          full_screen = FALSE,
           card_title("Recreation & Biodiversity Mapping"),
           card_body(
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
@@ -62,6 +62,17 @@ ces_rp_biodiversity_ui <- function(id) {
                 tags$div(
                   id = "slidersSidebar",
                   class = "d-none",
+                  tags$h4("Recreation Potential"),
+                  radioButtons(
+                    inputId = ns("recreation_potential"),
+                    label = "Select recreationist type:",
+                    selected = "Soft",
+                    choices = list(
+                      Soft = "Soft",
+                      Hard = "Hard",
+                      Empty = "Empty"
+                    )
+                  ),
                   tags$h4("Recreation Potential Filter"),
                   tags$p("Use the sliders below to filter the data:"),
                   sliderTextInput(
@@ -127,17 +138,6 @@ ces_rp_biodiversity_ui <- function(id) {
                 tags$div(
                   id = "speciesSidebar",
                   class = "d-none",
-                  tags$h4("Recreation Potential"),
-                  radioButtons(
-                    inputId = ns("recreation_potential"),
-                    label = "Select recreationist type:",
-                    selected = "Soft",
-                    choices = list(
-                      Soft = "Soft",
-                      Hard = "Hard",
-                      Empty = "Empty"
-                    )
-                  ),
                   tags$h4("Base Map Layer", class = "mt-3"),
                   radioButtons(
                     inputId = ns("map_base_layers"),

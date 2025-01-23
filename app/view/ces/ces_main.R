@@ -32,22 +32,22 @@ ces_ui <- function(id) {
         ns("ces_rp_biodiversity")
       )
     ),
-    # nav_panel(
-    #   title = "Recreation potential",
-    #   value = "Recreation potential",
-    #   icon = icon("person-walking"),
-    #   ces_rp_ui(
-    #     ns("ces_rp")
-    #   )
-    # ),
-    # nav_panel(
-    #   title = "Biodiversity",
-    #   value = "Biodiversity",
-    #   icon = icon("tree"),
-    #   ces_biodiversity_ui(
-    #     ns("ces_biodiversity")
-    #   )
-    # ),
+    nav_panel(
+      title = "Recreation potential",
+      value = "Recreation potential",
+      icon = icon("person-walking"),
+      ces_rp_ui(
+        ns("ces_rp")
+      )
+    ),
+    nav_panel(
+      title = "Biodiversity",
+      value = "Biodiversity",
+      icon = icon("tree"),
+      ces_biodiversity_ui(
+        ns("ces_biodiversity")
+      )
+    ),
   )
 }
 
