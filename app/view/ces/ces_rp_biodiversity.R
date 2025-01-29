@@ -31,26 +31,6 @@ ces_rp_biodiversity_ui <- function(id) {
         rel = "stylesheet",
         href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
       ),
-      tags$style(HTML("
-     /* Change the left (filled) side to transparent */
-    .custom-slider .irs-bar {
-      background: white !important; 
-      border-top: 1px solid grey !important;
-      border-bottom: 1px solid grey !important;
-    }
-
-    /* Change the right (unfilled) side to color */
-    .custom-slider .irs-line {
-      background: #a86200 !important;
-      border: #a86200 !important;
-    }
-
-    /* Ensure the slider handle is visible */
-    .custom-slider .irs-slider {
-      border: #a86200 !important;
-      background: white !important;
-    }
-  ")),
     ),
     fluidRow(
       column(
