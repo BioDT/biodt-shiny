@@ -31,6 +31,26 @@ ces_rp_biodiversity_ui <- function(id) {
         rel = "stylesheet",
         href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
       ),
+      tags$style(HTML("
+     /* Change the left (filled) side to transparent */
+    .custom-slider .irs-bar {
+      background: white !important; 
+      border-top: 1px solid grey !important;
+      border-bottom: 1px solid grey !important;
+    }
+
+    /* Change the right (unfilled) side to color */
+    .custom-slider .irs-line {
+      background: #a86200 !important;
+      border: #a86200 !important;
+    }
+
+    /* Ensure the slider handle is visible */
+    .custom-slider .irs-slider {
+      border: #a86200 !important;
+      background: white !important;
+    }
+  ")),
     ),
     fluidRow(
       column(
@@ -73,14 +93,17 @@ ces_rp_biodiversity_ui <- function(id) {
                       Empty = "Empty"
                     )
                   ),
-                  tags$h4("Recreation Potential Filter"),
-                  tags$p("Use the sliders below to filter the data:"),
-                  sliderTextInput(
-                    inputId = ns("recreation_potential_slider"),
-                    label = "Filter Recreation Potential:",
-                    choices = seq(0, 1, by = 0.1),
-                    selected = 0.5,#c(0, 1),
-                    grid = FALSE,
+                  tags$div(
+                  class="custom-slider",
+                    tags$h4("Recreation Potential Filter"),
+                    tags$p("Use the sliders below to filter the data:"),
+                    sliderTextInput(
+                      inputId = ns("recreation_potential_slider"),
+                      label = "Filter Recreation Potential:",
+                      choices = seq(0, 1, by = 0.1),
+                      selected = 0.5,#c(0, 1),
+                      grid = FALSE,
+                    ),
                   ),
                   actionButton(
                     inputId = ns("apply_filter_recre"),
@@ -113,13 +136,16 @@ ces_rp_biodiversity_ui <- function(id) {
                       `dropdownAlignRight` = FALSE
                     )
                   ),
-                  tags$h4("Species Occurrence", class = "mt-3"),
-                  sliderTextInput(
-                    inputId = ns("species_occurrence_slider"),
-                    label = "Filter Species Occurrence:",
-                    choices = seq(0, 1, by = 0.1),
-                    selected = 0.5,
-                    grid = FALSE,
+                  tags$div(
+                  class="custom-slider",
+                    tags$h4("Species Occurrence", class = "mt-3"),
+                    sliderTextInput(
+                      inputId = ns("species_occurrence_slider"),
+                      label = "Filter Species Occurrence:",
+                      choices = seq(0, 1, by = 0.1),
+                      selected = 0.5,
+                      grid = FALSE,
+                    ),
                   ),
                   actionButton(
                     inputId = ns("apply_filter_species"),
