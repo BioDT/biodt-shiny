@@ -7,7 +7,7 @@ box::use(
 
 box::use(
   app / logic / grassland / grassland_echart_modular[generate_chart],
-    app / logic / waiter[waiter_text],
+  app / logic / waiter[waiter_text],
 )
 
 #' @export
@@ -15,28 +15,30 @@ grassland_dynamics_datachart_ui <- function(
     id,
     i18n,
     plot_width = "100%",
-    plot_height = "500px"
-  ) {
+    plot_height = "500px") {
   ns <- NS(id)
   card(
     id = ns("datachart"),
-    class = "mx-md-3 card-shadow mb-2",
+    class = "ms-md-3 card-shadow mb-2",
     full_screen = TRUE,
     card_header(
       tags$h2(
         class = "card_title",
-        i18n$translate("PFTs Chart"))
+        i18n$translate("PFTs Chart")
+      )
     ),
+    card_body(
       ecs.output(
         ns("pft_chart"),
         width = plot_width,
         height = plot_height
       )
     )
+  )
 }
 
 #' @export
-grassland_dynamics_datachart_server <- function(id) { # nolint
+grassland_dynamics_datachart_server <- function(id, plot_type) { # nolint
   moduleServer(id, function(input, output, session) {
     # Define waiter ----
     msg <- list(
@@ -62,15 +64,14 @@ grassland_dynamics_datachart_server <- function(id) { # nolint
     output$pft_chart <- ecs.render({
       generate_chart(
         filepaths = filepaths_results,
-        plot_type = "line",
+        plot_type = plot_type(),
         plot_series = "mean",
         colors = colors,
         colors_series = colors_series,
         return_series = FALSE
       )
     })
-    
-    w$hide()
 
+    w$hide()
   })
 }
