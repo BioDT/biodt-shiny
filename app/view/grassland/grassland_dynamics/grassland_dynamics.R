@@ -54,7 +54,8 @@ grassland_dynamics_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    plot_type <- reactiveVal("line")
+    plot_type <- reactiveVal("bar")
+    mean_switch <- reactiveVal(FALSE)
 
     # LOCATION settings ----
     coordinates <- grassland_dynamics_location_server("location")
@@ -66,8 +67,8 @@ grassland_dynamics_server <- function(id, r) {
     grassland_dynamics_outputplot_server("outputplot")
 
     # Module with logic for a displaying of Grassland's data
-    grassland_dynamics_datachart_server("datachart", plot_type)
+    grassland_dynamics_datachart_server("datachart", plot_type, mean_switch)
 
-    grassland_dynamics_datachart_controls_server("controls", plot_type)
+    grassland_dynamics_datachart_controls_server("controls", plot_type, mean_switch)
   })
 }
