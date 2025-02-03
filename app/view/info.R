@@ -78,7 +78,7 @@ mod_info_ui <- function(id, i18n) {
                 ),
                 tags$li(
                   class = "w-100",
-                  i18n$translate("Forest/Bird Biodiversity Dynamics")
+                  i18n$translate("Forest Biodiversity Dynamics")
                 ),
                 tags$li(
                   class = "w-100",
@@ -121,15 +121,15 @@ mod_info_ui <- function(id, i18n) {
               tags$ul(
                 tags$li(
                   class = "w-100",
-                  i18n$translate("Crop Wild Relatives and Genetic Resources for Food Security")
+                  i18n$translate("Crop Wild Relatives")
                 ),
                 tags$li(
                   class = "w-100",
-                  i18n$translate("Genetically Detected Biodiversity in Cryptic Habitats")
+                  i18n$translate("Prioritisation of DNA metabarcoding sampling locations")
                 ),
                 tags$li(
                   class = "w-100",
-                  i18n$translate("DNA Detected Biodiversity, Poorly Known Habitats")
+                  i18n$translate("Phylogenetic Diversity")
                 ),
               )
             )
@@ -195,7 +195,7 @@ mod_info_ui <- function(id, i18n) {
                   actionLink(
                     class = "w-100",
                     inputId = ns("honeybee_selector"),
-                    label = i18n$translate("Pollinators (Honeybee)")
+                    label = i18n$translate("Honey Bees in Agricultural Landscapes")
                   )
                 ),
                 tags$li(
