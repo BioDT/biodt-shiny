@@ -20,7 +20,8 @@ box::use(
     disease_outbreaks_main_ui,
     disease_outbreaks_main_server
   ],
-  app/view/cwr/cwr_main[mod_cwr_server, mod_cwr_ui]
+  app/view/cwr/cwr_main[mod_cwr_server, mod_cwr_ui],
+  app/view/ias/ias_main[ias_ui, ias_main_server],
 )
 
 shiny$enableBookmarking("server")
@@ -177,6 +178,26 @@ ui <- function(id) {
             disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
           )
         },
+        if (env_active == "dev") {
+          ## Dynamics and threats from and for species of policy concern ----
+          nav_item(
+            shiny$div(
+              class = "p-2",
+              shiny$div(
+                shiny$icon("bugs", `aria-hidden` = "true"),
+                shiny$strong(i18n$translate("Dynamics and threats from and for species of policy concern")),
+                style = "width: 450px"
+              ),
+            )
+          )
+        },
+        if (env_active == "dev") {
+          nav_panel(
+            title = i18n$translate("Invasive Alien Species"),
+            class = "p-0",
+            ias_ui(ns("ias_main"), i18n)
+          )
+        },
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
@@ -187,11 +208,6 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info")
       ),
-      if (env_active == "dev") {
-        nav_item(
-          shiny$bookmarkButton()
-        )
-      },
       if (env_active == "dev") {
         nav_item(
           shiny$selectInput(
@@ -226,12 +242,12 @@ server <- function(id) {
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
-    
+
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
     })
-    
+
     # Info page ----
     mod_info_server(
       "info",
@@ -242,7 +258,7 @@ server <- function(id) {
       "cwr_main",
       i18n
     )
-    
+
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",
@@ -252,12 +268,14 @@ server <- function(id) {
     grassland_main_server(
       "grassland_main"
     )
-
+    # Cultural Ecosystem Services pDT ----
     ces_server(
       "ces_main"
     )
-
+    # Disease Outbreaks pDT ----
     disease_outbreaks_main_server("disease_outbreaks_main")
+    # Invasie Alien Species pDT ----
+    ias_main_server("ias_main")
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
