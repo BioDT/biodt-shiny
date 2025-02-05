@@ -1685,30 +1685,6 @@
       ],
       "Hash": "3ec7e3ddcacc2d34a9046941222bf94d"
     },
-    "treesitter": {
-      "Package": "treesitter",
-      "Version": "0.1.0",
-      "Source": "Repository",
-      "Repository": "https://packagemanager.posit.co/cran/latest",
-      "Requirements": [
-        "R",
-        "R6",
-        "cli",
-        "rlang",
-        "vctrs"
-      ],
-      "Hash": "22a579e4ac2ddd021df1791da7fd080f"
-    },
-    "treesitter.r": {
-      "Package": "treesitter.r",
-      "Version": "1.1.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R"
-      ],
-      "Hash": "067c058dbd496c4cd696449870b11d52"
-    },
     "tzdb": {
       "Package": "tzdb",
       "Version": "0.4.0",
