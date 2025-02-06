@@ -47,6 +47,7 @@ grassland_dynamics_ui <- function(id, i18n) {
     ),
     grassland_dynamics_outputplot_ui(ns("outputplot"), i18n),
     grassland_dynamics_datachart_ui(ns("datachart"), i18n), # UI wrapper for the chart of use case's variable(s) (currently "PFTs")
+    grassland_dynamics_soil_main_values_ui(ns("main_soil_values"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
 }

@@ -20,9 +20,9 @@ read_project_config <- function(
 get_soil_file_name <- function(
   project_config_file,
   skip_no_lines = 36,
-  max_no_printer = 36
+  max_no_printed = 36
 ) {
-  cutoff_lines <- project_config_file[skip_no_lines:max_no_printer]
+  cutoff_lines <- project_config_file[skip_no_lines:max_no_printed]
 
   soil_file_name <- cutoff_lines[cutoff_lines |>
     str_detect("^soilFile\t")] |>
@@ -52,7 +52,22 @@ get_soil_file_path <- function(
 }
 
 #' @export
-read_main_three_values <- function(){}
+read_main_three_values <- function(file_path){
+  silt_clay_sand <- read_delim(
+    file = file_path,
+    delim = "\t",
+    col_names = TRUE,
+    col_types = list(
+      Silt = "c",
+      Clay = "c",
+      Sand = "c"
+    ),
+    skip = 0,
+    n_max = 1,
+    show_col_types = FALSE,
+  )
+  return(silt_clay_sand)
+}
 
 #' @export
 read_data_table <- function(file_path) {
