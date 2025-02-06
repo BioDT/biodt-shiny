@@ -21,6 +21,17 @@ box::use(
     grassland_dynamics_datachart_ui,
     grassland_dynamics_datachart_server
   ],
+  app/view/grassland/grassland_dynamics/grassland_dynamics_soil_datatable[
+    grassland_dynamics_soil_datatable_ui,
+    grassland_dynamics_soil_datatable_server
+  ],
+  app/logic/grassland/grassland_soil_datatable_modular[
+    read_project_config,
+    get_soil_file_name,
+    get_lat_lon_name,
+    get_soil_file_path,
+    read_data_table
+  ]
 )
 
 #' @export
@@ -35,7 +46,8 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_location_ui(ns("location"), i18n),
     ),
     grassland_dynamics_outputplot_ui(ns("outputplot"), i18n),
-    grassland_dynamics_datachart_ui(ns("datachart"), i18n) # UI wrapper for the chart of use case's variable(s) (currently "PFTs")
+    grassland_dynamics_datachart_ui(ns("datachart"), i18n), # UI wrapper for the chart of use case's variable(s) (currently "PFTs")
+    grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
 }
 
@@ -47,6 +59,13 @@ grassland_dynamics_server <- function(id, r) {
     # LOCATION settings ----
     coordinates <- grassland_dynamics_location_server("location")
 
+    # Soil data table
+    config <- read_project_config("project1")
+    filename <- get_soil_file_name(config)
+    lat_lon_path <- get_lat_lon_name(filename)
+    soil_file_path <- get_soil_file_path(lat_lon_path)
+    soil_data_table <- read_data_table(soil_file_path)
+
     # MAP itself ----
     grassland_dynamics_inputmap_server("inputmap", coordinates)
 
@@ -55,5 +74,7 @@ grassland_dynamics_server <- function(id, r) {
 
     # Module with logic for a displaying of Grassland's data
     grassland_dynamics_datachart_server("datachart")
+
+    grassland_dynamics_soil_datatable_server("soil_data_table", soil_data_table)
   })
 }

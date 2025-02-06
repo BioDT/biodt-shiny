@@ -60,7 +60,9 @@ read_data_table <- function(file_path) {
     file = file_path,
     delim = "\t",
     col_names = TRUE,
-    skip = 3
+    skip = 3,
+    show_col_types = FALSE,
+    id = NULL,
   )
   return(dt)
 }
