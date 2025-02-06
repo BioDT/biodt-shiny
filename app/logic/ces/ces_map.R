@@ -1,6 +1,6 @@
 box::use(
   leaflet[leaflet, leafletOptions, addTiles, addProviderTiles, setView, addLegend, hideGroup, labelFormat, addRasterImage, tileOptions, providers, providerTileOptions, addControl],
-  leaflet.extras[addGroupedLayersControl, groupedLayersControlOptions, addControlGPS, gpsOptions],
+  leaflet.extras[addControlGPS, gpsOptions],
   terra,
   htmlwidgets[onRender],
 )
