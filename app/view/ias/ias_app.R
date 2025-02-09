@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, conditionalPanel, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler],
+  shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, conditionalPanel, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
   shinyWidgets[pickerInput, switchInput],
   leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula],
@@ -43,6 +43,20 @@ climate_model_mapping <- list(
 ias_app_ui <- function(id) {
   ns <- NS(id)
   tagList(
+      tags$head(
+    tags$style(HTML("
+      .summary-box {
+        border: 1px solid #dee2e6; padding: 10px; text-align: center; margin: 5px; border-radius: 5px; flex: 1 1 200px;
+      }
+      .summary-box .fa { font-size: 24px; margin-bottom: 5px; }
+      .habitat-box { background-color: #FFD700; color: #000; }
+      .data-type-box { background-color: #F4A460; color: #000; }
+      .time-frame-box { background-color: #FF8C00; color: #000; }
+      .time-period-box { background-color: #CD5C5C; color: #fff; }
+      .climate-model-box { background-color: #8B4513; color: #fff; }
+      .climate-scenario-box { background-color: #D2691E; color: #fff; }
+      .species-box { background-color: #DAA520; color: #000; }
+    "))),
     fluidRow(
     # layout_sidebar(
       # sidebar = sidebar(
@@ -50,6 +64,8 @@ ias_app_ui <- function(id) {
       #   width = "400px",
       #   title = "Select parameters",
       column(
+        class = "my-3",
+        style = "margin-left: 1em !important",
         width = 3,
         card(
         # Existing inputs ...
@@ -103,13 +119,14 @@ ias_app_ui <- function(id) {
       ),
       column(
         8,
-      card(
-        height = 650,
-        full_screen = TRUE,
-        card_header("pDT-IAS"),
-        card_body(leafletOutput(ns("rasterMap"))),
-        card_footer(class = "fs-6", uiOutput(ns("selectedOptions")))
-      )
+        class = "m-3",
+        card(
+          height = 650,
+          full_screen = TRUE,
+          card_header("pDT-IAS"),
+          card_body(leafletOutput(ns("rasterMap"))),
+          card_footer(class = "fs-6", uiOutput(ns("selectedOptions")))
+        )
     )
   )
 )
