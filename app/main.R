@@ -22,6 +22,7 @@ box::use(
   ],
   app/view/cwr/cwr_main[mod_cwr_server, mod_cwr_ui],
   app/view/ias/ias_main[ias_ui, ias_main_server],
+  app/view/rtbm/rtbm_main[rtbm_ui, rtbm_main_server],
 )
 
 shiny$enableBookmarking("server")
@@ -146,6 +147,16 @@ ui <- function(id) {
             title = i18n$translate("Crop wild relatives and genetic resources for food security"),
             mod_cwr_ui(
               ns("cwr_main"),
+              i18n
+            )
+          )
+        },
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = i18n$translate("Real-time Bird Monitoring with Citizen Science Data"),
+            rtbm_ui(
+              ns("rtbm_main"),
               i18n
             )
           )
@@ -276,6 +287,8 @@ server <- function(id) {
     disease_outbreaks_main_server("disease_outbreaks_main")
     # Invasie Alien Species pDT ----
     ias_main_server("ias_main")
+    # Real-time Bird Monitoring pDT ----
+    rtbm_main_server("rtbm_main")
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
