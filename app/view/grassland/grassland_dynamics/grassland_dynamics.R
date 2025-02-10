@@ -31,6 +31,9 @@ box::use(
     get_lat_lon_name,
     get_soil_file_path,
     read_data_table
+  ],
+  app/view/grassland/grassland_dynamics/grassland_dynamics_soil_main_values[
+    grassland_dynamics_soil_main_values_ui
   ]
 )
 
