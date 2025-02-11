@@ -30,11 +30,13 @@ box::use(
     get_soil_file_name,
     get_lat_lon_name,
     get_soil_file_path,
-    read_data_table
+    read_data_table,
+    read_main_three_values
   ],
   app/view/grassland/grassland_dynamics/grassland_dynamics_soil_main_values[
-    grassland_dynamics_soil_main_values_ui
-  ]
+    grassland_dynamics_soil_main_values_ui,
+    grassland_dynamics_soil_main_values_server
+  ],
 )
 
 #' @export
@@ -70,6 +72,9 @@ grassland_dynamics_server <- function(id, r) {
     soil_file_path <- get_soil_file_path(lat_lon_path)
     soil_data_table <- read_data_table(soil_file_path)
 
+    # Soil - main three values from above table
+    main_soil_values <- read_main_three_values(soil_file_path)
+
     # MAP itself ----
     grassland_dynamics_inputmap_server("inputmap", coordinates)
 
@@ -79,6 +84,10 @@ grassland_dynamics_server <- function(id, r) {
     # Module with logic for a displaying of Grassland's data
     grassland_dynamics_datachart_server("datachart")
 
+    # Soil data table
     grassland_dynamics_soil_datatable_server("soil_data_table", soil_data_table)
+
+    # Soil main 3 values from above soil data table
+    grassland_dynamics_soil_main_values_server("main_soil_values", main_soil_values)
   })
 }

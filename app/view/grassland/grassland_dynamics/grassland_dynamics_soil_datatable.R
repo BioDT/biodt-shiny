@@ -3,6 +3,7 @@ box::use(
   bslib[card, card_header, card_body],
   waiter[Waiter],
   DT[DTOutput, renderDT],
+  dplyr[select]
 )
 
 #' @export
@@ -40,8 +41,18 @@ grassland_dynamics_soil_datatable_server <- function(id,
     data_table_reactive(data_table)
 
     output$soil_data_table <- renderDT(
-      data_table_reactive(),
+      rownames = FALSE, 
+      {
+        data_table_reactive()      
+        #|>
+          # select(
+          #   "Layer" = Layer,
+          #   "FC[V%]" = `FC[V%]`,
+          #   "PWP[V%]" = `PWP[V%]`,
+          #   "POR[V%]" = `POR[V%]`,
+          #   "KS[mm/d]" = `KS[mm/d]`
+          # )
+      }
     )
-
   })
 }
