@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, icon, NS,showNotification, reactiveVal, observeEvent],
+  shiny[moduleServer, icon, NS, reactiveVal, observeEvent],
   bslib[navset_tab, nav_panel],
 )
 
@@ -55,19 +55,22 @@ ces_ui <- function(id) {
 ces_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     # Reactive value to track if the tabs were selected
     ces_selected <- reactiveVal(FALSE)
 
-    observeEvent(input$tab, {
+    observeEvent(
+      input$tab,
+      ignoreInit = TRUE, {
+      print(input$tab)
       # Check if the tab matches any of the specified tabs
       if (!ces_selected() && (input$tab == "Recreation & Biodiversity"
           # || input$tab == "Recreation potential" ||
           # input$tab == "Biodiversity"
       )) {
-        
+
         # Set ces_selected to TRUE if it's not already TRUE
-        ces_selected(TRUE) 
+        ces_selected(TRUE)
       }
     })
 

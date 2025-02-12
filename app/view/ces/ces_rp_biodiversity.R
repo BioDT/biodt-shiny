@@ -2,7 +2,6 @@ box::use(
   shiny[moduleServer, NS, tagList, column, fluidRow, verbatimTextOutput, actionButton, observe, observeEvent, radioButtons, checkboxInput, p, textOutput, renderText, reactive, HTML, selectInput, req, renderUI, uiOutput, htmlOutput, selectizeInput, tags, reactiveVal],
   bslib[card, nav_select, card_title, card_body],
   leaflet[addRasterImage, leafletOutput, renderLeaflet, leafletProxy, colorBin, layersControlOptions, removeLayersControl, addControl, addLayersControl, clearControls, showGroup, clearGroup, setMaxBounds, labelFormat, tileOptions],
-  leaflet.extras[addControlGPS, gpsOptions],
   terra[rast, values, crop, app, ifel, ext, as.polygons, sprc, merge, mean],
   waiter[Waiter],
   DT[renderDT, DTOutput],
