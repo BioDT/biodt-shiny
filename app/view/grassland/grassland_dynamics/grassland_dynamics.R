@@ -25,6 +25,10 @@ box::use(
     grassland_dynamics_datachart_controls_ui,
     grassland_dynamics_datachart_controls_server
   ],
+  app/view/grassland/grassland_dynamics/grassland_dynamics_weather_grass_chart[
+    grassland_dynamics_double_chart_ui,
+    grassland_dynamics_double_chart_server
+  ],
 )
 
 #' @export
@@ -39,6 +43,7 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_location_ui(ns("location"), i18n),
     ),
     grassland_dynamics_outputplot_ui(ns("outputplot"), i18n),
+    grassland_dynamics_double_chart_ui(ns("double_chart"), i18n),
     layout_column_wrap(
       width = NULL,
       fill = FALSE,
@@ -65,6 +70,9 @@ grassland_dynamics_server <- function(id, r) {
 
     # Output PLOT ----
     grassland_dynamics_outputplot_server("outputplot")
+
+    # WITH Weather
+    grassland_dynamics_double_chart_server("double_chart")
 
     # Module with logic for a displaying of Grassland's data
     grassland_dynamics_datachart_server("datachart", plot_type, mean_switch)
