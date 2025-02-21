@@ -117,10 +117,20 @@ generate_chart_with_weather <- function(
   filepaths_grass,
   filepath_weather,
   plot_type = "line", # "bar", "line"
+  plot_series = "all", # "all", "mean", "series"
+  clrs = c("#00aa00", "#a00000", "#0000d3"),
   colors_for_grass = c("#b4e4b4", "#dfa7a7", "#9c9cdf"),
   colors_for_weather = c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF"),
-  grass_end_date = "2015-12-31"
+  grass_end_date = "2015-12-31",
+  return_series = FALSE
 ) {
+
+  if (plot_type == "bar") {
+    plot_series <- "mean"
+    stack <- "total"
+  } else if (plot_type == "line") {
+    stack <- NULL
+  }
 
   final_simulations <- NULL
   simulations <- NULL
@@ -130,15 +140,54 @@ generate_chart_with_weather <- function(
       c(
         read_grass_simulations(
           filepath,
-          plot_type = "line",
+          plot_type = plot_type,
           colors = colors_for_grass,
+          stack = stack
         )
       )
   }
 
-  pft_list <- map_chr(simulations, "name")
-  pft_unique <- sort(unique(pft_list))
+  if (plot_series == "series" || plot_series == "all") {
+    final_simulations <- simulations
+  }
 
+  if (plot_series == "mean" || plot_series == "all") {
+    # Compute mean ----
+    pft_list <- map_chr(simulations, "name")
+    pft_unique <- sort(unique(pft_list))
+
+    for (i in seq_along(sort(pft_unique))) {
+      sub_simulations <- simulations[pft_list == pft_list[i]]
+      n_series <- length(sub_simulations)
+
+      series_mean <- rep(0, length(sub_simulations[[1]]$data))
+
+      for (series in sub_simulations) {
+        series_mean <- series_mean + unlist(series$data) / n_series
+      }
+
+      series_mean <- series_mean |>
+        round(2) |>
+        as.list()
+
+      final_simulations <- final_simulations |>
+        append(list(
+          list(
+            name = paste(pft_unique[i], "mean"),
+            type = plot_type,
+            showSymbol = FALSE,
+            stack = stack,
+            symbolSize = 20,
+            color = clrs[i],
+            emphasis = list(disabled = TRUE),
+            data = series_mean
+          )
+        ))
+    }
+  }
+
+
+  # generate chart - Weather data ----
   weather_data <- read_weather_data(
     file_path = filepath_weather,
     end_date = grass_end_date,
@@ -168,7 +217,10 @@ generate_chart_with_weather <- function(
 
   # Prepare tooltip formatter
   kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
+  print(kl) # [1] 36 37 38
   formatter <- paste0("{a", kl, "} at time {b", kl, "}:  {c", kl, "}", collapse = "<br />")
+  
+  # formatter <- paste0("{a36 37 38} at time {b36 37 38}:  {c36 37 38}", collapse = "<br />")
 
   # Echarty: making chart ----
   #' @export
@@ -277,6 +329,10 @@ generate_chart_with_weather <- function(
       series = final_simulations
     )
 
+  if (return_series) {
+    return(final_simulations)
+  } else {
     return(chart)
+  }
 }
 

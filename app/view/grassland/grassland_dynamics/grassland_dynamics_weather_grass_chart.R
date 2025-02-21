@@ -38,7 +38,7 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id) {
+grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -69,6 +69,7 @@ grassland_dynamics_double_chart_server <- function(id) {
       generate_chart_with_weather(
         filepaths_grass = files_grass,
         filepath_weather = file_weather,
+        plot_type = plot_type(),
         colors_for_grass = colors_for_grass,
         colors_for_weather = colors_for_weather,
         grass_end_date = end_date
