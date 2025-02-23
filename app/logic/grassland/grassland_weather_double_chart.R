@@ -216,11 +216,11 @@ generate_chart_with_weather <- function(
     unique()
 
   # Prepare tooltip formatter
-  kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
-  print(kl) # [1] 36 37 38
-  formatter <- paste0("{a", kl, "} at time {b", kl, "}:  {c", kl, "}", collapse = "<br />")
-  
-  # formatter <- paste0("{a36 37 38} at time {b36 37 38}:  {c36 37 38}", collapse = "<br />")
+  #kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
+  kl <- 33:38 # hardcoded, TODO figure out better, with a function or so...
+
+  formatter <- paste0("{a", kl, "}:   {c", kl, "}", collapse = "<br />")
+  formatter <- paste0("DATE: {b1}<br />\n", formatter)
 
   # Echarty: making chart ----
   #' @export
@@ -237,9 +237,7 @@ generate_chart_with_weather <- function(
         borderWidth = 1,
         borderColor = "#ccc",
         padding = 10,
-        textStyle = list(
-          color = "#000"
-        )
+        textStyle = list(color = "#000")
       ),
       axisPointer = list(
         link = list(
@@ -251,7 +249,12 @@ generate_chart_with_weather <- function(
           backgroundColor = "#777"
         )
       ),
-      legend = list(data = pft_unique),
+      legend = list(
+        orient = "vertical",
+        bottom = "40%",
+        right = "2%",
+        data = pft_unique
+      ),
       grid = list(
         list(
           left = "10%",
@@ -268,7 +271,11 @@ generate_chart_with_weather <- function(
       xAxis = list(
         list(
           type = "category",
-          boundaryGap = TRUE,
+          scale = TRUE,
+          boundaryGap = FALSE,
+          axisLine = list(
+            onZero = FALSE
+          ),
           nameLocation = "middle",
           nameGap = 25,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -277,9 +284,10 @@ generate_chart_with_weather <- function(
         list(
           type = "category",
           gridIndex = 1,
-          boundaryGap = TRUE,
+          scale = TRUE,
+          boundaryGap = FALSE,
           axisLine = list(
-            onZero = TRUE
+            onZero = FALSE
           ),
           axisTick = list(
             show = TRUE
