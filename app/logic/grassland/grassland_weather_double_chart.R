@@ -87,10 +87,12 @@ read_weather_data <- function(
     show_col_types = FALSE,
     id = NULL,
   ) |>
-    dplyr::filter(Date <= end_date)
+    dplyr::filter(Date <= end_date) # |>
+    # dplyr::select(!(`PAR[µmolm-2s-1]`))
 
   series_list <- list()
-  weather_col_names <- c("Precipitation[mm]", "Temperature[degC]", "Temperature_Daylight[degC]", "PAR[µmolm-2s-1]", "Daylength[h]", "PET[mm]")
+  
+  weather_col_names <- c("Precipitation[mm]", "Temperature[degC]", "Temperature_Daylight[degC]", "PAR[µmolm-2s-1]", "Daylength[h]", "PET[mm]") # removed "PAR[µmolm-2s-1]",
   for (col_name in weather_col_names) {
     i <- length(series_list) + 1
     
@@ -150,7 +152,7 @@ generate_chart_with_weather <- function(
   if (plot_series == "series" || plot_series == "all") {
     final_simulations <- simulations
   }
-
+  
   if (plot_series == "mean" || plot_series == "all") {
     # Compute mean ----
     pft_list <- map_chr(simulations, "name")
@@ -250,9 +252,10 @@ generate_chart_with_weather <- function(
         )
       ),
       legend = list(
-        orient = "vertical",
-        bottom = "40%",
-        right = "2%",
+        show = FALSE,
+        orient = "horizontal",
+        # bottom = "50%",
+        # right = "2%",
         data = pft_unique
       ),
       grid = list(
@@ -287,7 +290,7 @@ generate_chart_with_weather <- function(
           scale = TRUE,
           boundaryGap = FALSE,
           axisLine = list(
-            onZero = FALSE
+            onZero = TRUE
           ),
           axisTick = list(
             show = TRUE
@@ -309,7 +312,7 @@ generate_chart_with_weather <- function(
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
-          min = 0,
+          min = 0, 
           max = 100,
           scale = TRUE,
           splitArea = list(
@@ -320,6 +323,8 @@ generate_chart_with_weather <- function(
           scale = TRUE,
           gridIndex = 1,
           splitNumber = 2,
+          # min = 0,
+          # max = 100,
           axisLabel = list(
             show = FALSE
           ) ,

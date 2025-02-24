@@ -70,6 +70,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch) {
         filepaths_grass = files_grass,
         filepath_weather = file_weather,
         plot_type = plot_type(),
+        plot_series = ifelse(mean_switch(), "mean", "all"),
         colors_for_grass = colors_for_grass,
         colors_for_weather = colors_for_weather,
         grass_end_date = end_date
