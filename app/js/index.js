@@ -16,6 +16,8 @@ export function activeRecreation() {
   recre.classList.add("d-block")
   let species = document.getElementById("speciesSidebar")
   species.classList.add("d-none")
+  let maps = document.getElementById("mapsSidebar")
+  maps.classList.add("d-none")
 }
 
 export function deactRecreation() {
@@ -29,9 +31,26 @@ export function activeSpecies() {
   species.classList.add("d-block")
   let recre = document.getElementById("slidersSidebar")
   recre.classList.add("d-none")
+  let maps = document.getElementById("mapsSidebar")
+  maps.classList.add("d-none")
 }
 
 export function deactSpecies() {
   let species = document.getElementById("speciesSidebar")
   species.classList.add("d-none")
+}
+
+export function activeMaps() {
+  let maps = document.getElementById("mapsSidebar")
+  maps.classList.remove("d-none")
+  maps.classList.add("d-block")
+  let recre = document.getElementById("slidersSidebar")
+  recre.classList.add("d-none")
+  let species = document.getElementById("speciesSidebar")
+  species.classList.add("d-none")
+}
+
+export function deactMaps() {
+  let maps = document.getElementById("mapsSidebar")
+  maps.classList.add("d-none")
 }
