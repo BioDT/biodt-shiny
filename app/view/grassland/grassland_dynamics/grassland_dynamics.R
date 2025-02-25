@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, column, fixedRow, reactiveVal],
+  shiny[NS, tagList, moduleServer, column, fixedRow, reactiveVal, observeEvent],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -74,12 +74,11 @@ grassland_dynamics_ui <- function(id, i18n) {
 
     grassland_dynamics_soil_main_values_ui(ns("main_soil_values"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
-
   )
 }
 
 #' @export
-grassland_dynamics_server <- function(id, r) {
+grassland_dynamics_server <- function(id, tab_grassland_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -90,14 +89,14 @@ grassland_dynamics_server <- function(id, r) {
     coordinates <- grassland_dynamics_location_server("location")
 
     # Soil data table
-    config <- read_project_config("project1")
-    filename <- get_soil_file_name(config)
-    lat_lon_path <- get_lat_lon_name(filename)
-    soil_file_path <- get_soil_file_path(lat_lon_path)
+    soil_config <- read_project_config("project1")
+    soil_filename <- get_soil_file_name(soil_config)
+    soil_lat_lon_path <- get_lat_lon_name(soil_filename)
+    soil_file_path <- get_soil_file_path(soil_lat_lon_path)
     soil_data_table <- read_data_table(soil_file_path)
 
     # Soil - main three values from above table
-    main_soil_values <- read_main_three_values(soil_file_path)
+    main_soil_values <- read_main_three_values(soil_file_path)  
 
     # MAP itself ----
     grassland_dynamics_inputmap_server("inputmap", coordinates)
@@ -117,7 +116,7 @@ grassland_dynamics_server <- function(id, r) {
 
     # Soil data table
     grassland_dynamics_soil_datatable_server("soil_data_table", soil_data_table)
-
+    
     # Soil main 3 values from above soil data table
     grassland_dynamics_soil_main_values_server("main_soil_values", main_soil_values)
   })

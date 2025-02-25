@@ -36,22 +36,10 @@ grassland_dynamics_soil_datatable_ui <- function(
 grassland_dynamics_soil_datatable_server <- function(id,
                                                       data_table) {
   moduleServer(id, function(input, output, session) {
-    data_table_reactive <- reactiveVal()
-
-    data_table_reactive(data_table)
-
     output$soil_data_table <- renderDT(
       rownames = FALSE, 
       {
-        data_table_reactive()      
-        #|>
-          # select(
-          #   "Layer" = Layer,
-          #   "FC[V%]" = `FC[V%]`,
-          #   "PWP[V%]" = `PWP[V%]`,
-          #   "POR[V%]" = `POR[V%]`,
-          #   "KS[mm/d]" = `KS[mm/d]`
-          # )
+        data_table
       }
     )
   })
