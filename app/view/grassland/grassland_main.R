@@ -15,6 +15,7 @@ box::use(
 grassland_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
+    id = (ns("tab")),
     # Info Page ---
     nav_panel(
       title = "Info",
@@ -27,8 +28,8 @@ grassland_main_ui <- function(id, i18n) {
     ),
     # Grassland Case ----
     nav_panel(
-      title = i18n$translate("Grassland Dynamics"),
-      value = "Grassland Dynamics",
+      title = i18n$translate("Dynamics"),
+      value = "Dynamics",
       icon = icon("leaf"),
       grassland_dynamics_ui(
         ns("grassland_app"),
@@ -48,7 +49,11 @@ grassland_main_server <- function(id) {
     observeEvent(
       input$tab,
       {
-        if (input$tab == "Grassland Dynamics") {
+        print("input$tab:::")
+        print(input$tab)
+        if (input$tab == "Dynamics") {
+          #print(tab_grassland_selected)
+          #print(tab_grassland_selected())
           tab_grassland_selected(TRUE)
         } else {
           tab_grassland_selected(FALSE)

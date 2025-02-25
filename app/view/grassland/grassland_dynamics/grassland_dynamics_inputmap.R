@@ -30,24 +30,31 @@ grassland_dynamics_inputmap_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_inputmap_server <- function(id, coordinates) { # nolint: object_length_linter.
+grassland_dynamics_inputmap_server <- function(id, coordinates, tab_grassland_selected) { # nolint: object_length_linter.
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$leaflet_output <- renderLeaflet({
-      leaflet(
-        options = leafletOptions(
-          zoomControl = TRUE,
-          minZoom = 2,
-        )
-      ) |>
-        addTiles() |>
-        setView(
-          lng = 11.8787,
-          lat = 51.3919,
-          zoom = 9
-        )
-    })
+
+    observeEvent(tab_grassland_selected(),
+      ignoreNULL = TRUE,
+      ignoreInit = TRUE,
+      {
+        output$leaflet_output <- renderLeaflet({
+          leaflet(
+            options = leafletOptions(
+              zoomControl = TRUE,
+              minZoom = 2,
+            )
+          ) |>
+            addTiles() |>
+            setView(
+              lng = 11.8787,
+              lat = 51.3919,
+              zoom = 9
+            )
+        })
+      }
+    )
 
     # Calls update inputmap (leafletProxy fn) with the given coordinates (lng/lat or DEIMS.id)----
     observeEvent(
@@ -61,5 +68,5 @@ grassland_dynamics_inputmap_server <- function(id, coordinates) { # nolint: obje
         )
       }
     )
-  })
+    })
 }

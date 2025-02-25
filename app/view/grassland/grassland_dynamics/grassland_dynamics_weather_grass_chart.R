@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, reactive],
+  shiny[NS, moduleServer, tags, reactive, observeEvent],
   bslib[card, card_header, card_body],
   echarty[ecs.output, ecs.render],
   waiter[Waiter],
@@ -38,13 +38,13 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch) {
+grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, tab_grassland_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Define waiter ----
     msg <- list(
-      waiter_text(message = tags$h3("Loading chart...",
+      waiter_text(message = tags$h3("Loading...",
         style = "color: #414f2f;"
       ))
     )
@@ -60,26 +60,33 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch) {
     colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
     end_date <- "2015-12-31"
 
-    chart_reactive <- reactive({
-      w$show()
-      on.exit({
+    observeEvent(
+      tab_grassland_selected(),
+      ignoreNULL = TRUE,
+      ignoreInit = TRUE,
+      {
+        print("from double chart::")
+        print(tab_grassland_selected())
+        w$show()
+        chart_reactive <- reactive({
+          generate_chart_with_weather(
+            filepaths_grass = files_grass,
+            filepath_weather = file_weather,
+            plot_type = plot_type(),
+            plot_series = ifelse(mean_switch(), "mean", "all"),
+            colors_for_grass = colors_for_grass,
+            colors_for_weather = colors_for_weather,
+            grass_end_date = end_date
+          )
+        })
+
+        output$double_chart <- ecs.render(
+          chart_reactive()
+        )
         w$hide()
-      })
-
-      generate_chart_with_weather(
-        filepaths_grass = files_grass,
-        filepath_weather = file_weather,
-        plot_type = plot_type(),
-        plot_series = ifelse(mean_switch(), "mean", "all"),
-        colors_for_grass = colors_for_grass,
-        colors_for_weather = colors_for_weather,
-        grass_end_date = end_date
-      )
-    })
-
-    output$double_chart <- ecs.render(
-      chart_reactive()
+      }
     )
+    
 
   })
 }
