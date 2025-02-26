@@ -14,9 +14,10 @@ mod_acknowledgements_ui <- function(id) {
         id = ns("acknowledgement"),
         class = "mt-2 mx-md-3 card-shadow",
         card_header(
-              tags$h2(
-                class = "card_title",
-                "Acknowledgements"),
+          tags$h2(
+            class = "card_title",
+            "Acknowledgements"
+          ),
         ),
         card_body(
           id = ns("acknowledgement"),
@@ -38,9 +39,10 @@ mod_acknowledgements_ui <- function(id) {
         id = ns("credits"),
         class = "mt-2 mx-md-3 card-shadow",
         card_header(
-              tags$h2(
-                class = "card_title",
-                "Credits"),
+          tags$h2(
+            class = "card_title",
+            "Credits"
+          ),
         ),
         card_body(
           id = ns("credits"),
@@ -59,9 +61,10 @@ mod_acknowledgements_ui <- function(id) {
           "),
               tags$li("Tomáš Martinovič, IT4Innovations, VSB - Technical University of Ostrava"),
               tags$li("Ondrej Salamon, IT4Innovations, VSB - Technical University of Ostrava"),
+              tags$li("Kata Sara-aho, CSC - IT Center for Science"),
               tags$li("Allan Souza, University of Helsinki"),
               tags$li("Simon Rolph, UK Centre for Ecology & Hydrology"),
-              tags$li("Kata Sara-aho, CSC - IT Center for Science"),
+              tags$li("Dylan Carbone, UK Centre for Ecology & Hydrology"),
             ),
           ),
           tags$div(
