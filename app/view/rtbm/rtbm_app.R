@@ -28,7 +28,8 @@ bird_spp_info <- bird_info |>
   spread_all() |>
   as_tibble() |>
   select(-document.id) |> 
-  arrange(common_name)
+  arrange(common_name) |>
+  mutate(scientific_name = stringr::str_replace(string = scientific_name, pattern = " ", replacement = "_"))
 
 # Use the common name for the picker
 species_choices <- bird_spp_info$common_name
@@ -44,9 +45,9 @@ rtbm_app_ui <- function(id, i18n) {
             dateInput(
               inputId = ns("selectedDate"),
               label = "Select date:",
-              value = as.Date("2024-12-25"),
+              value = as.Date(today()),
               min = as.Date("2024-11-27"),
-              max = as.Date("2024-12-25")
+              max = as.Date(today())
             ),
             pickerInput(
               ns("speciesPicker"),
@@ -161,21 +162,12 @@ rtbm_app_server <- function(id, tab_selected) {
     }
     
     # Use the Finnish name to build the .tif URL
-    url_tif <- if (selected_date == "2024-11-27") {
-      paste0(
-        "https://2007147-webportal.a3s.fi/daily/",
-        "2024-11-27-rasterize/",
-        finnishName(),
-        ".tif"
-      )
-    } else {
-      paste0(
-        "https://2007147-webportal.a3s.fi/daily/",
-        selected_date, "/",
-        finnishName(),
-        "_occurrences.tif"
-      )
-    }
+    url_tif <- paste0(
+      "https://2007581-webportal.a3s.fi/daily/",
+      selected_date, "/",
+      scientificName(),
+      "_occurrences.tif"
+    )
     print(paste("Attempting to access URL:", url_tif))
     
     # First check if the URL is accessible

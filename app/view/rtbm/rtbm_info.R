@@ -17,7 +17,7 @@ rtbm_info_ui <- function(id) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         h2("Welcome to the Real-time bird monitoring pDT dashboard."),
         p("This dashboard provides insights into bird observations and related statistics. \n Use the navigation tabs to explore detailed visualizations and data summaries."),
-        p(strong("v0.1.1:"), em("updated on 2025-01-08"))
+        p(strong("v0.1.2:"), em("updated on 2025-02-20"))
 )
     ),
     column(
