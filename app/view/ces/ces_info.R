@@ -36,7 +36,7 @@ ces_info_ui <- function(id) {
         tags$img(
           class = "info-picture",
           src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
-          alt = "",
+          alt = "Cairnforms National Park",
         )
       )
     )

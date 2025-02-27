@@ -6,12 +6,13 @@ box::use(
 box::use(
   app/view/ces/ces_info[ces_info_ui,ces_info_server],
   app/view/ces/ces_rp[ces_rp_ui,ces_rp_server],
+  app/view/ces/ces_contributors[ces_contributors_ui,ces_contributors_server],
   app/view/ces/ces_biodiversity[ces_biodiversity_ui,ces_biodiversity_server],
   app/view/ces/ces_rp_biodiversity[ces_rp_biodiversity_ui,ces_rp_biodiversity_server],
 )
 
 #' @export
-ces_ui <- function(id) {
+ces_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
     id = ns("tab"),
@@ -46,6 +47,15 @@ ces_ui <- function(id) {
       icon = icon("tree"),
       ces_biodiversity_ui(
         ns("ces_biodiversity")
+      )
+    ),
+    nav_panel(
+      title = "Contributors",
+      value = "Contributors",
+      icon = icon("sitemap"),
+      ces_contributors_ui(
+        ns("ces_contributors"), 
+        i18n
       )
     ),
   )

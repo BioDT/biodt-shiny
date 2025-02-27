@@ -128,7 +128,8 @@ ui <- function(id) {
             title = i18n$translate("Cultural Ecosystem Services"),
             value = "CES",
             ces_ui(
-              ns("ces_main")
+              ns("ces_main"),
+              i18n
             )
           ),
         if (env_active == "dev") {
