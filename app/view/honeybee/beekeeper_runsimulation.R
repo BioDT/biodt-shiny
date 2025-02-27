@@ -7,11 +7,182 @@ box::use(
   waiter[Waiter],
   fs[file_copy],
   utils[write.csv],
+  httr2[request, req_headers, req_body_json, req_url_path_append, req_perform, req_method, req_options, req_perform_connection, resp_check_status, resp_stream_lines],
+  jsonlite[fromJSON],
 )
 
 box::use(
   app / logic / waiter[waiter_text],
 )
+
+create_and_wait_k8s_job <- function(data_subpath, run_id) {
+  # Get the service account token
+  token <- Sys.getenv("KUBERNETES_API_TOKEN", "")
+  if ( token == "" ) {
+    print("No manual token present, reading k8s-mounted service account token")
+    token <- readLines("/var/run/secrets/kubernetes.io/serviceaccount/token", warn = FALSE)
+  }
+  api_url <- Sys.getenv("KUBERNETES_API_URL", "https://kubernetes.default.svc")
+  namespace <- Sys.getenv("KUBERNETES_NAMESPACE", "default")
+  shinyproxy_id <- Sys.getenv("SHINYPROXY_ID", "")
+  if (shinyproxy_id == "") {
+    stop("SHINYPROXY_ID is not set, and is mandatory for k8s-based execution.")
+  }
+  
+  # Generate job name
+  job_name <- paste0("beehave-", tolower(gsub("[^[:alnum:]]", "-", shinyproxy_id)), "-", run_id)
+
+  # Job specification
+  job_spec <- list(
+    apiVersion = "batch/v1",
+    kind = "Job",
+    metadata = list(
+      name = job_name,
+      namespace = namespace
+    ),
+    spec = list(
+      template = list(
+        spec = list(
+          containers = list(
+            list(
+              name = "beehave",
+              image = "ghcr.io/biodt/beehave:0.3.9",
+              command = list("/scripts/cloud/run_docker_flow.sh"),
+              env = list(
+                list(name = "INPUT_DIR", value = "/data"),
+                list(name = "OUTPUT_DIR", value = "/data/output"),
+                list(name = "MAP", value = "map.tif"),
+                list(name = "LOOKUP_TABLE", value = "lookup_table.csv"),
+                list(name = "LOCATIONS", value = "locations.csv"),
+                list(name = "PARAMETERS", value = "parameters.csv"),
+                list(name = "NETLOGO_JAR_PATH", value = "/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar"),
+                list(name = "MODEL_PATH", value = "/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
+                list(name = "CPUS", value = "1")
+              ),
+              resources = list(
+                limits = list(cpu = "1")
+              ),
+              volumeMounts = list(
+                list(name = "biodt-scripts-volume", mountPath = "/scripts/cloud"),
+                list(name = "biodt-pollinators-r-volume", mountPath = "/R"),
+                list(name = paste0("biodt-shared-dir-volume-", shinyproxy_id), mountPath = "/data", subPath = data_subpath)
+              )
+            )
+          ),
+          volumes = list(
+            list(
+              name = "biodt-scripts-volume",
+              persistentVolumeClaim = list(claimName = "biodt-scripts-pvc")
+            ),
+            list(
+              name = "biodt-pollinators-r-volume",
+              persistentVolumeClaim = list(claimName = "biodt-pollinators-r-pvc")
+            ),
+            list(
+              name = paste0("biodt-shared-dir-volume-", shinyproxy_id),
+              persistentVolumeClaim = list(claimName = paste0("biodt-shared-dir-pvc-", shinyproxy_id))
+            )
+          ),
+          restartPolicy = "Never"
+        )
+      ),
+      backoffLimit = 4
+    )
+  )
+  
+  # Create the job
+  print("Creating a k8s-based beehave job...")
+  response <- request(api_url) |>
+    req_url_path_append("apis", "batch", "v1", "namespaces", namespace, "jobs") |>
+    req_headers(
+      "Authorization" = paste("Bearer", token),
+      "Content-Type" = "application/json"
+    ) |>
+    req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE) |>
+    req_body_json(job_spec) |>
+    req_perform()
+  
+  resp_check_status(response)
+  
+  # Wait for job completion
+  print("Waiting for beehave job completion...")
+  timeout <- 1200  # 20 minutes timeout
+  start_time <- Sys.time()
+
+  watch_url <- paste0(api_url, "/apis/batch/v1/namespaces/", namespace, 
+                     "/jobs?watch=true&timeoutSeconds=5000&fieldSelector=metadata.name=", job_name)
+
+  # Set up streaming GET request
+  tryCatch({
+    con <- request(watch_url) |>
+      req_headers("Authorization" = paste("Bearer", token)) |>
+      req_method("GET") |>
+      req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE) |>
+      req_perform_connection(blocking = FALSE, verbosity = NULL)
+    
+      while(TRUE) {
+        # For some reason, the blocking connection (or the stream) in httr2 is not working
+        # properly, (only the first line is parsed) so we need to use a non-blocking connection
+        # and an active waiting loop to check if there is any data available.
+        # TODO: Submit an issue to the httr2 package, or switch to old httr package.
+        line <- resp_stream_lines(con, lines = 1, warn = FALSE)
+        if (length(line) == 0) {
+          Sys.sleep(0.1)
+          next
+        }
+
+        event <- fromJSON(line)
+        status <- event$object$status
+        
+        if (!is.null(status$succeeded) && status$succeeded > 0) {
+          print("Beehave job completed successfully! Stopping the watch...")
+          break
+        }
+        if (!is.null(status$failed) && status$failed > 0) {
+          stop("FAILED")
+        }
+        if (difftime(Sys.time(), start_time, units = "secs") > timeout) {
+          stop("TIMEOUT")
+        }
+        next
+      }
+  }, error = function(e) {
+    if(grepl("FAILED", e$message)) {
+      stop("Beehave job failed.")
+    }
+    else if(grepl("TIMEOUT", e$message)) {
+      stop("Beehave job timeout.")
+    }
+    else{
+      error_message <- paste0("Unexpected error: ", e)
+      stop(error_message)
+    }
+  })
+  close(con)
+  print("Successfully stopped the watch.")
+
+  # Delete the job
+  job_delete_response <- request(api_url) |>
+    req_url_path_append("apis", "batch", "v1", "namespaces", namespace, "jobs", job_name) |>
+    req_method("DELETE") |>
+    req_headers(
+      "Authorization" = paste("Bearer", token),
+      "Content-Type" = "application/json"
+    ) |>
+    req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE) |>
+    req_body_json(list(propagationPolicy = "Foreground")) |>
+    req_method("DELETE") |>
+    req_perform()
+
+  tryCatch({
+    resp_check_status(job_delete_response)
+    print("Beehave job deleted successfully.")
+  }, error = function(e) {
+    print("Failed to delete Beehave job: ", e$message)
+  })
+
+  return(TRUE)
+}
 
 #' @export
 beekeeper_runsimulation_ui <- function(id, i18n) {
@@ -138,6 +309,7 @@ beekeeper_runsimulation_server <- function(
           Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S")
         )
         dir.create(run_dir)
+        data_subpath <- stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared/"))
 
         lookup_file <- file.path(run_dir, "lookup_table.csv")
         parameters_file <- file.path(run_dir, "parameters.csv")
@@ -200,16 +372,22 @@ beekeeper_runsimulation_server <- function(
           row.names = FALSE
         )
         # Run workflow ----
-        # docker_call <- paste0('docker run -v "/Users/martinovic/resilio/IT4I/Projects/BioDT/WP6/uc-pollinators/scripts/cloud/":"/scripts" -v "/Users/martinovic/resilio/IT4I/Projects/BioDT/WP6/uc-pollinators/R":"/R" -v "/Users/martinovic/git/biodt-shiny/', run_dir,'":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
-        # Execute docker run, no socket should be needed for this
+        print("Starting the workflow execution.")
+        EXECUTOR_TYPE <- Sys.getenv("EXECUTOR_TYPE", "DOCKER")
+        run_id <- counter()
 
-        docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
-
-        system(docker_call)
-
+        if (EXECUTOR_TYPE == "DOCKER") {
+          docker_call <- paste0('docker run -v "', Sys.getenv("SCRIPT_PATH"), '":"/scripts" -v "', Sys.getenv("R_PATH"), '":"/R" -v "', paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))), '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9')
+          system(docker_call)
+        } else if (EXECUTOR_TYPE == "KUBERNETES") {
+          create_and_wait_k8s_job(data_subpath, run_id)
+        } else {
+          stop("Invalid executor type: ", EXECUTOR_TYPE)
+        }
+        print("Workflow execution completed.")
         # Update output data ----
         new_out <- file.path(run_dir, "output", "output_id1_iter1.csv")
-        names(new_out) <- paste("Run", counter())
+        names(new_out) <- paste("Run", run_id)
         if (file.exists(new_out)) {
           new_list <- experiment_list() |>
             c(new_out)
