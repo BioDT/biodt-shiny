@@ -9,6 +9,7 @@ box::use(
     grassland_dynamics_server
   ],
   app/view/grassland/info/grassland_info[grassland_info_ui],
+  app/view/grassland/grassland_contributors[grassland_contributors_ui,grassland_contributors_server],
 )
 
 #' @export
@@ -32,6 +33,15 @@ grassland_main_ui <- function(id, i18n) {
       icon = icon("leaf"),
       grassland_dynamics_ui(
         ns("grassland_app"),
+        i18n
+      )
+    ),
+    nav_panel(
+      title = i18n$translate("Contributors"),
+      value = "Contributors",
+      icon = icon("leaf"),
+      grassland_contributors_ui(
+        ns("grassland_contributors"),
         i18n
       )
     )
