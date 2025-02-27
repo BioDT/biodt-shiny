@@ -13,6 +13,10 @@ box::use(
   app/logic/waiter[waiter_text],
 )
 
+box::use(
+  app/view/cwr/cwr_contributors[cwr_contributors_ui,cwr_contributors_server],
+)
+
 mod_cwr_ui <- function(id,
                        i18n) {
   ns <- shiny$NS(id)
@@ -237,6 +241,14 @@ mod_cwr_ui <- function(id,
         ),
         shiny$imageOutput(
           ns("response_curve")
+        )
+      ),
+      nav_panel(
+        title = i18n$translate("Contributors"),
+        value = "Contributors",
+        cwr_contributors_ui(
+          ns("cwr_contributors"),
+          i18n
         )
       ),
       
