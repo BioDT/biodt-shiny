@@ -6,6 +6,7 @@ box::use(
 box::use(
   app/view/ias/ias_info[ias_info_ui, ias_info_server],
   app/view/ias/ias_app[ias_app_ui, ias_app_server],
+  app/view/ias/ias_contributors[ias_contributors_ui,ias_contributors_server],
 )
 
 #' @export
@@ -28,6 +29,14 @@ ias_ui <- function(id, i18n) {
       icon = icon("tree"),
       ias_app_ui(
         ns("ias_app")
+      )
+    ),
+    nav_panel(
+      title = "Contributors",
+      value = "Contributors",
+      icon = icon("tree"),
+      ias_contributors_ui(
+        ns("ias_contributors")
       )
     )
   )
