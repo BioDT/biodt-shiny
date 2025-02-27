@@ -6,6 +6,7 @@ box::use(
 box::use(
   app/view/rtbm/rtbm_info[rtbm_info_ui, rtbm_info_server],
   app/view/rtbm/rtbm_app[rtbm_app_ui, rtbm_app_server],
+  app/view/rtbm/rtbm_contributors[rtbm_contributors_ui,rtbm_contributors_server],
 )
 
 #' @export
@@ -28,6 +29,14 @@ rtbm_ui <- function(id, i18n) {
       icon = icon("tree"),
       rtbm_app_ui(
         ns("rtbm_app")
+      )
+    ),
+    nav_panel(
+      title = "Contributors",
+      value = "Contributors",
+      icon = icon("tree"),
+      rtbm_contributors_ui(
+        ns("rtbm_contributors")
       )
     )
   )
