@@ -60,7 +60,6 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
                 list(name = "CPUS", value = "1")
               ),
               resources = list(
-                requests = list(cpu = "1"),
                 limits = list(cpu = "1")
               ),
               volumeMounts = list(
