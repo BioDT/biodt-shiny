@@ -65,6 +65,7 @@ mod_acknowledgements_ui <- function(id) {
               tags$li("Allan Souza, University of Helsinki"),
               tags$li("Simon Rolph, UK Centre for Ecology & Hydrology"),
               tags$li("Dylan Carbone, UK Centre for Ecology & Hydrology"),
+              tags$li("Zhenggang Gao, KTH Royal Institute of Technology")
             ),
           ),
           tags$div(
