@@ -2,7 +2,7 @@ box::use(
   shiny[NS, tagList, tags, HTML, icon, div, wellPanel, textOutput, observe, renderText, dateInput, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, conditionalPanel, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
   shinyWidgets[pickerInput, switchInput],
-  leaflet[leafletOutput, renderLeaflet, addProviderTiles, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula],
+  leaflet[leafletOutput, renderLeaflet, addProviderTiles, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula, addControl, addLegend],
   dplyr[filter, mutate, slice, select, arrange, pull],
   stringr[str_detect],
   sf[st_crs],
@@ -10,6 +10,13 @@ box::use(
   jsonlite[fromJSON],
   tidyjson[spread_all],
   lubridate[today],
+  httr2[request, req_perform],
+  terra[rast],
+  utils[download.file],
+  stats[na.omit],
+  raster[crs, projectRaster, raster, values, projection],
+  tools[file_ext],
+  grDevices[colorRampPalette],
 )
 
 # Load species info
@@ -37,9 +44,9 @@ rtbm_app_ui <- function(id, i18n) {
             dateInput(
               inputId = ns("selectedDate"),
               label = "Select date:",
-              value = as.Date(today()),
+              value = as.Date("2024-12-25"),
               min = as.Date("2024-11-27"),
-              max = as.Date(today())
+              max = as.Date("2024-12-25")
             ),
             pickerInput(
               ns("speciesPicker"),
@@ -140,26 +147,84 @@ rtbm_app_server <- function(id, tab_selected) {
   rasterData <- reactive({
     req(input$selectedDate, finnishName())
     selected_date <- format(input$selectedDate, "%Y-%m-%d")
+    
+    # Print debug information
+    print(paste("Selected date:", selected_date))
+    print(paste("Finnish name:", finnishName()))
+    
+    # Validate date is not in the future
+    if (input$selectedDate > Sys.Date()) {
+      error_msg <- "Error: Selected date is in the future. Please select a past date."
+      print(error_msg)
+      output$statusMsg <- renderText(error_msg)
+      return(NULL)
+    }
+    
     # Use the Finnish name to build the .tif URL
-    url_tif <- paste0(
-      "https://2007147-webportal.a3s.fi/daily/",
-      selected_date, "/",
-      finnishName(),
-      "_occurrences.tif"
-    )
-    print(url_tif)
+    url_tif <- if (selected_date == "2024-11-27") {
+      paste0(
+        "https://2007147-webportal.a3s.fi/daily/",
+        "2024-11-27-rasterize/",
+        finnishName(),
+        ".tif"
+      )
+    } else {
+      paste0(
+        "https://2007147-webportal.a3s.fi/daily/",
+        selected_date, "/",
+        finnishName(),
+        "_occurrences.tif"
+      )
+    }
+    print(paste("Attempting to access URL:", url_tif))
+    
+    # First check if the URL is accessible
+    tryCatch({
+      resp <- request(url_tif) |> req_perform()
+      if (resp$status_code != 200) {
+        error_msg <- paste("No observation data available for", commonName(), "on", selected_date)
+        print(error_msg)
+        output$statusMsg <- renderText(error_msg)
+        return(NULL)
+      }
+    }, error = function(e) {
+      error_msg <- paste("No observation data available for", commonName(), "on", selected_date)
+      print(error_msg)
+      output$statusMsg <- renderText(error_msg)
+      return(NULL)
+    })
+    
     tmp_file <- tempfile(fileext = ".tif")
     old_timeout <- getOption("timeout")
     options(timeout = 300)
     on.exit(options(timeout = old_timeout))
     
     tryCatch({
-      download.file(url_tif, tmp_file, mode = "wb", quiet = TRUE)
+      # Try to download the file
+      download_result <- download.file(url_tif, tmp_file, mode = "wb", quiet = TRUE)
+      if (download_result != 0) {
+        error_msg <- paste("Failed to download file from", url_tif)
+        print(error_msg)
+        output$statusMsg <- renderText(error_msg)
+        return(NULL)
+      }
+      
+      # Check if file exists and has content
+      if (!file.exists(tmp_file) || file.size(tmp_file) == 0) {
+        error_msg <- "Downloaded file is empty or missing"
+        print(error_msg)
+        output$statusMsg <- renderText(error_msg)
+        return(NULL)
+      }
+      
       r <- terra::rast(tmp_file)
       # Replace zeros with NAs
       r[r == 0] <- NA
       r
     }, error = function(e) {
+      error_msg <- paste("Error processing data:", conditionMessage(e))
+      print(error_msg)
+      output$statusMsg <- renderText(error_msg)
       NULL
     })
   })
@@ -192,12 +257,17 @@ rtbm_app_server <- function(id, tab_selected) {
     }
     
     crs_rt <- raster::crs(rt)
-    if (!is.na(crs_rt) && crs_rt@projargs != "+init=epsg:3857") {
-      rt <- raster::projectRaster(rt, crs = CRS("+init=epsg:3857"))
+    if (!is.na(crs_rt) && crs_rt@projargs != "EPSG:3857") {
+      rt <- raster::projectRaster(rt, crs = raster::crs("EPSG:3857"))
       vals <- na.omit(raster::values(rt))
     }
     
-    base_pal <- colorNumeric(magma(100), domain = vals, na.color = NA)
+    # Replace magma with built-in color palette
+    base_pal <- colorNumeric(
+      colorRampPalette(c("#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#B30000", "#7F0000"))(100),
+      domain = vals,
+      na.color = NA
+    )
     pal_na <- function(x) {
       col <- base_pal(x)
       col[is.na(col)] <- "#00000000"
