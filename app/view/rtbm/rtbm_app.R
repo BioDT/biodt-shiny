@@ -2,12 +2,12 @@ box::use(
   # HTML structure (htmltools)
   htmltools[
     a, div, em, HTML, img, p, renderTags,
-    strong, tagList, tags, tagQuery
+    strong, tagList, tags, tagQuery, span
   ],
 
   # Reactive components (Shiny)
   shiny[
-    NS, dateInput, uiOutput, leafletOutput,
+    NS, dateInput, uiOutput,
     moduleServer, observe, observeEvent,
     reactive, req, renderUI
   ],
@@ -17,12 +17,10 @@ box::use(
 
   # Leaflet map components
   leaflet[
-    leaflet, leafletProxy, renderLeaflet,
+    leaflet, leafletOutput, leafletProxy, renderLeaflet,
     addProviderTiles, addTiles, setView, addControl,
-  ],
-  leaflet[
     addLegend, addRasterImage, clearControls,
-    clearImages, colorNumeric,
+    clearImages, colorNumeric
   ],
 
   # Data manipulation
@@ -84,33 +82,38 @@ rtbm_app_ui <- function(id, i18n) {
   # Create base layout using htmltools
   base_layout <- div(
     class = "container-fluid p-3",
-    # Left sidebar
     div(
-      class = "col-md-4 col-12",
+      class = "row",
+      # Left sidebar
       div(
-        class = "card control-panel",
-        `aria-label` = "Control Panel",
-        style = "padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);"
-      )
-    ),
-    # Main content
-    div(
-      class = "col-md-8 col-12",
+        class = "col-md-4",
+        div(
+          class = "card control-panel h-100",
+          `aria-label` = "Control Panel",
+          style = "padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);"
+        )
+      ),
+      # Main content
       div(
-        class = "card",
+        class = "col-md-8",
         div(
-          class = "card-header d-flex justify-content-between align-items-center",
-          tags$h2(
-            class = "h5 mb-0",
-            "Bird Distribution Map"
-          )
-        ),
-        div(
-          class = "card-body p-0",
-          leafletOutput(
-            ns("rasterMap"),
-            height = 600,
-            `aria-label` = "Bird distribution map visualization"
+          class = "card h-100",
+          div(
+            class = "card-header d-flex justify-content-between align-items-center",
+            tags$h2(
+              class = "h5 mb-0",
+              "Bird Distribution Map"
+            )
+          ),
+          div(
+            class = "card-body p-0",
+            div(
+              `aria-label` = "Bird distribution map visualization",
+              leafletOutput(
+                ns("rasterMap"),
+                height = 600
+              )
+            )
           )
         )
       )
@@ -184,12 +187,18 @@ rtbm_app_ui <- function(id, i18n) {
         border-radius: var(--bs-border-radius);
         background-color: var(--control-panel-bg);
         border: 1px solid var(--control-panel-border);
+        height: 100%;
       }
 
       /* Cards */
       .card {
         height: 100%;
         box-shadow: var(--bs-box-shadow-sm);
+      }
+
+      /* Map container */
+      .leaflet-container {
+        border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
       }
 
       /* Form elements */
@@ -212,6 +221,12 @@ rtbm_app_ui <- function(id, i18n) {
       @media (max-width: 768px) {
         .control-panel {
           margin-bottom: 1rem;
+        }
+        .row > [class*='col-'] {
+          margin-bottom: 1rem;
+        }
+        .row > [class*='col-']:last-child {
+          margin-bottom: 0;
         }
       }
 
@@ -437,23 +452,29 @@ rtbm_app_server <- function(id, tab_selected) {
 
       if (is.null(r)) {
         output$statusMsg <- renderUI({
-          p(class = "text-info", "There is no observation for this selection.")
+          div(
+            class = "alert alert-info",
+            role = "alert",
+            "There is no observation for this selection."
+          )
         })
         leafletProxy(ns("rasterMap")) |>
           clearImages() |>
           clearControls()
         return()
       }
-      output$statusMsg <- renderUI({
-        NULL
-      })
+      output$statusMsg <- renderUI(NULL)
 
       rt <- raster::raster(r)
       vals <- na.omit(raster::values(rt))
 
       if (length(vals) == 0) {
         output$statusMsg <- renderUI({
-          p(class = "text-warning", "Raster has no valid data.")
+          div(
+            class = "alert alert-warning",
+            role = "alert",
+            "Raster has no valid data."
+          )
         })
         leafletProxy(ns("rasterMap")) |>
           clearImages() |>
@@ -462,8 +483,8 @@ rtbm_app_server <- function(id, tab_selected) {
       }
 
       crs_rt <- raster::crs(rt)
-      if (!is.na(crs_rt) && crs_rt@projargs != "EPSG:3857") {
-        rt <- raster::projectRaster(rt, crs = raster::crs("EPSG:3857"))
+      if (!is.na(crs_rt) && !sf::st_crs(crs_rt) == sf::st_crs(3857)) {
+        rt <- raster::projectRaster(rt, crs = sf::st_crs(3857))
         vals <- na.omit(raster::values(rt))
       }
 
@@ -474,6 +495,7 @@ rtbm_app_server <- function(id, tab_selected) {
           "#EF6548", "#D7301F", "#B30000", "#7F0000"
         ))(100),
         domain = vals,
+        na.color = "#00000000"
       )
       pal_na <- function(x) {
         col <- base_pal(x)
@@ -481,69 +503,86 @@ rtbm_app_server <- function(id, tab_selected) {
         col
       }
 
-      # Prepare photo content
-      photo_html <- if (!is.null(photo_url())) {
-        img(src = photo_url(), style = "width:200px; margin-bottom:5px;")
-      } else {
-        p(em("No image available"))
-      }
-
-      # Common name
-      common_html <- if (!is.null(common_name())) {
-        p(
-          strong("Common Name:"),
-          " ",
-          common_name()
-        )
-      } else {
-        NULL
-      }
-
-      # Scientific name with a Wiki hyperlink if available
-      sci_html <- NULL
-      if (!is.null(scientific_name())) {
-        if (!is.null(wiki_link())) {
-          # Link to external wiki
-          sci_html <- p(
-            em(
-              a(
-                href = wiki_link(),
-                target = "_blank",
-                scientific_name()
-              )
+      # Create info card components using htmltools
+      info_card_components <- list(
+        # Photo section
+        if (!is.null(photo_url())) {
+          div(
+            class = "info-card-photo mb-3",
+            img(
+              src = photo_url(),
+              alt = paste("Photo of", common_name()),
+              class = "img-fluid rounded",
+              style = "width: 200px;"
             )
           )
         } else {
-          # Just the scientific name (no link)
-          sci_html <- p(
-            em(scientific_name())
+          div(
+            class = "info-card-photo mb-3 text-muted",
+            em("No image available")
           )
-        }
-      }
+        },
 
-      # Song audio
-      song_html <- NULL
-      if (!is.null(song_url())) {
-        ext <- file_ext(song_url())
-        mime_type <- ifelse(ext == "mp3", "audio/mpeg", "audio/mpeg")
-        song_html <- tags$audio(
-          controls = NA,
-          style = "width:100%;",
-          tags$source(
-            src = song_url(),
-            type = mime_type
-          ),
-          "Your browser does not support the audio element."
+        # Bird information section
+        div(
+          class = "info-card-details",
+          # Common name
+          if (!is.null(common_name())) {
+            div(
+              class = "mb-2",
+              strong("Common Name: "),
+              span(common_name())
+            )
+          },
+
+          # Scientific name with optional wiki link
+          if (!is.null(scientific_name())) {
+            div(
+              class = "mb-2 scientific-name",
+              if (!is.null(wiki_link())) {
+                a(
+                  href = wiki_link(),
+                  target = "_blank",
+                  rel = "noopener",
+                  em(scientific_name()),
+                  class = "text-decoration-none"
+                )
+              } else {
+                em(scientific_name())
+              }
+            )
+          },
+
+          # Audio player
+          if (!is.null(song_url())) {
+            div(
+              class = "mt-3",
+              tags$audio(
+                class = "w-100",
+                controls = NA,
+                tags$source(
+                  src = song_url(),
+                  type = "audio/mpeg"
+                ),
+                "Your browser does not support the audio element."
+              )
+            )
+          }
         )
-      }
+      )
 
       # Create the info card with htmltools
       info_card_html <- div(
-        style = "background-color:white; padding:10px; border:1px solid #ccc; width:220px;",
-        photo_html,
-        common_html,
-        sci_html,
-        song_html
+        class = "leaflet-info-card",
+        style = paste(
+          "background-color: var(--bs-white);",
+          "padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);",
+          "border-radius: var(--bs-border-radius);",
+          "border: 1px solid var(--bs-border-color);",
+          "width: 220px;",
+          "box-shadow: var(--bs-box-shadow-sm);"
+        ),
+        info_card_components
       )
 
       # Convert htmltools tags to HTML for leaflet
@@ -556,11 +595,13 @@ rtbm_app_server <- function(id, tab_selected) {
         addLegend(
           pal = base_pal,
           values = vals,
-          title = "Number of records"
+          title = "Number of records",
+          className = "info-legend"
         ) |>
         addControl(
           html = info_card_html_str,
-          position = "bottomleft"
+          position = "bottomleft",
+          className = "info-card-container"
         )
     })
   })
