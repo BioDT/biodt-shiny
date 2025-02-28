@@ -7,4 +7,3 @@ linters:
     box_universal_import_linter = box.linters::box_universal_import_linter(),
     object_usage_linter = NULL  # Does not work with `box::use()`.
   )
-  
