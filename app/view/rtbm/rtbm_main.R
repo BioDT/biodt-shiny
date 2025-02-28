@@ -4,8 +4,8 @@ box::use(
 )
 
 box::use(
-  app/view/rtbm/rtbm_info[rtbm_info_ui, rtbm_info_server],
-  app/view/rtbm/rtbm_app[rtbm_app_ui, rtbm_app_server],
+  app / view / rtbm / rtbm_info[rtbm_info_ui, rtbm_info_server],
+  app / view / rtbm / rtbm_app[rtbm_app_ui, rtbm_app_server],
 )
 
 #' @export
@@ -42,10 +42,12 @@ rtbm_main_server <- function(id) {
 
     observeEvent(
       input$tab,
-      ignoreInit = TRUE, {
-      print(input$tab)
-      tab(input$tab)
-    })
+      ignoreInit = TRUE,
+      {
+        print(input$tab)
+        tab(input$tab)
+      }
+    )
 
     rtbm_info_server(
       "rtbm_info",
