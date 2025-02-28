@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, column, fixedRow, reactiveVal, observeEvent],
+  shiny[NS, tagList, moduleServer, column, fixedRow, reactiveVal, observeEvent, tags],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -17,10 +17,10 @@ box::use(
     grassland_dynamics_outputplot_ui,
     grassland_dynamics_outputplot_server
   ],
-  app/view/grassland/grassland_dynamics/grassland_dynamics_datachart[
-    grassland_dynamics_datachart_ui,
-    grassland_dynamics_datachart_server
-  ],
+  # app/view/grassland/grassland_dynamics/grassland_dynamics_datachart[
+  #   grassland_dynamics_datachart_ui,
+  #   grassland_dynamics_datachart_server
+  # ],
   app/view/grassland/grassland_dynamics/grassland_dynamics_datachart_controls[
     grassland_dynamics_datachart_controls_ui,
     grassland_dynamics_datachart_controls_server
@@ -82,7 +82,6 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-
     plot_type <- reactiveVal("bar")
     mean_switch <- reactiveVal(FALSE)
 
@@ -99,33 +98,22 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
 
     # Soil - main three values from above table
     main_soil_values <- read_main_three_values(soil_file_path)
+        
+    # MAP itself ----
+    grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected)
 
-    observeEvent(tab_grassland_selected(),
-      {
-      # MAP itself ----
-      grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected)
+    # Output PLOT ----
+    grassland_dynamics_outputplot_server("outputplot")
 
-      # Output PLOT ----
-      grassland_dynamics_outputplot_server("outputplot")
+    # WITH Weather
+    grassland_dynamics_double_chart_server("double_chart", plot_type, mean_switch, tab_grassland_selected)
 
-      # WITH Weather
-      grassland_dynamics_double_chart_server("double_chart", plot_type, mean_switch, tab_grassland_selected)
+    grassland_dynamics_double_chart_controls_server("controls", plot_type, mean_switch)
 
-      grassland_dynamics_double_chart_controls_server("controls", plot_type, mean_switch)
+    # Soil data table
+    grassland_dynamics_soil_datatable_server("soil_data_table", soil_data_table, tab_grassland_selected)
 
-      # Module with logic for a displaying of Grassland's data
-      # grassland_dynamics_datachart_server("datachart", plot_type, mean_switch)
-
-      # grassland_dynamics_datachart_controls_server("controls", plot_type, mean_switch)
-
-      # Soil data table
-      grassland_dynamics_soil_datatable_server("soil_data_table", soil_data_table)
-
-      # Soil main 3 values from above soil data table
-      grassland_dynamics_soil_main_values_server("main_soil_values", main_soil_values)
-      }
-    )
-
-    
-})
+    # Soil main 3 values from above soil data table
+    grassland_dynamics_soil_main_values_server("main_soil_values", main_soil_values, tab_grassland_selected)  
+      })
 }

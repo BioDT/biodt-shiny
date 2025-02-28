@@ -41,16 +41,13 @@ grassland_dynamics_datachart_ui <- function(
 grassland_dynamics_datachart_server <- function(id, plot_type, mean_switch) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
     # Define waiter ----
-    msg <- list(
-      waiter_text(message = tags$h3("Loading chart...",
+    msg <- waiter_text(message = tags$h3("Loading chart...",
         style = "color: #414f2f;"
       ))
-    )
     w <- Waiter$new(
       id = ns("datachart"),
-      html = msg[[1]],
+      html = msg,
       color = "rgba(256,256,256,0.9)",
     )
 

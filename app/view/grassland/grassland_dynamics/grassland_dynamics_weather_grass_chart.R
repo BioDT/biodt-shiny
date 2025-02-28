@@ -41,33 +41,30 @@ grassland_dynamics_double_chart_ui <- function(
 grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, tab_grassland_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
     # Define waiter ----
-    msg <- list(
-      waiter_text(message = tags$h3("Loading...",
+    msg <- waiter_text(message = tags$h3("Loading...",
         style = "color: #414f2f;"
       ))
-    )
     w <- Waiter$new(
       id = ns("double_chart_wrap"),
-      html = msg[[1]],
+      html = msg,
       color = "rgba(256,256,256,0.9)",
     )
-
-    files_grass <- list.files("app/data/grassland/simulations/project1/output", full.names = TRUE)
-    file_weather <- "app/data/grassland/scenarios/lat51.391900_lon11.878700/weather/lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt"
-    colors_for_grass <- c("#b4e4b4", "#dfa7a7", "#9c9cdf")
-    colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
-    end_date <- "2015-12-31"
 
     observeEvent(
       tab_grassland_selected(),
       ignoreNULL = TRUE,
       ignoreInit = TRUE,
       {
-        print("from double chart::")
-        print(tab_grassland_selected())
         w$show()
+
+        files_grass <- list.files("app/data/grassland/simulations/project1/output", full.names = TRUE)
+        file_weather <- "app/data/grassland/scenarios/lat51.391900_lon11.878700/weather/lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt"
+        colors_for_grass <- c("#b4e4b4", "#dfa7a7", "#9c9cdf")
+        colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
+        end_date <- "2015-12-31"
+
+
         chart_reactive <- reactive({
           generate_chart_with_weather(
             filepaths_grass = files_grass,
