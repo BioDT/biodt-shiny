@@ -1,19 +1,43 @@
 box::use(
-  shiny[column, conditionalPanel, fluidRow, icon, moduleServer, NS, observe],
-  shiny[downloadButton, downloadHandler, radioButtons, reactive, req, renderUI, span],
-  shiny[uiOutput, updateSliderInput, wellPanel],
-  shiny[dateInput, observeEvent, sliderInput],
+  # Shiny UI components
+  shiny[
+    column, conditionalPanel, fluidRow, icon,
+    moduleServer, NS, observe, downloadButton
+  ],
+  shiny[
+    downloadHandler, radioButtons, reactive, req,
+    renderUI, span, uiOutput, updateSliderInput
+  ],
+  shiny[
+    wellPanel, dateInput, observeEvent, sliderInput
+  ],
 
-  bslib[card, card_body, card_footer, card_header, layout_sidebar, sidebar],
+  # Bootstrap components
+  bslib[
+    card, card_body, card_footer, card_header,
+    layout_sidebar, sidebar,
+  ],
 
-  htmltools[a, div, em, HTML, img, p, renderTags, strong, tagList, tags],
+  # HTML tools
+  htmltools[
+    a, div, em, HTML, img, p, renderTags,
+    strong,
+  ],
+  htmltools[
+    tagList, tags, tagQuery,
+  ],
 
-  leaflet[leaflet, leafletOutput, leafletProxy, renderLeaflet],
-  leaflet[addProviderTiles, addTiles, setView],
-  leaflet[addControl, addLegend, addRasterImage],
-  leaflet[clearControls, clearImages, colorNumeric],
+  # Leaflet map components
+  leaflet[
+    leaflet, leafletOutput, leafletProxy, renderLeaflet,
+    addProviderTiles, addTiles, setView, addControl,
+  ],
+  leaflet[
+    addLegend, addRasterImage, clearControls,
+    clearImages, colorNumeric,
+  ],
 
-  shinyWidgets[pickerInput, switchInput],
+  # Data manipulation
   dplyr[arrange, filter, mutate, pull, select, slice],
   stringr[str_detect],
   sf[st_crs],
@@ -22,112 +46,181 @@ box::use(
   tidyjson[spread_all],
   lubridate[today],
   httr2[request, req_perform],
+
+  # File and data handling
   terra[rast],
   utils[download.file],
   stats[na.omit],
   raster[crs, projectRaster, raster, values, projection],
   tools[file_ext],
   grDevices[colorRampPalette],
+
+  # UI widgets
+  shinyWidgets[pickerInput, switchInput],
 )
 
-# Load species info
-# We should look at proper place to put this so it is loaded when needed
-bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
-bird_info <- fromJSON(bird_info_url)
+#' Load and prepare bird species information
+#' @noRd
+load_bird_species <- function() {
+  bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
+  bird_info <- fromJSON(bird_info_url)
 
-# Prepare species info
-bird_spp_info <- bird_info |>
-  spread_all() |>
-  as_tibble() |>
-  select(-document.id) |>
-  arrange(common_name) |>
-  mutate(
-    scientific_name = stringr::str_replace(
-      string = scientific_name,
-      pattern = " ",
-      replacement = "_"
+  bird_info |>
+    spread_all() |>
+    as_tibble() |>
+    select(-document.id) |>
+    arrange(common_name) |>
+    mutate(
+      scientific_name = stringr::str_replace(
+        string = scientific_name,
+        pattern = " ",
+        replacement = "_"
+      )
     )
-  )
+}
 
-# Use the common name for the picker
+# Initialize bird species data
+bird_spp_info <- load_bird_species()
 species_choices <- bird_spp_info$common_name
 
+#' Real-time Bird Monitoring UI Module
+#'
+#' @param id The module ID
+#' @param i18n Internationalization function
+#'
+#' @return A Shiny UI definition
 #' @export
 rtbm_app_ui <- function(id, i18n) {
   ns <- NS(id)
 
-  # Using imported functions directly without prefixes
-  tagList(
+  # Create base layout
+  base_layout <- div(
+    class = "row",
+    # Left sidebar
     div(
-      class = "row",
-      # Left sidebar with controls
+      class = "col-md-4",
       div(
-        class = "col-md-4",
-        div(
-          class = "well",
-          style = "padding: 15px;",
-          # Date picker
-          div(
-            class = "form-group",
-            dateInput(
-              ns("selectedDate"),
-              "Select date:",
-              value = today(),
-              min = as.Date("2024-11-27"),
-              max = today(),
-              format = "yyyy-mm-dd"
-            )
-          ),
-          # Species picker
-          div(
-            class = "form-group",
-            tags$label(`for` = ns("speciesPicker"), "Bird species:"),
-            pickerInput(
-              ns("speciesPicker"),
-              label = NULL,
-              choices = species_choices,
-              selected = species_choices[1],
-              multiple = FALSE,
-              options = list(
-                `actions-box` = FALSE,
-                `live-search` = TRUE
-              )
-            )
-          ),
-          # Status message container
-          div(
-            id = ns("statusMsgContainer"),
-            uiOutput(ns("statusMsg"))
-          )
-        )
-      ),
-      # Main content area with map
-      div(
-        class = "col-md-8",
-        card(
-          full_screen = TRUE,
-          card_header("Bird Distribution Map"),
-          card_body(
-            leafletOutput(ns("rasterMap"), height = 600)
-          )
+        class = "well control-panel",
+        style = "padding: 15px;"
+      )
+    ),
+    # Main content
+    div(
+      class = "col-md-8",
+      card(
+        full_screen = TRUE,
+        card_header("Bird Distribution Map"),
+        card_body(
+          leafletOutput(ns("rasterMap"), height = 600)
         )
       )
     )
   )
+
+  # Use tagQuery to build and modify the layout
+  layout <- tagQuery(base_layout)
+
+  # Add control panel components
+  control_panel <- tagQuery(layout)$
+    find(".control-panel")$
+    append(
+      # Date picker
+      div(
+        class = "form-group",
+        dateInput(
+          ns("selectedDate"),
+          "Select date:",
+          value = today(),
+          min = as.Date("2024-11-27"),
+          max = today(),
+          format = "yyyy-mm-dd"
+        )
+      ),
+      # Species picker
+      div(
+        class = "form-group",
+        tags$label(
+          `for` = ns("speciesPicker"),
+          "Bird species:"
+        ),
+        pickerInput(
+          ns("speciesPicker"),
+          label = NULL,
+          choices = species_choices,
+          selected = species_choices[1],
+          multiple = FALSE,
+          options = list(
+            `actions-box` = FALSE,
+            `live-search` = TRUE
+          )
+        )
+      ),
+      # Status message container
+      div(
+        id = ns("statusMsgContainer"),
+        class = "status-container",
+        uiOutput(ns("statusMsg"))
+      )
+  )$allTags()
+
+  # Add Bootstrap utility classes for better spacing
+  final_layout <- tagQuery(control_panel)$
+    find(".form-group")$
+    addClass("mb-3")$ # Add margin bottom
+    find(".status-container")$
+    addClass("mt-4")$ # Add margin top
+    find(".well")$
+    addClass("shadow-sm")$ # Add subtle shadow
+  allTags()
+
+  # Add responsive behavior
+  responsive_layout <- tagQuery(final_layout)$
+    find(".col-md-4")$
+    addClass("col-sm-12")$ # Full width on small screens
+    find(".col-md-8")$
+    addClass("col-sm-12")$ # Full width on small screens
+  allTags()
+
+  # Wrap in tagList for proper rendering
+  tagList(
+    # Add custom CSS classes
+    tags$style(
+      "
+      .control-panel {
+        border-radius: 8px;
+        background-color: #f8f9fa;
+      }
+      .status-container {
+        min-height: 50px;
+      }
+      @media (max-width: 768px) {
+        .control-panel {
+          margin-bottom: 1rem;
+        }
+      }
+    "
+    ),
+    responsive_layout
+  )
 }
 
+#' Real-time Bird Monitoring Server Module
+#'
+#' @param id The module ID
+#' @param tab_selected Reactive expression for tab selection
+#'
+#' @return A Shiny server function
 #' @export
 rtbm_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observeEvent(
-      tab_selected(),
+    # Handle tab selection
+    observeEvent(tab_selected(), {
       print(tab_selected())
-    )
-    # Reactives to get each field based on the *common_name* the user selected
+    })
 
-    # 1) Finnish Name (needed for .tif URL)
+    # Get Finnish name for URL construction
     finnish_name <- reactive({
       req(input$speciesPicker)
       fn <- bird_spp_info |>
@@ -140,7 +233,7 @@ rtbm_app_server <- function(id, tab_selected) {
       fn
     })
 
-    # 2) Photo URL
+    # Get photo URL for display
     photo_url <- reactive({
       req(input$speciesPicker)
       url <- bird_spp_info |>
