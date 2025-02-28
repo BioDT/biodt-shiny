@@ -154,12 +154,12 @@ generate_chart <- function(
     grass_end_date = "2015-12-31",
     return_series = FALSE) {
   
-  # if (plot_type == "bar") {
-  #   plot_series <- "mean"
-  #   stack <- "total"
-  # } else if (plot_type == "line") {
-  #   stack <- NULL
-  # }
+  if (plot_type == "bar") {
+    plot_series <- "mean"
+    stack <- "total"
+  } else if (plot_type == "line") {
+    stack <- NULL
+  }
   
   final_simulations <- NULL
   simulations <- NULL
@@ -188,45 +188,44 @@ generate_chart <- function(
   
 
   
-  # if (plot_series == "series" || plot_series == "all") {
-  #   final_simulations <- simulations
-  # }
-  
-  # if (plot_series == "mean" || plot_series == "all") {
-  #   # Compute mean ----
-  #   pft_list <- map_chr(simulations, "name")
-  #   pft_unique <- sort(unique(pft_list))
-  #   
-  #   for (i in seq_along(sort(pft_unique))) {
-  #     sub_simulations <- simulations[pft_list == pft_list[i]]
-  #     n_series <- length(sub_simulations)
-  #     
-  #     series_mean <- rep(0, length(sub_simulations[[1]]$data))
-  #     
-  #     for (series in sub_simulations) {
-  #       series_mean <- series_mean + unlist(series$data) / n_series
-  #     }
-  #     
-  #     series_mean <- series_mean |>
-  #       round(2) |>
-  #       as.list()
-  #     
-  #     final_simulations <- final_simulations |>
-  #       append(list(
-  #         list(
-  #           name = paste(pft_unique[i], "mean"),
-  #           type = plot_type,
-  #           # symbol = "pin",
-  #           showSymbol = FALSE,
-  #           stack = stack,
-  #           symbolSize = 20,
-  #           color = colors[i],
-  #           emphasis = list(disabled = TRUE),
-  #           data = series_mean
-  #         )
-  #       ))
-  #   }
-  # }
+  if (plot_series == "series" || plot_series == "all") {
+    final_simulations <- simulations
+  }
+   if (plot_series == "mean" || plot_series == "all") {
+    # Compute mean ----
+    pft_list <- map_chr(simulations, "name")
+    pft_unique <- sort(unique(pft_list))
+    
+    for (i in seq_along(sort(pft_unique))) {
+      sub_simulations <- simulations[pft_list == pft_list[i]]
+      n_series <- length(sub_simulations)
+      
+      series_mean <- rep(0, length(sub_simulations[[1]]$data))
+      
+      for (series in sub_simulations) {
+        series_mean <- series_mean + unlist(series$data) / n_series
+      }
+      
+      series_mean <- series_mean |>
+        round(2) |>
+        as.list()
+      
+      final_simulations <- final_simulations |>
+        append(list(
+          list(
+            name = paste(pft_unique[i], "mean"),
+            type = plot_type,
+            # symbol = "pin",
+            showSymbol = FALSE,
+            stack = stack,
+            symbolSize = 20,
+            color = colors[i],
+            emphasis = list(disabled = TRUE),
+            data = series_mean
+          )
+        ))
+    }
+  }
   
   # Prepare time
   time <- read_delim(

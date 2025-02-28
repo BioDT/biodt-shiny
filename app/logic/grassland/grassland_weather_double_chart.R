@@ -126,6 +126,8 @@ generate_chart_with_weather <- function(
   grass_end_date = "2015-12-31",
   return_series = FALSE
 ) {
+  print("plot_series:::")
+  print(plot_series)
 
   if (plot_type == "bar") {
     plot_series <- "mean"
@@ -142,8 +144,8 @@ generate_chart_with_weather <- function(
       c(
         read_grass_simulations(
           filepath,
-          plot_type = plot_type,
-          colors = colors_for_grass,
+          plot_type = "line",
+          colors = clrs,
           stack = stack
         )
       )
@@ -187,7 +189,6 @@ generate_chart_with_weather <- function(
         ))
     }
   }
-
 
   # generate chart - Weather data ----
   weather_data <- read_weather_data(
