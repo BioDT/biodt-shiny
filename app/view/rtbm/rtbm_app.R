@@ -1,8 +1,22 @@
 box::use(
-  shiny[NS, tagList, tags, HTML, icon, div, wellPanel, textOutput, observe, renderText, dateInput, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, conditionalPanel, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler],
+  shiny[NS, tagList, tags, HTML, icon, div, wellPanel, textOutput],
+  shiny[observe, renderText, dateInput, span, strong, moduleServer, fluidRow, radioButtons],
+  shiny[
+    column, uiOutput, conditionalPanel, sliderInput, downloadButton, reactive, req,
+    observeEvent
+  ],
+  shiny[updateSliderInput, renderUI, downloadHandler],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
   shinyWidgets[pickerInput, switchInput],
-  leaflet[leafletOutput, renderLeaflet, addProviderTiles, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula, addControl, addLegend],
+  leaflet[
+    leafletOutput, renderLeaflet, addProviderTiles, leaflet, addTiles, setView,
+    addEasyButton, easyButton
+  ],
+  leaflet[
+    JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls,
+    addRasterImage, evalFormula
+  ],
+  leaflet[addControl, addLegend],
   dplyr[filter, mutate, slice, select, arrange, pull],
   stringr[str_detect],
   sf[st_crs],
@@ -29,7 +43,13 @@ bird_spp_info <- bird_info |>
   as_tibble() |>
   select(-document.id) |>
   arrange(common_name) |>
-  mutate(scientific_name = stringr::str_replace(string = scientific_name, pattern = " ", replacement = "_"))
+  mutate(
+    scientific_name = stringr::str_replace(
+      string = scientific_name,
+      pattern = " ",
+      replacement = "_"
+    )
+  )
 
 # Use the common name for the picker
 species_choices <- bird_spp_info$common_name
@@ -57,7 +77,7 @@ rtbm_app_ui <- function(id, i18n) {
             multiple = FALSE,
             options = list(
               `actions-box` = FALSE,
-              `live-search` = TRUE # <--- Add live search
+              `live-search` = TRUE
             )
           ),
           textOutput(ns("statusMsg"))
@@ -89,7 +109,7 @@ rtbm_app_server <- function(id, tab_selected) {
     # Reactives to get each field based on the *common_name* the user selected
 
     # 1) Finnish Name (needed for .tif URL)
-    finnishName <- reactive({
+    finnish_name <- reactive({
       req(input$speciesPicker)
       fn <- bird_spp_info |>
         filter(common_name == input$speciesPicker) |>
@@ -102,7 +122,7 @@ rtbm_app_server <- function(id, tab_selected) {
     })
 
     # 2) Photo URL
-    photoURL <- reactive({
+    photo_url <- reactive({
       req(input$speciesPicker)
       url <- bird_spp_info |>
         filter(common_name == input$speciesPicker) |>
@@ -114,13 +134,13 @@ rtbm_app_server <- function(id, tab_selected) {
     })
 
     # 3) Common name (English) - directly from input
-    commonName <- reactive({
+    common_name <- reactive({
       req(input$speciesPicker)
       input$speciesPicker
     })
 
     # 4) Scientific name
-    scientificName <- reactive({
+    scientific_name <- reactive({
       req(input$speciesPicker)
       sn <- bird_spp_info |>
         filter(common_name == input$speciesPicker) |>
@@ -132,7 +152,7 @@ rtbm_app_server <- function(id, tab_selected) {
     })
 
     # 4b) Wiki link (for the hyperlink on the scientific name)
-    wikiLink <- reactive({
+    wiki_link <- reactive({
       req(input$speciesPicker)
       wl <- bird_spp_info |>
         filter(common_name == input$speciesPicker) |>
@@ -144,7 +164,7 @@ rtbm_app_server <- function(id, tab_selected) {
     })
 
     # 5) Song URL
-    songURL <- reactive({
+    song_url <- reactive({
       req(input$speciesPicker)
       s_url <- bird_spp_info |>
         filter(common_name == input$speciesPicker) |>
@@ -156,17 +176,19 @@ rtbm_app_server <- function(id, tab_selected) {
     })
 
     # Reactive to download raster data using the Finnish name
-    rasterData <- reactive({
-      req(input$selectedDate, finnishName())
+    raster_data <- reactive({
+      req(input$selectedDate, finnish_name())
       selected_date <- format(input$selectedDate, "%Y-%m-%d")
 
       # Print debug information
       print(paste("Selected date:", selected_date))
-      print(paste("Finnish name:", finnishName()))
+      print(paste("Finnish name:", finnish_name()))
 
       # Validate date is not in the future
       if (input$selectedDate > Sys.Date()) {
-        error_msg <- "Error: Selected date is in the future. Please select a past date."
+        error_msg <- paste(
+          "Error: Selected date is in the future. Please select a past date."
+        )
         print(error_msg)
         output$statusMsg <- renderText(error_msg)
         return(NULL)
@@ -176,7 +198,7 @@ rtbm_app_server <- function(id, tab_selected) {
       url_tif <- paste0(
         "https://2007581-webportal.a3s.fi/daily/",
         selected_date, "/",
-        scientificName(),
+        scientific_name(),
         "_occurrences.tif"
       )
       print(paste("Attempting to access URL:", url_tif))
@@ -186,14 +208,24 @@ rtbm_app_server <- function(id, tab_selected) {
         {
           resp <- request(url_tif) |> req_perform()
           if (resp$status_code != 200) {
-            error_msg <- paste("No observation data available for", commonName(), "on", selected_date)
+            error_msg <- paste(
+              "No observation data available for",
+              common_name(),
+              "on",
+              selected_date
+            )
             print(error_msg)
             output$statusMsg <- renderText(error_msg)
             return(NULL)
           }
         },
         error = function(e) {
-          error_msg <- paste("No observation data available for", commonName(), "on", selected_date)
+          error_msg <- paste(
+            "No observation data available for",
+            common_name(),
+            "on",
+            selected_date
+          )
           print(error_msg)
           output$statusMsg <- renderText(error_msg)
           return(NULL)
@@ -247,7 +279,7 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Observe changes in raster and update the map
     observe({
-      r <- rasterData()
+      r <- raster_data()
 
       if (is.null(r)) {
         output$statusMsg <- renderText("There is no observation for this selection.")
@@ -277,9 +309,11 @@ rtbm_app_server <- function(id, tab_selected) {
 
       # Replace magma with built-in color palette
       base_pal <- colorNumeric(
-        colorRampPalette(c("#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59", "#EF6548", "#D7301F", "#B30000", "#7F0000"))(100),
+        colorRampPalette(c(
+          "#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59",
+          "#EF6548", "#D7301F", "#B30000", "#7F0000"
+        ))(100),
         domain = vals,
-        na.color = NA
       )
       pal_na <- function(x) {
         col <- base_pal(x)
@@ -288,43 +322,43 @@ rtbm_app_server <- function(id, tab_selected) {
       }
 
       # Prepare photo content
-      photo_html <- if (!is.null(photoURL())) {
-        paste0("<img src='", photoURL(), "' style='width:200px; margin-bottom:5px;'>")
+      photo_html <- if (!is.null(photo_url())) {
+        paste0("<img src='", photo_url(), "' style='width:200px; margin-bottom:5px;'>")
       } else {
         "<p><em>No image available</em></p>"
       }
 
       # Common name
-      common_html <- if (!is.null(commonName())) {
-        paste0("<p><strong>Common Name:</strong> ", commonName(), "</p>")
+      common_html <- if (!is.null(common_name())) {
+        paste0("<p><strong>Common Name:</strong> ", common_name(), "</p>")
       } else {
         ""
       }
 
       # Scientific name with a Wiki hyperlink if available
       sci_html <- ""
-      if (!is.null(scientificName())) {
-        if (!is.null(wikiLink())) {
+      if (!is.null(scientific_name())) {
+        if (!is.null(wiki_link())) {
           # Link to external wiki
           sci_html <- paste0(
-            "<p><em><a href='", wikiLink(),
-            "' target='_blank'>", scientificName(),
+            "<p><em><a href='", wiki_link(),
+            "' target='_blank'>", scientific_name(),
             "</a></em></p>"
           )
         } else {
           # Just the scientific name (no link)
-          sci_html <- paste0("<p><em>", scientificName(), "</em></p>")
+          sci_html <- paste0("<p><em>", scientific_name(), "</em></p>")
         }
       }
 
       # Song audio
       song_html <- ""
-      if (!is.null(songURL())) {
-        ext <- file_ext(songURL())
+      if (!is.null(song_url())) {
+        ext <- file_ext(song_url())
         mime_type <- ifelse(ext == "mp3", "audio/mpeg", "audio/mpeg")
         song_html <- paste0(
           "<audio controls style='width:100%;'>",
-          "<source src='", songURL(), "' type='", mime_type, "'>",
+          "<source src='", song_url(), "' type='", mime_type, "'>",
           "Your browser does not support the audio element.</audio>"
         )
       }
