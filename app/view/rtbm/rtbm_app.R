@@ -1,23 +1,20 @@
 box::use(
-  shiny[NS, tagList, tags, HTML, icon, div, wellPanel, textOutput],
-  shiny[observe, renderText, dateInput, span, strong, moduleServer, fluidRow, radioButtons],
-  shiny[
-    column, uiOutput, conditionalPanel, sliderInput, downloadButton, reactive, req,
-    observeEvent
-  ],
-  shiny[updateSliderInput, renderUI, downloadHandler],
-  bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
+  shiny[column, conditionalPanel, fluidRow, icon, moduleServer, NS, observe],
+  shiny[downloadButton, downloadHandler, radioButtons, reactive, req, renderUI, span],
+  shiny[uiOutput, updateSliderInput, wellPanel],
+  shiny[dateInput, observeEvent, sliderInput],
+
+  bslib[card, card_body, card_footer, card_header, layout_sidebar, sidebar],
+
+  htmltools[a, div, em, HTML, img, p, renderTags, strong, tagList, tags],
+
+  leaflet[leaflet, leafletOutput, leafletProxy, renderLeaflet],
+  leaflet[addProviderTiles, addTiles, setView],
+  leaflet[addControl, addLegend, addRasterImage],
+  leaflet[clearControls, clearImages, colorNumeric],
+
   shinyWidgets[pickerInput, switchInput],
-  leaflet[
-    leafletOutput, renderLeaflet, addProviderTiles, leaflet, addTiles, setView,
-    addEasyButton, easyButton
-  ],
-  leaflet[
-    JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls,
-    addRasterImage, evalFormula
-  ],
-  leaflet[addControl, addLegend],
-  dplyr[filter, mutate, slice, select, arrange, pull],
+  dplyr[arrange, filter, mutate, pull, select, slice],
   stringr[str_detect],
   sf[st_crs],
   tibble[as_tibble],
@@ -38,6 +35,7 @@ box::use(
 bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
 bird_info <- fromJSON(bird_info_url)
 
+# Prepare species info
 bird_spp_info <- bird_info |>
   spread_all() |>
   as_tibble() |>
@@ -57,34 +55,55 @@ species_choices <- bird_spp_info$common_name
 #' @export
 rtbm_app_ui <- function(id, i18n) {
   ns <- NS(id)
+
+  # Using imported functions directly without prefixes
   tagList(
-    fluidRow(
-      column(
-        width = 4,
-        wellPanel(
-          dateInput(
-            inputId = ns("selectedDate"),
-            label = "Select date:",
-            value = as.Date(today()),
-            min = as.Date("2024-11-27"),
-            max = as.Date(today())
-          ),
-          pickerInput(
-            ns("speciesPicker"),
-            "Bird species:",
-            choices = species_choices,
-            selected = species_choices[1],
-            multiple = FALSE,
-            options = list(
-              `actions-box` = FALSE,
-              `live-search` = TRUE
+    div(
+      class = "row",
+      # Left sidebar with controls
+      div(
+        class = "col-md-4",
+        div(
+          class = "well",
+          style = "padding: 15px;",
+          # Date picker
+          div(
+            class = "form-group",
+            dateInput(
+              ns("selectedDate"),
+              "Select date:",
+              value = today(),
+              min = as.Date("2024-11-27"),
+              max = today(),
+              format = "yyyy-mm-dd"
             )
           ),
-          textOutput(ns("statusMsg"))
+          # Species picker
+          div(
+            class = "form-group",
+            tags$label(`for` = ns("speciesPicker"), "Bird species:"),
+            pickerInput(
+              ns("speciesPicker"),
+              label = NULL,
+              choices = species_choices,
+              selected = species_choices[1],
+              multiple = FALSE,
+              options = list(
+                `actions-box` = FALSE,
+                `live-search` = TRUE
+              )
+            )
+          ),
+          # Status message container
+          div(
+            id = ns("statusMsgContainer"),
+            uiOutput(ns("statusMsg"))
+          )
         )
       ),
-      column(
-        width = 8,
+      # Main content area with map
+      div(
+        class = "col-md-8",
         card(
           full_screen = TRUE,
           card_header("Bird Distribution Map"),
@@ -177,6 +196,11 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Reactive to download raster data using the Finnish name
     raster_data <- reactive({
+      # Debug prints for reactive dependencies
+      print("raster_data reactive triggered")
+      print(paste("selectedDate:", input$selectedDate))
+      print(paste("finnish_name:", finnish_name()))
+      print(paste("scientific_name:", scientific_name()))
       req(input$selectedDate, finnish_name())
       selected_date <- format(input$selectedDate, "%Y-%m-%d")
 
@@ -190,7 +214,9 @@ rtbm_app_server <- function(id, tab_selected) {
           "Error: Selected date is in the future. Please select a past date."
         )
         print(error_msg)
-        output$statusMsg <- renderText(error_msg)
+        output$statusMsg <- renderUI({
+          p(class = "text-danger", error_msg)
+        })
         return(NULL)
       }
 
@@ -207,7 +233,8 @@ rtbm_app_server <- function(id, tab_selected) {
       tryCatch(
         {
           resp <- request(url_tif) |> req_perform()
-          if (resp$status_code != 200) {
+          status <- resp$status
+          if (status != 200) {
             error_msg <- paste(
               "No observation data available for",
               common_name(),
@@ -215,7 +242,9 @@ rtbm_app_server <- function(id, tab_selected) {
               selected_date
             )
             print(error_msg)
-            output$statusMsg <- renderText(error_msg)
+            output$statusMsg <- renderUI({
+              p(class = "text-danger", error_msg)
+            })
             return(NULL)
           }
         },
@@ -227,7 +256,9 @@ rtbm_app_server <- function(id, tab_selected) {
             selected_date
           )
           print(error_msg)
-          output$statusMsg <- renderText(error_msg)
+          output$statusMsg <- renderUI({
+            p(class = "text-danger", error_msg)
+          })
           return(NULL)
         }
       )
@@ -244,7 +275,9 @@ rtbm_app_server <- function(id, tab_selected) {
           if (download_result != 0) {
             error_msg <- paste("Failed to download file from", url_tif)
             print(error_msg)
-            output$statusMsg <- renderText(error_msg)
+            output$statusMsg <- renderUI({
+              p(class = "text-danger", error_msg)
+            })
             return(NULL)
           }
 
@@ -252,7 +285,9 @@ rtbm_app_server <- function(id, tab_selected) {
           if (!file.exists(tmp_file) || file.size(tmp_file) == 0) {
             error_msg <- "Downloaded file is empty or missing"
             print(error_msg)
-            output$statusMsg <- renderText(error_msg)
+            output$statusMsg <- renderUI({
+              p(class = "text-danger", error_msg)
+            })
             return(NULL)
           }
 
@@ -264,7 +299,9 @@ rtbm_app_server <- function(id, tab_selected) {
         error = function(e) {
           error_msg <- paste("Error processing data:", conditionMessage(e))
           print(error_msg)
-          output$statusMsg <- renderText(error_msg)
+          output$statusMsg <- renderUI({
+            p(class = "text-danger", error_msg)
+          })
           NULL
         }
       )
@@ -282,19 +319,25 @@ rtbm_app_server <- function(id, tab_selected) {
       r <- raster_data()
 
       if (is.null(r)) {
-        output$statusMsg <- renderText("There is no observation for this selection.")
+        output$statusMsg <- renderUI({
+          p(class = "text-info", "There is no observation for this selection.")
+        })
         leafletProxy(ns("rasterMap")) |>
           clearImages() |>
           clearControls()
         return()
       }
-      output$statusMsg <- renderText("")
+      output$statusMsg <- renderUI({
+        NULL
+      })
 
       rt <- raster::raster(r)
       vals <- na.omit(raster::values(rt))
 
       if (length(vals) == 0) {
-        output$statusMsg <- renderText("Raster has no valid data.")
+        output$statusMsg <- renderUI({
+          p(class = "text-warning", "Raster has no valid data.")
+        })
         leafletProxy(ns("rasterMap")) |>
           clearImages() |>
           clearControls()
@@ -323,54 +366,71 @@ rtbm_app_server <- function(id, tab_selected) {
 
       # Prepare photo content
       photo_html <- if (!is.null(photo_url())) {
-        paste0("<img src='", photo_url(), "' style='width:200px; margin-bottom:5px;'>")
+        img(src = photo_url(), style = "width:200px; margin-bottom:5px;")
       } else {
-        "<p><em>No image available</em></p>"
+        p(em("No image available"))
       }
 
       # Common name
       common_html <- if (!is.null(common_name())) {
-        paste0("<p><strong>Common Name:</strong> ", common_name(), "</p>")
+        p(
+          strong("Common Name:"),
+          " ",
+          common_name()
+        )
       } else {
-        ""
+        NULL
       }
 
       # Scientific name with a Wiki hyperlink if available
-      sci_html <- ""
+      sci_html <- NULL
       if (!is.null(scientific_name())) {
         if (!is.null(wiki_link())) {
           # Link to external wiki
-          sci_html <- paste0(
-            "<p><em><a href='", wiki_link(),
-            "' target='_blank'>", scientific_name(),
-            "</a></em></p>"
+          sci_html <- p(
+            em(
+              a(
+                href = wiki_link(),
+                target = "_blank",
+                scientific_name()
+              )
+            )
           )
         } else {
           # Just the scientific name (no link)
-          sci_html <- paste0("<p><em>", scientific_name(), "</em></p>")
+          sci_html <- p(
+            em(scientific_name())
+          )
         }
       }
 
       # Song audio
-      song_html <- ""
+      song_html <- NULL
       if (!is.null(song_url())) {
         ext <- file_ext(song_url())
         mime_type <- ifelse(ext == "mp3", "audio/mpeg", "audio/mpeg")
-        song_html <- paste0(
-          "<audio controls style='width:100%;'>",
-          "<source src='", song_url(), "' type='", mime_type, "'>",
-          "Your browser does not support the audio element.</audio>"
+        song_html <- tags$audio(
+          controls = NA,
+          style = "width:100%;",
+          tags$source(
+            src = song_url(),
+            type = mime_type
+          ),
+          "Your browser does not support the audio element."
         )
       }
 
-      info_card_html <- paste0(
-        "<div style='background-color:white; padding:10px; border:1px solid #ccc; width:220px;'>",
+      # Create the info card with htmltools
+      info_card_html <- div(
+        style = "background-color:white; padding:10px; border:1px solid #ccc; width:220px;",
         photo_html,
         common_html,
         sci_html,
-        song_html,
-        "</div>"
+        song_html
       )
+
+      # Convert htmltools tags to HTML for leaflet
+      info_card_html_str <- renderTags(info_card_html)$html
 
       leafletProxy(ns("rasterMap")) |>
         clearImages() |>
@@ -382,7 +442,7 @@ rtbm_app_server <- function(id, tab_selected) {
           title = "Number of records"
         ) |>
         addControl(
-          html = info_card_html,
+          html = info_card_html_str,
           position = "bottomleft"
         )
     })
