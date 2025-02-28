@@ -1,35 +1,23 @@
 box::use(
-  # Shiny UI components
-  shiny[
-    column, conditionalPanel, fluidRow, icon,
-    moduleServer, NS, observe, downloadButton
+  # HTML structure (htmltools)
+  htmltools[
+    a, div, em, HTML, img, p, renderTags,
+    strong, tagList, tags, tagQuery
   ],
+
+  # Reactive components (Shiny)
   shiny[
-    downloadHandler, radioButtons, reactive, req,
-    renderUI, span, uiOutput, updateSliderInput
-  ],
-  shiny[
-    wellPanel, dateInput, observeEvent, sliderInput
+    NS, dateInput, uiOutput, leafletOutput,
+    moduleServer, observe, observeEvent,
+    reactive, req, renderUI
   ],
 
   # Bootstrap components
-  bslib[
-    card, card_body, card_footer, card_header,
-    layout_sidebar, sidebar,
-  ],
-
-  # HTML tools
-  htmltools[
-    a, div, em, HTML, img, p, renderTags,
-    strong,
-  ],
-  htmltools[
-    tagList, tags, tagQuery,
-  ],
+  bslib[card, card_body, card_footer, card_header],
 
   # Leaflet map components
   leaflet[
-    leaflet, leafletOutput, leafletProxy, renderLeaflet,
+    leaflet, leafletProxy, renderLeaflet,
     addProviderTiles, addTiles, setView, addControl,
   ],
   leaflet[
@@ -56,7 +44,7 @@ box::use(
   grDevices[colorRampPalette],
 
   # UI widgets
-  shinyWidgets[pickerInput, switchInput],
+  shinyWidgets[pickerInput],
 )
 
 #' Load and prepare bird species information
@@ -93,54 +81,69 @@ species_choices <- bird_spp_info$common_name
 rtbm_app_ui <- function(id, i18n) {
   ns <- NS(id)
 
-  # Create base layout
+  # Create base layout using htmltools
   base_layout <- div(
-    class = "row",
+    class = "container-fluid p-3",
     # Left sidebar
     div(
-      class = "col-md-4",
+      class = "col-md-4 col-12",
       div(
-        class = "well control-panel",
-        style = "padding: 15px;"
+        class = "card control-panel",
+        `aria-label` = "Control Panel",
+        style = "padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);"
       )
     ),
     # Main content
     div(
-      class = "col-md-8",
-      card(
-        full_screen = TRUE,
-        card_header("Bird Distribution Map"),
-        card_body(
-          leafletOutput(ns("rasterMap"), height = 600)
+      class = "col-md-8 col-12",
+      div(
+        class = "card",
+        div(
+          class = "card-header d-flex justify-content-between align-items-center",
+          tags$h2(
+            class = "h5 mb-0",
+            "Bird Distribution Map"
+          )
+        ),
+        div(
+          class = "card-body p-0",
+          leafletOutput(
+            ns("rasterMap"),
+            height = 600,
+            `aria-label` = "Bird distribution map visualization"
+          )
         )
       )
     )
   )
 
-  # Use tagQuery to build and modify the layout
-  layout <- tagQuery(base_layout)
-
-  # Add control panel components
-  control_panel <- tagQuery(layout)$
+  # Use tagQuery for dynamic modifications
+  control_panel <- tagQuery(base_layout)$
     find(".control-panel")$
     append(
-      # Date picker
+      # Date picker (Shiny input)
       div(
-        class = "form-group",
+        class = "form-group mb-3",
+        tags$label(
+          `for` = ns("selectedDate"),
+          class = "form-label",
+          "Select date:"
+        ),
         dateInput(
           ns("selectedDate"),
-          "Select date:",
+          label = NULL,
           value = today(),
           min = as.Date("2024-11-27"),
           max = today(),
           format = "yyyy-mm-dd"
         )
       ),
-      # Species picker
+      # Species picker (Shiny widget)
       div(
-        class = "form-group",
+        class = "form-group mb-3",
         tags$label(
           `for` = ns("speciesPicker"),
+          class = "form-label",
           "Bird species:"
         ),
         pickerInput(
@@ -151,56 +154,77 @@ rtbm_app_ui <- function(id, i18n) {
           multiple = FALSE,
           options = list(
             `actions-box` = FALSE,
-            `live-search` = TRUE
+            `live-search` = TRUE,
+            `size` = 10
           )
         )
       ),
       # Status message container
       div(
         id = ns("statusMsgContainer"),
-        class = "status-container",
+        class = "alert-container mt-3",
+        `aria-live` = "polite",
         uiOutput(ns("statusMsg"))
       )
-  )$allTags()
+    )$allTags()
 
-  # Add Bootstrap utility classes for better spacing
-  final_layout <- tagQuery(control_panel)$
-    find(".form-group")$
-    addClass("mb-3")$ # Add margin bottom
-    find(".status-container")$
-    addClass("mt-4")$ # Add margin top
-    find(".well")$
-    addClass("shadow-sm")$ # Add subtle shadow
-  allTags()
-
-  # Add responsive behavior
-  responsive_layout <- tagQuery(final_layout)$
-    find(".col-md-4")$
-    addClass("col-sm-12")$ # Full width on small screens
-    find(".col-md-8")$
-    addClass("col-sm-12")$ # Full width on small screens
-  allTags()
-
-  # Wrap in tagList for proper rendering
+  # Wrap everything in tagList with styles
   tagList(
-    # Add custom CSS classes
-    tags$style(
+    # Add custom CSS using tags$style
+    tags$style(HTML(
       "
+      /* Layout */
+      .container-fluid {
+        --control-panel-bg: var(--bs-light);
+        --control-panel-border: var(--bs-border-color);
+      }
+
+      /* Control Panel */
       .control-panel {
-        border-radius: 8px;
-        background-color: #f8f9fa;
+        border-radius: var(--bs-border-radius);
+        background-color: var(--control-panel-bg);
+        border: 1px solid var(--control-panel-border);
       }
-      .status-container {
-        min-height: 50px;
+
+      /* Cards */
+      .card {
+        height: 100%;
+        box-shadow: var(--bs-box-shadow-sm);
       }
+
+      /* Form elements */
+      .form-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      /* Species Picker */
+      .bootstrap-select .dropdown-menu {
+        max-height: 300px;
+      }
+
+      /* Alert Container */
+      .alert-container {
+        min-height: 48px;
+      }
+
+      /* Responsive adjustments */
       @media (max-width: 768px) {
         .control-panel {
           margin-bottom: 1rem;
         }
       }
-    "
-    ),
-    responsive_layout
+
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        .container-fluid {
+          --control-panel-bg: var(--bs-dark);
+          --control-panel-border: var(--bs-border-color-translucent);
+        }
+      }
+      "
+    )),
+    control_panel
   )
 }
 
