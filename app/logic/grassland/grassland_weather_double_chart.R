@@ -19,6 +19,7 @@ read_grass_simulations <- function(
   colors = c("#00aa00", "#a00000", "#0000a0"),
   stack = NULL,
   series_opacity = 0.2) {
+  
   input_data <- read_delim(
     file = filename,
     skip = 0,
@@ -48,28 +49,28 @@ read_grass_simulations <- function(
   return(series_list)
 }
 
-# create 1D vector of DATEs ----
-prepare_time <- function(filepaths) {
-  time <- read_delim(
-    file = filepaths[1],
-    skip = 0,
-    trim_ws = TRUE,
-    delim = "\t",
-    escape_double = FALSE,
-    col_names = TRUE,
-    col_types = list(
-      Date = "D",
-      DayCount = "-",
-      PFT = "-",
-      Fraction = "-",
-      NumberPlants = "-"
-    )
-  ) |>
-    pull(Date) |>
-    unique()
+# # create 1D vector of DATEs ----
+# prepare_time <- function(filepaths) {
+#   time <- read_delim(
+#     file = filepaths[1],
+#     skip = 0,
+#     trim_ws = TRUE,
+#     delim = "\t",
+#     escape_double = FALSE,
+#     col_names = TRUE,
+#     col_types = list(
+#       Date = "D",
+#       DayCount = "-",
+#       PFT = "-",
+#       Fraction = "-",
+#       NumberPlants = "-"
+#     )
+#   ) |>
+#     pull(Date) |>
+#     unique()
   
-  return(time)
-}
+#   return(time)
+# }
 
 # loads and restructure WEATHER data ----
 colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
@@ -90,13 +91,13 @@ read_weather_data <- function(
     dplyr::filter(Date <= end_date) # |>
     # dplyr::select(!(`PAR[µmolm-2s-1]`))
 
-  series_list <- list()
+  series <- list()
   
   weather_col_names <- c("Precipitation[mm]", "Temperature[degC]", "Temperature_Daylight[degC]", "PAR[µmolm-2s-1]", "Daylength[h]", "PET[mm]") # removed "PAR[µmolm-2s-1]",
   for (col_name in weather_col_names) {
-    i <- length(series_list) + 1
+    i <- length(series) + 1
     
-    series_list[[i]] <-
+    series[[i]] <-
       list(
         name = col_name,
         type = "line",
@@ -110,7 +111,7 @@ read_weather_data <- function(
       )
   }
 
-  return(series_list)
+  return(series)
 }
 
 # create CHART itself ----
@@ -126,9 +127,6 @@ generate_chart_with_weather <- function(
   grass_end_date = "2015-12-31",
   return_series = FALSE
 ) {
-  print("plot_series:::")
-  print(plot_series)
-
   if (plot_type == "bar") {
     plot_series <- "mean"
     stack <- "total"
@@ -144,8 +142,8 @@ generate_chart_with_weather <- function(
       c(
         read_grass_simulations(
           filepath,
-          plot_type = "line",
-          colors = clrs,
+          plot_type = plot_type,
+          colors = colors_for_grass,
           stack = stack
         )
       )
@@ -190,14 +188,7 @@ generate_chart_with_weather <- function(
     }
   }
 
-  # generate chart - Weather data ----
-  weather_data <- read_weather_data(
-    file_path = filepath_weather,
-    end_date = grass_end_date,
-    colors = colors_for_weather
-  )
 
-  final_simulations <- append(simulations, weather_data)
 
   # Prepare time
   time <- read_delim(
@@ -219,11 +210,21 @@ generate_chart_with_weather <- function(
     unique()
 
   # Prepare tooltip formatter
-  #kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
-  kl <- 33:38 # hardcoded, TODO figure out better, with a function or so...
+  kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
+  # kl <- 1:38 # hardcoded, TODO figure out better, with a function or so...
 
   formatter <- paste0("{a", kl, "}:   {c", kl, "}", collapse = "<br />")
   formatter <- paste0("DATE: {b1}<br />\n", formatter)
+
+  # generate chart - Weather data ----
+  weather_data <- read_weather_data(
+    file_path = filepath_weather,
+    end_date = grass_end_date,
+    colors = colors_for_weather
+  )
+
+  final_simulations <- final_simulations |>
+    append(weather_data)
 
   # Echarty: making chart ----
   #' @export
