@@ -22,12 +22,12 @@ ces_contributors_ui <- function(id, i18n = NULL) {
         tags$p("Simon Rolph and Dylan Carbone, UK Centre for Ecology & Hydrology, Wallingford, United Kingdom"),
         tags$p("Jan Dick, Chris Andrews, Maddalena Tigli, Megan Williams and Joe Marsh Rossney, UK Centre for Ecology & Hydrology, Edinburgh, United Kingdom"),
         tags$p("John Watkins and Will Bolton, UK Centre for Ecology & Hydrology, Lancaster, United Kingdom"),
+        tags$p("Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava, Ostrava-Poruba, Czech Republic"),
+        tags$p("Kata Sara-aho, CSC – IT Center for Science Ltd, Espoo, Finland"),
+        tags$p("Dirk Pleiter, KTH – Royal Institute of Technology, Stockholm, Sweden"),
+        tags$p("Christoph Wohner, Environment Agency Austria, Vienna, Austria"),
         tags$p("Julian Lopez Gordillo, Naturalis Biodiversity Center, Leiden, Netherlands"),
         tags$p("Nick Oostervink, Netherlands Organisation for Applied Scientific Research, The Hague, Netherlands"),
-        tags$p("Dirk Pleiter, KTH Royal Institute of Technology, Stockholm, Sweden"),
-        tags$p("Christoph Wohner, Environment Agency Austria, Vienna, Austria"),
-        tags$p("Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava"),
-        tags$p("Kata Sara-aho, CSC – IT Center for Science Ltd.")
       )
     ),
     column(
