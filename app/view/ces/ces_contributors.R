@@ -20,7 +20,7 @@ ces_contributors_ui <- function(id, i18n = NULL) {
           style = "greeting display-4 font-weight-bold"
         ),
         tags$p("Simon Rolph and Dylan Carbone, UK Centre for Ecology & Hydrology, Wallingford, United Kingdom"),
-        tags$p("Jan Dick, Chris Andrews, Maddalena Tigli and Joe Marsh Rossney, UK Centre for Ecology & Hydrology, Edinburgh, United Kingdom"),
+        tags$p("Jan Dick, Chris Andrews, Maddalena Tigli, Megan Williams and Joe Marsh Rossney, UK Centre for Ecology & Hydrology, Edinburgh, United Kingdom"),
         tags$p("John Watkins and Will Bolton, UK Centre for Ecology & Hydrology, Lancaster, United Kingdom"),
         tags$p("Julian Lopez Gordillo, Naturalis Biodiversity Center, Leiden, Netherlands"),
         tags$p("Nick Oostervink, Netherlands Organisation for Applied Scientific Research, The Hague, Netherlands"),
