@@ -43,6 +43,9 @@ box::use(
 
   # UI widgets
   shinyWidgets[pickerInput],
+
+  # Color palettes
+  viridisLite[magma],
 )
 
 #' Load and prepare bird species information
@@ -488,12 +491,9 @@ rtbm_app_server <- function(id, tab_selected) {
         vals <- na.omit(raster::values(rt))
       }
 
-      # Replace magma with built-in color palette
+      # Use magma color palette
       base_pal <- colorNumeric(
-        colorRampPalette(c(
-          "#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59",
-          "#EF6548", "#D7301F", "#B30000", "#7F0000"
-        ))(100),
+        magma(100),
         domain = vals,
         na.color = "#00000000"
       )
