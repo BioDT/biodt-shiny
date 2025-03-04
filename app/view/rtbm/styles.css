@@ -1,0 +1,88 @@
+/* Layout */
+.container-fluid {
+  --control-panel-bg: var(--bs-light);
+  --control-panel-border: var(--bs-border-color);
+}
+
+/* Control Panel */
+.control-panel {
+  border-radius: var(--bs-border-radius);
+  background-color: var(--control-panel-bg);
+  border: 1px solid var(--control-panel-border);
+  height: 100%;
+}
+
+/* Cards */
+.card {
+  height: 100%;
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+/* Map container */
+.leaflet-container {
+  border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+}
+
+/* Legend styles */
+.info.legend {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 6px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.info.legend i {
+  width: 18px;
+  height: 18px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
+}
+
+/* Form elements */
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+/* Species Picker */
+.bootstrap-select .dropdown-menu {
+  max-height: 300px;
+}
+
+/* Alert Container */
+.alert-container {
+  min-height: 48px;
+}
+
+/* Info Card */
+.info-card-container {
+  background-color: var(--bs-white);
+  padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
+  border-radius: var(--bs-border-radius);
+  border: 1px solid var(--bs-border-color);
+  width: 220px;
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .control-panel {
+    margin-bottom: 1rem;
+  }
+  .row > [class*='col-'] {
+    margin-bottom: 1rem;
+  }
+  .row > [class*='col-']:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container-fluid {
+    --control-panel-bg: var(--bs-dark);
+    --control-panel-border: var(--bs-border-color-translucent);
+  }
+} 
