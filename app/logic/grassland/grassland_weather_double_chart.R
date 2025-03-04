@@ -2,7 +2,8 @@ box::use(
   readr[read_delim],
   dplyr[pull],
   purrr[map_chr],
-  echarty[ec.init]
+  echarty[ec.init],
+  htmlwidgets[JS],
 )
 
 # loads and restructure GRASSLAND data ----
@@ -188,8 +189,6 @@ generate_chart_with_weather <- function(
     }
   }
 
-
-
   # Prepare time
   time <- read_delim(
     file = filepaths_grass[1],
@@ -210,8 +209,8 @@ generate_chart_with_weather <- function(
     unique()
 
   # Prepare tooltip formatter
-  kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
-  # kl <- 1:38 # hardcoded, TODO figure out better, with a function or so...
+  # kl <- (length(final_simulations) - length(pft_unique)):(length(final_simulations) - 1)
+  kl <- 0:8 # hardcoded, TODO figure out better, with a function or so...
 
   formatter <- paste0("{a", kl, "}:   {c", kl, "}", collapse = "<br />")
   formatter <- paste0("DATE: {b1}<br />\n", formatter)
@@ -241,7 +240,13 @@ generate_chart_with_weather <- function(
         borderWidth = 1,
         borderColor = "#ccc",
         padding = 10,
-        textStyle = list(color = "#000")
+        textStyle = list(color = "#000"),
+        backgroundColor = 'rgba(255, 255, 255, 0.8)',
+        position = htmlwidgets::JS(
+          "function (point, params, dom, rect, size) {
+            return [point[0], '10%'];
+          }"
+        )
       ),
       axisPointer = list(
         link = list(
@@ -349,5 +354,19 @@ generate_chart_with_weather <- function(
   } else {
     return(chart)
   }
+
+  # chart$x$customEvents <- htmlwidgets::JS("
+  #   function(el, x) {
+  #     console.log('Initializing chart');
+  #     var myChart = echarts.init(el);
+
+  #     // Store chart instance globally
+  #     window.currentEchartsInstance = myChart;
+  #     console.log('Chart instance stored globally');
+
+  #     myChart.setOption(x.opts);
+  #     console.log('Chart initialized with options:', x.opts);
+  #   }
+  # ")
 }
 
