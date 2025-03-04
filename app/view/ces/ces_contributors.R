@@ -27,7 +27,7 @@ ces_contributors_ui <- function(id, i18n = NULL) {
         tags$p("Dirk Pleiter, KTH – Royal Institute of Technology, Stockholm, Sweden"),
         tags$p("Christoph Wohner, Environment Agency Austria, Vienna, Austria"),
         tags$p("Julian Lopez Gordillo, Naturalis Biodiversity Center, Leiden, Netherlands"),
-        tags$p("Nick Oostervink, Netherlands Organisation for Applied Scientific Research, The Hague, Netherlands"),
+        tags$p("Nick Oostervink, Netherlands Organisation for Applied Scientific Research, The Hague, Netherlands "),
       )
     ),
     column(
