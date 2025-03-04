@@ -145,7 +145,7 @@ ui <- function(id) {
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
-            title = i18n$translate("Crop wild relatives and genetic resources for food security"),
+            title = i18n$translate(" Crop wild relatives and genetic resources for food security"),
             mod_cwr_ui(
               ns("cwr_main"),
               i18n
