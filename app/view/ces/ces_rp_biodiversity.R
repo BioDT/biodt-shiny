@@ -43,6 +43,7 @@ ces_rp_biodiversity_ui <- function(id) {
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
             tags$div(
               class = "button-container",
+              id = "openSidebar",
               actionButton(ns("toggleSliders"), HTML('<i class="fa-solid fa-person-hiking"></i>'), class = "toggle-button", title = "Hiker Settings"),
               actionButton(ns("toggleSpecies"), HTML('<i class="fa-solid fa-paw"></i>'), class = "toggle-button", title = "Species Occurence"),
               actionButton(ns("toggleMaps"), HTML('<i class="fa-solid fa-layer-group"></i>'), class = "toggle-button", title = "Map Layers"),
@@ -212,21 +213,47 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
     )
     
     # Logic for handling the Sliders button click
-    observeEvent(input$toggleSliders, {
-      runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for sliders content
-      runjs('App.activeRecreation()')
+    observeEvent(input$toggleSliders, { 
+      runjs('
+    if (window.activeSection === "sliders") {
+      App.toggleSidebar(); // Close sidebar if Sliders is already active
+      window.activeSection = null; // Reset active section
+    } else {
+      if (!document.getElementById("sidebar").classList.contains("active")) {
+        App.toggleSidebar();
+      }
+      App.activeRecreation();
+      window.activeSection = "sliders";
+    }
+  ')
     })
     
     # Logic for handling the Species button click
     observeEvent(input$toggleSpecies, {
-      runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for species content
-      runjs('App.activeSpecies()')
+      runjs(' if (window.activeSection === "species") {
+      App.toggleSidebar(); // Close sidebar if Species is already active
+      window.activeSection = null;
+    } else {
+      if (!document.getElementById("sidebar").classList.contains("active")) {
+        App.toggleSidebar();
+      }
+      App.activeSpecies();
+      window.activeSection = "species";
+    }')
     })
     
     # Logic for handling the Maps button click
     observeEvent(input$toggleMaps, {
-      runjs('App.toggleSidebar()')  # Call JS to toggle the sidebar for maps content
-      runjs('App.activeMaps()')
+      runjs('if (window.activeSection === "maps") {
+      App.toggleSidebar(); // Close sidebar if Maps is already active
+      window.activeSection = null;
+    } else {
+      if (!document.getElementById("sidebar").classList.contains("active")) {
+        App.toggleSidebar();
+      }
+      App.activeMaps();
+      window.activeSection = "maps";
+    }')
     })
     
     # Logic for basic sidebar closing
