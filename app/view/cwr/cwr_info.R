@@ -1,14 +1,14 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent,showNotification],
+  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent, showNotification],
   bslib[nav_select],
 )
 
 #' @export
-ces_info_ui <- function(id) {
+cwr_info_ui <- function(id) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
-    style ="overflow-x: hidden",
+    style = "overflow-x: hidden",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
@@ -45,9 +45,8 @@ ces_info_ui <- function(id) {
 
 
 #' @export
-ces_info_server <- function(id, main_session) {
+cwr_info_server <- function(id, main_session) {
   moduleServer(id, function(input, output, session) {
-    
     observeEvent(
       input$start,
       {
