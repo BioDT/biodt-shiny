@@ -11,18 +11,18 @@ box::use(
 )
 
 box::use(
-  app/view/info[mod_info_ui, mod_info_server],
-  app/view/acknowledgements[mod_acknowledgements_ui],
-  app/view/honeybee/honeybee_main[honeybee_ui, honeybee_server],
-  app/view/grassland/grassland_main[grassland_main_ui, grassland_main_server],
-  app/view/ces/ces_main[ces_ui, ces_server],
-  app/view/disease_outbreaks/disease_outbreaks_main[
+  app / view / info[mod_info_ui, mod_info_server],
+  app / view / acknowledgements[mod_acknowledgements_ui],
+  app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
+  app / view / grassland / grassland_main[grassland_main_ui, grassland_main_server],
+  app / view / ces / ces_main[ces_ui, ces_server],
+  app / view / disease_outbreaks / disease_outbreaks_main[
     disease_outbreaks_main_ui,
     disease_outbreaks_main_server
   ],
-  app/view/cwr/cwr_main[mod_cwr_server, mod_cwr_ui],
-  app/view/ias/ias_main[ias_ui, ias_main_server],
-  app/view/rtbm/rtbm_main[rtbm_ui, rtbm_main_server],
+  app / view / cwr / cwr_main[mod_cwr_server, mod_cwr_ui],
+  app / view / ias / ias_main[ias_ui, ias_main_server],
+  app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
 )
 
 shiny$enableBookmarking("server")
@@ -49,7 +49,7 @@ i18n$set_translation_language("en")
 ui <- function(id) {
   ns <- shiny$NS(id)
   page(
-  #shiny$bootstrapPage(
+    # shiny$bootstrapPage(
     theme = biodt_theme,
     # Head ----
     shiny$tags$head(
@@ -103,14 +103,14 @@ ui <- function(id) {
         align = "left",
         icon = shiny$icon("people-group", `aria-hidden` = "true"),
         # if (env_active == "dev") {
-          nav_item(
-            ## Species response to environment - menu subitem ----
-            shiny$tags$div(
-              class = "p-2",
-              shiny$icon("temperature-arrow-up", `aria-hidden` = "true"),
-              shiny$tags$strong(i18n$translate("Species response to environmental change"))
-            )
-          ),
+        nav_item(
+          ## Species response to environment - menu subitem ----
+          shiny$tags$div(
+            class = "p-2",
+            shiny$icon("temperature-arrow-up", `aria-hidden` = "true"),
+            shiny$tags$strong(i18n$translate("Species response to environmental change"))
+          )
+        ),
         # },
         if (env_active == "dev") {
           nav_panel(
@@ -123,15 +123,15 @@ ui <- function(id) {
             )
           )
         },
-          nav_panel(
-            class = "p-0",
-            title = i18n$translate("Cultural Ecosystem Services"),
-            value = "CES",
-            ces_ui(
-              ns("ces_main"),
-              i18n
-            )
-          ),
+        nav_panel(
+          class = "p-0",
+          title = i18n$translate("Cultural Ecosystem Services"),
+          value = "CES",
+          ces_ui(
+            ns("ces_main"),
+            i18n
+          )
+        ),
         if (env_active == "dev") {
           nav_item(
             ## Species response to environment - menu subitem ----
@@ -142,16 +142,14 @@ ui <- function(id) {
             )
           )
         },
-        if (env_active == "dev") {
-          nav_panel(
-            class = "p-0",
-            title = i18n$translate(" Crop wild relatives and genetic resources for food security"),
-            mod_cwr_ui(
-              ns("cwr_main"),
-              i18n
-            )
+        nav_panel(
+          class = "p-0",
+          title = i18n$translate(" Crop wild relatives and genetic resources for food security"),
+          mod_cwr_ui(
+            ns("cwr_main"),
+            i18n
           )
-        },
+        ),
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
