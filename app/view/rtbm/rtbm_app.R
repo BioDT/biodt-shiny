@@ -43,6 +43,9 @@ box::use(
 
   # UI widgets
   shinyWidgets[pickerInput],
+
+  # Color palettes
+  viridisLite[magma],
 )
 
 #' Load and prepare bird species information
@@ -173,72 +176,10 @@ rtbm_app_ui <- function(id, i18n) {
 
   # Wrap everything in tagList with styles
   tagList(
-    # Add custom CSS using tags$style
-    tags$style(HTML(
-      "
-      /* Layout */
-      .container-fluid {
-        --control-panel-bg: var(--bs-light);
-        --control-panel-border: var(--bs-border-color);
-      }
-
-      /* Control Panel */
-      .control-panel {
-        border-radius: var(--bs-border-radius);
-        background-color: var(--control-panel-bg);
-        border: 1px solid var(--control-panel-border);
-        height: 100%;
-      }
-
-      /* Cards */
-      .card {
-        height: 100%;
-        box-shadow: var(--bs-box-shadow-sm);
-      }
-
-      /* Map container */
-      .leaflet-container {
-        border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
-      }
-
-      /* Form elements */
-      .form-group label {
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-      }
-
-      /* Species Picker */
-      .bootstrap-select .dropdown-menu {
-        max-height: 300px;
-      }
-
-      /* Alert Container */
-      .alert-container {
-        min-height: 48px;
-      }
-
-      /* Responsive adjustments */
-      @media (max-width: 768px) {
-        .control-panel {
-          margin-bottom: 1rem;
-        }
-        .row > [class*='col-'] {
-          margin-bottom: 1rem;
-        }
-        .row > [class*='col-']:last-child {
-          margin-bottom: 0;
-        }
-      }
-
-      /* Dark mode support */
-      @media (prefers-color-scheme: dark) {
-        .container-fluid {
-          --control-panel-bg: var(--bs-dark);
-          --control-panel-border: var(--bs-border-color-translucent);
-        }
-      }
-      "
-    )),
+    # Include external CSS file
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css")
+    ),
     control_panel
   )
 }
@@ -488,12 +429,9 @@ rtbm_app_server <- function(id, tab_selected) {
         vals <- na.omit(raster::values(rt))
       }
 
-      # Replace magma with built-in color palette
+      # Use magma color palette
       base_pal <- colorNumeric(
-        colorRampPalette(c(
-          "#FFF7EC", "#FEE8C8", "#FDD49E", "#FDBB84", "#FC8D59",
-          "#EF6548", "#D7301F", "#B30000", "#7F0000"
-        ))(100),
+        magma(100),
         domain = vals,
         na.color = "#00000000"
       )
@@ -596,7 +534,9 @@ rtbm_app_server <- function(id, tab_selected) {
           pal = base_pal,
           values = vals,
           title = "Number of records",
-          className = "info-legend"
+          position = "topright",
+          className = "info legend",
+          opacity = 0.8
         ) |>
         addControl(
           html = info_card_html_str,
