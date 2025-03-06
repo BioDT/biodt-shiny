@@ -255,8 +255,8 @@ mod_cwr_server <- function(id, i18n) {
           class(suitable_pixels)
           stress_values <- terra$values(r_cwr$stress_maps[[input$stress_var]])[suitable_pixels] |>
             terra$na.omit() |>
-            table() |>
-            prop.table()
+            table() #|>
+          # prop.table()
 
           # Create a named list with zeros for all values in the range
           range_values <- as.character(r_cwr$stressor_range[1]:r_cwr$stressor_range[2])
@@ -301,8 +301,8 @@ mod_cwr_server <- function(id, i18n) {
               nameLocation = "middle",
               nameGap = 40,
               nameTextStyle = list(fontWeight = "bolder"),
-              min = 0,
-              max = 1
+              min = 0
+              # max = 1
             ),
             series = r_cwr$stress_data
           )
