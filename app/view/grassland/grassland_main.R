@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, icon, NS],
+  shiny[moduleServer, icon, NS, reactiveVal, observeEvent],
   bslib[navset_tab, nav_panel],
 )
 
@@ -16,6 +16,7 @@ box::use(
 grassland_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
+    id = (ns("tab")),
     # Info Page ---
     nav_panel(
       title = "Info",
@@ -53,6 +54,19 @@ grassland_main_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    grassland_dynamics_server("grassland_app")
+    tab_grassland_selected <- reactiveVal(FALSE)
+
+    observeEvent(
+      input$tab,
+      {
+        if (input$tab == "Grassland Dynamics") {
+          tab_grassland_selected(TRUE)
+        } else {
+          tab_grassland_selected(FALSE)
+        }
+      }
+    )
+
+    grassland_dynamics_server("grassland_app", tab_grassland_selected)
   })
 }
