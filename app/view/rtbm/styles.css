@@ -50,11 +50,30 @@
 /* Date Picker */
 .datepicker-dropdown {
   z-index: 1051 !important;
+  top: 100% !important;
+  bottom: auto !important;
+  transform: translate3d(0, 0, 0) !important;
+  margin-top: 2px !important;
+  position: absolute !important;
 }
 
 /* Species Picker */
 .bootstrap-select .dropdown-menu {
+  top: 100% !important;
+  bottom: auto !important;
+  transform: translate3d(0, 0, 0) !important;
+  margin-top: 2px !important;
+  position: absolute !important;
   max-height: 300px;
+}
+
+/* Ensure the container allows overflow */
+.bootstrap-select {
+  position: static !important;
+}
+
+.well {
+  overflow: visible !important;
 }
 
 /* Alert Container */
