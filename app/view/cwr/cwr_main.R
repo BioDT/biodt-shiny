@@ -5,7 +5,7 @@ box::use(
   leaflet,
   leaflegend[addLegendNumeric],
   terra,
-  shinyWidgets[pickerInput, updatePickerInput],
+  shinyWidgets[pickerInput, updatePickerInput, pickerOptions],
   waiter[Waiter],
   dplyr[bind_rows],
   echarty[ecs.render, ecs.output, ec.init],
@@ -57,10 +57,12 @@ mod_cwr_ui <- function(
               choices = list(""),
               multiple = TRUE,
               selected = c("Sativus"),
-              options = list(
+              options = pickerOptions(
                 `actions-box` = NULL,
                 `live-search` = TRUE,
-                container = "body"
+                container = "body",
+                maxOptions = 5,
+                maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
               )
             ),
             pickerInput(
@@ -246,35 +248,36 @@ mod_cwr_server <- function(id, i18n) {
               group = "suitability"
             )
           r_cwr$stress_data <- NULL
-        } else {
-          r_cwr$stress_data <- lapply(input$species, function(species_name) {
-            suitable_pixels <- which(terra$values(r_cwr$map_list[[species_name]]) == 1)
-            class(suitable_pixels)
-            stress_values <- terra$values(r_cwr$stress_maps[[input$stress_var]])[suitable_pixels] |>
-              terra$na.omit() |>
-              table() |>
-              prop.table()
-
-            # Create a named list with zeros for all values in the range
-            range_values <- as.character(r_cwr$stressor_range[1]:r_cwr$stressor_range[2])
-            filled_list <- setNames(rep(0, length(range_values)), range_values)
-
-            # Fill in the values from stress_values where names match
-            filled_list[names(stress_values)] <- stress_values
-
-            return(
-              list(
-                name = species_name,
-                type = "line",
-                color = c("#00aa00", "#ff0000", "#0000aa")[which(species_name == input$species)],
-                symbol = "none",
-                showSymbol = FALSE,
-                emphasis = list(disabled = TRUE),
-                data = unname(as.numeric(filled_list))
-              )
-            )
-          })
         }
+        # else {
+        r_cwr$stress_data <- lapply(input$species, function(species_name) {
+          suitable_pixels <- which(terra$values(r_cwr$map_list[[species_name]]) == 1)
+          class(suitable_pixels)
+          stress_values <- terra$values(r_cwr$stress_maps[[input$stress_var]])[suitable_pixels] |>
+            terra$na.omit() |>
+            table() |>
+            prop.table()
+
+          # Create a named list with zeros for all values in the range
+          range_values <- as.character(r_cwr$stressor_range[1]:r_cwr$stressor_range[2])
+          filled_list <- setNames(rep(0, length(range_values)), range_values)
+
+          # Fill in the values from stress_values where names match
+          filled_list[names(stress_values)] <- stress_values
+
+          return(
+            list(
+              name = species_name,
+              type = "line",
+              color = c("#00aa00", "#ff0000", "#0000aa")[which(species_name == input$species)],
+              symbol = "none",
+              showSymbol = FALSE,
+              emphasis = list(disabled = TRUE),
+              data = unname(as.numeric(filled_list))
+            )
+          )
+        })
+        # }
 
         r_cwr$tolerance_plot <- ec.init()
         r_cwr$tolerance_plot$x$opts <-
@@ -290,7 +293,7 @@ mod_cwr_server <- function(id, i18n) {
               nameLocation = "middle",
               nameGap = 25,
               nameTextStyle = list(fontWeight = "bolder"),
-              data = 1:87
+              data = r_cwr$stressor_range[1]:r_cwr$stressor_range[2]
             ),
             yAxis = list(
               type = "value",
@@ -329,15 +332,6 @@ mod_cwr_server <- function(id, i18n) {
         if (input$stress_var == "None") {
           # Hide the stress range slider ----
           hide("stress_range")
-          # Hide the stress map ----
-          runjs(sprintf("document.getElementById('%s').style.width = '0';", ns("map_stress_div")))
-          runjs(sprintf("document.getElementById('%s').style.width = '100%%';", ns("map_div")))
-
-          leaflet$leafletProxy("map_stress", session) |>
-            leaflet$clearGroup("stress")
-        } else if (length(input$species) > 1) {
-          # Show the stress range slider ----
-          show("stress_range")
           # Hide the stress map ----
           runjs(sprintf("document.getElementById('%s').style.width = '0';", ns("map_stress_div")))
           runjs(sprintf("document.getElementById('%s').style.width = '100%%';", ns("map_div")))
