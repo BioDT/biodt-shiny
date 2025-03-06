@@ -47,6 +47,11 @@
   font-weight: 500;
 }
 
+/* Date Picker */
+.datepicker-dropdown {
+  z-index: 1051 !important;
+}
+
 /* Species Picker */
 .bootstrap-select .dropdown-menu {
   max-height: 300px;
