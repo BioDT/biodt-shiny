@@ -254,28 +254,34 @@ generate_chart_with_weather <- function(
             xAxisIndex = "all"
           )
         ),
-        label = list(
+        label = list( 
           backgroundColor = "#777"
         )
       ),
       legend = list(
-        show = FALSE,
-        orient = "horizontal",
-        # bottom = "50%",
-        # right = "2%",
+        show = TRUE,
+        orient = "vertical",
+        bottom = "50%",
+        right = "2%",
         data = pft_unique
       ),
       grid = list(
         list(
           left = "10%",
           right = "8%",
-          height = "50%"
+          height = "33%"
         ),
         list(
           left = "10%",
           right = "8%",
-          top = "63%",
-          height = "50%"
+          top = "40%",
+          height = "33%"
+        ),
+        list(
+          left = "10%",
+          right = "8%",
+          top = "60%",
+          height = "33%"
         )
       ),
       xAxis = list(
@@ -294,6 +300,25 @@ generate_chart_with_weather <- function(
         list(
           type = "category",
           gridIndex = 1,
+          scale = TRUE,
+          boundaryGap = FALSE,
+          axisLine = list(
+            onZero = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = TRUE
+          ),
+          axisLabel = list(
+            show = TRUE
+          ),
+          data = time
+        ),
+        list(
+          type = "category",
+          gridIndex = 2,
           scale = TRUE,
           boundaryGap = FALSE,
           axisLine = list(
@@ -330,6 +355,25 @@ generate_chart_with_weather <- function(
           scale = TRUE,
           gridIndex = 1,
           splitNumber = 2,
+          # min = 0,
+          # max = 100,
+          axisLabel = list(
+            show = FALSE
+          ) ,
+          axisLine = list(
+            show = FALSE 
+          ),
+          axisTick = list(
+            show = FALSE
+          ),
+          splitLine = list(
+            show = FALSE
+          )
+        ),
+        list(
+          scale = TRUE,
+          gridIndex = 2,
+          splitNumber = 3,
           # min = 0,
           # max = 100,
           axisLabel = list(
