@@ -93,7 +93,6 @@ rtbm_app_ui <- function(id, i18n) {
         div(
           class = "card control-panel h-100",
           `aria-label` = "Control Panel",
-          style = "padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);"
         )
       ),
       # Main content
@@ -450,8 +449,7 @@ rtbm_app_server <- function(id, tab_selected) {
             img(
               src = photo_url(),
               alt = paste("Photo of", common_name()),
-              class = "img-fluid rounded",
-              style = "width: 200px;"
+              class = "img-fluid rounded"
             )
           )
         } else {

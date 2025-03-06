@@ -10,6 +10,7 @@
   background-color: var(--control-panel-bg);
   border: 1px solid var(--control-panel-border);
   height: 100%;
+  padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
 }
 
 /* Cards */
@@ -57,6 +58,10 @@
 }
 
 /* Info Card */
+.info-card-photo img {
+  width: 200px;
+}
+
 .info-card-container {
   background-color: var(--bs-white);
   padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
