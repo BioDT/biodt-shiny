@@ -127,6 +127,7 @@ The app is modularized and each pDT have files in its own subfolder. UI files ar
  * Crop wild relatives: `TBD`
  * GRASSLAND: `app/view/grassland`
  * Invasive alien species: `TBD`
+ * RTBM (Real-time Bird Monitoring): `app/view/rtbm`
 
 ## Technicals
 
