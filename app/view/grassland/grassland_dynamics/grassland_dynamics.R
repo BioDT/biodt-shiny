@@ -17,15 +17,6 @@ box::use(
     grassland_dynamics_outputplot_ui,
     grassland_dynamics_outputplot_server
   ],
-  # app/view/grassland/grassland_dynamics/grassland_dynamics_datachart[
-  #   grassland_dynamics_datachart_ui,
-  #   grassland_dynamics_datachart_server
-  # ],
-  app/view/grassland/grassland_dynamics/grassland_dynamics_datachart_controls[
-    grassland_dynamics_datachart_controls_ui,
-    grassland_dynamics_datachart_controls_server
-  ],
-
   app/view/grassland/grassland_dynamics/grassland_dynamics_weather_grass_chart[
     grassland_dynamics_double_chart_ui,
     grassland_dynamics_double_chart_server
