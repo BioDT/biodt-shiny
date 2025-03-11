@@ -61,7 +61,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
         files_grass <- list.files("app/data/grassland/simulations/project1/output", full.names = TRUE)
         file_weather <- "app/data/grassland/scenarios/lat51.391900_lon11.878700/weather/lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt"
         colors_for_grass <- c("#b4e4b4", "#dfa7a7", "#9c9cdf")
-        colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
+        #colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
+        colors_for_weather = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00")
         end_date <- "2015-12-31"
 
 

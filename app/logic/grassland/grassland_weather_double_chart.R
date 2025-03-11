@@ -94,22 +94,38 @@ read_weather_data <- function(
 
   series <- list()
   
-  weather_col_names <- c("Precipitation[mm]", "Temperature[degC]", "Temperature_Daylight[degC]", "PAR[µmolm-2s-1]", "Daylength[h]", "PET[mm]") # removed "PAR[µmolm-2s-1]",
+  weather_col_names <- c("Precipitation[mm]", "Temperature[degC]", "Temperature_Daylight[degC]", "PAR[µmolm-2s-1]", "Daylength[h]", "PET[mm]")
   for (col_name in weather_col_names) {
     i <- length(series) + 1
     
-    series[[i]] <-
-      list(
-        name = col_name,
-        type = "line",
-        color = colors[i],
-        symbol = "none",
-        showSymbol = FALSE,
-        emphasis = list(disabled = TRUE),
-        xAxisIndex = 1,
-        yAxisIndex = 1,
-        data = unname(as.list(unlist(input_data[, col_name])))
-      )
+
+    if (col_name == "PAR[µmolm-2s-1]") {
+      series[[i]] <-
+        list(
+          name = col_name,
+          type = "line",
+          color = colors[i],
+          symbol = "none",
+          showSymbol = FALSE,
+          emphasis = list(disabled = TRUE),
+          xAxisIndex = 1,
+          yAxisIndex = 1,
+          data = unname(as.list(unlist(input_data[, col_name])))
+        )
+    } else {
+      series[[i]] <-
+        list(
+          name = col_name,
+          type = "line",
+          color = colors[i],
+          symbol = "none",
+          showSymbol = FALSE,
+          emphasis = list(disabled = TRUE),
+          xAxisIndex = 2,
+          yAxisIndex = 2,
+          data = unname(as.list(unlist(input_data[, col_name])))
+        )
+    }
   }
 
   return(series)
@@ -124,7 +140,8 @@ generate_chart_with_weather <- function(
   plot_series = "all", # "all", "mean", "series"
   clrs = c("#00aa00", "#a00000", "#0000d3"),
   colors_for_grass = c("#b4e4b4", "#dfa7a7", "#9c9cdf"),
-  colors_for_weather = c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF"),
+  # colors_for_weather = c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF"),
+  colors_for_weather = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00"),
   grass_end_date = "2015-12-31",
   return_series = FALSE
 ) {
@@ -230,10 +247,23 @@ generate_chart_with_weather <- function(
   chart <- ec.init()
   chart$x$opts <-
     list(
-      title = list(text = "Grassland Simulation & Weather"),
+      # title = list(text = "Grassland Simulation & Weather"),
       tooltip = list(
         trigger = "axis",
-        formatter = formatter,
+        #formatter = formatter,
+        formatter = JS("
+          function (param) {
+              return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
+                'Mean PFT 0: ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
+                'Mean PFT 1: ' + param.find(item => item.seriesName ==  'PFT 1 mean').value + '<br />' +
+                'Mean PFT 2: ' + param.find(item => item.seriesName ==  'PFT 2 mean').value + '<hr size=1 style=\"margin: 4px 0\">' +
+                'PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<hr size=1 style=\"margin: 4px 0\">' +
+                'Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +                
+                'Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
+                'Temperature_Daylight[degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
+                'PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
+            }
+        "), 
         axisPointer = list(
           type = "cross"
         ),
@@ -244,7 +274,7 @@ generate_chart_with_weather <- function(
         backgroundColor = 'rgba(255, 255, 255, 0.8)',
         position = htmlwidgets::JS(
           "function (point, params, dom, rect, size) {
-            return [point[0], '10%'];
+            return [point[0], '0%'];
           }"
         )
       ),
@@ -269,19 +299,20 @@ generate_chart_with_weather <- function(
         list(
           left = "10%",
           right = "8%",
-          height = "33%"
+          top = "top",
+          height = "30%"
         ),
         list(
           left = "10%",
           right = "8%",
-          top = "40%",
-          height = "33%"
+          top = "middle",
+          height = "30%"
         ),
         list(
           left = "10%",
           right = "8%",
-          top = "60%",
-          height = "33%"
+          top = "bottom",
+          height = "30%"
         )
       ),
       xAxis = list(
@@ -312,7 +343,7 @@ generate_chart_with_weather <- function(
             show = TRUE
           ),
           axisLabel = list(
-            show = TRUE
+            show = FALSE
           ),
           data = time
         ),
@@ -331,7 +362,7 @@ generate_chart_with_weather <- function(
             show = TRUE
           ),
           axisLabel = list(
-            show = TRUE
+            show = FALSE
           ),
           data = time
         )
@@ -352,19 +383,23 @@ generate_chart_with_weather <- function(
           )
         ),
         list(
+          name = "PAR[µmolm-2s-1]",
+          nameLocation = "middle",
+          nameGap = 40,
+          nameTextStyle = list(fontWeight = "bolder"),
           scale = TRUE,
           gridIndex = 1,
-          splitNumber = 2,
-          # min = 0,
-          # max = 100,
+          splitNumber = 5,
+          min = 0,
+          max = 1000,
           axisLabel = list(
-            show = FALSE
+            show = TRUE
           ) ,
           axisLine = list(
-            show = FALSE 
+            show = TRUE 
           ),
           axisTick = list(
-            show = FALSE
+            show = TRUE
           ),
           splitLine = list(
             show = FALSE
@@ -373,17 +408,17 @@ generate_chart_with_weather <- function(
         list(
           scale = TRUE,
           gridIndex = 2,
-          splitNumber = 3,
-          # min = 0,
-          # max = 100,
+          splitNumber = 5,
+          min = 0,
+          max = 50,
           axisLabel = list(
-            show = FALSE
+            show = TRUE
           ) ,
           axisLine = list(
-            show = FALSE 
+            show = TRUE 
           ),
           axisTick = list(
-            show = FALSE
+            show = TRUE
           ),
           splitLine = list(
             show = FALSE
