@@ -138,8 +138,9 @@ generate_chart_with_weather <- function(
   filepath_weather,
   plot_type = "line", # "bar", "line"
   plot_series = "all", # "all", "mean", "series"
-  clrs = c("#00aa00", "#a00000", "#0000d3"),
-  colors_for_grass = c("#b4e4b4", "#dfa7a7", "#9c9cdf"),
+  # #CC79A7 #000000 #88CCEE
+  clrs = c("#000000", "#CC79A7", "#88CCEE"),
+  colors_for_grass = c("#808080", "#E8C4D8", "#E0F2FB"),
   # colors_for_weather = c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF"),
   colors_for_weather = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00"),
   grass_end_date = "2015-12-31",
