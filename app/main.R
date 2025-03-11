@@ -54,6 +54,7 @@ ui <- function(id) {
     # Head ----
     shiny$tags$head(
       shiny$tags$link(rel = "shortcut icon", href = "static/favicon.ico"),
+      shiny$tags$html(lang = "en"),
       useShinyjs(),
       useWaiter(),
       useHostess(),
