@@ -50,8 +50,5 @@ grassland_dynamics_outputplot_server <- function(id) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    output$output_plot_gl <- renderPlot(
-      print("Grasslands' shiny::renderPlot run")
-    )
   })
 }
