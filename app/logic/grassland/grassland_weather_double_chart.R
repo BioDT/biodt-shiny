@@ -138,9 +138,8 @@ generate_chart_with_weather <- function(
   filepath_weather,
   plot_type = "line", # "bar", "line"
   plot_series = "all", # "all", "mean", "series"
-  # #CC79A7 #000000 #88CCEE
-  clrs = c("#000000", "#CC79A7", "#88CCEE"),
-  colors_for_grass = c("#808080", "#E8C4D8", "#E0F2FB"),
+  clrs = c("#117733", "#882255", "#332288"),
+  colors_for_grass = c("#18A547", "#AF2C6E", "#422CAF"),
   # colors_for_weather = c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF"),
   colors_for_weather = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00"),
   grass_end_date = "2015-12-31",
@@ -255,14 +254,15 @@ generate_chart_with_weather <- function(
         formatter = JS("
           function (param) {
               return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
-                'Mean PFT 0: ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
-                'Mean PFT 1: ' + param.find(item => item.seriesName ==  'PFT 1 mean').value + '<br />' +
-                'Mean PFT 2: ' + param.find(item => item.seriesName ==  'PFT 2 mean').value + '<hr size=1 style=\"margin: 4px 0\">' +
-                'PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<hr size=1 style=\"margin: 4px 0\">' +
-                'Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +                
-                'Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
-                'Temperature_Daylight[degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
-                'PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #117733\"></i>Mean PFT 0: ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #882255\"></i>Mean PFT 1: ' + param.find(item => item.seriesName ==  'PFT 1 mean').value + '<br />' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #332288\"></i>Mean PFT 2: ' + param.find(item => item.seriesName ==  'PFT 2 mean').value + '<hr size=1 style=\"margin: 4px 0\">' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<hr size=1 style=\"margin: 4px 0\">' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +                
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #009E73\"></i>Temperature_Daylight[degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Daylength[h]: ' + param.find(item => item.seriesName ==  'Daylength[h]').value + '<br />' +
+                '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
             }
         "), 
         axisPointer = list(
