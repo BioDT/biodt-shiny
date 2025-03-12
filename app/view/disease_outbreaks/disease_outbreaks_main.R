@@ -4,9 +4,9 @@ box::use(
 )
 
 box::use(
-  app/view/disease_outbreaks/info/disease_info[disease_info_ui],
-  app/view/disease_outbreaks/disease_app/disease_app[disease_app_ui, disease_app_server],
-  app/view/disease_outbreaks/disease_contributors[disease_contributors_ui],
+  app / view / disease_outbreaks / info / disease_info[disease_info_ui],
+  app / view / disease_outbreaks / disease_app / disease_app[disease_app_ui, disease_app_server],
+  app / view / disease_outbreaks / disease_contributors[disease_contributors_ui],
 )
 
 #' @export
@@ -20,7 +20,8 @@ disease_outbreaks_main_ui <- function(id, i18n) {
       value = "Info (called from 1st navpanel in disease_outbreaks_main.R)",
       icon = icon("circle-info"),
       disease_info_ui(
-        ns("disease_info"), i18n
+        ns("disease_info"),
+        i18n
       )
     ),
     nav_panel(
@@ -56,8 +57,6 @@ disease_outbreaks_main_server <- function(id) {
       {
         if (input$tab == "Disease Outbreaks") {
           tab_disease_selected(TRUE)
-        } else {
-          tab_disease_selected(FALSE)
         }
       }
     )
