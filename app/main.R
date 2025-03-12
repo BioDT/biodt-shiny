@@ -1,6 +1,15 @@
 box::use(
   shiny,
-  bslib[nav_select, bs_theme, page_navbar, nav_menu, nav_spacer, nav_item, nav_panel, page],
+  bslib[
+    nav_select,
+    bs_theme,
+    page_navbar,
+    nav_menu,
+    nav_spacer,
+    nav_item,
+    nav_panel,
+    page
+  ],
   shinyjs[useShinyjs],
   waiter[useWaiter, useHostess, waiterShowOnLoad, waiter_hide, spin_loaders],
   cicerone[use_cicerone],
@@ -14,15 +23,21 @@ box::use(
   app / view / info[mod_info_ui, mod_info_server],
   app / view / acknowledgements[mod_acknowledgements_ui],
   app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],
-  app / view / grassland / grassland_main[grassland_main_ui, grassland_main_server],
+  app /
+    view /
+    grassland /
+    grassland_main[grassland_main_ui, grassland_main_server],
   app / view / ces / ces_main[ces_ui, ces_server],
-  app / view / disease_outbreaks / disease_outbreaks_main[
-    disease_outbreaks_main_ui,
-    disease_outbreaks_main_server
-  ],
+  app /
+    view /
+    disease_outbreaks /
+    disease_outbreaks_main[
+      disease_outbreaks_main_ui,
+      disease_outbreaks_main_server
+    ],
   app / view / cwr / cwr_main[mod_cwr_server, mod_cwr_ui],
-  app / view / ias / ias_main[ias_ui, ias_main_server],
-  app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
+  # app / view / ias / ias_main[ias_ui, ias_main_server],
+  # app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
 )
 
 shiny$enableBookmarking("server")
@@ -42,7 +57,9 @@ biodt_theme <- bs_theme(
 
 env_active <- Sys.getenv("R_CONFIG_ACTIVE")
 
-i18n <- Translator$new(translation_json_path = "app/translations/translations.json")
+i18n <- Translator$new(
+  translation_json_path = "app/translations/translations.json"
+)
 i18n$set_translation_language("en")
 
 #' @export
@@ -109,7 +126,9 @@ ui <- function(id) {
           shiny$tags$div(
             class = "p-2",
             shiny$icon("temperature-arrow-up", `aria-hidden` = "true"),
-            shiny$tags$strong(i18n$translate("Species response to environmental change"))
+            shiny$tags$strong(i18n$translate(
+              "Species response to environmental change"
+            ))
           )
         ),
         # },
@@ -139,13 +158,17 @@ ui <- function(id) {
             shiny$tags$div(
               class = "p-2",
               shiny$icon("temperature-arrow-up"),
-              shiny$tags$strong(i18n$translate("Species response to environmental change"))
+              shiny$tags$strong(i18n$translate(
+                "Species response to environmental change"
+              ))
             )
           )
         },
         nav_panel(
           class = "p-0",
-          title = i18n$translate(" Crop wild relatives and genetic resources for food security"),
+          title = i18n$translate(
+            " Crop wild relatives and genetic resources for food security"
+          ),
           mod_cwr_ui(
             ns("cwr_main"),
             i18n
@@ -154,11 +177,13 @@ ui <- function(id) {
         if (env_active == "dev") {
           nav_panel(
             class = "p-0",
-            title = i18n$translate("Real-time Bird Monitoring with Citizen Science Data"),
-            rtbm_ui(
-              ns("rtbm_main"),
-              i18n
-            )
+            title = i18n$translate(
+              "Real-time Bird Monitoring with Citizen Science Data"
+            ),
+            # rtbm_ui(
+            #   ns("rtbm_main"),
+            #   i18n
+            # )
           )
         },
         ## Species interactions (themselves, human) - menu subitem ----
@@ -167,7 +192,9 @@ ui <- function(id) {
             class = "p-2",
             shiny$div(
               shiny$icon("bugs", `aria-hidden` = "true"),
-              shiny$strong(i18n$translate("Species interactions with each other and with humans")),
+              shiny$strong(i18n$translate(
+                "Species interactions with each other and with humans"
+              )),
               style = "width: 450px"
             ),
           )
@@ -196,7 +223,9 @@ ui <- function(id) {
               class = "p-2",
               shiny$div(
                 shiny$icon("bugs", `aria-hidden` = "true"),
-                shiny$strong(i18n$translate("Dynamics and threats from and for species of policy concern")),
+                shiny$strong(i18n$translate(
+                  "Dynamics and threats from and for species of policy concern"
+                )),
                 style = "width: 450px"
               ),
             )
@@ -206,7 +235,7 @@ ui <- function(id) {
           nav_panel(
             title = i18n$translate("Invasive Alien Species"),
             class = "p-0",
-            ias_ui(ns("ias_main"), i18n)
+            # ias_ui(ns("ias_main"), i18n)
           )
         },
       ),
@@ -286,9 +315,9 @@ server <- function(id) {
     # Disease Outbreaks pDT ----
     disease_outbreaks_main_server("disease_outbreaks_main")
     # Invasie Alien Species pDT ----
-    ias_main_server("ias_main")
+    # ias_main_server("ias_main")
     # Real-time Bird Monitoring pDT ----
-    rtbm_main_server("rtbm_main")
+    # rtbm_main_server("rtbm_main")
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
