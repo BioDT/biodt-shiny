@@ -44,3 +44,4 @@ Dockerfile_old
 .win
 app/view/rtbm/.windsurfrules
 app/view/rtbm/.cursorrules
+biodt-shiny.code-workspace
