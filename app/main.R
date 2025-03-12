@@ -120,7 +120,6 @@ ui <- function(id) {
         title = i18n$translate("Digital Twin"),
         align = "left",
         icon = shiny$icon("people-group", `aria-hidden` = "true"),
-        # if (env_active == "dev") {
         nav_item(
           ## Species response to environment - menu subitem ----
           shiny$tags$div(
@@ -131,18 +130,15 @@ ui <- function(id) {
             ))
           )
         ),
-        # },
-        if (env_active == "dev") {
-          nav_panel(
-            class = "p-0",
-            title = i18n$translate("Grassland Dynamics"),
-            value = "Grassland",
-            grassland_main_ui(
-              ns("grassland_main"),
-              i18n
-            )
+        nav_panel(
+          class = "p-0",
+          title = i18n$translate("Grassland Dynamics"),
+          value = "Grassland",
+          grassland_main_ui(
+            ns("grassland_main"),
+            i18n
           )
-        },
+        ),
         nav_panel(
           class = "p-0",
           title = i18n$translate("Cultural Ecosystem Services"),

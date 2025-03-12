@@ -1,8 +1,9 @@
 box::use(
-  shiny[NS, moduleServer, tags, reactive, observeEvent],
-  bslib[card, card_header, card_body],
+  shiny[NS, moduleServer, tags, reactive, observeEvent, selectInput, actionButton],
+  bslib[card, card_header, card_body, layout_column_wrap],
   echarty[ecs.output, ecs.render],
   waiter[Waiter],
+  shinyjs[disabled]
 )
 
 box::use(
@@ -12,10 +13,11 @@ box::use(
 
 #' @export
 grassland_dynamics_double_chart_ui <- function(
-    id,
-    i18n,
-    plot_width = "100%",
-    plot_height = "600px") {
+  id,
+  i18n,
+  plot_width = "100%",
+  plot_height = "600px"
+) {
   ns <- NS(id)
   card(
     id = ns("double_chart_wrap"),
@@ -28,6 +30,21 @@ grassland_dynamics_double_chart_ui <- function(
       )
     ),
     card_body(
+      layout_column_wrap(
+        width = 1 / 2,
+        selectInput(
+          ns("output_list"),
+          label = i18n$translate("Choose output dataset"),
+          choices = NULL
+        ),
+        disabled(
+          actionButton(
+            ns("update_output"),
+            label = i18n$translate("Show results"),
+            class = "mt-auto"
+          )
+        )
+      ),
       ecs.output(
         ns("double_chart"),
         width = plot_width,
@@ -42,9 +59,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...",
-        style = "color: #414f2f;"
-      ))
+    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("double_chart_wrap"),
       html = msg,
@@ -65,7 +80,6 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
         colors_for_weather = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00")
         end_date <- "2015-12-31"
 
-
         chart_reactive <- reactive({
           generate_chart_with_weather(
             filepaths_grass = files_grass,
@@ -84,7 +98,5 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
         w$hide()
       }
     )
-    
-
   })
 }
