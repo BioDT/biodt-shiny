@@ -29,9 +29,12 @@ update_leaflet_map <- function(
 
   for (species_name in species) {
     if (subset_suitability_map) {
+      map_list[[species_name]][map_list[[species_name]] == 0] <- NA
+
+      stress_map <- terra$resample(stress_map, map_list[[species_name]])
       map_list[[species_name]] <- terra$mask(
-        map_list[[species_name]],
-        stress_map
+        stress_map,
+        map_list[[species_name]]
       )
     }
 
@@ -47,13 +50,11 @@ update_leaflet_map <- function(
     baseGroups[[species_name]] <- species_name
   }
 
-  # Add stressor to the baseGroups list
-  if (!is.null(stressor) && stressor != "None") {
-    baseGroups["Stressor"] <- stressor
-  }
-
   # Add stressor layer
-  if (!is.null(stressor) && stressor != "None") {
+  if (!is.null(stressor) && stressor != "None" && isFALSE(subset_suitability_map)) {
+    # Add stressor to the baseGroups list
+    baseGroups["Stressor"] <- stressor
+
     leaflet$leafletProxy("map", session) |>
       leaflet$addRasterImage(
         stress_map,

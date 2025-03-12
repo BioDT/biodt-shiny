@@ -81,14 +81,6 @@ mod_cwr_ui <- function(
                     maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
                   )
                 )
-              ),
-              shiny$div(
-                style = "display: flex; align-items: flex-end; padding-bottom: 6px; justify-content: flex-start;",
-                shiny$actionButton(
-                  ns("update"),
-                  "Update Map",
-                  style = "width: 100%;"
-                )
               )
             ),
             # Second row with stress variable and slider
@@ -118,8 +110,16 @@ mod_cwr_ui <- function(
               hidden(
                 shiny$checkboxInput(
                   ns("subset_suitability_map"),
-                  "Subset Suitability Map",
+                  "Subset Stressor Map with Suitability Map",
                   FALSE
+                )
+              ),
+              shiny$div(
+                style = "display: flex; align-items: flex-end; padding-bottom: 6px; justify-content: flex-start;",
+                shiny$actionButton(
+                  ns("update"),
+                  "Update Map",
+                  style = "width: 100%;"
                 )
               )
             )
