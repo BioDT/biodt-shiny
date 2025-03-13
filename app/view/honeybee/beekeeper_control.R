@@ -31,14 +31,17 @@ beekeeper_control_ui <- function(id, i18n) {
           "Instructions"
         ),
         tags$ol(
-          tags$style("
+          tags$style(
+            "
             .card-list ol li {
               margin-bottom: 10px;
               margin-left: 20px;
             }
-          "),
+          "
+          ),
           tags$li(
-            tags$b("Select"), "point on the map by clicking the",
+            tags$b("Select"),
+            "point on the map by clicking the",
             shiny::icon("location-dot"),
             tags$b("icon")
           ),

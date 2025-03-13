@@ -1,5 +1,16 @@
 box::use(
-  shiny[NS, moduleServer, tags, tagList, fluidRow, actionButton, reactiveVal, observeEvent, reactive, req],
+  shiny[
+    NS,
+    moduleServer,
+    tags,
+    tagList,
+    fluidRow,
+    actionButton,
+    reactiveVal,
+    observeEvent,
+    reactive,
+    req
+  ],
   bslib[card, card_header, card_body],
   shinyjs[disabled, disable, enable],
   terra[vect, project, buffer, crop, writeRaster],
@@ -67,7 +78,10 @@ beekeeper_runsimulation_server <- function(
         tags$br(),
         tags$h4("This operation takes some time.", style = "color: #414f2f;"),
         tags$h4("You can expect it to run for 2 to 4 minutes.", style = "color: #414f2f;"),
-        tags$h4("Please do not close the tab during this time. You can browse other tabs.", style = "color: #414f2f;")
+        tags$h4(
+          "Please do not close the tab during this time. You can browse other tabs.",
+          style = "color: #414f2f;"
+        )
       ),
     )
 
@@ -81,6 +95,8 @@ beekeeper_runsimulation_server <- function(
     # Making a beekeeper dir in the shared folder
     temp_dir <- session_dir |>
       file.path("beekeeper")
+
+    print("temp_dir")
 
     # this variable represents all runs of simulation in order in which they were
     # chronologicaly run by user; "Example" is dummy hardcoded example for
@@ -159,9 +175,7 @@ beekeeper_runsimulation_server <- function(
           clip_buffer
         )
 
-        # BEWARE !!!!!!!!!!!!
-        # HARDCODED paths follows
-
+        # Copy model file ----
         file_copy(
           file.path(
             "app",
@@ -203,15 +217,16 @@ beekeeper_runsimulation_server <- function(
             '":"/scripts" -v "',
             config$get("r_path"),
             '":"/R" -v "',
-            paste0(
-              config$get("data_path"),
-              stringr::str_remove(run_dir, paste0(config$get("home_path"), "shared"))
-            ),
-            '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9'
+            run_dir,
+            '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/cloud/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9'
           )
+          print(docker_call)
           system(docker_call)
-        } else if (config$executor == "k8s") {
-          data_subpath <- stringr::str_remove(run_dir, paste0(config$get("home_path"), "shared/"))
+        } else if (config$get("executor") == "k8s") {
+          data_subpath <- stringr::str_remove(
+            run_dir,
+            file.path(config$get("home_path"), "shared/")
+          )
           create_and_wait_k8s_job(data_subpath, run_id)
         } else {
           stop("Invalid executor type: ", config$get("executor"))

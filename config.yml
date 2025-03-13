@@ -1,16 +1,18 @@
 default:
   rhino_log_level: !expr Sys.getenv("RHINO_LOG_LEVEL", "INFO")
   rhino_log_file: !expr Sys.getenv("RHINO_LOG_FILE", NA)
-  home_path: "app/data/shared"
-  data_path: "app/data/shared"
-  script_path: "app/data/honeybee/scripts"
-  r_path: "app/data/honeybee/R"
+  base_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
+  home_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
+  data_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
+  script_path: !expr paste0(file.path(getwd(), "app", "data", "honeybee", "scripts"), .Platform$file.sep)
+  r_path: !expr paste0(file.path(getwd(), "app", "data", "honeybee", "R"), .Platform$file.sep)
   executor: "docker"
 
 dev:
   rhino_log_level: !expr Sys.getenv("RHINO_LOG_LEVEL", "DEBUG")
 
 prod:
+  base_path: !expr Sys.getenv("BASE_PATH")
   home_path: !expr Sys.getenv("HOME_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
   script_path: !expr Sys.getenv("SCRIPT_PATH")
@@ -18,6 +20,7 @@ prod:
   executor: "docker"
 
 shinyproxy:
+  base_path: !expr Sys.getenv("BASE_PATH")
   home_path: !expr Sys.getenv("HOME_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
   script_path: !expr Sys.getenv("SCRIPT_PATH")
@@ -25,6 +28,7 @@ shinyproxy:
   executor: "docker"
 
 k8s:
+  base_path: !expr Sys.getenv("BASE_PATH")
   api_url: !expr Sys.getenv("KUBERNETES_API_URL")
   namespace: !expr Sys.getenv("KUBERNETES_NAMESPACE")
   token: !expr Sys.getenv("KUBERNETES_API_TOKEN")
