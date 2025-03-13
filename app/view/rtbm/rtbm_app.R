@@ -7,9 +7,9 @@ box::use(
 
   # Reactive components (Shiny)
   shiny[
-    NS, dateInput, uiOutput,
+    NS, dateInput, uiOutput, actionButton,
     moduleServer, observe, observeEvent,
-    reactive, req, renderUI
+    reactive, req, renderUI, eventReactive
   ],
 
   # Bootstrap components
@@ -168,6 +168,15 @@ rtbm_app_ui <- function(id, i18n) {
           )
         )
       ),
+      # Load Data button
+      div(
+        class = "form-group mb-3",
+        actionButton(
+          ns("loadData"),
+          "Load Data",
+          class = "btn btn-primary"
+        )
+      ),
       # Status message container
       div(
         id = ns("statusMsgContainer"),
@@ -273,8 +282,11 @@ rtbm_app_server <- function(id, tab_selected) {
       s_url
     })
 
-    # Reactive to download raster data using the Finnish name
-    raster_data <- reactive({
+    # Changed from reactive to eventReactive to only load data when the button is clicked
+    raster_data <- eventReactive(input$loadData, {
+      # Clear any previous status messages when starting a new load
+      output$statusMsg <- renderUI(NULL)
+      
       # Debug prints for reactive dependencies
       print("raster_data reactive triggered")
       print(paste("selectedDate:", input$selectedDate))
@@ -298,6 +310,15 @@ rtbm_app_server <- function(id, tab_selected) {
         })
         return(NULL)
       }
+
+      # Show loading message
+      output$statusMsg <- renderUI({
+        div(
+          class = "alert alert-info",
+          role = "alert",
+          "Loading data... Please wait."
+        )
+      })
 
       # Use the Finnish name to build the .tif URL
       url_tif <- paste0(
@@ -393,24 +414,27 @@ rtbm_app_server <- function(id, tab_selected) {
         setView(lng = 25, lat = 65.5, zoom = 5)
     })
 
+    # Initial status message prompting user action
+    output$statusMsg <- renderUI({
+      div(
+        class = "alert alert-info",
+        role = "alert",
+        "Select a date and species, then click 'Load Data' to view the distribution map."
+      )
+    })
+
     # Observe changes in raster and update the map
     observe({
+      # This will only trigger when raster_data() has a value, which happens after the button is clicked
       r <- raster_data()
 
       if (is.null(r)) {
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-info",
-            role = "alert",
-            "There is no observation for this selection."
-          )
-        })
+        # Status message is now handled in the raster_data eventReactive
         leafletProxy(ns("rasterMap")) |>
           clearImages() |>
           clearControls()
         return()
       }
-      output$statusMsg <- renderUI(NULL)
 
       rt <- raster::raster(r)
       vals <- na.omit(raster::values(rt))
@@ -548,6 +572,15 @@ rtbm_app_server <- function(id, tab_selected) {
           position = "bottomleft",
           className = "info-card-container"
         )
+        
+      # Update status message to show success
+      output$statusMsg <- renderUI({
+        div(
+          class = "alert alert-success",
+          role = "alert",
+          "Data loaded successfully."
+        )
+      })
     })
   })
 }
