@@ -7,18 +7,17 @@ box::use(
 
   # Reactive components (Shiny)
   shiny[
-    NS, uiOutput, actionButton,
+    NS, uiOutput, actionButton, dateRangeInput,
     moduleServer, observe, observeEvent,
     reactive, req, renderUI, eventReactive,
-    invalidateLater, reactiveVal
+    invalidateLater, reactiveVal, sliderInput,
+    icon
   ],
 
   # Bootstrap components
   bslib[
-    card, card_body, card_footer, card_header,
-    input_daterange, input_button, input_slider
+    card, card_body, card_footer, card_header
   ],
-  bsicons[bs_icon],
 
   # Leaflet map components
   leaflet[
@@ -159,14 +158,15 @@ rtbm_app_ui <- function(id, i18n) {
           class = "form-label",
           "Select date range:"
         ),
-        input_daterange(
-          id = ns("dateRange"),
+        dateRangeInput(
+          inputId = ns("dateRange"),
           label = NULL,
           start = today() - 14,
           end = today(),
           min = "2022-01-01",
           max = today(),
-          format = "yyyy-mm-dd"
+          format = "yyyy-mm-dd",
+          separator = " to "
         )
       ),
       # Species picker (Shiny widget)
@@ -198,8 +198,8 @@ rtbm_app_ui <- function(id, i18n) {
       div(
         class = "form-group mb-3",
         actionButton(
-          ns("loadData"),
-          "Load Data",
+          inputId = ns("loadData"),
+          label = "Load Data",
           class = "btn btn-primary"
         )
       ),
@@ -288,26 +288,26 @@ rtbm_app_server <- function(id, tab_selected) {
         div(
           class = "animation-buttons",
           if (!animation()) {
-            input_button(
-              ns("play_animation"), 
-              "Play", 
-              icon = bs_icon("play-fill"),
+            actionButton(
+              inputId = ns("play_animation"), 
+              label = "Play", 
+              icon = icon("play"),
               class = "btn-sm btn-primary me-2"
             )
           } else {
-            input_button(
-              ns("pause_animation"), 
-              "Pause", 
-              icon = bs_icon("pause-fill"),
+            actionButton(
+              inputId = ns("pause_animation"), 
+              label = "Pause", 
+              icon = icon("pause"),
               class = "btn-sm btn-secondary me-2"
             )
           }
         ),
         div(
           class = "speed-control",
-          input_slider(
-            ns("speed_slider"),
-            "Animation Speed:",
+          sliderInput(
+            inputId = ns("speed_slider"),
+            label = "Animation Speed:",
             min = 1,
             max = 10,
             value = animation_speed(),
