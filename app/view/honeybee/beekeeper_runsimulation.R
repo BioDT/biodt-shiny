@@ -8,11 +8,12 @@ box::use(
   fs[file_copy],
   utils[write.csv],
   jsonlite[fromJSON],
+  config,
 )
 
 box::use(
   app / logic / waiter[waiter_text],
-  app / logic / honeybee / k8s[create_and_wait_k8s_job]
+  app / logic / honeybee / k8s[create_and_wait_k8s_job],
 )
 
 #' @export
@@ -135,7 +136,6 @@ beekeeper_runsimulation_server <- function(
           Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S")
         )
         dir.create(run_dir)
-        data_subpath <- stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared/"))
 
         lookup_file <- file.path(run_dir, "lookup_table.csv")
         parameters_file <- file.path(run_dir, "parameters.csv")
@@ -163,7 +163,12 @@ beekeeper_runsimulation_server <- function(
         # HARDCODED paths follows
 
         file_copy(
-          file.path("app", "data", "honeybee", "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
+          file.path(
+            "app",
+            "data",
+            "honeybee",
+            "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"
+          ),
           file.path(run_dir, "Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
           overwrite = TRUE
         )
@@ -189,24 +194,27 @@ beekeeper_runsimulation_server <- function(
         )
         # Run workflow ----
         print("Starting the workflow execution.")
-        EXECUTOR_TYPE <- Sys.getenv("EXECUTOR_TYPE", "DOCKER")
         run_id <- counter()
 
-        if (EXECUTOR_TYPE == "DOCKER") {
+        if (config$get("executor") == "docker") {
           docker_call <- paste0(
             'docker run -v "',
-            Sys.getenv("SCRIPT_PATH"),
+            config$get("script_path"),
             '":"/scripts" -v "',
-            Sys.getenv("R_PATH"),
+            config$get("r_path"),
             '":"/R" -v "',
-            paste0(Sys.getenv("DATA_PATH"), stringr::str_remove(run_dir, paste0(Sys.getenv("HOME_PATH"), "shared"))),
+            paste0(
+              config$get("data_path"),
+              stringr::str_remove(run_dir, paste0(config$get("home_path"), "shared"))
+            ),
             '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9'
           )
           system(docker_call)
-        } else if (EXECUTOR_TYPE == "KUBERNETES") {
+        } else if (config$executor == "k8s") {
+          data_subpath <- stringr::str_remove(run_dir, paste0(config$get("home_path"), "shared/"))
           create_and_wait_k8s_job(data_subpath, run_id)
         } else {
-          stop("Invalid executor type: ", EXECUTOR_TYPE)
+          stop("Invalid executor type: ", config$get("executor"))
         }
         print("Workflow execution completed.")
         # Update output data ----

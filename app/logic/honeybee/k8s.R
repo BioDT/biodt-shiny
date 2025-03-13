@@ -54,7 +54,10 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
                 list(name = "LOCATIONS", value = "locations.csv"),
                 list(name = "PARAMETERS", value = "parameters.csv"),
                 list(name = "NETLOGO_JAR_PATH", value = "/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar"),
-                list(name = "MODEL_PATH", value = "/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"),
+                list(
+                  name = "MODEL_PATH",
+                  value = "/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"
+                ),
                 list(name = "CPUS", value = "1")
               ),
               resources = list(
@@ -82,7 +85,9 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
             ),
             list(
               name = paste0("biodt-shared-dir-volume-", shinyproxy_id),
-              persistentVolumeClaim = list(claimName = paste0("biodt-shared-dir-pvc-", shinyproxy_id))
+              persistentVolumeClaim = list(
+                claimName = paste0("biodt-shared-dir-pvc-", shinyproxy_id)
+              )
             )
           ),
           restartPolicy = "Never"
