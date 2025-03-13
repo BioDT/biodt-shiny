@@ -1,7 +1,32 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, uiOutput, renderUI, HTML, observeEvent, reactiveVal, reactive, textOutput, renderText],
+  shiny[
+    moduleServer,
+    NS,
+    tagList,
+    tags,
+    uiOutput,
+    renderUI,
+    HTML,
+    observeEvent,
+    reactiveVal,
+    reactive,
+    textOutput,
+    renderText
+  ],
   bslib[card, card_header, card_body],
-  leaflet[addRectangles, flyTo, fitBounds, removeLayersControl, setView, leafletOutput, renderLeaflet, leafletProxy, addCircles, removeShape, clearControls],
+  leaflet[
+    addRectangles,
+    flyTo,
+    fitBounds,
+    removeLayersControl,
+    setView,
+    leafletOutput,
+    renderLeaflet,
+    leafletProxy,
+    addCircles,
+    removeShape,
+    clearControls
+  ],
   htmlwidgets[onRender],
   terra[vect, extract, project, buffer, crop],
   shinyjs[hide, show, useShinyjs]
@@ -15,7 +40,6 @@ box::use(
 honeybee_map_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
-    useShinyjs(),
     card(
       class = "ms-md-3 card-shadow",
       title = "input_map",
@@ -48,9 +72,7 @@ honeybee_map_ui <- function(id, i18n) {
             leafletOutput(ns("map_mini"), height = "256px"),
           )
         ),
-        leafletOutput(ns("map_plot"),
-          height = "500px"
-        ),
+        leafletOutput(ns("map_plot"), height = "500px"),
         textOutput(ns("acknowledgment"))
       )
     ),
@@ -58,11 +80,13 @@ honeybee_map_ui <- function(id, i18n) {
 }
 
 #' @export
-honeybee_map_server <- function(id,
-                                leaflet_map,
-                                experiment_list,
-                                map,
-                                map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")) {
+honeybee_map_server <- function(
+  id,
+  leaflet_map,
+  experiment_list,
+  map,
+  map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     coordinates_text <- reactiveVal()
@@ -202,7 +226,6 @@ honeybee_map_server <- function(id,
       # Add code to add awesomemarker to the map with the name of the list values in the label.
       new_name <- names(experiment_list)[length(experiment_list)]
     })
-
 
     reactive(out())
   })
