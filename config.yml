@@ -17,19 +17,15 @@ prod:
   r_path: !expr Sys.getenv("R_PATH")
   executor: "docker"
 
-shinyproxy:
-  base_path: !expr Sys.getenv("BASE_PATH")
-  data_path: !expr Sys.getenv("DATA_PATH")
-  script_path: !expr Sys.getenv("SCRIPT_PATH")
-  r_path: !expr Sys.getenv("R_PATH")
-  executor: "docker"
-
 k8s:
   base_path: !expr Sys.getenv("BASE_PATH")
+  data_path: !expr Sys.getenv("DATA_PATH")
+  home_path: !expr Sys.getenv("HOME_PATH")
+  script_path: !expr Sys.getenv("SCRIPT_PATH")
+  r_path: !expr Sys.getenv("R_PATH")
   api_url: !expr Sys.getenv("KUBERNETES_API_URL")
   namespace: !expr Sys.getenv("KUBERNETES_NAMESPACE")
   token: !expr Sys.getenv("KUBERNETES_API_TOKEN")
   shinyproxy_id: !expr Sys.getenv("SHINYPROXY_ID")
-  home_path: !expr Sys.getenv("HOME_PATH")
   executor: "k8s"
 
