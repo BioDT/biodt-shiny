@@ -1,6 +1,6 @@
 IMAGE_ROOT?=ghcr.io/biodt
 IMAGE=shiny-base
-IMAGE_VERSION=0.4.0
+IMAGE_VERSION=0.5.0
 
 build: Dockerfile renv.lock
 	docker buildx build --platform linux/amd64 \
