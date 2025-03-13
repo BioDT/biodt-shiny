@@ -161,7 +161,7 @@ ui <- function(id) {
         nav_panel(
           class = "p-0",
           title = i18n$translate(
-            " Crop wild relatives and genetic resources for food security"
+            "Crop wild relatives and genetic resources for food security"
           ),
           mod_cwr_ui(
             ns("cwr_main"),
