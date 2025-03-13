@@ -8,3 +8,6 @@ rsconnect/
 renv
 shared
 .Rprofile
+containers
+.github
+tests
