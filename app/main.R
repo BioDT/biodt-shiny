@@ -260,10 +260,8 @@ server <- function(id) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    base_path <- config$get("base_path")
-
     session_dir <- file.path(
-      paste0(base_path, "shared"),
+      config$get("base_path"),
       paste0(
         Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S"),
         "_",

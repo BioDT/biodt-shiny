@@ -140,9 +140,6 @@ beekeeper_runsimulation_server <- function(
         counter(counter() + 1)
 
         # Prepare folder structure ----
-        if (!dir.exists(session_dir)) {
-          dir.create(session_dir, recursive = TRUE)
-        }
         if (!dir.exists(temp_dir)) {
           dir.create(temp_dir, recursive = TRUE)
         }

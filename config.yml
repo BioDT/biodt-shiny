@@ -1,8 +1,7 @@
 default:
   rhino_log_level: !expr Sys.getenv("RHINO_LOG_LEVEL", "INFO")
   rhino_log_file: !expr Sys.getenv("RHINO_LOG_FILE", NA)
-  base_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
-  home_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
+  base_path: !expr paste0(file.path(getwd(), "app", "data", "shared"), .Platform$file.sep)
   data_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
   script_path: !expr paste0(file.path(getwd(), "app", "data", "honeybee", "scripts"), .Platform$file.sep)
   r_path: !expr paste0(file.path(getwd(), "app", "data", "honeybee", "R"), .Platform$file.sep)
@@ -13,7 +12,6 @@ dev:
 
 prod:
   base_path: !expr Sys.getenv("BASE_PATH")
-  home_path: !expr Sys.getenv("HOME_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
   script_path: !expr Sys.getenv("SCRIPT_PATH")
   r_path: !expr Sys.getenv("R_PATH")
@@ -21,7 +19,6 @@ prod:
 
 shinyproxy:
   base_path: !expr Sys.getenv("BASE_PATH")
-  home_path: !expr Sys.getenv("HOME_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
   script_path: !expr Sys.getenv("SCRIPT_PATH")
   r_path: !expr Sys.getenv("R_PATH")
