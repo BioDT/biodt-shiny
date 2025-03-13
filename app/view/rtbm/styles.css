@@ -56,6 +56,70 @@
   min-height: 48px;
 }
 
+/* Time Control Panel */
+.rtbm-container .animation-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
+
+.rtbm-container .animation-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rtbm-container .speed-control {
+  width: 220px;
+}
+
+/* Current Date Display */
+.rtbm-container .time-display {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.rtbm-container .current-date {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Slider customization */
+.rtbm-container .animation-controls .irs--shiny .irs-bar {
+  border-top: 1px solid #428bca;
+  border-bottom: 1px solid #428bca;
+  background: #428bca;
+}
+
+.rtbm-container .animation-controls .irs--shiny .irs-handle {
+  border: 1px solid #428bca;
+  background-color: #428bca;
+}
+
+.rtbm-container .animation-controls .irs--shiny .irs-from,
+.rtbm-container .animation-controls .irs--shiny .irs-to,
+.rtbm-container .animation-controls .irs--shiny .irs-single {
+  background-color: #428bca;
+}
+
+/* Daterange picker customization */
+.rtbm-container .form-group .daterangepicker .ranges li.active {
+  background-color: #428bca;
+}
+
+.rtbm-container .form-group .daterangepicker td.active {
+  background-color: #428bca;
+}
+
+/* Card Footer styling */
+.rtbm-container .card-footer {
+  border-top: 1px solid var(--bs-border-color);
+  background-color: rgba(var(--bs-light-rgb), 0.7);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .rtbm-container .control-panel {
@@ -67,6 +131,15 @@
   .rtbm-container .row > [class*='col-']:last-child {
     margin-bottom: 0;
   }
+  
+  .rtbm-container .animation-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .rtbm-container .speed-control {
+    width: 100%;
+  }
 }
 
 /* Dark mode support */
@@ -74,5 +147,11 @@
   .rtbm-container .container-fluid {
     --control-panel-bg: var(--bs-dark);
     --control-panel-border: var(--bs-border-color-translucent);
+  }
+  
+  .rtbm-container .current-date {
+    background-color: rgba(33, 37, 41, 0.9);
+    color: #f8f9fa;
+    border-color: rgba(255, 255, 255, 0.2);
   }
 }
