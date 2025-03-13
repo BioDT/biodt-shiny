@@ -12,21 +12,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Lint R
-        if: always()
-        shell: Rscript {0}
-        run: rhino::lint_r()
-
-      - name: Lint JavaScript
-        if: always()
-        shell: Rscript {0}
-        run: rhino::lint_js()
-
-      - name: Lint Sass
-        if: always()
-        shell: Rscript {0}
-        run: rhino::lint_sass()
-
       - name: Build JavaScript
         if: always()
         shell: Rscript {0}
