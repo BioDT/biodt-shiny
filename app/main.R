@@ -36,8 +36,8 @@ box::use(
       disease_outbreaks_main_server
     ],
   app / view / cwr / cwr_main[mod_cwr_server, mod_cwr_ui],
-  # app / view / ias / ias_main[ias_ui, ias_main_server],
-  # app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
+  app / view / ias / ias_main[ias_ui, ias_main_server],
+  app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
 )
 
 shiny$enableBookmarking("server")
@@ -176,10 +176,10 @@ ui <- function(id) {
             title = i18n$translate(
               "Real-time Bird Monitoring with Citizen Science Data"
             ),
-            # rtbm_ui(
-            #   ns("rtbm_main"),
-            #   i18n
-            # )
+            rtbm_ui(
+              ns("rtbm_main"),
+              i18n
+            )
           )
         },
         ## Species interactions (themselves, human) - menu subitem ----
@@ -205,13 +205,11 @@ ui <- function(id) {
             i18n
           )
         ),
-        if (env_active == "dev") {
-          nav_panel(
-            title = i18n$translate("Disease Outbreaks"),
-            class = "p-0",
-            disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
-          )
-        },
+        nav_panel(
+          title = i18n$translate("Disease Outbreaks"),
+          class = "p-0",
+          disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
+        ),
         if (env_active == "dev") {
           ## Dynamics and threats from and for species of policy concern ----
           nav_item(
@@ -231,7 +229,7 @@ ui <- function(id) {
           nav_panel(
             title = i18n$translate("Invasive Alien Species"),
             class = "p-0",
-            # ias_ui(ns("ias_main"), i18n)
+            ias_ui(ns("ias_main"), i18n)
           )
         },
       ),
@@ -311,9 +309,9 @@ server <- function(id) {
     # Disease Outbreaks pDT ----
     disease_outbreaks_main_server("disease_outbreaks_main")
     # Invasie Alien Species pDT ----
-    # ias_main_server("ias_main")
+    ias_main_server("ias_main")
     # Real-time Bird Monitoring pDT ----
-    # rtbm_main_server("rtbm_main")
+    rtbm_main_server("rtbm_main")
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
