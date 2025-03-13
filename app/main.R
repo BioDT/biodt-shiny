@@ -148,18 +148,16 @@ ui <- function(id) {
             i18n
           )
         ),
-        if (env_active == "dev") {
-          nav_item(
-            ## Species response to environment - menu subitem ----
-            shiny$tags$div(
-              class = "p-2",
-              shiny$icon("temperature-arrow-up"),
-              shiny$tags$strong(i18n$translate(
-                "Species response to environmental change"
-              ))
-            )
+        nav_item(
+          ## Species response to environment - menu subitem ----
+          shiny$tags$div(
+            class = "p-2",
+            shiny$icon("temperature-arrow-up"),
+            shiny$tags$strong(i18n$translate(
+              "Species response to environmental change"
+            ))
           )
-        },
+        ),
         nav_panel(
           class = "p-0",
           title = i18n$translate(
