@@ -70,4 +70,4 @@ RUN apt-get update -qy && \
 # Entrypoint script
 COPY run_shiny.sh /biodt/run_shiny.sh
 RUN chmod a+x /biodt/run_shiny.sh
-ENTRYPOINT ["/biodt/run_shiny.sh"]
+ENTRYPOINT ["bash"]
