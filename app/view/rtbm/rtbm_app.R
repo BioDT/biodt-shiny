@@ -84,31 +84,31 @@ rtbm_app_ui <- function(id, i18n) {
 
   # Create base layout using htmltools
   base_layout <- div(
-    class = "container-fluid p-3",
+    class = "rtbm-container container-fluid p-3",
     div(
       class = "row",
       # Left sidebar
       div(
         class = "col-md-4",
         div(
-          class = "card control-panel h-100",
+          class = "control-panel card-shadow",
           `aria-label` = "Control Panel",
         )
       ),
       # Main content
       div(
         class = "col-md-8",
-        div(
-          class = "card h-100",
-          div(
-            class = "card-header d-flex justify-content-between align-items-center",
+        card(
+          class = "h-100 card-shadow",
+          card_header(
+            class = "d-flex justify-content-between align-items-center",
             tags$h2(
-              class = "h5 mb-0",
+              class = "card_title",
               "Bird Distribution Map"
             )
           ),
-          div(
-            class = "card-body p-0",
+          card_body(
+            class = "p-0",
             div(
               `aria-label` = "Bird distribution map visualization",
               leafletOutput(
@@ -151,16 +151,20 @@ rtbm_app_ui <- function(id, i18n) {
           class = "form-label",
           "Bird species:"
         ),
-        pickerInput(
-          ns("speciesPicker"),
-          label = NULL,
-          choices = species_choices,
-          selected = species_choices[1],
-          multiple = FALSE,
-          options = list(
-            `actions-box` = FALSE,
-            `live-search` = TRUE,
-            `size` = 10
+        div(
+          class = "dropdown",
+          pickerInput(
+            ns("speciesPicker"),
+            label = NULL,
+            choices = species_choices,
+            selected = species_choices[1],
+            multiple = FALSE,
+            options = list(
+              `actions-box` = FALSE,
+              `live-search` = TRUE,
+              `size` = 10,
+              `dropupAuto` = FALSE
+            )
           )
         )
       ),
@@ -175,8 +179,11 @@ rtbm_app_ui <- function(id, i18n) {
 
   # Wrap everything in tagList with styles
   tagList(
-    # Include external CSS file
+    # Include CSS resources
     tags$head(
+      # Import global styles first
+      tags$link(rel = "stylesheet", type = "text/css", href = "styles/main.css"),
+      # Then module-specific styles that only contain necessary overrides
       tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css")
     ),
     control_panel
