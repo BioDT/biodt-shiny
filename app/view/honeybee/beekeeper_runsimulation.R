@@ -102,7 +102,7 @@ beekeeper_runsimulation_server <- function(
     # chronologicaly run by user; "Example" is dummy hardcoded example for
     # demonstration purpose
     experiment_list <- reactiveVal(
-      c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
+      c(Example = file.path(config$get("data_path"), "honeybee", "output_example", "Result_table_original.csv"))
     )
     counter <- reactiveVal(0)
 

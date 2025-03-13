@@ -4,6 +4,7 @@ box::use(
   purrr[map_chr],
   echarty[ec.init],
   htmlwidgets[JS],
+  config,
 )
 
 # loads and restructure GRASSLAND data ----
@@ -19,8 +20,8 @@ read_grass_simulations <- function(
   plot_type = c("bar", "line"),
   colors = c("#00aa00", "#a00000", "#0000a0"),
   stack = NULL,
-  series_opacity = 0.2) {
-  
+  series_opacity = 0.2
+) {
   input_data <- read_delim(
     file = filename,
     skip = 0,
@@ -69,7 +70,7 @@ read_grass_simulations <- function(
 #   ) |>
 #     pull(Date) |>
 #     unique()
-  
+
 #   return(time)
 # }
 
@@ -77,7 +78,14 @@ read_grass_simulations <- function(
 colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
 
 read_weather_data <- function(
-  file_path = "app/data/grassland/scenarios/lat51.391900_lon11.878700/weather/lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt",
+  file_path = file.path(
+    config$get("data_path"),
+    "grassland",
+    "scenarios",
+    "lat51.391900_lon11.878700",
+    "weather",
+    "lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt"
+  ),
   end_date = "2015-12-31",
   colors = colors_for_weather
 ) {
@@ -90,14 +98,20 @@ read_weather_data <- function(
     id = NULL,
   ) |>
     dplyr::filter(Date <= end_date) # |>
-    # dplyr::select(!(`PAR[µmolm-2s-1]`))
+  # dplyr::select(!(`PAR[µmolm-2s-1]`))
 
   series <- list()
-  
-  weather_col_names <- c("Precipitation[mm]", "Temperature[degC]", "Temperature_Daylight[degC]", "PAR[µmolm-2s-1]", "Daylength[h]", "PET[mm]")
+
+  weather_col_names <- c(
+    "Precipitation[mm]",
+    "Temperature[degC]",
+    "Temperature_Daylight[degC]",
+    "PAR[µmolm-2s-1]",
+    "Daylength[h]",
+    "PET[mm]"
+  )
   for (col_name in weather_col_names) {
     i <- length(series) + 1
-    
 
     if (col_name == "PAR[µmolm-2s-1]") {
       series[[i]] <-
@@ -170,7 +184,7 @@ generate_chart_with_weather <- function(
   if (plot_series == "series" || plot_series == "all") {
     final_simulations <- simulations
   }
-  
+
   if (plot_series == "mean" || plot_series == "all") {
     # Compute mean ----
     pft_list <- map_chr(simulations, "name")
@@ -251,7 +265,8 @@ generate_chart_with_weather <- function(
       tooltip = list(
         trigger = "axis",
         #formatter = formatter,
-        formatter = JS("
+        formatter = JS(
+          "
           function (param) {
               return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
                 '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #117733\"></i>Mean PFT 0: ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
@@ -264,7 +279,8 @@ generate_chart_with_weather <- function(
                 '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Daylength[h]: ' + param.find(item => item.seriesName ==  'Daylength[h]').value + '<br />' +
                 '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
             }
-        "), 
+        "
+        ),
         axisPointer = list(
           type = "cross"
         ),
@@ -285,7 +301,7 @@ generate_chart_with_weather <- function(
             xAxisIndex = "all"
           )
         ),
-        label = list( 
+        label = list(
           backgroundColor = "#777"
         )
       ),
@@ -376,7 +392,7 @@ generate_chart_with_weather <- function(
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
-          min = 0, 
+          min = 0,
           max = 100,
           scale = TRUE,
           splitArea = list(
@@ -395,9 +411,9 @@ generate_chart_with_weather <- function(
           max = 1000,
           axisLabel = list(
             show = TRUE
-          ) ,
+          ),
           axisLine = list(
-            show = TRUE 
+            show = TRUE
           ),
           axisTick = list(
             show = TRUE
@@ -414,9 +430,9 @@ generate_chart_with_weather <- function(
           max = 50,
           axisLabel = list(
             show = TRUE
-          ) ,
+          ),
           axisLine = list(
-            show = TRUE 
+            show = TRUE
           ),
           axisTick = list(
             show = TRUE
@@ -449,4 +465,3 @@ generate_chart_with_weather <- function(
   #   }
   # ")
 }
-

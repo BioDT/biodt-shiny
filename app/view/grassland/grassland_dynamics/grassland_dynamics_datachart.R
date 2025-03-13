@@ -3,6 +3,7 @@ box::use(
   bslib[card, card_header, card_body],
   echarty[ecs.output, ecs.render],
   waiter[Waiter],
+  config,
 )
 
 box::use(
@@ -12,10 +13,11 @@ box::use(
 
 #' @export
 grassland_dynamics_datachart_ui <- function(
-    id,
-    i18n,
-    plot_width = "100%",
-    plot_height = "500px") {
+  id,
+  i18n,
+  plot_width = "100%",
+  plot_height = "500px"
+) {
   ns <- NS(id)
   card(
     id = ns("datachart"),
@@ -38,13 +40,12 @@ grassland_dynamics_datachart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_datachart_server <- function(id, plot_type, mean_switch) { # nolint
+grassland_dynamics_datachart_server <- function(id, plot_type, mean_switch) {
+  # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading chart...",
-        style = "color: #414f2f;"
-      ))
+    msg <- waiter_text(message = tags$h3("Loading chart...", style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("datachart"),
       html = msg,
@@ -52,10 +53,14 @@ grassland_dynamics_datachart_server <- function(id, plot_type, mean_switch) { # 
     )
 
     # Parameters for chart ----
-    filepaths_results <- list.files("app/data/grassland/simulations/project1/output", full.names = TRUE)
+    filepaths_results <- list.files(
+      file.path(config$get("data_path"), "grassland", "simulations", "project1", "output"),
+      full.names = TRUE
+    )
     stack <- "total"
     series_opacity <- 0.01
     colors <- c("#00ab4a", "#ae0000", "#003fc8")
+    colors_series <- c("#b4e4b4", "#dfa7a7", "#9c9cdf")
     colors_series <- c("#b4e4b4", "#dfa7a7", "#9c9cdf")
 
     chart_reactive <- reactive({

@@ -1,10 +1,24 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, selectInput, updateSelectInput, actionButton, reactiveVal, observeEvent, downloadButton, downloadHandler, req],
+  shiny[
+    moduleServer,
+    NS,
+    tagList,
+    tags,
+    selectInput,
+    updateSelectInput,
+    actionButton,
+    reactiveVal,
+    observeEvent,
+    downloadButton,
+    downloadHandler,
+    req,
+  ],
   bslib[card, card_header, layout_column_wrap],
   echarty[ecs.output, ecs.render, ec.init],
   waiter[Waiter],
   readr[write_csv],
   stringr[str_replace_all, str_remove],
+  config,
 )
 
 box::use(
@@ -14,14 +28,14 @@ box::use(
 
 #' @export
 beekeeper_plot_ui <- function(
-    id,
-    i18n,
-    card_header = "Output plot",
-    title = "output_plot",
-    plot_width = "100%",
-    plot_height = "500px"
-    # custom_code = NULL
-    ) {
+  id,
+  i18n,
+  card_header = "Output plot",
+  title = "output_plot",
+  plot_width = "100%",
+  plot_height = "500px"
+  # custom_code = NULL
+) {
   ns <- NS(id)
   tagList(
     card(
@@ -42,7 +56,9 @@ beekeeper_plot_ui <- function(
           selectInput(
             ns("experiment"),
             label = "Choose experiment:",
-            choices = c(Example = "app/data/honeybee/output_example/Result_table_original.csv")
+            choices = c(
+              Example = file.path(config$get("data_path"), "honeybee", "output_example", "Result_table_original.csv")
+            )
           ),
           # style = "max-width: 200px"
         ),
@@ -67,9 +83,10 @@ beekeeper_plot_ui <- function(
 
 #' @export
 beekeeper_plot_server <- function(
-    id,
-    beekeeper_selected,
-    experiment_list) {
+  id,
+  beekeeper_selected,
+  experiment_list
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -77,10 +94,7 @@ beekeeper_plot_server <- function(
     plot_data <- reactiveVal()
 
     msg <- waiter_text(
-      message =
-        tags$h3("Updating plot...",
-          style = "color: #414f2f;"
-        )
+      message = tags$h3("Updating plot...", style = "color: #414f2f;")
     )
 
     w <- Waiter$new(
@@ -88,52 +102,44 @@ beekeeper_plot_server <- function(
       color = "rgba(256,256,256,0.9)"
     )
 
-    observeEvent(beekeeper_selected(),
-      ignoreInit = TRUE,
-      ignoreNULL = TRUE,
-      {
-        req(
-          beekeeper_selected(),
-          is.null(plot_data())
-        )
-        print("preparing plot")
-        w$show()
-        # Hardcoded for prototype
-        read_plot_data("app/data/honeybee/output_example/Result_table_original.csv") |>
-          plot_data()
+    observeEvent(beekeeper_selected(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      req(
+        beekeeper_selected(),
+        is.null(plot_data())
+      )
+      print("preparing plot")
+      w$show()
+      read_plot_data(
+        file.path(config$get("data_path"), "honeybee", "output_example", "Result_table_original.csv")
+      ) |>
+        plot_data()
 
-        honeybee_beekeeper_plot(
-          input = plot_data()
-        ) |>
-          plot()
-        w$hide()
-      }
-    )
+      honeybee_beekeeper_plot(
+        input = plot_data()
+      ) |>
+        plot()
+      w$hide()
+    })
 
-    observeEvent(experiment_list(),
-      ignoreInit = TRUE,
-      ignoreNULL = TRUE,
-      {
-        print("updating beekeeper plot list")
-        new_list <- experiment_list()
-        shiny::updateSelectInput(
-          inputId = "experiment",
-          choices = new_list,
-          selected = new_list[length(new_list)]
-        )
-      }
-    )
-
-    # observeEvent(input$update_plot, {
-    #   honeybee_beekeeper_plot(
-    #     input$experiment
-    #   ) |>
-    #     plot()
-    # })
+    observeEvent(experiment_list(), ignoreInit = TRUE, ignoreNULL = TRUE, {
+      print("updating beekeeper plot list")
+      new_list <- experiment_list()
+      shiny::updateSelectInput(
+        inputId = "experiment",
+        choices = new_list,
+        selected = new_list[length(new_list)]
+      )
+    })
 
     output$download_data <- downloadHandler(
       filename = function() {
-        paste0("honeybee_", names(experiment_list())[experiment_list() == input$experiment], "_", str_replace_all(str_replace_all(str_remove(Sys.time(), "\\.(.*)"), ":", "-"), " ", "_"), ".csv")
+        paste0(
+          "honeybee_",
+          names(experiment_list())[experiment_list() == input$experiment],
+          "_",
+          str_replace_all(str_replace_all(str_remove(Sys.time(), "\\.(.*)"), ":", "-"), " ", "_"),
+          ".csv"
+        )
       },
       content = function(file) {
         write_csv(plot_data(), file)

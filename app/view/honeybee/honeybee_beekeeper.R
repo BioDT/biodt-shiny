@@ -1,10 +1,21 @@
 box::use(
-  shiny[moduleServer, NS, tagList, tags, actionButton, observeEvent, reactiveVal, bootstrapPage, req],
+  shiny[
+    moduleServer,
+    NS,
+    tagList,
+    tags,
+    actionButton,
+    observeEvent,
+    reactiveVal,
+    bootstrapPage,
+    req
+  ],
   leaflet[leaflet, addTiles],
   bslib[layout_column_wrap],
   htmltools[css],
   waiter[Waiter],
   readr[read_csv],
+  config,
 )
 
 box::use(
@@ -13,7 +24,13 @@ box::use(
   app / view / honeybee / beekeeper_param[honeybee_param_ui, honeybee_param_server],
   app / view / honeybee / beekeeper_lookup[honeybee_lookup_ui, honeybee_lookup_server],
   app / view / honeybee / beekeeper_plot[beekeeper_plot_ui, beekeeper_plot_server],
-  app / view / honeybee / beekeeper_runsimulation[beekeeper_runsimulation_ui, beekeeper_runsimulation_server],
+  app /
+    view /
+    honeybee /
+    beekeeper_runsimulation[
+      beekeeper_runsimulation_ui,
+      beekeeper_runsimulation_server
+    ],
   app / logic / honeybee / honeybee_beekeeper_map[read_honeybee_tif, honeybee_leaflet_map],
   app / logic / waiter[waiter_text],
 )
@@ -23,10 +40,12 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
   ns <- NS(id)
   tagList(
     tags$div(
+      # UI module at the top of the given pDT,
+      # describing to users step by step what to do, when interacting with the app
       beekeeper_control_ui(
         ns("beekeeper_control"),
         i18n
-      ), # UI module at the top of the given pDT, describing to users step by step what to do, when interacting with the app
+      ),
       layout_column_wrap(
         width = NULL,
         fill = FALSE,
@@ -58,18 +77,12 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-honeybee_beekeeper_server <- function(id,
-                                      session_dir,
-                                      beekeeper_selected) {
+honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected) {
   moduleServer(id, function(input, output, session) {
     # Define waiter ----
     msg <- list(
-      waiter_text(message = tags$h3("Loading data...",
-        style = "color: #414f2f;"
-      )),
-      waiter_text(message = tags$h3("Computing Beehave simulation...",
-        style = "color: #414f2f;"
-      ))
+      waiter_text(message = tags$h3("Loading data...", style = "color: #414f2f;")),
+      waiter_text(message = tags$h3("Computing Beehave simulation...", style = "color: #414f2f;"))
     )
 
     w <- Waiter$new(
@@ -96,8 +109,7 @@ honeybee_beekeeper_server <- function(id,
         )
         w$show()
         # Load map
-        # Hardcoded for prototype
-        "app/data/honeybee/map.tif" |>
+        file.path(config$get("data_path"), "honeybee", "map.tif") |>
           read_honeybee_tif() |>
           map()
 
@@ -109,8 +121,7 @@ honeybee_beekeeper_server <- function(id,
           leaflet_map()
 
         # Lookup table
-        # Hardcoded for prototype
-        "app/data/honeybee/lookup_table.csv" |>
+        file.path(config$get("data_path"), "honeybee", "lookup_table.csv") |>
           read_csv(show_col_types = FALSE) |>
           lookup_table()
 
@@ -119,7 +130,8 @@ honeybee_beekeeper_server <- function(id,
     )
 
     # Map ----
-    coordinates <- honeybee_map_server("beekeeper_map",
+    coordinates <- honeybee_map_server(
+      "beekeeper_map",
       leaflet_map = leaflet_map,
       experiment_list = experiment_list,
       map
@@ -129,12 +141,7 @@ honeybee_beekeeper_server <- function(id,
     parameters <- honeybee_param_server("beekeeper_param")
 
     # Lookup table ----
-    lookup <- honeybee_lookup_server("beekeeper_lookup",
-      lookup_table = lookup_table
-    )
-
-
-    beekeeper_control_server("beekeeper_control") # an old module, it was refactored as the module beekeeper_runsimulation.R, probably it doesn't even be here
+    lookup <- honeybee_lookup_server("beekeeper_lookup", lookup_table = lookup_table)
 
     # Execution ----
     experiment_list <- beekeeper_runsimulation_server(

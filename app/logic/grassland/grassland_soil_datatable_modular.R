@@ -1,18 +1,19 @@
 box::use(
   readr[read_lines, read_delim],
-  stringr[str_detect, str_remove]
+  stringr[str_detect, str_remove],
+  config,
 )
 
 #' @export
 read_project_config <- function(
   project_name = "project1"
 ) {
-  simulations_path <- "app/data/grassland/simulations/"
-  project_path <- paste0(simulations_path, project_name, "/")
+  simulations_path <- file.path(config$get("data_path"), "grassland", "simulations")
+  project_path <- file.path(simulations_path, project_name)
 
   config_file_path <- list.files(project_path, pattern = "(__configuration__generic_)")
 
-  project_config_file <- read_lines(paste0(project_path, config_file_path))
+  project_config_file <- read_lines(file.path(project_path, config_file_path))
   return(project_config_file)
 }
 
@@ -24,9 +25,11 @@ get_soil_file_name <- function(
 ) {
   cutoff_lines <- project_config_file[skip_no_lines:max_no_printed]
 
-  soil_file_name <- cutoff_lines[cutoff_lines |>
-    str_detect("^soilFile\t")] |>
-      str_remove("^soilFile\t")
+  soil_file_name <- cutoff_lines[
+    cutoff_lines |>
+      str_detect("^soilFile\t")
+  ] |>
+    str_remove("^soilFile\t")
 
   return(soil_file_name)
 }
@@ -43,16 +46,18 @@ get_lat_lon_name <- function(
 get_soil_file_path <- function(
   lat_lon_name
 ) {
-  scenarios_path <- "app/data/grassland/scenarios/"
-  soil_data_path <- paste0(scenarios_path, lat_lon_name, "/soil/")
+  scenarios_path <- file.path(config$get("data_path"), "grassland", "scenarios")
+  soil_data_path <- paste0(file.path(scenarios_path, lat_lon_name, "soil"), .Platform$file.sep)
 
-  soil_file_name <- list.files(soil_data_path)[list.files(soil_data_path) |>
-    str_detect("__soil\\.txt$")]
-  soil_file_path <- paste0(soil_data_path, soil_file_name)
+  soil_file_name <- list.files(soil_data_path)[
+    list.files(soil_data_path) |>
+      str_detect("__soil\\.txt$")
+  ]
+  soil_file_path <- file.path(soil_data_path, soil_file_name)
 }
 
 #' @export
-read_main_three_values <- function(file_path){
+read_main_three_values <- function(file_path) {
   silt_clay_sand <- read_delim(
     file = file_path,
     delim = "\t",

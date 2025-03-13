@@ -1,10 +1,10 @@
 default:
   rhino_log_level: !expr Sys.getenv("RHINO_LOG_LEVEL", "INFO")
   rhino_log_file: !expr Sys.getenv("RHINO_LOG_FILE", NA)
-  base_path: !expr paste0(file.path(getwd(), "app", "data", "shared"), .Platform$file.sep)
-  data_path: !expr paste0(file.path(getwd(), "app", "data"), .Platform$file.sep)
-  script_path: !expr paste0(file.path(getwd(), "app", "data", "honeybee", "scripts"), .Platform$file.sep)
-  r_path: !expr paste0(file.path(getwd(), "app", "data", "honeybee", "R"), .Platform$file.sep)
+  base_path: !expr file.path(getwd(), "app", "data", "shared")
+  data_path: !expr file.path(getwd(), "app", "data")
+  script_path: !expr file.path(getwd(), "app", "data", "honeybee", "scripts")
+  r_path: !expr file.path(getwd(), "app", "data", "honeybee", "R")
   executor: "docker"
 
 dev:

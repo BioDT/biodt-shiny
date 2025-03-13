@@ -10,6 +10,7 @@ box::use(
   dplyr[bind_rows],
   echarty[ecs.render, ecs.output, ec.init],
   utils[str],
+  config,
 )
 
 box::use(
@@ -190,7 +191,7 @@ mod_cwr_server <- function(id, i18n) {
       )
 
     # Path to stored files (should be set for where the files are stored)
-    cwr_path <- "app/data/cwr"
+    cwr_path <- file.path(config$get("data_path"), "cwr")
 
     # Initialise maps when CWR selected
     shiny$observeEvent(
