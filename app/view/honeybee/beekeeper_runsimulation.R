@@ -141,17 +141,17 @@ beekeeper_runsimulation_server <- function(
 
         # Prepare folder structure ----
         if (!dir.exists(session_dir)) {
-          dir.create(session_dir)
+          dir.create(session_dir, recursive = TRUE)
         }
         if (!dir.exists(temp_dir)) {
-          dir.create(temp_dir)
+          dir.create(temp_dir, recursive = TRUE)
         }
 
         run_dir <- file.path(
           temp_dir,
           Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S")
         )
-        dir.create(run_dir)
+        dir.create(run_dir, recursive = TRUE)
 
         lookup_file <- file.path(run_dir, "lookup_table.csv")
         parameters_file <- file.path(run_dir, "parameters.csv")
