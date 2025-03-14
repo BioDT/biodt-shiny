@@ -1,0 +1,75 @@
+name: Docker Build
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'What to build'
+        required: true
+        type: choice
+        options:
+          - base
+          - app
+          - both
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-base:
+    if: |
+      github.event_name == 'workflow_dispatch' && 
+      (inputs.build_type == 'base' || inputs.build_type == 'both') ||
+      (github.event_name == 'push' && contains(github.event.head_commit.modified, 'renv.lock'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Build and push base image
+        working-directory: containers/base
+        run: |
+          make build
+          make push
+
+  build-app:
+    needs: build-base
+    if: |
+      github.event_name == 'workflow_dispatch' && 
+      (inputs.build_type == 'app' || inputs.build_type == 'both') ||
+      (github.event_name == 'push' && 
+       (contains(github.event.head_commit.modified, 'app/') || 
+        contains(github.event.head_commit.modified, 'Dockerfile')))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Build and push app image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/biodt/shiny-app:latest
+            ghcr.io/biodt/shiny-app:${{ github.sha }}
