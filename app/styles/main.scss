@@ -1,16 +1,15 @@
-
 .bslib-page-fill {
   overflow: auto;
 }
 
 .bslib-card .card-body {
-    overflow: auto;
-    overflow-x: hidden;
+  overflow: auto;
+  overflow-x: hidden;
 }
 
 .card_title {
-    margin: 0.25rem 0 0.25rem 0;
-    font-size: 1.5rem;
+  margin: 0.25rem 0;
+  font-size: 1.5rem;
 }
 
 .pdt_instructions_title {
@@ -18,18 +17,18 @@
 }
 
 .btn-navbar {
-  color: #414F2F;
+  color: #414f2f;
   background-color: #fff;
   border-color: #fff;
 }
 
-.bslib-sidebar-layout>.sidebar {
+.bslib-sidebar-layout > .sidebar {
   background-color: #fff;
 }
 
 .index-info {
   background-image: url("../img/forest2.png");
-  background-color: #FFF;
+  background-color: #fff;
   background-repeat: no-repeat;
   background-position: bottom;
   background-attachment: fixed;
@@ -40,28 +39,28 @@
 .info-text {
   color: #546145;
   background-color: #fff;
-  background-color: rgba(256, 256, 256, 0.8);
+  background-color: rgb(256 256 256 / 80%);
   border-radius: 25px;
   padding-left: 10px;
   padding-right: 10px;
 }
 
 .marker-cluster-red {
-  background-color: rgb(160, 50, 85);
-  background-color: rgba(253, 60, 115, 0.5);
+  background-color: rgb(160 50 85);
+  background-color: rgb(253 60 115 / 50%);
 
   div {
-    background-color: rgb(170, 20, 60);
-    background-color: rgba(241, 40, 70, 0.6);
-    color: rgb(235, 235, 235)
+    background-color: rgb(170 20 60);
+    background-color: rgb(241 40 70 / 60%);
+    color: rgb(235 235 235);
   }
 }
 
 /* highlight nav-item */
 
 .navbar {
-          z-index: 9999; 
- }
+  z-index: 9999;
+}
 
 .navbar-nav {
   .nav-link {
@@ -74,7 +73,7 @@
   }
 
   .nav-item {
-    &:after {
+    &::after {
       position: absolute;
       bottom: 0;
       left: 0;
@@ -99,48 +98,48 @@
 
 /* shadow effect for each card (bslib) element */
 .card-shadow {
-  box-shadow: 0 2px 2px #888888;
+  box-shadow: 0 2px 2px #888;
 }
 
 /* slider inputs color fix (for awesome inputs which were removed) */
 .irs {
-
   .irs-bar,
   .irs-shadow {
-    background: #A86200;
-    border-color: #A86200;
-    color: #A86200;
+    background: #a86200;
+    border-color: #a86200;
+    color: #a86200;
   }
 
   .irs-handle {
-    background: #A86200;
-    border-color: #A86200;
-    color:#A86200;
+    background: #a86200;
+    border-color: #a86200;
+    color: #a86200;
   }
 
   .irs-single {
-    background: #A86200;
-    border-color: #A86200;
+    background: #a86200;
+    border-color: #a86200;
   }
 }
 
 .irs--shiny .irs-handle.state_hover,
 .irs--shiny .irs-handle:hover {
-  background: #A86200;
+  background: #a86200;
 }
+
 /* END slider inputs color fix (for awesome inputs which were removed) */
 
-.no-minor-ticks{
+.no-minor-ticks {
   .irs-grid-pol.small {
-    height: 0px;
+    height: 0;
   }
 }
+
 /* shiny checkbox color fix */
 .shiny-input-checkbox {
-  background-color: #A86200 !important;
-  border-color: #A86200 !important;
+  background-color: #a86200 !important;
+  border-color: #a86200 !important;
 }
-
 
 .landing-pdt-wrap {
   background: #fff;
@@ -170,11 +169,12 @@
       padding-top: 1rem;
       padding-left: 0.5rem;
       list-style: none inside;
+
       li {
         font-weight: 600;
         margin-bottom: 20px;
         font-size: 1rem;
-        color: #A86200;
+        color: #a86200;
         display: inline-block;
         padding-left: 50px;
         background: url("../img/title_tail.svg") no-repeat left top;
@@ -196,13 +196,13 @@
   }
 
   a {
-    transition: .3s all ease-in-out;
+    transition: 0.3s all ease-in-out;
     text-decoration: none;
   }
 }
 
-.waiter-fullscreen{          
-  background-image: url('../img/forest2.png');
+.waiter-fullscreen {
+  background-image: url("../img/forest2.png");
   background-repeat: no-repeat;
   background-size: 100%;
   background-position: bottom;
@@ -221,7 +221,7 @@
 .fluid-row {
   margin: 0;
   padding: 0;
-  align-items: center; 
+  align-items: center;
   justify-content: center;
 }
 
@@ -229,131 +229,129 @@
   width: 100%;
 }
 
-      .button-container {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          position: absolute;
-          right: 16px;
-          z-index: 1001;
-      }
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: absolute;
+  right: 16px;
+  z-index: 1001;
+}
 
-      .button-container.moved {
-       right: 300px; /* Adjust this value based on sidebar width */
-      }
+.button-container.moved {
+  right: 300px; /* Adjust this value based on sidebar width */
+}
 
-      .toggle-button {
-          background: #414F2F;
-          color: #ffffff;
-          border: none;
-          padding: 8px 15px;
-          cursor: pointer;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-          transition: background-color 0.3s ease, box-shadow 0.3s ease;
-          border-radius: 5px 0 0 5px;
-          width: 60px;
-          height: 50px;
-      }
+.toggle-button {
+  background: #414f2f;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 20%);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 5px 0 0 5px;
+  width: 60px;
+  height: 50px;
+}
 
-      .toggle-button i {
-        font-size: 1.5rem;
-      }
+.toggle-button i {
+  font-size: 1.5rem;
+}
 
-      .toggle-button:hover {
-          background-color: #556B2F;
-      }
+.toggle-button:hover {
+  background-color: #556b2f;
+}
 
-      .toggle-button[title] {
-          position: relative;
-      }
+.toggle-button[title] {
+  position: relative;
+}
 
+.toggle-button[title]::after {
+  content: attr(title);
+  position: absolute;
+  right: 100%; /* Position it to the left of the button */
+  top: 50%;
+  transform: translateY(-50%) translateX(-10px); /* Adjust tooltip to the left */
+  background: rgb(0 0 0 / 90%);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+  min-width: 120px; /* Ensure minimum width */
+  word-wrap: break-word; /* Avoid text overflow */
+  font-size: 1rem;
+}
 
-        .toggle-button[title]::after {
-            content: attr(title);
-            position: absolute;
-            right: 100%; /* Position it to the left of the button */
-            top: 50%;
-            transform: translateY(-50%) translateX(-10px); /* Adjust tooltip to the left */
-            background: rgba(0, 0, 0, 0.9);
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 4px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            z-index: 10;
-            min-width: 120px; /* Ensure minimum width */
-            word-wrap: break-word; /* Avoid text overflow */
-            font-size: 1rem;
-        }
+.toggle-button[title]:hover::after {
+  opacity: 1;
+}
 
-        .toggle-button[title]:hover::after {
-            opacity: 1;
-        }
+.sidebar {
+  width: 300px;
+  height: 100%;
+  background: #fff;
+  position: absolute;
+  right: -300px; /* Initially hidden off-screen */
+  z-index: 1000;
+  padding: 30px 15px;
+  border-left: 1px solid #ccc;
+  overflow-y: auto;
+  display: none;
+}
 
-        .sidebar {
-          width: 300px;
-          height: 100%;
-          background: #fff;
-          position: absolute;
-          right: -300px; /* Initially hidden off-screen */
-          z-index: 1000;
-          padding: 30px 15px;
-          border-left: 1px solid #ccc;
-          overflow-y: auto;
-          display: none;
-        }
+.sidebar.active {
+  right: 0; /* Show sidebar */
+  display: block;
+}
 
-        .sidebar.active {
-          right: 0; /* Show sidebar */
-          display: block;
-        }
+.close-button {
+  background: none;
+  color: #f44336;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 1.5rem;
+  position: absolute;
+  right: 20px;
+  top: 0;
+}
 
-        .close-button {
-        background: none;
-        color: #f44336;
-        border: none;
-        padding: 5px 10px 5px 10px;
-        cursor: pointer;
-        font-size: 1.5rem;
-        position: absolute;
-        right: 20px;
-        top: 0;
-      }
+.close-button:hover {
+  color: #d32f2f;  /* Darker red icon on hover */
+  background: none;
+}
 
-    .close-button:hover {
-      color: #d32f2f;  /* Darker red icon on hover */
-      background: none;
-    }
+.leaflet-touch .leaflet-bar a {
+  background-color: white;
+  color: #414f2f;
+}
 
-    .leaflet-touch .leaflet-bar a {
-    background-color: white;
-    color: #414f2f;
-    }
-
-    .leaflet-control-gps .gps-button {
-    background-position: top !important;
-    }
+.leaflet-control-gps .gps-button {
+  background-position: top !important;
+}
 
 /* CES sliders */
 
 /* Change the left (filled) side to transparent */
-    .custom-slider .irs-bar {
-      background: white !important; 
-      border-top: 1px solid grey !important;
-      border-bottom: 1px solid grey !important;
-    }
+.custom-slider .irs-bar {
+  background: white !important;
+  border-top: 1px solid grey !important;
+  border-bottom: 1px solid grey !important;
+}
 
-    /* Change the right (unfilled) side to color */
-    .custom-slider .irs-line {
-      background: #a86200 !important;
-      border: #a86200 !important;
-    }
+/* Change the right (unfilled) side to color */
+.custom-slider .irs-line {
+  background: #a86200 !important;
+  border: #a86200 !important;
+}
 
-    /* Ensure the slider handle is visible */
-    .custom-slider .irs-slider {
-      border: #a86200 !important;
-      background: white !important;
-    }
-
+/* Ensure the slider handle is visible */
+.custom-slider .irs-slider {
+  border: #a86200 !important;
+  background: white !important;
+}
