@@ -42,7 +42,10 @@
   width: 200px;
 }
 
-.rtbm-container .info-card-container {
+/* Bird Info Card - Specific selectors to ensure the style is applied */
+.rtbm-container .info-card-container,
+.rtbm-container .leaflet-control.info-card-container,
+.leaflet-control.info-card-container {
   background-color: var(--bs-white);
   padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
   border-radius: var(--bs-border-radius);
@@ -51,28 +54,86 @@
   box-shadow: var(--bs-box-shadow-sm);
 }
 
-/* Alert Container */
+/* Leaflet Info Card - Inner content */
+.rtbm-container .leaflet-info-card {
+  width: 100%;
+}
+
+/* Map display elements */
+.map-date-display {
+  background-color: rgba(255,255,255,0.8);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+/* Time display */
+.rtbm-container .time-display {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.rtbm-container .current-date {
+  color: var(--bs-primary);
+}
+
+/* Animation controls */
+.rtbm-container .animation-controls {
+  margin-top: 1rem;
+}
+
+.rtbm-container .animation-button-container {
+  display: flex;
+  align-items: center;
+}
+
+.rtbm-container .animation-button-container .btn {
+  min-width: 80px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Status Messages */
 .rtbm-container .alert-container {
-  min-height: 48px;
+  min-height: 60px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .rtbm-container .control-panel {
-    margin-bottom: 1rem;
-  }
-  .rtbm-container .row > [class*='col-'] {
-    margin-bottom: 1rem;
-  }
-  .rtbm-container .row > [class*='col-']:last-child {
-    margin-bottom: 0;
-  }
+/* Leaflet controls and overlays */
+.leaflet-weather-control {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .rtbm-container .container-fluid {
-    --control-panel-bg: var(--bs-dark);
-    --control-panel-border: var(--bs-border-color-translucent);
-  }
+.time-controls {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.time-slider .js-range-slider {
+  width: 100%;
+}
+
+.date-label {
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rain-legend {
+  background: linear-gradient(to right, #f0f9ff, #0077be, #00305a);
+  height: 20px;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.rain-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.8em;
 }
