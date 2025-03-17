@@ -40,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: containers/base/Dockerfile
+          file: containers/base/Dockerfile
           push: true
           tags: |
             ghcr.io/biodt/shiny-base:latest
