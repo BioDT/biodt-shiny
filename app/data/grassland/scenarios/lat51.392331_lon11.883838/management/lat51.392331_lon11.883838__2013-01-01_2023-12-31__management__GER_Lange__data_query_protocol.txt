@@ -1,3 +1,0 @@
-data_source	time_stamp
-https://data.mendeley.com/public-files/datasets/m9rrv26dvf/files/98d7c7ab-0a8f-4c2f-a78f-6c1739ee9354/file_downloaded	2024-10-10T09:38:46+00:00
-https://data.mendeley.com/public-files/datasets/m9rrv26dvf/files/d871429a-b2a6-4592-b3e5-4650462a9ac3/file_downloaded	2024-10-10T09:38:48+00:00
