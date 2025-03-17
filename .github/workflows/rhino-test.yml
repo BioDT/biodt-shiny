@@ -1,5 +1,9 @@
 name: Rhino Test
-on: push
+on:
+  push:
+    paths:
+      - 'app/**'
+      - 'tests/**'
 permissions:
   contents: read
   packages: write
