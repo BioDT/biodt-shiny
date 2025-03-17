@@ -3,8 +3,6 @@ default:
   rhino_log_file: !expr Sys.getenv("RHINO_LOG_FILE", NA)
   base_path: !expr file.path(getwd(), "app", "data", "shared")
   data_path: !expr file.path(getwd(), "app", "data")
-  script_path: !expr file.path(getwd(), "app", "data", "honeybee", "scripts")
-  r_path: !expr file.path(getwd(), "app", "data", "honeybee", "R")
   executor: "docker"
 
 dev:
@@ -13,8 +11,6 @@ dev:
 prod:
   base_path: !expr Sys.getenv("BASE_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
-  script_path: !expr Sys.getenv("SCRIPT_PATH")
-  r_path: !expr Sys.getenv("R_PATH")
   executor: "docker"
 
 k8s:

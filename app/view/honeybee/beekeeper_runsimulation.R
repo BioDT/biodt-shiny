@@ -210,14 +210,23 @@ beekeeper_runsimulation_server <- function(
         if (config$get("executor") == "docker") {
           docker_call <- paste0(
             'docker run -v "',
-            config$get("script_path"),
-            '":"/scripts" -v "',
-            config$get("r_path"),
-            '":"/R" -v "',
             run_dir,
-            '":"/data" -e INPUT_DIR="/data" -e OUTPUT_DIR="/data/output" -e MAP="map.tif" -e LOOKUP_TABLE="lookup_table.csv" -e LOCATIONS="locations.csv" -e PARAMETERS="parameters.csv" -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar" -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo" -e CPUS="1" --cpus 1 --platform linux/amd64 --entrypoint /scripts/cloud/run_docker_flow.sh ghcr.io/biodt/beehave:0.3.9'
+            '":"/data"',
+            ' -e INPUT_DIR="/data"',
+            ' -e OUTPUT_DIR="/data/output"',
+            ' -e MAP="map.tif"',
+            ' -e LOOKUP_TABLE="lookup_table.csv"',
+            ' -e LOCATIONS="locations.csv"',
+            ' -e PARAMETERS="parameters.csv"',
+            ' -e NETLOGO_JAR_PATH="/NetLogo 6.3.0/lib/app/netlogo-6.3.0.jar"',
+            ' -e MODEL_PATH="/data/Beehave_BeeMapp2015_Netlogo6version_PolygonAggregation.nlogo"',
+            ' -e CPUS="1"',
+            " --cpus 1",
+            " --platform linux/amd64",
+            " --entrypoint /scripts/cloud/run_docker_flow.sh",
+            " ghcr.io/biodt/beehave:0.3.11"
           )
-          print(docker_call)
+
           system(docker_call)
         } else if (config$get("executor") == "k8s") {
           data_subpath <- stringr::str_remove(
