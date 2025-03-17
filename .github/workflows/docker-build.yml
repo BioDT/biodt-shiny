@@ -39,7 +39,8 @@ jobs:
       - name: Build and push base image
         uses: docker/build-push-action@v5
         with:
-          context: containers/base
+          context: .
+          dockerfile: containers/base/Dockerfile
           push: true
           tags: |
             ghcr.io/biodt/shiny-base:latest
