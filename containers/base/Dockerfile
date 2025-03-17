@@ -68,6 +68,6 @@ RUN apt-get update -qy && \
     apt-get clean
 
 # Entrypoint script
-COPY containers/base/run_shiny.sh /biodt/run_shiny.sh
-RUN chmod a+x /biodt/run_shiny.sh
+# COPY run_shiny.sh /biodt/run_shiny.sh
+# RUN chmod a+x /biodt/run_shiny.sh
 ENTRYPOINT ["bash"]
