@@ -17,7 +17,7 @@ grassland_dynamics_double_chart_ui <- function(
   id,
   i18n,
   plot_width = "100%",
-  plot_height = "600px"
+  plot_height = "1000px"
 ) {
   ns <- NS(id)
   card(

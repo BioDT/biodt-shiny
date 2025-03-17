@@ -5,6 +5,7 @@ box::use(
   echarty[ec.init],
   htmlwidgets[JS],
   config,
+  utils[str]
 )
 
 # loads and restructure GRASSLAND data ----
@@ -126,7 +127,7 @@ read_weather_data <- function(
           yAxisIndex = 1,
           data = unname(as.list(unlist(input_data[, col_name])))
         )
-    } else {
+    } else if (col_name == "Precipitation[mm]") {
       series[[i]] <-
         list(
           name = col_name,
@@ -139,8 +140,49 @@ read_weather_data <- function(
           yAxisIndex = 2,
           data = unname(as.list(unlist(input_data[, col_name])))
         )
+    } else if (col_name == "Temperature[degC]" | col_name == "Temperature_Daylight[degC]") {
+      series[[i]] <-
+        list(
+          name = col_name,
+          type = "line",
+          color = colors[i],
+          symbol = "none",
+          showSymbol = FALSE,
+          emphasis = list(disabled = TRUE),
+          xAxisIndex = 3,
+          yAxisIndex = 3,
+          data = unname(as.list(unlist(input_data[, col_name])))
+        )
+    } else if (col_name == "Daylength[h]") {
+      series[[i]] <-
+        list(
+          name = col_name,
+          type = "line",
+          color = colors[i],
+          symbol = "none",
+          showSymbol = FALSE,
+          emphasis = list(disabled = TRUE),
+          xAxisIndex = 4,
+          yAxisIndex = 4,
+          data = unname(as.list(unlist(input_data[, col_name])))
+        )
+    } else if (col_name == "PET[mm]") {
+      series[[i]] <-
+        list(
+          name = col_name,
+          type = "line",
+          color = colors[i],
+          symbol = "none",
+          showSymbol = FALSE,
+          emphasis = list(disabled = TRUE),
+          xAxisIndex = 5,
+          yAxisIndex = 5,
+          data = unname(as.list(unlist(input_data[, col_name])))
+        )
     }
+    # print(str(series[[i]]))
   }
+  print("separating data for echarts done")
 
   return(series)
 }
@@ -313,28 +355,18 @@ generate_chart_with_weather <- function(
         data = pft_unique
       ),
       grid = list(
-        list(
-          left = "10%",
-          right = "8%",
-          top = "top",
-          height = "30%"
-        ),
-        list(
-          left = "10%",
-          right = "8%",
-          top = "middle",
-          height = "30%"
-        ),
-        list(
-          left = "10%",
-          right = "8%",
-          top = "bottom",
-          height = "30%"
+        list(left = "10%", right = "8%", top = "4%", height = "13%"),
+        list(left = "10%", right = "8%", top = "20%", height = "13%"),
+        list(left = "10%", right = "8%", top = "36", height = "13%"),
+        list(left = "10%", right = "8%", bottom = "35%", height = "13%"),
+        list(left = "10%", right = "8%", bottom = "19%", height = "13%"),
+        list(left = "10%", right = "8%", bottom = "3", height = "13%"
         )
       ),
       xAxis = list(
         list(
           type = "category",
+          gridIndex = 0,
           scale = TRUE,
           boundaryGap = FALSE,
           axisLine = list(
@@ -382,6 +414,63 @@ generate_chart_with_weather <- function(
             show = FALSE
           ),
           data = time
+        ),
+        list(
+          type = "category",
+          gridIndex = 3,
+          scale = TRUE,
+          boundaryGap = FALSE,
+          axisLine = list(
+            onZero = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = TRUE
+          ),
+          axisLabel = list(
+            show = FALSE
+          ),
+          data = time
+        ),
+        list(
+          type = "category",
+          gridIndex = 4,
+          scale = TRUE,
+          boundaryGap = FALSE,
+          axisLine = list(
+            onZero = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = TRUE
+          ),
+          axisLabel = list(
+            show = FALSE
+          ),
+          data = time
+        ),
+        list(
+          type = "category",
+          gridIndex = 5,
+          scale = TRUE,
+          boundaryGap = FALSE,
+          axisLine = list(
+            onZero = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = TRUE
+          ),
+          axisLabel = list(
+            show = FALSE
+          ),
+          data = time
         )
       ),
       yAxis = list(
@@ -394,6 +483,7 @@ generate_chart_with_weather <- function(
           nameTextStyle = list(fontWeight = "bolder"),
           min = 0,
           max = 100,
+          gridIndex = 0,
           scale = TRUE,
           splitArea = list(
             show = TRUE
@@ -423,11 +513,72 @@ generate_chart_with_weather <- function(
           )
         ),
         list(
+          name = "Precipitation[mm]",
           scale = TRUE,
           gridIndex = 2,
           splitNumber = 5,
           min = 0,
-          max = 50,
+          max = 100,
+          axisLabel = list(
+            show = TRUE
+          ),
+          axisLine = list(
+            show = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = FALSE
+          )
+        ),
+        list(
+          name = "Temperature[degC]",
+          scale = TRUE,
+          gridIndex = 3,
+          splitNumber = 5,
+          min = -10,
+          max = 40,
+          axisLabel = list(
+            show = TRUE
+          ),
+          axisLine = list(
+            show = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = FALSE
+          )
+        ),
+        list(
+          name = "Daylength[h]",
+          scale = TRUE,
+          gridIndex = 4,
+          splitNumber = 5,
+          min = 0,
+          max = 24,
+          axisLabel = list(
+            show = TRUE
+          ),
+          axisLine = list(
+            show = TRUE
+          ),
+          axisTick = list(
+            show = TRUE
+          ),
+          splitLine = list(
+            show = FALSE
+          )
+        ),
+        list(
+          name = "PET[mm]",
+          scale = TRUE,
+          gridIndex = 5,
+          splitNumber = 5,
+          min = 0,
+          max = 20,
           axisLabel = list(
             show = TRUE
           ),
