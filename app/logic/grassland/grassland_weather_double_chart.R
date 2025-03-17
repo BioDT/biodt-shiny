@@ -537,7 +537,7 @@ generate_chart_with_weather <- function(
           scale = TRUE,
           gridIndex = 3,
           splitNumber = 5,
-          min = -10,
+          min = -15,
           max = 40,
           axisLabel = list(
             show = TRUE
