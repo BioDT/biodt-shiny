@@ -59,6 +59,13 @@
   width: 100%;
 }
 
+/* Map display elements */
+.map-date-display {
+  background-color: rgba(255,255,255,0.8);
+  padding: 8px;
+  border-radius: 4px;
+}
+
 /* Time display */
 .rtbm-container .time-display {
   font-size: 1.1rem;
@@ -71,22 +78,62 @@
 
 /* Animation controls */
 .rtbm-container .animation-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  margin-top: 1rem;
 }
 
-.rtbm-container .animation-buttons {
+.rtbm-container .animation-button-container {
   display: flex;
   align-items: center;
 }
 
-.rtbm-container .speed-control {
-  min-width: 200px;
+.rtbm-container .animation-button-container .btn {
+  min-width: 80px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Status Messages */
 .rtbm-container .alert-container {
   min-height: 60px;
+}
+
+/* Leaflet controls and overlays */
+.leaflet-weather-control {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+.time-controls {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.time-slider .js-range-slider {
+  width: 100%;
+}
+
+.date-label {
+  font-weight: bold;
+  font-size: 1.2em;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rain-legend {
+  background: linear-gradient(to right, #f0f9ff, #0077be, #00305a);
+  height: 20px;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.rain-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.8em;
 }

@@ -11,8 +11,12 @@ box::use(
     moduleServer, observe, observeEvent,
     reactive, req, renderUI, eventReactive,
     invalidateLater, reactiveVal, sliderInput,
-    icon, textOutput, renderText, isTruthy
+    icon, textOutput, renderText, isTruthy,
+    selectInput
   ],
+  
+  # UI enhancement
+  shinyjs,
 
   # Bootstrap components
   bslib[
@@ -47,7 +51,7 @@ box::use(
   memoise[memoise, forget],
 
   # UI widgets
-  shinyWidgets[pickerInput, sliderTextInput],
+  shinyWidgets[pickerInput, sliderTextInput, updateSliderTextInput],
 
   # Color palettes
   viridisLite[magma, inferno],
@@ -109,7 +113,6 @@ rtbm_app_ui <- function(id, i18n) {
             class = "card-body",
             # Current date display
             uiOutput(ns("currentDateDisplay")),
-            hr(),
             # Date range picker
             dateRangeInput(
               inputId = ns("dateRange"),
@@ -144,7 +147,6 @@ rtbm_app_ui <- function(id, i18n) {
               icon = icon("refresh"),
               class = "btn btn-primary btn-block mt-3 mb-3 w-100"
             ),
-            hr(),
             # Status message
             uiOutput(ns("statusMsg")),
             hr(),
@@ -181,46 +183,9 @@ rtbm_app_ui <- function(id, i18n) {
       # Import global styles first
       tags$link(rel = "stylesheet", type = "text/css", href = "styles/main.css"),
       # Then module-specific styles that only contain necessary overrides
-      tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css"),
-      # Custom CSS for rainfall animation style
-      tags$style(HTML("
-        .leaflet-weather-control {
-          background-color: rgba(255, 255, 255, 0.8);
-          padding: 10px;
-          border-radius: 4px;
-          box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-        }
-        .time-controls {
-          padding: 10px;
-          background-color: #f8f9fa;
-          border-radius: 4px;
-        }
-        .time-slider .js-range-slider {
-          width: 100%;
-        }
-        .animation-buttons .btn {
-          min-width: 80px;
-        }
-        .date-label {
-          font-weight: bold;
-          font-size: 1.2em;
-          text-align: center;
-          margin-bottom: 10px;
-        }
-        .rain-legend {
-          background: linear-gradient(to right, #f0f9ff, #0077be, #00305a);
-          height: 20px;
-          border-radius: 4px;
-          margin-top: 5px;
-        }
-        .rain-legend-labels {
-          display: flex;
-          justify-content: space-between;
-          margin-top: 5px;
-          font-size: 0.8em;
-        }
-      "))
+      tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css")
     ),
+    shinyjs::useShinyjs(),  # Initialize shinyjs
     control_panel
   )
 }
@@ -246,6 +211,9 @@ rtbm_app_server <- function(id, tab_selected) {
       return(selected_date)
     })
     current_frame <- reactiveVal(1)
+
+    # Animation controls
+    animation_active <- reactiveVal(FALSE)
 
     # Generate date sequence based on selected range
     date_sequence <- reactive({
@@ -280,15 +248,86 @@ rtbm_app_server <- function(id, tab_selected) {
         return(NULL)
       }
 
-      sliderTextInput(
-        inputId = ns("date_slider"),
-        label = "Select Date:",
-        choices = format(dates, "%Y-%m-%d"),
-        selected = format(dates[1], "%Y-%m-%d"),
-        grid = TRUE,
-        animate = FALSE,
-        width = "100%"
+      tagList(
+        sliderTextInput(
+          inputId = ns("date_slider"),
+          label = "Select Date:",
+          choices = format(dates, "%Y-%m-%d"),
+          selected = format(dates[1], "%Y-%m-%d"),
+          grid = TRUE,
+          animate = FALSE,
+          width = "100%"
+        ),
+        
+        # Animation controls - only shown after data is loaded
+        div(
+          class = "animation-controls mt-3",
+          # Play/Pause Button (centered)
+          div(
+            class = "d-flex justify-content-center",
+            div(
+              class = "animation-button-container",
+              uiOutput(ns("playPauseButton"))
+            )
+          )
+        )
       )
+    })
+
+    # Play/Pause button UI
+    output$playPauseButton <- renderUI({
+      if (animation_active()) {
+        # Show pause button when animation is running
+        actionButton(
+          inputId = ns("pause_animation"),
+          label = "Pause",
+          icon = icon("pause"),
+          class = "btn btn-secondary"
+        )
+      } else {
+        # Show play button when animation is stopped
+        actionButton(
+          inputId = ns("play_animation"),
+          label = "Play",
+          icon = icon("play"),
+          class = "btn btn-primary"
+        )
+      }
+    })
+
+    # Handle play button
+    observeEvent(input$play_animation, {
+      animation_active(TRUE)
+    })
+
+    # Handle pause button
+    observeEvent(input$pause_animation, {
+      animation_active(FALSE)
+    })
+
+    # Animation loop
+    observe({
+      # Only run when animation is active
+      req(animation_active())
+      req(available_dates())
+
+      # Get dates and current index
+      dates <- available_dates()
+      current_idx <- which(format(dates, "%Y-%m-%d") == input$date_slider)
+
+      # Move to next date (or cycle back to beginning)
+      next_idx <- if (current_idx < length(dates)) current_idx + 1 else 1
+      next_date <- dates[next_idx]
+
+      # Update the date slider input (which will trigger map update)
+      updateSliderTextInput(
+        session = session,
+        inputId = "date_slider",
+        selected = format(next_date, "%Y-%m-%d")
+      )
+
+      # Fixed delay of 1 second between animations
+      invalidateLater(1000)
     })
 
     # Handle manual date slider change
@@ -491,11 +530,11 @@ rtbm_app_server <- function(id, tab_selected) {
         ) |>
         addControl(
           html = paste(
-            "<div style='background-color: rgba(255,255,255,0.8); padding: 8px; border-radius: 4px;'>",
+            "<div class='map-date-display'>",
             "<strong>Date:</strong> ", format(current_date(), "%Y-%m-%d"),
             "</div>"
           ),
-          position = "topright"
+          position = "bottomleft"
         )
     }
 
