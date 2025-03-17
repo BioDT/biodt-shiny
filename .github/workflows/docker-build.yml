@@ -37,10 +37,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Build and push base image
-        working-directory: containers/base
-        run: |
-          make build
-          make push
+        uses: docker/build-push-action@v5
+        with:
+          context: containers/base
+          push: true
+          tags: |
+            ghcr.io/biodt/shiny-base:latest
+            ghcr.io/biodt/shiny-base:${{ github.sha }}
 
   build-app:
     needs: build-base
