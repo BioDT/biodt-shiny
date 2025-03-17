@@ -335,7 +335,7 @@ def get_category_deims(location):
             )
         except Exception as e:
             print(
-                f"Error: Access failed to DEIMS site record ('https://deims.org/api/sites/{location["deims_id"]}')."
+                f"Error: Access failed to DEIMS site record ('https://deims.org/api/sites/{location['deims_id']}')."
             )
             print(f" Exception: {str(e)}.")
 

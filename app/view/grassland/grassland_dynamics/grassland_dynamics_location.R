@@ -3,6 +3,7 @@ box::use(
     reactiveVal, renderText, verbatimTextOutput, NS, actionButton, radioButtons,
     textInput, numericInput, observeEvent, tags, moduleServer
   ],
+  reticulate[source_python, py_require],
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
 )
@@ -10,6 +11,10 @@ box::use(
 box::use(
   app/logic/deimsid_coordinates[get_coords_deimsid],
 )
+
+py_require("deims") 
+py_require("requests")
+py_require("utils")
 
 #' @export
 grassland_dynamics_location_ui <- function(id, i18n) {
@@ -61,6 +66,11 @@ grassland_dynamics_location_ui <- function(id, i18n) {
         inputId = ns("update_map_location"),
         label = i18n$translate("Update Map Location")
       ),
+      actionButton(
+        inputId = ns("check_grassland"),
+        label = i18n$translate("Check grassland"),
+        class = "align-bottom"
+      ),
     )
   )
 }
@@ -85,6 +95,25 @@ grassland_dynamics_location_server <- function(id) { # nolint
         condition = input$input_type == "DEIMS.id"
       )
     })
+
+    observeEvent(input$check_grassland,
+      ignoreNULL = TRUE,
+      ignoreInit = TRUE, {
+        print("input$check_grassland:::")
+        print(input$check_grassland)
+
+        source_python("app/python/check_if_grassland.py")
+        locations <- list()
+
+        locations$lat <- coordinates()$lat
+        locations$lon <- coordinates()$lng
+
+        result <- check_locations_for_grassland(locations, file_name="test.txt")
+
+        print("result:::")
+        print(result)
+      }
+    )
 
     # Sets up reactive value for map coordinates ----
     # The variable is then pulled up to app.R, from there passed down as fn's argument

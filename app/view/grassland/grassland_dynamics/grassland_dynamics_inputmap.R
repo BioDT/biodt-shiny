@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, observeEvent],
+  shiny[NS, moduleServer, tags, observeEvent, actionButton],
   bslib[card, card_header, card_body],
   leaflet[setView, leaflet, leafletOptions, leafletOutput, renderLeaflet, addTiles],
   htmlwidgets[JS],

@@ -21,7 +21,7 @@ grassland_dynamics_double_chart_ui <- function(
   ns <- NS(id)
   card(
     id = ns("double_chart_wrap"),
-    class = "mx-md-3 card-shadow mb-2",
+    class = "ms-md-3 card-shadow mb-2",
     full_screen = TRUE,
     card_header(
       tags$h2(
