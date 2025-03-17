@@ -12,9 +12,9 @@ box::use(
     reactive, req, renderUI, eventReactive,
     invalidateLater, reactiveVal, sliderInput,
     icon, textOutput, renderText, isTruthy,
-    selectInput
+    selectInput, isolate
   ],
-  
+
   # UI enhancement
   shinyjs,
 
@@ -185,7 +185,7 @@ rtbm_app_ui <- function(id, i18n) {
       # Then module-specific styles that only contain necessary overrides
       tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css")
     ),
-    shinyjs::useShinyjs(),  # Initialize shinyjs
+    shinyjs::useShinyjs(), # Initialize shinyjs
     control_panel
   )
 }
@@ -214,6 +214,10 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Animation controls
     animation_active <- reactiveVal(FALSE)
+
+    # Create flags to track if legend and info card are already added
+    legend_added <- reactiveVal(FALSE)
+    info_card_added <- reactiveVal(FALSE)
 
     # Generate date sequence based on selected range
     date_sequence <- reactive({
@@ -258,7 +262,7 @@ rtbm_app_server <- function(id, tab_selected) {
           animate = FALSE,
           width = "100%"
         ),
-        
+
         # Animation controls - only shown after data is loaded
         div(
           class = "animation-controls mt-3",
@@ -450,6 +454,12 @@ rtbm_app_server <- function(id, tab_selected) {
 
           r <- terra::rast(tmp_file)
           r[r == 0] <- NA
+
+          # Check for invalid observation data (-1 values)
+          if (any(terra::values(r) == -1, na.rm = TRUE)) {
+            return(NULL) # Skip dates with invalid observation data
+          }
+
           return(r)
         },
         error = function(e) {
@@ -462,6 +472,30 @@ rtbm_app_server <- function(id, tab_selected) {
     observe({
       invalidateLater(calculate_seconds_until_midnight())
       forget(cached_get_bird_data)
+    })
+
+    # Calculate global min/max values for legend scale
+    global_min_max <- reactive({
+      req(frames_data())
+      frames <- frames_data()
+      if (length(frames) == 0) {
+        return(c(0, 1))
+      }
+
+      # Collect all values across all frames
+      all_values <- numeric(0)
+      for (frame in frames) {
+        if (!is.null(frame$values) && length(frame$values) > 0) {
+          all_values <- c(all_values, frame$values)
+        }
+      }
+
+      if (length(all_values) == 0) {
+        return(c(0, 1))
+      }
+
+      # Return min and max values
+      c(min(all_values, na.rm = TRUE), max(all_values, na.rm = TRUE))
     })
 
     # Function to process and update map with a specific frame
@@ -485,57 +519,75 @@ rtbm_app_server <- function(id, tab_selected) {
       # Use standard color palette as requested
       pal <- colorNumeric(
         palette = "magma",
-        domain = vals,
+        domain = global_min_max(),
         na.color = "#00000000"
       )
 
-      # Create info card with species info
-      info_card_components <- createInfoCard()
-      info_card_html <- div(
-        class = "leaflet-info-card",
-        style = paste(
-          "background-color: rgba(255, 255, 255, 0.9);",
-          "padding: 15px;",
-          "border-radius: 4px;",
-          "border: 1px solid rgba(0,0,0,0.1);",
-          "width: 220px;",
-          "box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
-        ),
-        info_card_components
-      )
-
-      # Convert htmltools tags to HTML for leaflet
-      info_card_html_str <- renderTags(info_card_html)$html
-
-      # Update the map with the current frame
-      leafletProxy(ns("rasterMap")) |>
+      # Start with a leaflet proxy that only clears the raster images
+      map_update <- leafletProxy(ns("rasterMap")) |>
         clearImages() |>
-        clearControls() |>
         addRasterImage(
           rt,
           colors = pal,
           opacity = 0.8,
           project = FALSE
-        ) |>
-        addLegend(
-          position = "bottomright",
-          pal = pal,
-          values = vals,
-          title = "Observations",
-          opacity = 0.8
-        ) |>
-        addControl(
-          html = info_card_html_str,
-          position = "topleft"
-        ) |>
+        )
+
+      # Update only the date display
+      map_update <- map_update |>
         addControl(
           html = paste(
             "<div class='map-date-display'>",
             "<strong>Date:</strong> ", format(current_date(), "%Y-%m-%d"),
             "</div>"
           ),
-          position = "bottomleft"
+          position = "bottomleft",
+          layerId = "date-display" # Add layerId for easy replacement
         )
+
+      # Only add the legend once when data is first loaded
+      if (!legend_added()) {
+        # Create info card with species info (only once)
+        info_card_components <- isolate(createInfoCard())
+        info_card_html <- div(
+          class = "leaflet-info-card",
+          style = paste(
+            "background-color: rgba(255, 255, 255, 0.9);",
+            "padding: 15px;",
+            "border-radius: 4px;",
+            "border: 1px solid rgba(0,0,0,0.1);",
+            "width: 220px;",
+            "box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+          ),
+          info_card_components
+        )
+
+        # Convert htmltools tags to HTML for leaflet
+        info_card_html_str <- renderTags(info_card_html)$html
+
+        # Add the legend and info card
+        map_update <- map_update |>
+          addLegend(
+            position = "bottomright",
+            pal = pal,
+            values = global_min_max(),
+            title = "Observations",
+            opacity = 0.8,
+            layerId = "legend"
+          ) |>
+          addControl(
+            html = info_card_html_str,
+            position = "topleft",
+            layerId = "info-card"
+          )
+
+        # Set flags to indicate legend and info card have been added
+        legend_added(TRUE)
+        info_card_added(TRUE)
+      }
+
+      # Execute the map update
+      map_update
     }
 
     # Create the info card with species details
@@ -641,6 +693,12 @@ rtbm_app_server <- function(id, tab_selected) {
           rt <- raster::raster(r)
           vals <- na.omit(raster::values(rt))
 
+          # Check for invalid observation data (values of -1)
+          if (length(vals) > 0 && any(vals == -1)) {
+            print(paste("Invalid observation data (value -1) found for date:", date))
+            next
+          }
+
           if (length(vals) > 0) {
             # Ensure proper projection
             crs_rt <- raster::crs(rt)
@@ -701,6 +759,10 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Changed from reactive to eventReactive to only load data when the button is clicked
     raster_data <- eventReactive(input$loadData, {
+      # Reset flags when loading new data
+      legend_added(FALSE)
+      info_card_added(FALSE)
+
       # Process all dates and prepare data
       success <- processAllDates()
       print(paste("Data processing complete. Success:", success))
