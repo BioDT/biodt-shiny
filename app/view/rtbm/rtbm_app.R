@@ -108,13 +108,35 @@ rtbm_app_ui <- function(id, i18n) {
     class = "rtbm-container container-fluid p-3",
     div(
       class = "row g-3",
-      # Control Panel
+      # Sidebar Toggle Button (visible on mobile)
       div(
-        class = "col-md-3",
+        class = "col-12 d-md-none mb-2",
+        actionButton(
+          inputId = ns("toggleSidebar"),
+          label = "Toggle Controls",
+          icon = icon("bars"),
+          class = "btn btn-secondary w-100"
+        )
+      ),
+      # Control Panel Sidebar
+      div(
+        id = ns("sidebarCol"),
+        class = "col-md-3 sidebar-column",
         div(
-          class = "control-panel card",
+          class = "control-panel card h-100",
           div(
-            class = "card-body",
+            class = "card-header d-flex justify-content-between align-items-center",
+            span("Bird Observation Controls"),
+            # Desktop toggle button (smaller version)
+            actionButton(
+              inputId = ns("collapseSidebar"),
+              label = NULL,
+              icon = icon("chevron-left"),
+              class = "btn btn-sm btn-outline-secondary collapse-sidebar-btn"
+            )
+          ),
+          div(
+            class = "card-body overflow-auto",
             # Current date display
             uiOutput(ns("currentDateDisplay")),
             # Date range picker
@@ -154,31 +176,33 @@ rtbm_app_ui <- function(id, i18n) {
             # Status message
             uiOutput(ns("statusMsg")),
             hr(),
-            # Date slider
-            uiOutput(ns("dateSlider"))
+            # Date slider with more height for better display
+            div(
+              class = "date-slider-container",
+              uiOutput(ns("dateSlider"))
+            )
           )
         )
       ),
-      # Map Column
+      # Collapsed sidebar state - only shows expand button
       div(
-        class = "col-md-9",
+        id = ns("collapsedSidebar"),
+        class = "col-auto sidebar-collapsed d-none",
+        actionButton(
+          inputId = ns("expandSidebar"),
+          label = NULL,
+          icon = icon("chevron-right"),
+          class = "btn btn-secondary expand-sidebar-btn"
+        )
+      ),
+      # Map Column - will expand when sidebar collapses
+      div(
+        id = ns("mapCol"),
+        class = "col-md-9 map-column",
         leafletOutput(ns("rasterMap"), height = "800px")
       )
     )
   )
-
-  # Use tagQuery for dynamic modifications
-  control_panel <- tagQuery(base_layout)$
-    find(".control-panel")$
-    append(
-    # Status message container
-    div(
-      id = ns("statusMsgContainer"),
-      class = "alert-container mt-3",
-      `aria-live` = "polite",
-      uiOutput(ns("statusMsg"))
-    )
-  )$allTags()
 
   # Wrap everything in tagList with styles
   tagList(
@@ -190,7 +214,7 @@ rtbm_app_ui <- function(id, i18n) {
       tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css")
     ),
     shinyjs::useShinyjs(), # Initialize shinyjs
-    control_panel
+    base_layout
   )
 }
 
@@ -218,6 +242,32 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Animation controls
     animation_active <- reactiveVal(FALSE)
+
+    # Sidebar state management
+    sidebar_expanded <- reactiveVal(TRUE) # Start expanded
+
+    # Handle sidebar toggle on mobile
+    observeEvent(input$toggleSidebar, {
+      shinyjs::toggleClass(id = "sidebarCol", class = "d-none")
+    })
+
+    # Handle sidebar collapse on desktop
+    observeEvent(input$collapseSidebar, {
+      sidebar_expanded(FALSE)
+      shinyjs::addClass(id = "sidebarCol", class = "d-none")
+      shinyjs::removeClass(id = "collapsedSidebar", class = "d-none")
+      shinyjs::removeClass(id = "mapCol", class = "col-md-9")
+      shinyjs::addClass(id = "mapCol", class = "col-md-11")
+    })
+
+    # Handle sidebar expand on desktop
+    observeEvent(input$expandSidebar, {
+      sidebar_expanded(TRUE)
+      shinyjs::removeClass(id = "sidebarCol", class = "d-none")
+      shinyjs::addClass(id = "collapsedSidebar", class = "d-none")
+      shinyjs::removeClass(id = "mapCol", class = "col-md-11")
+      shinyjs::addClass(id = "mapCol", class = "col-md-9")
+    })
 
     # Create flags to track if legend and info card are already added
     legend_added <- reactiveVal(FALSE)
@@ -565,11 +615,11 @@ rtbm_app_server <- function(id, tab_selected) {
 
           # Transform to WGS84 (EPSG:4326) for Leaflet compatibility
           points_sf <- st_transform(points_sf, 4326)
-          
+
           # Clear previous markers but leave existing squares
           map_update <- map_update |>
             clearGroup("observation_markers")
-          
+
           # No need to add new shapes - existing squares are already displayed
         }
       }
@@ -889,9 +939,9 @@ rtbm_app_server <- function(id, tab_selected) {
         intensity_value <- if (is.numeric(hover_data$value)) {
           round(hover_data$value, 2)
         } else {
-          "N/A"  # Fallback for non-numeric values
+          "N/A" # Fallback for non-numeric values
         }
-        
+
         leafletProxy(ns("rasterMap")) |>
           addControl(
             html = paste0(
