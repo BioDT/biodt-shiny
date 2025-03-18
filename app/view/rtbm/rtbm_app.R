@@ -12,9 +12,9 @@ box::use(
     reactive, req, renderUI, eventReactive,
     invalidateLater, reactiveVal, sliderInput,
     icon, textOutput, renderText, isTruthy,
-    selectInput
+    selectInput, isolate
   ],
-  
+
   # UI enhancement
   shinyjs,
 
@@ -28,13 +28,14 @@ box::use(
     leaflet, leafletOutput, leafletProxy, renderLeaflet,
     addProviderTiles, addTiles, setView, addControl,
     addLegend, addRasterImage, clearControls,
-    clearImages, colorNumeric, clearShapes
+    clearImages, colorNumeric, clearShapes, addMarkers,
+    clearGroup, makeIcon, addCircleMarkers, addRectangles
   ],
 
   # Data manipulation
   dplyr[arrange, filter, mutate, pull, select, slice],
   stringr[str_detect],
-  sf[st_crs, st_as_sf, st_sfc, st_sf],
+  sf[st_crs, st_as_sf, st_sfc, st_sf, st_transform, st_coordinates],
   tibble[as_tibble],
   jsonlite[fromJSON],
   tidyjson[spread_all],
@@ -44,8 +45,8 @@ box::use(
   # File and data handling
   terra[rast],
   utils[download.file],
-  stats[na.omit],
-  raster[crs, projectRaster, raster, values, projection],
+  stats[na.omit, quantile],
+  raster[crs, projectRaster, raster, values, projection, xyFromCell],
   tools[file_ext],
   grDevices[colorRampPalette],
   memoise[memoise, forget],
@@ -55,6 +56,9 @@ box::use(
 
   # Color palettes
   viridisLite[magma, inferno],
+
+  # JavaScript interface
+  htmlwidgets
 )
 
 #' Load and prepare bird species information
@@ -185,7 +189,7 @@ rtbm_app_ui <- function(id, i18n) {
       # Then module-specific styles that only contain necessary overrides
       tags$link(rel = "stylesheet", type = "text/css", href = "view/rtbm/styles.css")
     ),
-    shinyjs::useShinyjs(),  # Initialize shinyjs
+    shinyjs::useShinyjs(), # Initialize shinyjs
     control_panel
   )
 }
@@ -214,6 +218,10 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Animation controls
     animation_active <- reactiveVal(FALSE)
+
+    # Create flags to track if legend and info card are already added
+    legend_added <- reactiveVal(FALSE)
+    info_card_added <- reactiveVal(FALSE)
 
     # Generate date sequence based on selected range
     date_sequence <- reactive({
@@ -258,7 +266,7 @@ rtbm_app_server <- function(id, tab_selected) {
           animate = FALSE,
           width = "100%"
         ),
-        
+
         # Animation controls - only shown after data is loaded
         div(
           class = "animation-controls mt-3",
@@ -450,6 +458,12 @@ rtbm_app_server <- function(id, tab_selected) {
 
           r <- terra::rast(tmp_file)
           r[r == 0] <- NA
+
+          # Check for invalid observation data (-1 values)
+          if (any(terra::values(r) == -1, na.rm = TRUE)) {
+            return(NULL) # Skip dates with invalid observation data
+          }
+
           return(r)
         },
         error = function(e) {
@@ -462,6 +476,30 @@ rtbm_app_server <- function(id, tab_selected) {
     observe({
       invalidateLater(calculate_seconds_until_midnight())
       forget(cached_get_bird_data)
+    })
+
+    # Calculate global min/max values for legend scale
+    global_min_max <- reactive({
+      req(frames_data())
+      frames <- frames_data()
+      if (length(frames) == 0) {
+        return(c(0, 1))
+      }
+
+      # Collect all values across all frames
+      all_values <- numeric(0)
+      for (frame in frames) {
+        if (!is.null(frame$values) && length(frame$values) > 0) {
+          all_values <- c(all_values, frame$values)
+        }
+      }
+
+      if (length(all_values) == 0) {
+        return(c(0, 1))
+      }
+
+      # Return min and max values
+      c(min(all_values, na.rm = TRUE), max(all_values, na.rm = TRUE))
     })
 
     # Function to process and update map with a specific frame
@@ -485,57 +523,112 @@ rtbm_app_server <- function(id, tab_selected) {
       # Use standard color palette as requested
       pal <- colorNumeric(
         palette = "magma",
-        domain = vals,
+        domain = global_min_max(),
         na.color = "#00000000"
       )
 
-      # Create info card with species info
-      info_card_components <- createInfoCard()
-      info_card_html <- div(
-        class = "leaflet-info-card",
-        style = paste(
-          "background-color: rgba(255, 255, 255, 0.9);",
-          "padding: 15px;",
-          "border-radius: 4px;",
-          "border: 1px solid rgba(0,0,0,0.1);",
-          "width: 220px;",
-          "box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
-        ),
-        info_card_components
-      )
-
-      # Convert htmltools tags to HTML for leaflet
-      info_card_html_str <- renderTags(info_card_html)$html
-
-      # Update the map with the current frame
-      leafletProxy(ns("rasterMap")) |>
+      # Start with a leaflet proxy that only clears the raster images
+      # Use layerId for raster image to enable targeted updates
+      map_update <- leafletProxy(ns("rasterMap")) |>
         clearImages() |>
-        clearControls() |>
         addRasterImage(
           rt,
           colors = pal,
           opacity = 0.8,
-          project = FALSE
-        ) |>
-        addLegend(
-          position = "bottomright",
-          pal = pal,
-          values = vals,
-          title = "Observations",
-          opacity = 0.8
-        ) |>
-        addControl(
-          html = info_card_html_str,
-          position = "topleft"
-        ) |>
+          project = FALSE,
+          layerId = paste0("raster_", frame_index)
+        )
+
+      # Convert raster data to point markers for interactivity
+      # Extract points with values above threshold for markers
+      if (length(vals) > 0) {
+        # Convert raster to points where values are above minimum threshold
+        # This creates interactive markers at observation hotspots
+        threshold <- quantile(vals, 0.75, na.rm = TRUE) # Use top 25% as hotspots
+        significant_cells <- which(values(rt) > threshold & !is.na(values(rt)))
+
+        if (length(significant_cells) > 0) {
+          # Convert cell indices to spatial coordinates
+          cell_coords <- xyFromCell(rt, significant_cells)
+          cell_values <- values(rt)[significant_cells]
+
+          # Create sf points
+          points_df <- data.frame(
+            x = cell_coords[, 1],
+            y = cell_coords[, 2],
+            value = cell_values,
+            id = seq_along(cell_values)
+          )
+
+          # Convert to sf object
+          points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = projection(rt))
+
+          # Transform to WGS84 (EPSG:4326) for Leaflet compatibility
+          points_sf <- st_transform(points_sf, 4326)
+          
+          # Clear previous markers but leave existing squares
+          map_update <- map_update |>
+            clearGroup("observation_markers")
+          
+          # No need to add new shapes - existing squares are already displayed
+        }
+      }
+
+      # Update only the date display
+      map_update <- map_update |>
         addControl(
           html = paste(
             "<div class='map-date-display'>",
             "<strong>Date:</strong> ", format(current_date(), "%Y-%m-%d"),
             "</div>"
           ),
-          position = "bottomleft"
+          position = "bottomleft",
+          layerId = "date-display" # Add layerId for easy replacement
         )
+
+      # Only add the legend once when data is first loaded
+      if (!legend_added()) {
+        # Create info card with species info (only once)
+        info_card_components <- isolate(createInfoCard())
+        info_card_html <- div(
+          class = "leaflet-info-card",
+          style = paste(
+            "background-color: rgba(255, 255, 255, 0.9);",
+            "padding: 15px;",
+            "border-radius: 4px;",
+            "border: 1px solid rgba(0,0,0,0.1);",
+            "width: 220px;",
+            "box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+          ),
+          info_card_components
+        )
+
+        # Convert htmltools tags to HTML for leaflet
+        info_card_html_str <- renderTags(info_card_html)$html
+
+        # Add the legend and info card
+        map_update <- map_update |>
+          addLegend(
+            position = "bottomright",
+            pal = pal,
+            values = global_min_max(),
+            title = "Observations",
+            opacity = 0.8,
+            layerId = "legend"
+          ) |>
+          addControl(
+            html = info_card_html_str,
+            position = "topleft",
+            layerId = "info-card"
+          )
+
+        # Set flags to indicate legend and info card have been added
+        legend_added(TRUE)
+        info_card_added(TRUE)
+      }
+
+      # Execute the map update
+      map_update
     }
 
     # Create the info card with species details
@@ -641,6 +734,12 @@ rtbm_app_server <- function(id, tab_selected) {
           rt <- raster::raster(r)
           vals <- na.omit(raster::values(rt))
 
+          # Check for invalid observation data (values of -1)
+          if (length(vals) > 0 && any(vals == -1)) {
+            print(paste("Invalid observation data (value -1) found for date:", date))
+            next
+          }
+
           if (length(vals) > 0) {
             # Ensure proper projection
             crs_rt <- raster::crs(rt)
@@ -701,6 +800,10 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Changed from reactive to eventReactive to only load data when the button is clicked
     raster_data <- eventReactive(input$loadData, {
+      # Reset flags when loading new data
+      legend_added(FALSE)
+      info_card_added(FALSE)
+
       # Process all dates and prepare data
       success <- processAllDates()
       print(paste("Data processing complete. Success:", success))
@@ -721,8 +824,14 @@ rtbm_app_server <- function(id, tab_selected) {
     # Base leaflet map
     output$rasterMap <- renderLeaflet({
       leaflet() |>
-        addProviderTiles("CartoDB.Positron") |>
-        setView(lng = 25, lat = 65.5, zoom = 5)
+        addProviderTiles("CartoDB.Positron", layerId = "base_map") |>
+        setView(lng = 25, lat = 65.5, zoom = 5) |>
+        # Add empty controls that will be filled later
+        addControl(
+          html = "<div id='hover-info' class='map-hover-display d-none'></div>",
+          position = "topright",
+          layerId = "hover-info-control"
+        )
     })
 
     # Initial status message prompting user action
@@ -737,6 +846,73 @@ rtbm_app_server <- function(id, tab_selected) {
     # Observe button click to trigger initial data load
     observeEvent(input$loadData, {
       raster_data()
+    })
+
+    # Track map view changes
+    observeEvent(input$rasterMap_zoom, {
+      # Store current zoom level
+      current_zoom <- input$rasterMap_zoom
+      print(paste("Zoom level changed to:", current_zoom))
+
+      # Just track zoom level but don't try to manipulate markers directly
+      # Let the CSS solution handle consistent appearance
+    })
+
+    # Track map bounds changes
+    observeEvent(input$rasterMap_bounds, {
+      # Store current bounds
+      current_bounds <- input$rasterMap_bounds
+      print(paste("Map bounds changed"))
+
+      # This could be used to load more detailed data for the visible area
+      # or adjust data display based on the current view
+    })
+
+    # Handle marker clicks
+    observeEvent(input$rasterMap_marker_click, {
+      click_data <- input$rasterMap_marker_click
+      print(paste("Marker clicked:", click_data$id))
+
+      # Extract marker ID from the layerId
+      marker_id <- sub("marker_", "", click_data$id)
+
+      # Additional click handling can be implemented here
+      # For example, showing detailed information about the specific observation
+    })
+
+    # Handle map shape hover events
+    observeEvent(input$rasterMap_shape_mouseover, {
+      hover_data <- input$rasterMap_shape_mouseover
+
+      if (!is.null(hover_data)) {
+        # Show hover info with the observation value
+        intensity_value <- if (is.numeric(hover_data$value)) {
+          round(hover_data$value, 2)
+        } else {
+          "N/A"  # Fallback for non-numeric values
+        }
+        
+        leafletProxy(ns("rasterMap")) |>
+          addControl(
+            html = paste0(
+              "<div class='map-hover-display'>",
+              "<strong>Intensity:</strong> ", intensity_value,
+              "</div>"
+            ),
+            position = "topright",
+            layerId = "hover-info-control"
+          )
+      }
+    })
+
+    observeEvent(input$rasterMap_shape_mouseout, {
+      # Hide or clear hover information
+      leafletProxy(ns("rasterMap")) |>
+        addControl(
+          html = "<div class='map-hover-display d-none'></div>",
+          position = "topright",
+          layerId = "hover-info-control"
+        )
     })
   })
 }
