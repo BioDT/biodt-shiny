@@ -137,3 +137,56 @@
   margin-top: 5px;
   font-size: 0.8em;
 }
+
+/* Map hover display */
+.map-hover-display {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  min-width: 120px;
+  font-size: 0.9rem;
+}
+
+.map-hover-display.d-none {
+  display: none;
+}
+
+/* Observation popup styles */
+.observation-popup {
+  padding: 5px;
+  min-width: 150px;
+  font-size: 0.9rem;
+}
+
+/* Interactive markers */
+.leaflet-interactive {
+  cursor: pointer;
+  transition: stroke-width 0.2s ease, r 0.2s ease;
+}
+
+.leaflet-interactive:hover {
+  stroke-width: 2px !important;
+}
+
+/* Leaflet Info Card - Override inline styles with CSS class */
+.leaflet-info-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  width: 220px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Highlight animation for markers */
+@keyframes pulse-marker {
+  0% { opacity: 0.6; r: 5px; }
+  50% { opacity: 1; r: 7px; }
+  100% { opacity: 0.6; r: 5px; }
+}
+
+.marker-highlight {
+  animation: pulse-marker 1.5s infinite;
+}

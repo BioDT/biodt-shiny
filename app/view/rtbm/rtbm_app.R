@@ -28,13 +28,14 @@ box::use(
     leaflet, leafletOutput, leafletProxy, renderLeaflet,
     addProviderTiles, addTiles, setView, addControl,
     addLegend, addRasterImage, clearControls,
-    clearImages, colorNumeric, clearShapes
+    clearImages, colorNumeric, clearShapes, addMarkers,
+    clearGroup, makeIcon, addCircleMarkers, addRectangles
   ],
 
   # Data manipulation
   dplyr[arrange, filter, mutate, pull, select, slice],
   stringr[str_detect],
-  sf[st_crs, st_as_sf, st_sfc, st_sf],
+  sf[st_crs, st_as_sf, st_sfc, st_sf, st_transform, st_coordinates],
   tibble[as_tibble],
   jsonlite[fromJSON],
   tidyjson[spread_all],
@@ -44,8 +45,8 @@ box::use(
   # File and data handling
   terra[rast],
   utils[download.file],
-  stats[na.omit],
-  raster[crs, projectRaster, raster, values, projection],
+  stats[na.omit, quantile],
+  raster[crs, projectRaster, raster, values, projection, xyFromCell],
   tools[file_ext],
   grDevices[colorRampPalette],
   memoise[memoise, forget],
@@ -55,6 +56,9 @@ box::use(
 
   # Color palettes
   viridisLite[magma, inferno],
+
+  # JavaScript interface
+  htmlwidgets
 )
 
 #' Load and prepare bird species information
@@ -524,14 +528,51 @@ rtbm_app_server <- function(id, tab_selected) {
       )
 
       # Start with a leaflet proxy that only clears the raster images
+      # Use layerId for raster image to enable targeted updates
       map_update <- leafletProxy(ns("rasterMap")) |>
         clearImages() |>
         addRasterImage(
           rt,
           colors = pal,
           opacity = 0.8,
-          project = FALSE
+          project = FALSE,
+          layerId = paste0("raster_", frame_index)
         )
+
+      # Convert raster data to point markers for interactivity
+      # Extract points with values above threshold for markers
+      if (length(vals) > 0) {
+        # Convert raster to points where values are above minimum threshold
+        # This creates interactive markers at observation hotspots
+        threshold <- quantile(vals, 0.75, na.rm = TRUE) # Use top 25% as hotspots
+        significant_cells <- which(values(rt) > threshold & !is.na(values(rt)))
+
+        if (length(significant_cells) > 0) {
+          # Convert cell indices to spatial coordinates
+          cell_coords <- xyFromCell(rt, significant_cells)
+          cell_values <- values(rt)[significant_cells]
+
+          # Create sf points
+          points_df <- data.frame(
+            x = cell_coords[, 1],
+            y = cell_coords[, 2],
+            value = cell_values,
+            id = seq_along(cell_values)
+          )
+
+          # Convert to sf object
+          points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = projection(rt))
+
+          # Transform to WGS84 (EPSG:4326) for Leaflet compatibility
+          points_sf <- st_transform(points_sf, 4326)
+          
+          # Clear previous markers but leave existing squares
+          map_update <- map_update |>
+            clearGroup("observation_markers")
+          
+          # No need to add new shapes - existing squares are already displayed
+        }
+      }
 
       # Update only the date display
       map_update <- map_update |>
@@ -783,8 +824,14 @@ rtbm_app_server <- function(id, tab_selected) {
     # Base leaflet map
     output$rasterMap <- renderLeaflet({
       leaflet() |>
-        addProviderTiles("CartoDB.Positron") |>
-        setView(lng = 25, lat = 65.5, zoom = 5)
+        addProviderTiles("CartoDB.Positron", layerId = "base_map") |>
+        setView(lng = 25, lat = 65.5, zoom = 5) |>
+        # Add empty controls that will be filled later
+        addControl(
+          html = "<div id='hover-info' class='map-hover-display d-none'></div>",
+          position = "topright",
+          layerId = "hover-info-control"
+        )
     })
 
     # Initial status message prompting user action
@@ -799,6 +846,73 @@ rtbm_app_server <- function(id, tab_selected) {
     # Observe button click to trigger initial data load
     observeEvent(input$loadData, {
       raster_data()
+    })
+
+    # Track map view changes
+    observeEvent(input$rasterMap_zoom, {
+      # Store current zoom level
+      current_zoom <- input$rasterMap_zoom
+      print(paste("Zoom level changed to:", current_zoom))
+
+      # Just track zoom level but don't try to manipulate markers directly
+      # Let the CSS solution handle consistent appearance
+    })
+
+    # Track map bounds changes
+    observeEvent(input$rasterMap_bounds, {
+      # Store current bounds
+      current_bounds <- input$rasterMap_bounds
+      print(paste("Map bounds changed"))
+
+      # This could be used to load more detailed data for the visible area
+      # or adjust data display based on the current view
+    })
+
+    # Handle marker clicks
+    observeEvent(input$rasterMap_marker_click, {
+      click_data <- input$rasterMap_marker_click
+      print(paste("Marker clicked:", click_data$id))
+
+      # Extract marker ID from the layerId
+      marker_id <- sub("marker_", "", click_data$id)
+
+      # Additional click handling can be implemented here
+      # For example, showing detailed information about the specific observation
+    })
+
+    # Handle map shape hover events
+    observeEvent(input$rasterMap_shape_mouseover, {
+      hover_data <- input$rasterMap_shape_mouseover
+
+      if (!is.null(hover_data)) {
+        # Show hover info with the observation value
+        intensity_value <- if (is.numeric(hover_data$value)) {
+          round(hover_data$value, 2)
+        } else {
+          "N/A"  # Fallback for non-numeric values
+        }
+        
+        leafletProxy(ns("rasterMap")) |>
+          addControl(
+            html = paste0(
+              "<div class='map-hover-display'>",
+              "<strong>Intensity:</strong> ", intensity_value,
+              "</div>"
+            ),
+            position = "topright",
+            layerId = "hover-info-control"
+          )
+      }
+    })
+
+    observeEvent(input$rasterMap_shape_mouseout, {
+      # Hide or clear hover information
+      leafletProxy(ns("rasterMap")) |>
+        addControl(
+          html = "<div class='map-hover-display d-none'></div>",
+          position = "topright",
+          layerId = "hover-info-control"
+        )
     })
   })
 }
