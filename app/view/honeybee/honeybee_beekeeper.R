@@ -49,7 +49,7 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
       layout_column_wrap(
         width = NULL,
         fill = FALSE,
-        style = css(grid_template_columns = "2fr 1fr"),
+        style = css(grid_template_columns = "3fr 1fr"),
         honeybee_map_ui(
           ns("beekeeper_map"),
           i18n

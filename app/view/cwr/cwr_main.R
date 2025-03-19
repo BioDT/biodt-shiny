@@ -1,6 +1,30 @@
 box::use(
-  shiny,
-  bslib[navset_tab, nav_panel],
+  shiny[moduleServer,
+         NS,
+         tagList,
+         column,
+         fluidRow,
+         verbatimTextOutput,
+         actionButton,
+         observe,
+         observeEvent,
+         radioButtons,
+         checkboxInput,
+         p,
+         textOutput,
+         renderText,
+         reactive,
+         HTML,
+         selectInput,
+         req,
+         renderUI,
+         uiOutput,
+         htmlOutput,
+         selectizeInput,
+         tags,
+         reactiveValues, div, sliderInput],
+  htmltools[css],
+  bslib[navset_tab, nav_panel, card, card_header, card_body, layout_column_wrap],
   shinyjs[hidden, show, hide, runjs, delay],
   leaflet,
   leaflegend[addLegendNumeric],
@@ -27,12 +51,11 @@ box::use(
   app / logic / cwr / tolerance_plot[create_tolerance_plot],
 )
 
-mod_cwr_ui <- function(
-  id,
-  i18n
+mod_cwr_ui <- function(id, i18n
+                       
 ) {
-  ns <- shiny$NS(id)
-  shiny$tagList(
+  ns <- NS(id)
+ tagList(
     navset_tab(
       id = ns("tab"),
       # Info ----
@@ -45,106 +68,100 @@ mod_cwr_ui <- function(
       nav_panel(
         title = "Map",
         value = "Map",
-        shiny$div(
-          shiny$HTML("<h2>Genus and species</h2>"),
-          shiny$div(
-            style = "display: flex; flex-direction: column; gap: 20px;",
-            # First row with genus, species, and update button
-            shiny$div(
-              style = "display: flex; flex-direction: row; gap: 10px; flex-wrap: wrap; align-items: flex-end;",
-              shiny$div(
-                style = "flex: 1; min-width: 200px;",
-                pickerInput(
-                  ns("genus"),
-                  label = "Choose genus",
-                  choices = list(""),
-                  multiple = FALSE,
-                  options = list(
-                    `actions-box` = NULL,
-                    `live-search` = TRUE,
-                    container = "body"
-                  )
-                )
-              ),
-              shiny$div(
-                style = "flex: 2; min-width: 300px;",
-                pickerInput(
-                  ns("species"),
-                  label = "Choose species",
-                  choices = list(""),
-                  multiple = TRUE,
-                  selected = c("Sativus"),
-                  options = pickerOptions(
-                    `actions-box` = NULL,
-                    `live-search` = TRUE,
-                    container = "body",
-                    maxOptions = 5,
-                    maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
-                  )
-                )
-              )
+        layout_column_wrap(
+          width = NULL,
+          fill = FALSE,
+          class = "mt-2",
+          style = css(grid_template_columns = "3fr 1fr"),
+          card(
+            class = "ms-md-3 card-shadow",
+            card_header(
+              tags$h2(
+                class = "card_title",
+                "Input map")
             ),
-            # Second row with stress variable and slider
-            shiny$div(
-              style = "max-width: 300px;",
-              pickerInput(
-                ns("stress_var"),
-                "Select Stress Variable:",
-                choices = c(
-                  "None" = "None",
-                  "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
-                  "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
-                  "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
-                  "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
-                ),
-                selected = "None"
-              ),
-              hidden(
-                shiny$sliderInput(
-                  ns("stress_range"),
-                  "Select Stress Range:",
-                  min = 0,
-                  max = 1,
-                  value = c(0, 1)
-                )
-              ),
-              hidden(
-                shiny$checkboxInput(
-                  ns("subset_suitability_map"),
-                  "Subset Stressor Map with Suitability Map",
-                  FALSE
-                )
-              ),
-              shiny$div(
-                style = "display: flex; align-items: flex-end; padding-bottom: 6px; justify-content: flex-start;",
-                shiny$actionButton(
-                  ns("update"),
-                  "Update Map",
-                  style = "width: 100%;"
-                )
-              )
+            card_body(
+              id = ns("map_div"),
+              style = "min-height: 500px !important; width: 100%; transition: width 0.3s ease; margin-left: auto;",
+              class = "html-fill-container",
+              leaflet$leafletOutput(ns("map"))
+              # )
+            ),
+            hidden(
+              ecs.output(ns("tolerance_plot"))
             )
           ),
+          card(
+            class = "me-md-3 card-shadow",
+            card_header(
+              tags$h2(
+                class = "card_title",
+                "Genus and Species")
+            ),
+            card_body(
+                  pickerInput(
+                    ns("genus"),
+                    label = "Choose genus",
+                    choices = list(""),
+                    multiple = FALSE,
+                    options = list(
+                      `actions-box` = NULL,
+                      `live-search` = TRUE,
+                      container = "body"
+                    )
+                  ),
+                  pickerInput(
+                    ns("species"),
+                    label = "Choose species",
+                    choices = list(""),
+                    multiple = TRUE,
+                    selected = c("Sativus"),
+                    options = pickerOptions(
+                      `actions-box` = NULL,
+                      `live-search` = TRUE,
+                      container = "body",
+                      maxOptions = 5,
+                      maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
+                    )
+                  ),
+              # Second row with stress variable and slider
+                pickerInput(
+                  ns("stress_var"),
+                  "Select Stress Variable:",
+                  choices = c(
+                    "None" = "None",
+                    "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
+                    "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
+                    "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
+                    "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
+                  ),
+                  selected = "None"
+                ),
+                hidden(
+                  sliderInput(
+                    ns("stress_range"),
+                    "Select Stress Range:",
+                    min = 0,
+                    max = 1,
+                    value = c(0, 1)
+                  )
+                ),
+                hidden(
+                  checkboxInput(
+                    ns("subset_suitability_map"),
+                    "Subset Stressor Map with Suitability Map",
+                    FALSE
+                  )
+                ),
+                  actionButton(
+                    ns("update"),
+                    "Update Map",
+                    style = "width: 100%;"
+                  )
+            ),
+          ),
         ),
-        # shiny$div(
-        #   style = "display: flex; flex-direction: row; width: 100%; gap: 10px; position: relative;",
-        # shiny$div(
-        #   id = ns("map_stress_div"),
-        #   style = "min-height: 500px !important; width: 0; transition: width 0.3s ease;",
-        #   class = "html-fill-container",
-        #   leaflet$leafletOutput(ns("map_stress"))
-        # ),
-        shiny$div(
-          id = ns("map_div"),
-          style = "min-height: 500px !important; width: 100%; transition: width 0.3s ease; margin-left: auto;",
-          class = "html-fill-container",
-          leaflet$leafletOutput(ns("map"))
-          # )
         ),
-        hidden(
-          ecs.output(ns("tolerance_plot"))
-        )
-      ),
       nav_panel(
         title = i18n$t("Contributors"),
         value = "Contributors",
@@ -158,12 +175,12 @@ mod_cwr_ui <- function(
 }
 
 mod_cwr_server <- function(id, i18n) {
-  shiny$moduleServer(id, function(input, output, session) {
+  moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     msg <-
       waiter_text(
-        message = shiny$tags$h3("Loading...", style = "color: #414f2f;")
+        message = tags$h3("Loading...", style = "color: #414f2f;")
       )
 
     w <- Waiter$new(
@@ -173,7 +190,7 @@ mod_cwr_server <- function(id, i18n) {
 
     # Initialize reactiveValues for CWR pDT ----
     r_cwr <-
-      shiny$reactiveValues(
+      reactiveValues(
         map = NULL,
         map_list = list(),
         rasters = NULL,
@@ -194,10 +211,10 @@ mod_cwr_server <- function(id, i18n) {
     cwr_path <- file.path(config$get("data_path"), "cwr")
 
     # Initialise maps when CWR selected
-    shiny$observeEvent(
+    observeEvent(
       input$tab,
       {
-        shiny$req(input$tab == "Map")
+        req(input$tab == "Map")
 
         # Create map ----
         # r_cwr$map
@@ -239,7 +256,7 @@ mod_cwr_server <- function(id, i18n) {
     # Set species based on genus ----
 
     # Since genus and genus_response_curves are synced we do it just for one and set them on both pages
-    shiny$observeEvent(
+    observeEvent(
       input$genus,
       ignoreInit = TRUE,
       {
@@ -255,7 +272,7 @@ mod_cwr_server <- function(id, i18n) {
     )
 
     # Species change logic ----
-    shiny$observeEvent(
+    observeEvent(
       {
         input$update
         r_cwr$first_visit
@@ -263,7 +280,7 @@ mod_cwr_server <- function(id, i18n) {
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        shiny$req(
+        req(
           input$tab == "Map",
           input$species
         )
@@ -324,7 +341,7 @@ mod_cwr_server <- function(id, i18n) {
     )
 
     # Render tolerance plot ----
-    shiny$observeEvent(
+    observeEvent(
       r_cwr$tolerance_plot,
       {
         # str(r_cwr$tolerance_plot)
@@ -333,10 +350,10 @@ mod_cwr_server <- function(id, i18n) {
     )
 
     # Map UI ----
-    shiny$observeEvent(
+    observeEvent(
       input$stress_var,
       {
-        shiny$req(input$stress_var, r_cwr$stress_maps)
+        req(input$stress_var, r_cwr$stress_maps)
         if (input$stress_var == "None") {
           # Hide the stress range slider ----
           hide("stress_range")
@@ -401,7 +418,7 @@ mod_cwr_server <- function(id, i18n) {
             ]])
 
             # Update slider input ----
-            shiny$updateSliderInput(
+            updateSliderInput(
               session,
               "stress_range",
               min = r_cwr$stressor_range[1],
@@ -435,12 +452,12 @@ mod_cwr_server <- function(id, i18n) {
       }
     )
 
-    shiny$observeEvent(
+   observeEvent(
       input$stress_range,
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        shiny$req(
+       req(
           input$stress_range,
           r_cwr$stress_maps[[input$stress_var]]
         )
