@@ -1,28 +1,33 @@
 box::use(
-  shiny[moduleServer,
-         NS,
-         tagList,
-         column,
-         fluidRow,
-         verbatimTextOutput,
-         actionButton,
-         observe,
-         observeEvent,
-         radioButtons,
-         checkboxInput,
-         p,
-         textOutput,
-         renderText,
-         reactive,
-         HTML,
-         selectInput,
-         req,
-         renderUI,
-         uiOutput,
-         htmlOutput,
-         selectizeInput,
-         tags,
-         reactiveValues, div, sliderInput],
+  shiny[
+    moduleServer,
+    NS,
+    tagList,
+    column,
+    fluidRow,
+    verbatimTextOutput,
+    actionButton,
+    observe,
+    observeEvent,
+    radioButtons,
+    checkboxInput,
+    p,
+    textOutput,
+    renderText,
+    reactive,
+    HTML,
+    selectInput,
+    req,
+    renderUI,
+    uiOutput,
+    htmlOutput,
+    selectizeInput,
+    tags,
+    reactiveValues,
+    div,
+    sliderInput,
+    updateSliderInput,
+  ],
   htmltools[css],
   bslib[navset_tab, nav_panel, card, card_header, card_body, layout_column_wrap],
   shinyjs[hidden, show, hide, runjs, delay],
@@ -51,11 +56,9 @@ box::use(
   app / logic / cwr / tolerance_plot[create_tolerance_plot],
 )
 
-mod_cwr_ui <- function(id, i18n
-                       
-) {
+mod_cwr_ui <- function(id, i18n) {
   ns <- NS(id)
- tagList(
+  tagList(
     navset_tab(
       id = ns("tab"),
       # Info ----
@@ -78,7 +81,8 @@ mod_cwr_ui <- function(id, i18n
             card_header(
               tags$h2(
                 class = "card_title",
-                "Input map")
+                "Input map"
+              )
             ),
             card_body(
               id = ns("map_div"),
@@ -96,72 +100,73 @@ mod_cwr_ui <- function(id, i18n
             card_header(
               tags$h2(
                 class = "card_title",
-                "Genus and Species")
+                "Genus and Species"
+              )
             ),
             card_body(
-                  pickerInput(
-                    ns("genus"),
-                    label = "Choose genus",
-                    choices = list(""),
-                    multiple = FALSE,
-                    options = list(
-                      `actions-box` = NULL,
-                      `live-search` = TRUE,
-                      container = "body"
-                    )
-                  ),
-                  pickerInput(
-                    ns("species"),
-                    label = "Choose species",
-                    choices = list(""),
-                    multiple = TRUE,
-                    selected = c("Sativus"),
-                    options = pickerOptions(
-                      `actions-box` = NULL,
-                      `live-search` = TRUE,
-                      container = "body",
-                      maxOptions = 5,
-                      maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
-                    )
-                  ),
+              pickerInput(
+                ns("genus"),
+                label = "Choose genus",
+                choices = list(""),
+                multiple = FALSE,
+                options = list(
+                  `actions-box` = NULL,
+                  `live-search` = TRUE,
+                  container = "body"
+                )
+              ),
+              pickerInput(
+                ns("species"),
+                label = "Choose species",
+                choices = list(""),
+                multiple = TRUE,
+                selected = c("Sativus"),
+                options = pickerOptions(
+                  `actions-box` = NULL,
+                  `live-search` = TRUE,
+                  container = "body",
+                  maxOptions = 5,
+                  maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
+                )
+              ),
               # Second row with stress variable and slider
-                pickerInput(
-                  ns("stress_var"),
-                  "Select Stress Variable:",
-                  choices = c(
-                    "None" = "None",
-                    "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
-                    "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
-                    "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
-                    "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
-                  ),
-                  selected = "None"
+              pickerInput(
+                ns("stress_var"),
+                "Select Stress Variable:",
+                choices = c(
+                  "None" = "None",
+                  "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
+                  "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
+                  "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
+                  "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
                 ),
-                hidden(
-                  sliderInput(
-                    ns("stress_range"),
-                    "Select Stress Range:",
-                    min = 0,
-                    max = 1,
-                    value = c(0, 1)
-                  )
-                ),
-                hidden(
-                  checkboxInput(
-                    ns("subset_suitability_map"),
-                    "Subset Stressor Map with Suitability Map",
-                    FALSE
-                  )
-                ),
-                  actionButton(
-                    ns("update"),
-                    "Update Map",
-                    style = "width: 100%;"
-                  )
+                selected = "None"
+              ),
+              hidden(
+                sliderInput(
+                  ns("stress_range"),
+                  "Select Stress Range:",
+                  min = 0,
+                  max = 1,
+                  value = c(0, 1)
+                )
+              ),
+              hidden(
+                checkboxInput(
+                  ns("subset_suitability_map"),
+                  "Subset Stressor Map with Suitability Map",
+                  FALSE
+                )
+              ),
+              actionButton(
+                ns("update"),
+                "Update Map",
+                style = "width: 100%;"
+              )
             ),
           ),
         ),
-        ),
+      ),
       nav_panel(
         title = i18n$t("Contributors"),
         value = "Contributors",
@@ -452,12 +457,12 @@ mod_cwr_server <- function(id, i18n) {
       }
     )
 
-   observeEvent(
+    observeEvent(
       input$stress_range,
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-       req(
+        req(
           input$stress_range,
           r_cwr$stress_maps[[input$stress_var]]
         )
