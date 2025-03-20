@@ -105,32 +105,6 @@ mod_cwr_ui <- function(id, i18n) {
             ),
             card_body(
               pickerInput(
-                ns("genus"),
-                label = "Choose genus",
-                choices = list(""),
-                multiple = FALSE,
-                options = list(
-                  `actions-box` = NULL,
-                  `live-search` = TRUE,
-                  container = "body"
-                )
-              ),
-              pickerInput(
-                ns("species"),
-                label = "Choose species",
-                choices = list(""),
-                multiple = TRUE,
-                selected = c("Sativus"),
-                options = pickerOptions(
-                  `actions-box` = NULL,
-                  `live-search` = TRUE,
-                  container = "body",
-                  maxOptions = 5,
-                  maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
-                )
-              ),
-              # Second row with stress variable and slider
-              pickerInput(
                 ns("stress_var"),
                 "Select Stress Variable:",
                 choices = c(
@@ -158,10 +132,35 @@ mod_cwr_ui <- function(id, i18n) {
                   FALSE
                 )
               ),
+              pickerInput(
+                ns("genus"),
+                label = "Choose genus",
+                choices = list(""),
+                multiple = FALSE,
+                options = list(
+                  `actions-box` = NULL,
+                  `live-search` = TRUE,
+                  container = "body"
+                )
+              ),
+              pickerInput(
+                ns("species"),
+                label = "Choose species",
+                choices = list(""),
+                multiple = TRUE,
+                selected = c("Sativus"),
+                options = pickerOptions(
+                  `actions-box` = NULL,
+                  `live-search` = TRUE,
+                  container = "body",
+                  maxOptions = 5,
+                  maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
+                )
+              ),
               actionButton(
                 ns("update"),
-                "Update Map",
-                style = "width: 100%;"
+                label = "Update map",
+                class = "btn-primary mt-3",
               )
             ),
           ),

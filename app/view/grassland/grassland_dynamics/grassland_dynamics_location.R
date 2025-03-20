@@ -59,7 +59,8 @@ grassland_dynamics_location_ui <- function(id, i18n) {
       ),
       actionButton(
         inputId = ns("update_map_location"),
-        label = i18n$translate("Update Map Location")
+        label = i18n$translate("Update Map Location"),
+        class = "btn-primary"
       ),
     )
   )

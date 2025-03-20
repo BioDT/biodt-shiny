@@ -221,13 +221,13 @@ ces_rp_biodiversity_ui <- function(id) {
                 actionButton(
                   inputId = ns("apply_filter_species"),
                   label = "Apply filter",
-                  class = "btn-primary"
+                  class = "btn-primary mb-3"
                 ),
                 disabled(
                   checkboxInput(
                     inputId = ns("species_occurence"),
                     label = "Show Species Occurence",
-                    value = TRUE
+                    value = TRUE,
                   )
                 ),
               ),
