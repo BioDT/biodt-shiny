@@ -96,8 +96,6 @@ beekeeper_runsimulation_server <- function(
     temp_dir <- session_dir |>
       file.path("beekeeper")
 
-    print("temp_dir")
-
     # this variable represents all runs of simulation in order in which they were
     # chronologicaly run by user; "Example" is dummy hardcoded example for
     # demonstration purpose
