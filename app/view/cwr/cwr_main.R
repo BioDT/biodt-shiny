@@ -32,7 +32,6 @@ box::use(
   bslib[navset_tab, nav_panel, card, card_header, card_body, layout_column_wrap],
   shinyjs[hidden, show, hide, runjs, delay],
   leaflet,
-  leaflegend[addLegendNumeric],
   terra,
   shinyWidgets[pickerInput, updatePickerInput, pickerOptions],
   waiter[Waiter],
