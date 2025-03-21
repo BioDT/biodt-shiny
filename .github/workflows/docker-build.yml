@@ -47,7 +47,7 @@ jobs:
             ghcr.io/biodt/shiny-base:${{ github.sha }}
 
   build-app:
-    needs: build-base
+    needs: ${{ (github.event_name == 'workflow_dispatch' && inputs.build_type == 'both') || (github.event_name != 'workflow_dispatch') && contains(github.event.head_commit.modified, 'renv.lock') ? ['build-base'] : [] }}
     if: |
       github.event_name == 'workflow_dispatch' && 
       (inputs.build_type == 'app' || inputs.build_type == 'both') ||
