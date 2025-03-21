@@ -303,7 +303,7 @@ server <- function(id) {
       "ces_main"
     )
     # Disease Outbreaks pDT ----
-    disease_outbreaks_main_server("disease_outbreaks_main")
+    disease_outbreaks_main_server("disease_outbreaks_main", session_dir)
     # Invasie Alien Species pDT ----
     ias_main_server("ias_main")
     # Real-time Bird Monitoring pDT ----
