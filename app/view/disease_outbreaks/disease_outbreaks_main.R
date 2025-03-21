@@ -46,7 +46,7 @@ disease_outbreaks_main_ui <- function(id, i18n) {
 }
 
 #' @export
-disease_outbreaks_main_server <- function(id) {
+disease_outbreaks_main_server <- function(id, session_dir) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -61,6 +61,6 @@ disease_outbreaks_main_server <- function(id) {
       }
     )
 
-    disease_app_server("disease_app", tab_disease_selected)
+    disease_app_server("disease_app", tab_disease_selected, session_dir)
   })
 }

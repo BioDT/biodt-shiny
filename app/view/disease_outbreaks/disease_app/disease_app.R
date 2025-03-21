@@ -5,19 +5,18 @@ box::use(
   waiter[Waiter],
   leaflet,
   leaflet.extras,
-  leafem,
   zip[zip],
-  sf,
-  raster,
   jsonlite,
-  utils[read.csv],
-  ggplot2,
-  reshape2,
-  gridExtra,
+  terra,
+  readr,
+  echarty[ecs.render, ecs.output],
+  shinyjs[hide, show, hidden, delay],
 )
 
 box::use(
   app / logic / waiter[waiter_text],
+  app / logic / disease_outbreaks / disease_data_load[load_simulated_data],
+  app / logic / disease_outbreaks / disease_histogram[disease_histogram],
 )
 
 #' @export
@@ -31,68 +30,43 @@ disease_app_ui <- function(id, i18n) {
           "Upload a GeoTIFF file",
           accept = c(".tiff", ".tif")
         ),
-        shiny$actionButton(ns("select_area"), "Select Area"),
-        shiny$verbatimTextOutput(ns("converted_coordinates")), # Display converted coordinates
-        shiny$actionButton(ns("select_release"), "Select Release Coordinate"),
-        shiny$verbatimTextOutput(ns("release_coordinates")), # Display release coordinates
-        shiny$actionButton(ns("select_fences"), "Select Fences Coordinate"),
-        shiny$verbatimTextOutput(ns("fence_coordinates")), # Display release coordinates
         shiny$actionButton(ns("run_command"), "Run model"),
         shiny$verbatimTextOutput(ns("command_output")), # Display WSL command output
         shiny$hr(), # Add a horizontal line for visual separation
-        shiny$sliderInput(
-          ns("tick_slider"),
-          "Select Time Step:",
-          min = 0,
-          max = 100, # This will be updated dynamically
-          value = 0
+        hidden(
+          shiny$sliderInput(
+            ns("tick_slider"),
+            "Select Time Step:",
+            min = -1,
+            max = 0, # This will be updated dynamically
+            value = -1,
+            step = 1
+          )
         ),
-        shiny$actionButton(ns("load_grid"), "Show epidemic statistics"),
-        shiny$uiOutput(ns("download_zip_ui")),
-
-        # Base Map and Shapes Layer Control
-        shiny$hr(), # Separator
-        shiny$h4("Map Layer Control"),
-        shiny$checkboxGroupInput(
-          ns("base_layers"),
-          "Select Base Layers:",
-          choices = c("TIFF Map" = "tiff_map", "Drawn Shapes" = "drawn_shapes"),
-          selected = c("tiff_map", "drawn_shapes")
-        ),
-
-        # Raster Layer Control
-        shiny$hr(), # Separator
-        shiny$h4("Raster Layer Control"),
-        shiny$checkboxGroupInput(
-          ns("raster_layers"),
-          "Select Raster Layers to Display:",
-          choices = c("Infected" = "infected", "Resistant" = "resistant", "Susceptible" = "susceptible"),
-          selected = c("infected", "resistant", "susceptible")
-        ),
-
-        # Heatmap Control
-        shiny$hr(), # Separator
-        shiny$h4("Heatmap Control"),
-        shiny$checkboxGroupInput(
-          ns("heatmap_layers"),
-          "Select Heatmaps to Display:",
-          choices = c("Infected" = "infected", "Resistant" = "resistant", "Susceptible" = "susceptible"),
-          selected = c("infected", "resistant", "susceptible")
+        hidden(
+          shiny$actionButton(
+            ns("export_zip"),
+            "Export Outputs",
+            icon = shiny$icon("file-zipper")
+          )
         ),
         width = 3
       ),
       shiny$mainPanel(
         leaflet$leafletOutput(ns("map"), height = "600px"),
-        shiny$verbatimTextOutput(ns("shape_info")), # Display drawn shape info
-        shiny$plotOutput(ns("histogram_plot"), height = "400px"),
-        shiny$plotOutput(ns("grid_plot"), height = "800px")
+        ecs.output(ns("histogram_plot"), height = "400px"),
+        shiny$verbatimTextOutput(ns("shape_info")) # Display drawn shape info
       )
     )
   )
 }
 
 #' @export
-disease_app_server <- function(id, tab_disease_selected) {
+disease_app_server <- function(
+  id,
+  tab_disease_selected,
+  session_dir
+) {
   shiny$moduleServer(id, function(input, output, session) {
     # Define waiter ----
     msg <- waiter_text(message = shiny$tags$h3("Loading data...", style = "color: #414f2f;"))
@@ -101,759 +75,426 @@ disease_app_server <- function(id, tab_disease_selected) {
       color = "rgba(256,256,256,0.9)"
     )
 
-    ns <- session$ns
-
-    # shiny$reactive expression to read and process the TIFF file
-    tiffRaster <- shiny$reactive({
-      shiny$req(input$file) # Ensure file is uploaded
-
-      # Load the GeoTIFF file
-      raster$raster(input$file$datapath)
-    })
-
-    # Render the initial Leaflet map
-    output$map <- leaflet$renderLeaflet({
-      shiny$req(tiffRaster())
-
-      # Create a base leaflet map
-      map <- leaflet$leaflet() |>
-        leaflet$addTiles() |>
-        leafem$addMouseCoordinates() |>
-        leaflet$addRasterImage(
-          tiffRaster(),
-          opacity = 0.8,
-          project = TRUE,
-          colors = leaflet$colorNumeric(
-            c("#EEDED1", "#EA6D20"),
-            domain = raster$values(tiffRaster()),
-            na.color = "transparent"
-          ),
-          group = "TIFF Map"
-        ) |>
-        leaflet$addLayersControl(
-          overlayGroups = c("TIFF Map", "drawnShapes"),
-          options = leaflet$layersControlOptions(collapsed = FALSE)
-        ) |>
-        leaflet.extras$addDrawToolbar(
-          targetGroup = "drawnShapes",
-          polygonOptions = leaflet.extras$drawPolygonOptions(
-            showArea = TRUE,
-            shapeOptions = list(
-              fillOpacity = 0.2, # fill
-              opacity = 0.2 # border
-            )
-          ),
-          rectangleOptions = leaflet.extras$drawRectangleOptions(
-            shapeOptions = list(
-              fillOpacity = 0.2, # fill
-              opacity = 0.2 # border
-            )
-          ),
-          circleOptions = FALSE, # Disable circle markers
-          editOptions = leaflet.extras$editToolbarOptions(remove = TRUE),
-          polylineOptions = leaflet.extras$drawPolylineOptions()
-        ) |>
-        leaflet$addMiniMap(toggleDisplay = TRUE)
-
-      map
-    })
-
-    # Observe changes in layer visibility
-    shiny$observe({
-      # Toggle TIFF Map visibility
-      if ("tiff_map" %in% input$base_layers) {
-        leaflet$leafletProxy("map") |>
-          leaflet$showGroup("TIFF Map")
-      } else {
-        leaflet$leafletProxy("map") |>
-          leaflet$hideGroup("TIFF Map")
-      }
-
-      # Toggle Drawn Shapes visibility
-      if ("drawn_shapes" %in% input$base_layers) {
-        leaflet$leafletProxy("map") |>
-          leaflet$showGroup("drawnShapes")
-      } else {
-        leaflet$leafletProxy("map") |>
-          leaflet$hideGroup("drawnShapes")
-      }
-    })
-
-    # shiny$reactive value to store drawn rectangle
-    drawn_area <- shiny$reactiveVal(NULL)
-    release_point <- shiny$reactiveVal(NULL)
-    drawn_fences <- shiny$reactiveVal(NULL)
-    #
-    drawn_area_save <- shiny$reactiveVal(NULL)
-    drawn_area_save_4326 <- shiny$reactiveVal(NULL)
-    release_point_save <- shiny$reactiveVal(NULL)
-    drawn_fences_save <- shiny$reactiveVal(NULL)
-
-    # shiny$reactive values to store different grid data types
-    infected_grid_data <- shiny$reactiveVal(NULL)
-    resistant_grid_data <- shiny$reactiveVal(NULL)
-    susceptible_grid_data <- shiny$reactiveVal(NULL)
-
-    # shiny$reactive value to track if grid data has been loaded
-    grid_data_loaded <- shiny$reactiveVal(FALSE)
-
-    # 3D matrices to store grid data across all ticks
-    infected_data <- NULL
-    resistant_data <- NULL
-    susceptible_data <- NULL
-
-    # Available ticks for grid data
-    available_ticks <- NULL
-
-    # List to store secondary infection data across all ticks
-    sec_inf_data <- NULL
-
-    # Available ticks for secondary infection data
-    available_sec_inf_ticks <- NULL
-
-    # Capture drawn shapes
-    shiny$observeEvent(input$map_draw_new_feature, {
-      feature <- input$map_draw_new_feature
-
-      if (feature$geometry$type == "Polygon") {
-        # Extract coordinates of the rectangle
-        coords <- feature$geometry$coordinates[[1]] # Extract the first ring of the polygon
-
-        # Convert the coordinates list to a matrix
-        coords_matrix <- do.call(rbind, lapply(coords, function(pt) c(pt[[1]], pt[[2]])))
-
-        # Calculate the bounding box
-        bbox <- list(
-          min_x = min(coords_matrix[, 1]),
-          min_y = min(coords_matrix[, 2]),
-          max_x = max(coords_matrix[, 1]),
-          max_y = max(coords_matrix[, 2])
-        )
-
-        # Store the bounding box
-        drawn_area(bbox)
-        drawn_fences(coords_matrix)
-      } else if (feature$geometry$type == "Point") {
-        # Store release point coordinates
-        release_point_coords <- feature$geometry$coordinates
-        release_point(list(
-          longitude = release_point_coords[[1]],
-          latitude = release_point_coords[[2]]
-        ))
-      }
-    })
-
-    # Convert rectangle to EPSG:3035 when "Select Area" is clicked
-    shiny$observeEvent(input$select_area, {
-      shiny$req(drawn_area())
-      bbox <- drawn_area()
-
-      # Create an sf object for the bounding box
-      rectangle_sf <- sf$st_as_sf(
-        data.frame(
-          x = c(bbox$min_x, bbox$max_x, bbox$max_x, bbox$min_x, bbox$min_x),
-          y = c(bbox$min_y, bbox$min_y, bbox$max_y, bbox$max_y, bbox$min_y)
-        ),
-        coords = c("x", "y"),
-        crs = 4326
-      ) # WGS84
-
-      drawn_area_save_4326(rectangle_sf)
-
-      # Transform to EPSG:3035
-      rectangle_sf_proj <- sf$st_transform(rectangle_sf, crs = 3035)
-
-      # Get the transformed bounding box
-      coords <- sf$st_bbox(rectangle_sf_proj)
-      converted_bbox <- list(
-        coordinates = c(
-          coords["xmin"],
-          coords["ymin"],
-          coords["xmax"],
-          coords["ymax"]
-        )
-      )
-
-      # Store converted_bbox for access by the WSL command
-      drawn_area(converted_bbox)
-      drawn_area_save(converted_bbox)
-
-      shiny$showNotification(
-        "The modeling area is selected",
-        type = "message"
-      )
-    })
-
-    # Convert polygon to EPSG:3035 when "fence_coordinates" is clicked
-    shiny$observeEvent(input$select_fences, {
-      shiny$req(drawn_fences())
-      fences_coords <- drawn_fences()
-
-      fences_coords = data.frame(x = fences_coords[, 1], y = fences_coords[, 2])
-
-      # Create an sf object for the bounding box
-      fences_coords <- sf$st_as_sf(fences_coords, coords = c("x", "y"), crs = 4326) # WGS84
-
-      # Transform to EPSG:3035
-      fences_coords <- sf$st_transform(fences_coords, crs = 3035)
-
-      # Convert to JSON
-      fences_coords <- jsonlite$toJSON(
-        list(
-          type = "Polygon",
-          coordinates = fences_coords
-        ),
-        auto_unbox = TRUE
-      )
-
-      # Store converted_bbox for access by the WSL command
-      drawn_fences(fences_coords)
-      drawn_fences_save(fences_coords)
-
-      shiny$showNotification(
-        "The fencing area is selected",
-        type = "message"
-      )
-    })
-
-    # Convert point to EPSG:3035 when "Select Release Point" is clicked
-    shiny$observeEvent(input$select_release, {
-      shiny$req(release_point()) # Ensure a point has been selected
-
-      # Retrieve the release point data
-      point <- release_point()
-
-      # Create an sf object for the point
-      point_sf <- sf$st_as_sf(
-        data.frame(
-          x = point$longitude,
-          y = point$latitude
-        ),
-        coords = c("x", "y"),
-        crs = 4326
-      ) # WGS84
-
-      # Transform to EPSG:3035
-      point_sf_proj <- sf$st_transform(point_sf, crs = 3035)
-
-      # Get the transformed point coordinates
-      coords <- sf$st_coordinates(point_sf_proj)
-      converted_point <- list(
-        #x = round(coords[1, "X"]),
-        #y = round(coords[1, "Y"])
-        x = coords[1, "X"],
-        y = coords[1, "Y"]
-      )
-
-      # Store the converted point for later use
-      release_point(converted_point)
-      release_point_save(converted_point)
-
-      shiny$showNotification(
-        "The release point is selected",
-        type = "message"
-      )
-    })
-
-    # Observe load_grid button press
-    shiny$observeEvent(input$load_grid, {
-      # Ensure output directory exists
-      if (!dir.exists("outputs/epi_stat_outputs")) {
-        shiny$showNotification("Output directory does not exist", type = "error")
-        return()
-      }
-
-      # Find all CSV files for grid data
-      infected_files <- list.files(
-        "outputs/epi_stat_outputs",
-        pattern = "^epi_stat_infected_tick_\\d+\\.csv$",
-        full.names = TRUE
-      )
-      resistant_files <- list.files(
-        "outputs/epi_stat_outputs",
-        pattern = "^epi_stat_resistant_tick_\\d+\\.csv$",
-        full.names = TRUE
-      )
-      susceptible_files <- list.files(
-        "outputs/epi_stat_outputs",
-        pattern = "^epi_stat_susceptible_tick_\\d+\\.csv$",
-        full.names = TRUE
-      )
-
-      # Extract tick numbers
-      infected_ticks <- as.numeric(gsub(".*_tick_(\\d+)\\.csv", "\\1", infected_files))
-      resistant_ticks <- as.numeric(gsub(".*_tick_(\\d+)\\.csv", "\\1", resistant_files))
-      susceptible_ticks <- as.numeric(gsub(".*_tick_(\\d+)\\.csv", "\\1", susceptible_files))
-
-      # Find common ticks across all grid types
-      available_ticks <<- sort(Reduce(intersect, list(infected_ticks, resistant_ticks, susceptible_ticks)))
-
-      # If no common ticks, show error
-      if (length(available_ticks) == 0) {
-        shiny$showNotification("No common ticks found across grid types", type = "error")
-        return()
-      }
-
-      # Read first file to determine grid dimensions
-      first_infected_file <- infected_files[match(available_ticks[1], infected_ticks)]
-      sample_data <- as.matrix(read.csv(first_infected_file, header = FALSE))
-
-      # Initialize 3D matrices
-      infected_data <<- array(NA_real_, dim = c(nrow(sample_data), ncol(sample_data), length(available_ticks)))
-      resistant_data <<- array(NA_real_, dim = c(nrow(sample_data), ncol(sample_data), length(available_ticks)))
-      susceptible_data <<- array(NA_real_, dim = c(nrow(sample_data), ncol(sample_data), length(available_ticks)))
-
-      # Load data into 3D matrices
-      for (i in seq_along(available_ticks)) {
-        tick <- available_ticks[i]
-
-        # Find corresponding files for this tick
-        infected_file <- infected_files[match(tick, infected_ticks)]
-        resistant_file <- resistant_files[match(tick, resistant_ticks)]
-        susceptible_file <- susceptible_files[match(tick, susceptible_ticks)]
-
-        # Read and store grid data
-        infected_data[,, i] <<- as.matrix(read.csv(infected_file, header = FALSE))
-        resistant_data[,, i] <<- as.matrix(read.csv(resistant_file, header = FALSE))
-        susceptible_data[,, i] <<- as.matrix(read.csv(susceptible_file, header = FALSE))
-        #print(paste("Loaded tick:", tick))
-      }
-
-      # Update tick slider
-      shiny$updateSliderInput(
-        session,
-        "tick_slider",
-        min = min(available_ticks),
-        max = max(available_ticks),
-        value = min(available_ticks)
-      )
-
-      # Set grid data as loaded
-      grid_data_loaded(TRUE)
-
-      # Show success notification
-      shiny$showNotification("results loaded", type = "message")
-
-      # Find all secondary infection CSV files
-      sec_inf_files <- list.files(
-        "outputs/sec_inf_outputs",
-        pattern = "^secondary_infections_tick_\\d+\\.csv$",
-        full.names = TRUE
-      )
-
-      # Extract tick numbers for secondary infection files
-      sec_inf_ticks <- as.numeric(gsub(".*_tick_(\\d+)\\.csv", "\\1", sec_inf_files))
-
-      # Sort ticks
-      available_sec_inf_ticks <<- sort(sec_inf_ticks)
-
-      # If no secondary infection ticks found, show error
-      if (length(available_sec_inf_ticks) == 0) {
-        shiny$showNotification("No secondary infection data found", type = "error")
-        return()
-      }
-
-      # Initialize list to store secondary infection data
-      sec_inf_data <<- vector("list", length(available_sec_inf_ticks))
-      names(sec_inf_data) <<- as.character(available_sec_inf_ticks)
-
-      # Load secondary infection data
-      for (i in seq_along(available_sec_inf_ticks)) {
-        tick <- available_sec_inf_ticks[i]
-        file <- sec_inf_files[match(tick, sec_inf_ticks)]
-
-        # Read CSV file
-        sec_inf_data[[i]] <<- read.csv(file, header = TRUE)
-      }
-    })
-
-    # Update raster layers when tick slider changes
-    shiny$observe({
-      # shiny$require grid data to be loaded and 3D matrices to exist
-      shiny$req(grid_data_loaded(), !is.null(infected_data))
-
-      # Find the index of the current tick
-      current_tick_index <- which(available_ticks == input$tick_slider)
-
-      if (length(current_tick_index) > 0) {
-        # Extract grid data for the current tick
-        current_infected_grid <- infected_data[,, current_tick_index]
-        current_resistant_grid <- resistant_data[,, current_tick_index]
-        current_susceptible_grid <- susceptible_data[,, current_tick_index]
-
-        # Update grid data shiny$reactive values
-        infected_grid_data(current_infected_grid)
-        resistant_grid_data(current_resistant_grid)
-        susceptible_grid_data(current_susceptible_grid)
-      }
-    })
-
-    # Update histogram when tick slider changes
-    shiny$observeEvent(
-      input$tick_slider,
-      {
-        #print(paste("Tick slider changed to:", input$tick_slider))
-
-        # shiny$require secondary infection data to be loaded
-        shiny$req(!is.null(sec_inf_data), length(sec_inf_data) > 0)
-
-        # Find the index of the current tick
-        current_sec_inf_index <- which(as.numeric(names(sec_inf_data)) == input$tick_slider)
-
-        if (length(current_sec_inf_index) > 0) {
-          # Extract secondary infection data for the current tick
-          current_sec_inf <- sec_inf_data[[current_sec_inf_index]]
-
-          # Prepare data for plotting
-          infection_types <- c("total", "within", "between", "carcass")
-
-          # Color mapping for infection types
-          infection_colors <- c(
-            "total" = "#ff6666",
-            "within" = "#ff9999",
-            "between" = "#66b3ff",
-            "carcass" = "#99ff99"
-          )
-
-          # Render histogram plot
-          output$histogram_plot <- shiny$renderPlot({
-            # Only render if grid data has been loaded
-            shiny$req(grid_data_loaded())
-
-            # Prepare plots
-            plots <- list()
-
-            # Create separate histograms for each infection type
-            for (infection_type in infection_types) {
-              # Prepare data for the specific infection type
-              hist_data <- data.frame(
-                Secondary_Infections = 0:(nrow(current_sec_inf) - 1),
-                Frequency = current_sec_inf[[infection_type]]
-              )
-
-              # Create histogram if there's data
-              if (nrow(hist_data) > 0) {
-                histogram_plot <- ggplot2$ggplot(hist_data, ggplot2$aes(x = Secondary_Infections, y = Frequency)) +
-                  ggplot2$geom_bar(stat = "identity", fill = infection_colors[infection_type]) +
-                  ggplot2$labs(
-                    title = paste("Secondary", infection_type, "Infections Histogram"),
-                    x = "Number of Secondary Infections",
-                    y = "Frequency"
-                  ) +
-                  ggplot2$theme_minimal() +
-                  ggplot2$theme(
-                    plot.title = ggplot2$element_text(hjust = 0.5),
-                    legend.position = "none"
-                  )
-
-                # Add plot to the list
-                plots[[paste0("Secondary_Infections_", infection_type)]] <- histogram_plot
-              }
-            }
-
-            # Arrange plots
-            if (length(plots) > 0) {
-              if (length(plots) == 1) {
-                plots[[1]]
-              } else {
-                gridExtra$grid.arrange(grobs = plots, ncol = 2)
-              }
-            }
-          })
-        } else {
-          print(paste("No secondary infection data found for tick", input$tick_slider))
-        }
-      },
-      ignoreNULL = FALSE
+    # Prepare directory for results ----
+    # Non-persistent data solution
+    # Making a beekeeper dir in the shared folder
+    temp_dir <- session_dir |>
+      file.path("disease_outbreaks")
+
+    r_disease <- shiny$reactiveValues(
+      bounds = NULL,
+      release_point = NULL,
+      fences = NULL,
+      tiff_raster = NULL,
+      r_dir = NULL,
+      infected_files = NULL,
+      infected_data = NULL,
+      infected_ticks = NULL,
+      susceptible_files = NULL,
+      susceptible_data = NULL,
+      susceptible_ticks = NULL,
+      resistant_files = NULL,
+      resistant_data = NULL,
+      resistant_ticks = NULL,
+      available_ticks = NULL,
+      sec_inf_ticks = NULL,
+      sec_inf_files = NULL,
+      sec_inf_data = NULL,
+      run_success = 0,
+      run_dir = NULL
     )
 
-    # Update raster layers when tick slider changes
-    shiny$observe({
-      # Only update if grid data has been initially loaded
-      shiny$req(grid_data_loaded())
+    ns <- session$ns
 
-      # Get bounding box from drawn area
-      bbox <- sf$st_bbox(drawn_area_save_4326())
-
-      # Clear existing layers
-      leaflet$leafletProxy("map") |>
-        leaflet$clearGroup("Infected Grid") |>
-        leaflet$clearGroup("Resistant Grid") |>
-        leaflet$clearGroup("Susceptible Grid") |>
-        leaflet$clearGroup("Release Point")
-
-      infected_raster <- NULL
-      resistant_raster <- NULL
-      susceptible_raster <- NULL
-      # Add infected grid data layer if available and contains non-zero values
-      if (
-        !is.null(infected_grid_data()) &&
-          any(infected_grid_data() > 0) &&
-          "infected" %in% input$raster_layers
-      ) {
-        # Create raster with correct extent for infected grid
-        infected_raster <- raster$raster(
-          infected_grid_data(),
-          xmn = bbox$xmin,
-          xmx = bbox$xmax,
-          ymn = bbox$ymin,
-          ymx = bbox$ymax,
-          crs = sf$st_crs(4326)$proj4string
-        )
-
-        # Add the infected grid data raster to the map
-        leaflet$leafletProxy("map") |>
-          leaflet$addRasterImage(
-            infected_raster,
-            opacity = 0.5,
-            colors = leaflet$colorBin(
-              c("white", "red"),
-              domain = c(-0.01, max(raster$values(infected_raster), na.rm = TRUE)),
-              bins = 4,
-              na.color = "transparent"
-            ),
-            group = "Infected Grid"
-          )
-      }
-
-      # Add resistant grid data layer if available and contains non-zero values
-      if (
-        !is.null(resistant_grid_data()) &&
-          any(resistant_grid_data() > 0) &&
-          "resistant" %in% input$raster_layers
-      ) {
-        # Create raster with correct extent for resistant grid
-        resistant_raster <- raster$raster(
-          resistant_grid_data(),
-          xmn = bbox$xmin,
-          xmx = bbox$xmax,
-          ymn = bbox$ymin,
-          ymx = bbox$ymax,
-          crs = sf$st_crs(4326)$proj4string
-        )
-
-        # Add the resistant grid data raster to the map
-        leaflet$leafletProxy("map") |>
-          leaflet$addRasterImage(
-            resistant_raster,
-            opacity = 0.5,
-            colors = leaflet$colorBin(
-              c("white", "green"),
-              domain = c(-0.01, max(raster$values(resistant_raster), na.rm = TRUE)),
-              bins = 4,
-              na.color = "transparent"
-            ),
-            group = "Resistant Grid"
-          )
-      }
-
-      # Add susceptible grid data layer if available and contains non-zero values
-      if (
-        !is.null(susceptible_grid_data()) &&
-          any(susceptible_grid_data() > 0) &&
-          "susceptible" %in% input$raster_layers
-      ) {
-        # Create raster with correct extent for susceptible grid
-        susceptible_raster <- raster$raster(
-          susceptible_grid_data(),
-          xmn = bbox$xmin,
-          xmx = bbox$xmax,
-          ymn = bbox$ymin,
-          ymx = bbox$ymax,
-          crs = sf$st_crs(4326)$proj4string
-        )
-
-        # Add the susceptible grid data raster to the map
-        leaflet$leafletProxy("map") |>
-          leaflet$addRasterImage(
-            susceptible_raster,
-            opacity = 0.5,
-            colors = leaflet$colorBin(
-              palette = c("white", "blue"), # Changed color to blue for susceptible
-              domain = c(-0.01, max(raster$values(susceptible_raster), na.rm = TRUE)),
-              bins = 4,
-              na.color = "transparent"
-            ),
-            group = "Susceptible Grid"
-          )
-      }
-
-      # Add release point if available
-      if (!is.null(release_point())) {
-        # Safely extract longitude and latitude
-        release_lon <- tryCatch(
-          release_point()$longitude,
-          error = function(e) NULL
-        )
-        release_lat <- tryCatch(
-          release_point()$latitude,
-          error = function(e) NULL
-        )
-
-        # Only add marker if both coordinates are valid
-        if (!is.null(release_lon) && !is.null(release_lat)) {
-          leaflet$leafletProxy("map") |>
-            leaflet$addMarkers(
-              lng = release_lon,
-              lat = release_lat,
-              popup = "Release Point",
-              group = "Release Point"
+    shiny$observeEvent(
+      tab_disease_selected(),
+      {
+        output$map <- leaflet$renderLeaflet(
+          leaflet$leaflet() |>
+            leaflet$addTiles() |>
+            leaflet$setView(
+              lng = 9,
+              lat = 53,
+              zoom = 4
             )
+        )
+      }
+    )
+
+    # shiny$reactive expression to read and process the TIFF file
+    shiny$observeEvent(
+      input$file,
+      {
+        shiny$req(input$file) # Ensure file is uploaded
+        r_disease$tiff_raster <- terra$rast(input$file$datapath)
+      }
+    )
+
+    # Render the initial Leaflet map
+    shiny$observeEvent(
+      r_disease$tiff_raster,
+      {
+        shiny$req(r_disease$tiff_raster)
+
+        # Create a base leaflet map
+        map <- leaflet$leafletProxy("map") |>
+          leaflet$addTiles() |>
+          leaflet$addRasterImage(
+            r_disease$tiff_raster,
+            opacity = 0.8,
+            project = TRUE,
+            colors = leaflet$colorNumeric(
+              c("#EEDED1", "#EA6D20"),
+              domain = terra$values(r_disease$tiff_raster),
+              na.color = "transparent"
+            ),
+            group = "Input Map"
+          ) |>
+          leaflet$addLayersControl(
+            overlayGroups = c(
+              "Input Map",
+              "Bounds",
+              "Fences",
+              "Release Point"
+            ),
+            options = leaflet$layersControlOptions(collapsed = FALSE)
+          ) |>
+          leaflet.extras$addDrawToolbar(
+            targetGroup = "drawnShapes",
+            polygonOptions = leaflet.extras$drawPolygonOptions(
+              showArea = TRUE,
+              shapeOptions = list(
+                fillOpacity = 0.2, # fill
+                opacity = 0.2, # border
+                color = "#a20101",
+                fillColor = "#a20101"
+              )
+            ),
+            rectangleOptions = leaflet.extras$drawRectangleOptions(
+              shapeOptions = list(
+                fillOpacity = 0.2, # fill
+                opacity = 0.2 # border
+              )
+            ),
+            circleMarkerOptions = FALSE, # Disable circle markers
+            circleOptions = FALSE, # Disable circle markers
+            editOptions = leaflet.extras$editToolbarOptions(remove = TRUE),
+            polylineOptions = FALSE
+          ) |>
+          # This is to hide the drawn shapes layer by default
+          # Apparently, it is not easy to delete the drawnShapes without whole draw toolbar
+          leaflet$hideGroup("drawnShapes")
+
+        map
+      }
+    )
+
+    shiny$observeEvent(
+      input$map_draw_new_feature,
+      {
+        shiny$req(input$map_draw_new_feature)
+        feature <- input$map_draw_new_feature
+        feature_type <- input$map_draw_new_feature$properties$feature_type
+        coords <- input$map_draw_new_feature$geometry$coordinates
+
+        leaflet$leafletProxy("map") |>
+          leaflet$removeShape(layerId = feature$properties$layerId)
+
+        if (feature_type == "rectangle") {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeShape("Bounds") |>
+            leaflet$addGeoJSON(
+              feature,
+              group = "Bounds",
+              layerId = "Bounds"
+            )
+
+          helper_bbox <- terra::ext(
+            coords[[1]][[1]][[1]], # xmin
+            coords[[1]][[3]][[1]], # xmax
+            coords[[1]][[1]][[2]], # ymin
+            coords[[1]][[3]][[2]] # ymax
+          ) |>
+            terra$project("EPSG:4326", "EPSG:3035")
+          r_disease$bounds <- c(
+            helper_bbox[1],
+            helper_bbox[3],
+            helper_bbox[2],
+            helper_bbox[4]
+          )
+        } else if (feature_type == "polygon") {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeShape("Fences") |>
+            leaflet$addGeoJSON(
+              feature,
+              group = "Fences",
+              layerId = "Fences",
+              fillOpacity = 0.2, # fill
+              opacity = 0.2, # border
+              color = "#a20101",
+              fillColor = "#a20101"
+            )
+
+          # Convert the coordinates list to a matrix
+          coords_matrix <- do.call(rbind, lapply(coords[[1]], function(pt) c(pt[[1]], pt[[2]])))
+
+          # Create SpatVector from coordinates matrix
+          poly_vect <- terra::vect(coords_matrix, type = "polygon", crs = "EPSG:4326")
+
+          # Project to EPSG:3035
+          poly_proj <- terra::project(poly_vect, "EPSG:3035") |>
+            terra$geom()
+
+          poly_proj_list <-
+            apply(poly_proj[, c("x", "y")], 1, function(x) {
+              list(geometry = list(type = "Point", coordinates = x))
+            })
+
+          r_disease$fences <- jsonlite::toJSON(
+            list(
+              type = "Polygon",
+              coordinates = poly_proj_list
+            ),
+            auto_unbox = TRUE
+          )
+        } else if (feature_type == "marker") {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeShape("Release Point") |>
+            leaflet$addGeoJSON(
+              feature,
+              group = "Release Point",
+              layerId = "Release Point"
+            )
+          temp <- terra$vect(
+            matrix(
+              c(
+                coords[[1]],
+                coords[[2]]
+              ),
+              ncol = 2
+            ),
+            type = "point",
+            crs = "EPSG:4326"
+          ) |>
+            terra$project(
+              "EPSG:3035"
+            ) |>
+            terra$geom()
+          r_disease$release_point <- temp[, c("x", "y")]
         }
       }
+    )
 
-      # Add legends for existing grid layers
-      # Clear any existing legends first
-      leaflet$leafletProxy("map") |>
-        leaflet$removeControl("infected_legend") |>
-        leaflet$removeControl("resistant_legend") |>
-        leaflet$removeControl("susceptible_legend")
+    # Run WSL Command
+    shiny$observeEvent(
+      input$run_command,
+      ignoreInit = TRUE,
+      {
+        shiny$req(
+          r_disease$bounds,
+          r_disease$release_point,
+          r_disease$fences
+        )
 
-      # Track legend positions
-      legend_position <- "bottomright"
-      legend_count <- 0
+        r_disease$run_dir <- file.path(
+          temp_dir,
+          Sys.time() |> format(format = "%Y-%m-%d-%H-%M-%S")
+        )
+        dir.create(r_disease$run_dir, recursive = TRUE)
 
-      # Check and add legend for infected raster
-      if (!is.null(infected_raster)) {
-        leaflet$leafletProxy("map") |>
-          leaflet$addLegend(
-            layerId = "infected_legend",
-            position = legend_position,
-            pal = leaflet$colorBin(
-              palette = c("white", "red"),
-              domain = c(-0.01, max(raster$values(infected_raster), na.rm = TRUE)),
-              bins = 4
-            ),
-            values = raster$values(infected_raster),
-            title = "Infected Grid",
-            group = "Infected Grid",
-            opacity = 0.7
-          )
-        legend_count <- legend_count + 1
+        # Show a notification
+        shiny$showNotification("Modelling started.", type = "message")
+
+        shiny$req(input$file) # Ensure a file is uploaded
+
+        # Extract the file name
+        map_name <- basename(input$file$name)
+
+        # Retrieve parameters
+        area <- paste("[", paste(r_disease$bounds, collapse = ", "), "]", sep = "")
+        release_coord <- paste("[", paste(r_disease$release_point, collapse = ", "), "]", sep = "")
+        fence_polygon <- r_disease$fences
+
+        wsl_command <- sprintf(
+          'docker run -e INPUT_MAP=%s -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
+          shQuote(map_name),
+          shQuote(area),
+          shQuote(release_coord),
+          shQuote(fence_polygon),
+          r_disease$run_dir
+        )
+
+        # Run the command and capture output
+        tryCatch(
+          {
+            command_output <- system(wsl_command)
+            output$command_output <- shiny$renderPrint({
+              command_output
+            })
+          },
+          error = function(e) {
+            output$command_output <- shiny$renderPrint({
+              paste("Error executing WSL command:", e$message)
+            })
+          }
+        )
+        if (dir.exists(file.path(r_disease$run_dir, "epi_stat_outputs"))) {
+          r_disease$run_success <- r_disease$run_success + 1
+        }
       }
+    )
 
-      # Check and add legend for resistant raster
-      if (!is.null(resistant_raster)) {
-        leaflet$leafletProxy("map") |>
-          leaflet$addLegend(
-            layerId = "resistant_legend",
-            position = legend_position,
-            pal = leaflet$colorBin(
-              palette = c("white", "green"),
-              domain = c(-0.01, max(raster$values(resistant_raster), na.rm = TRUE)),
-              bins = 4
-            ),
-            values = raster$values(resistant_raster),
-            title = "Resistant Grid",
-            group = "Resistant Grid",
-            opacity = 0.7
-          )
-        legend_count <- legend_count + 1
+    shiny$observeEvent(
+      r_disease$run_success,
+      ignoreInit = TRUE,
+      {
+        shiny$req(r_disease$run_dir)
+        load_simulated_data(
+          r_disease$run_dir,
+          r_disease
+        )
+
+        show("tick_slider")
+        show("export_zip")
+
+        delay(
+          200,
+          {
+            # Update tick slider
+            shiny$updateSliderInput(
+              session,
+              "tick_slider",
+              min = min(r_disease$available_ticks),
+              max = max(r_disease$available_ticks),
+              value = min(r_disease$available_ticks)
+            )
+          }
+        )
       }
+    )
 
-      # Check and add legend for susceptible raster
-      if (!is.null(susceptible_raster)) {
+    # Update histogram and map output when tick slider changes
+    shiny$observeEvent(
+      {
+        input$tick_slider
+      },
+      ignoreInit = TRUE,
+      {
+        hist_data <- r_disease$sec_inf_data[[as.character(input$tick_slider)]]
+        # Prepare data for secondary infection histogram
+        output$histogram_plot <- ecs.render(
+          disease_histogram(hist_data)
+        )
+        helper_susceptible <-
+          r_disease$susceptible_data[[
+            as.character(input$tick_slider)
+          ]]
+        helper_infected <-
+          r_disease$infected_data[[
+            as.character(input$tick_slider)
+          ]]
+        helper_resistant <-
+          r_disease$resistant_data[[
+            as.character(input$tick_slider)
+          ]]
+        # Remove old rasters and add new ones ----
         leaflet$leafletProxy("map") |>
-          leaflet$addLegend(
-            layerId = "susceptible_legend",
-            position = legend_position,
-            pal = leaflet$colorBin(
-              palette = c("white", "blue"),
-              domain = c(-0.01, max(raster$values(susceptible_raster), na.rm = TRUE)),
-              bins = 4
-            ),
-            values = raster$values(susceptible_raster),
-            title = "Susceptible Grid",
+          leaflet$clearGroup("Infected Grid") |>
+          leaflet$clearGroup("Resistant Grid") |>
+          leaflet$clearGroup("Susceptible Grid") |>
+          leaflet$addRasterImage(
+            helper_susceptible,
             group = "Susceptible Grid",
-            opacity = 0.7
+            colors = leaflet$colorNumeric(
+              "Blues",
+              domain = terra$values(helper_susceptible),
+              na.color = "transparent"
+            ),
+            opacity = 0.4,
+            project = FALSE
+          ) |>
+          leaflet$addRasterImage(
+            helper_infected,
+            group = "Infected Grid",
+            colors = leaflet$colorNumeric(
+              "Reds",
+              domain = terra$values(helper_infected),
+              na.color = "transparent"
+            ),
+            opacity = 0.4,
+            project = FALSE
+          ) |>
+          leaflet$addRasterImage(
+            helper_resistant,
+            group = "Resistant Grid",
+            colors = leaflet$colorNumeric(
+              "Greens",
+              domain = terra$values(helper_resistant),
+              na.color = "transparent"
+            ),
+            opacity = 0.4,
+            project = FALSE
+          ) |>
+          leaflet$addLayersControl(
+            overlayGroups = c(
+              "Input Map",
+              "Bounds",
+              "Fences",
+              "Release Point",
+              "Susceptible Grid",
+              "Infected Grid",
+              "Resistant Grid"
+            ),
+            options = leaflet$layersControlOptions(collapsed = FALSE)
+          ) |>
+          leaflet$addLegend(
+            pal = leaflet$colorNumeric(
+              "Blues",
+              domain = terra$values(helper_susceptible),
+              na.color = "transparent"
+            ),
+            values = terra$values(helper_susceptible),
+            opacity = 0.4,
+            group = "Susceptible Grid",
+            layerId = "susceptible_legend",
+            position = "bottomright"
+          ) |>
+          leaflet$addLegend(
+            pal = leaflet$colorNumeric(
+              "Reds",
+              domain = terra$values(helper_infected),
+              na.color = "transparent"
+            ),
+            values = terra$values(helper_infected),
+            opacity = 0.4,
+            group = "Infected Grid",
+            layerId = "infected_legend",
+            position = "bottomright"
+          ) |>
+          leaflet$addLegend(
+            pal = leaflet$colorNumeric(
+              "Greens",
+              domain = terra$values(helper_resistant),
+              na.color = "transparent"
+            ),
+            values = terra$values(helper_resistant),
+            opacity = 0.4,
+            group = "Resistant Grid",
+            layerId = "resistant_legend",
+            position = "bottomright"
           )
-        legend_count <- legend_count + 1
       }
-
-      # Optional: Adjust legend position if multiple legends exist
-      if (legend_count > 1) {
-        legend_positions <- c(
-          "bottomright",
-          "bottomleft",
-          "topright",
-          "topleft"
-        )
-        legend_position <- legend_positions[1:legend_count]
-      }
-    })
-
-    # Render the grid plot
-    output$grid_plot <- shiny$renderPlot({
-      # Only render if grid data has been loaded
-      shiny$req(grid_data_loaded())
-
-      # Prepare plots
-      plots <- list()
-
-      # Define color palettes
-      color_palette <- c(
-        "Susceptible" = "#66b3ff",
-        "Infected" = "#ff6666",
-        "Resistant" = "#99ff99"
-      )
-
-      # Read grid data based on selected layers
-      layer_names <- c(
-        "Susceptible" = "susceptible",
-        "Infected" = "infected",
-        "Resistant" = "resistant"
-      )
-
-      # Use heatmap_layers for selection instead of raster_layers
-      selected_layers <- names(layer_names)[layer_names %in% input$heatmap_layers]
-
-      # Create heatmaps for selected layers
-      for (layer_name in selected_layers) {
-        grid_data <- switch(
-          layer_name,
-          "Susceptible" = susceptible_grid_data(),
-          "Infected" = infected_grid_data(),
-          "Resistant" = resistant_grid_data()
-        )
-
-        if (!is.null(grid_data)) {
-          # Create heatmap
-          heatmap_plot <- ggplot2$ggplot(data = reshape2$melt(grid_data)) +
-            ggplot2$geom_tile(ggplot2$aes(x = Var2, y = Var1, fill = value)) +
-            ggplot2$scale_fill_gradient(low = "white", high = color_palette[layer_name]) +
-            ggplot2$scale_y_reverse() +
-            ggplot2$labs(title = paste(layer_name, "Grid"), x = "X", y = "Y", fill = "Count") +
-            ggplot2$theme_minimal() +
-            ggplot2$theme(legend.position = "right")
-
-          plots[[layer_name]] <- heatmap_plot
-        }
-      }
-
-      # Arrange plots
-      if (length(plots) > 0) {
-        if (length(plots) == 1) {
-          plots[[1]]
-        } else {
-          gridExtra$grid.arrange(grobs = plots, ncol = 2)
-        }
-      }
-    })
-
-    # Add UI element for zip export
-    output$download_zip_ui <- shiny$renderUI({
-      shiny$actionButton("export_zip", "Export Outputs", icon = shiny$icon("file-zipper"))
-    })
+    )
 
     # Observe export zip button press
     shiny$observeEvent(input$export_zip, {
       # Ensure outputs directory exists
-      shiny$req(dir.exists("outputs"))
+      shiny$req(dir.exists(r_disease$run_dir))
 
       # Generate filename with timestamp
       file_name <- paste0("outputs_", format(Sys.time(), "%Y%m%d%H%M%S"), ".zip")
 
-      zip(zipfile = file_name, files = "outputs")
+      zip(zipfile = file_name, files = r_disease$run_dir)
 
       if (file.exists(file_name)) {
         shiny$showNotification(
@@ -861,57 +502,6 @@ disease_app_server <- function(id, tab_disease_selected) {
           type = "message"
         )
       }
-    })
-
-    # Run WSL Command
-    shiny$observeEvent(input$run_command, {
-      # Clear grid data
-      infected_grid_data(NULL)
-      resistant_grid_data(NULL)
-      susceptible_grid_data(NULL)
-
-      # Reset grid data loaded flag
-      grid_data_loaded(FALSE)
-
-      # Show a notification
-      shiny$showNotification("Modelling started.", type = "message")
-
-      shiny$req(input$file) # Ensure a file is uploaded
-
-      # Extract the file name
-      map_name <- basename(input$file$name)
-
-      # Retrieve parameters
-      converted_bbox <- drawn_area_save()
-      area <- paste("[", paste(converted_bbox$coordinates, collapse = ", "), "]", sep = "")
-
-      release_coord <- paste("[", paste(as.numeric(release_point_save()), collapse = ", "), "]", sep = "")
-
-      fence_polygon <- drawn_fences_save()
-
-      wsl_command <- sprintf(
-        'docker run -e INPUT_MAP=%s -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "$(pwd)/outputs:/code/outputs" asf_dckr python /code/experiments/shiny.py',
-        shQuote(map_name),
-        shQuote(area),
-        shQuote(release_coord),
-        shQuote(fence_polygon)
-      )
-
-      print(wsl_command)
-      # Run the command and capture output
-      tryCatch(
-        {
-          command_output <- system(wsl_command)
-          output$command_output <- shiny$renderPrint({
-            command_output
-          })
-        },
-        error = function(e) {
-          output$command_output <- shiny$renderPrint({
-            paste("Error executing WSL command:", e$message)
-          })
-        }
-      )
     })
   })
 }
