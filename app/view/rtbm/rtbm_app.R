@@ -58,7 +58,7 @@ box::use(
   viridisLite[magma, inferno],
 
   # JavaScript interface
-  htmlwidgets
+  htmlwidgets,
 )
 
 #' Load and prepare bird species information
@@ -398,7 +398,7 @@ rtbm_app_server <- function(id, tab_selected) {
       new_frame <- which(format(dates, "%Y-%m-%d") == selected_date_str)
 
       if (length(new_frame) > 0 && new_frame > 0) {
-        updateMapWithFrame(new_frame)
+        update_map_with_frame(new_frame)
       }
     })
 
@@ -553,7 +553,7 @@ rtbm_app_server <- function(id, tab_selected) {
     })
 
     # Function to process and update map with a specific frame
-    updateMapWithFrame <- function(frame_index) {
+    update_map_with_frame <- function(frame_index) {
       frames <- frames_data()
 
       # Check if frames data exists and frame index is valid
@@ -639,7 +639,7 @@ rtbm_app_server <- function(id, tab_selected) {
       # Only add the legend once when data is first loaded
       if (!legend_added()) {
         # Create info card with species info (only once)
-        info_card_components <- isolate(createInfoCard())
+        info_card_components <- isolate(create_info_card())
         info_card_html <- div(
           class = "leaflet-info-card",
           style = paste(
@@ -682,7 +682,7 @@ rtbm_app_server <- function(id, tab_selected) {
     }
 
     # Create the info card with species details
-    createInfoCard <- function() {
+    create_info_card <- function() {
       list(
         # Photo section
         if (!is.null(photo_url())) {
@@ -751,7 +751,7 @@ rtbm_app_server <- function(id, tab_selected) {
     }
 
     # Process and prepare data for all dates in the range
-    processAllDates <- function() {
+    process_all_dates <- function() {
       req(date_sequence(), input$speciesPicker)
 
       dates <- date_sequence()
@@ -855,13 +855,13 @@ rtbm_app_server <- function(id, tab_selected) {
       info_card_added(FALSE)
 
       # Process all dates and prepare data
-      success <- processAllDates()
+      success <- process_all_dates()
       print(paste("Data processing complete. Success:", success))
 
       if (success) {
         # Show the first frame
         print("Displaying first frame")
-        updateMapWithFrame(1)
+        update_map_with_frame(1)
       } else {
         # Clear the map if no data
         print("No data available - clearing the map")
