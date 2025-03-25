@@ -253,7 +253,7 @@ generate_chart_lines <- function(
           gridIndex = 1,
           splitNumber = 5,
           min = 0,
-          max = 10,
+          max = 50,
           axisLabel = list(
             show = TRUE
           ),
@@ -268,7 +268,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "Temperature[degC] & Temperature_Daylight[degC]",
+          name = "Temperature[degC] & <br/>Temperature_Daylight[degC]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),

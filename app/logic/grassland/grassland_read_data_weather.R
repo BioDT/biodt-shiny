@@ -34,7 +34,6 @@ read_weather_data <- function(
       yAxisIndex = 1,
       data = unname(as.list(unlist(input_data[, "Precipitation[mm]"])))
     )
-
   series[[2]] <-
     list(
       name = "Temperature[degC]",
@@ -47,7 +46,6 @@ read_weather_data <- function(
       yAxisIndex = 2,
       data = unname(as.list(unlist(input_data[, "Temperature[degC]"])))
     )
-
   series[[3]] <-
     list(
       name = "Temperature_Daylight[degC]",
@@ -60,7 +58,6 @@ read_weather_data <- function(
       yAxisIndex = 2,
       data = unname(as.list(unlist(input_data[, "Temperature_Daylight[degC]"])))
     )
-
   series[[4]] <-
     list(
       name = "PAR[µmolm-2s-1]",
@@ -73,7 +70,6 @@ read_weather_data <- function(
       yAxisIndex = 3,
       data = unname(as.list(unlist(input_data[, "PAR[µmolm-2s-1]"])))
     )
-
   series[[5]] <-
     list(
       name = "Daylength[h]",
@@ -86,7 +82,6 @@ read_weather_data <- function(
       yAxisIndex = 4,
       data = unname(as.list(unlist(input_data[, "Daylength[h]"])))
     )
-
   series[[6]] <-
     list(
       name = "PET[mm]",
