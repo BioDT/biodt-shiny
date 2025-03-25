@@ -27,8 +27,7 @@ rtbm_contributors_ui <- function(id, i18n = NULL) {
       style = "height: 100vh;",
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        tags$img(
-        )
+        tags$img()
       )
     )
   )
