@@ -18,7 +18,7 @@ box::use(
   # UI components
   bslib[card, card_header, card_body, card_footer, tooltip, value_box, layout_column_wrap],
   shinyWidgets[sliderTextInput, pickerInput, updateSliderTextInput, progressBar, updateProgressBar],
-  shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass],
+  shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass, delay],
   htmlwidgets[onRender],
 
   # Interactive map
@@ -27,7 +27,7 @@ box::use(
     addCircleMarkers, addControl, clearControls, addLegend, addPolylines,
     layersControlOptions, addLayersControl, leafletOutput, renderLeaflet, leafletProxy,
     addRasterImage, clearImages, colorNumeric, addMarkers, clearGroup, makeIcon,
-    addRectangles, removeControl
+    addRectangles, removeControl, removeTiles
   ],
   leaflet.extras[addHeatmap],
 
@@ -51,7 +51,7 @@ box::use(
   utils[head, tail, str, capture.output],
 
   # Local dependencies
-  ./rtbm_data_preprocessing[
+  . / rtbm_data_preprocessing[
     load_bird_species, update_local_cache, load_species_data
   ],
 )
@@ -562,14 +562,43 @@ rtbm_app_server <- function(id, tab_selected) {
                       )
 
                     # 4. Add legend
-                    m <- m |>
-                      addLegend(
-                        position = "bottomright",
-                        pal = pal,
-                        values = points_data$intensity,
-                        title = "Observation intensity",
-                        opacity = 0.7
-                      )
+                    m <- m |> addLegend(
+                      position = "bottomright",
+                      pal = pal,
+                      values = points_data$intensity,
+                      title = "Observation intensity",
+                      opacity = 0.7
+                    )
+                    
+                    # Always re-add the bird info card if it's supposed to be there
+                    if (info_card_added()) {
+                      # Make sure we have all bird info available
+                      if (!is.null(input$speciesPicker) && !is.null(photo_url()) && !is.null(scientific_name()) && !is.null(wiki_link()) && !is.null(song_url())) {
+                        # Create bird info card HTML with inline styles
+                        bird_info_html <- HTML(paste0(
+                          "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+                          "<h5>", input$speciesPicker, "</h5>",
+                          "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+                          "<div style='text-align: center;'>",
+                          "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+                          "</div>",
+                          "<div style='margin-top: 10px;'>",
+                          "<audio controls style='width: 100%;'>",
+                          "<source src='", song_url(), "' type='audio/mp3'>",
+                          "Your browser does not support the audio element.",
+                          "</audio>",
+                          "</div>",
+                          "</div>"
+                        ))
+                        
+                        # Add the bird info card directly to the map
+                        m <- m |> addControl(
+                          html = bird_info_html,
+                          position = "topleft",
+                          layerId = "bird-info-card"
+                        )
+                      }
+                    }
 
                     # Log success
                     safe_print("Successfully added ", nrow(points_data), " observation points to map")
@@ -805,6 +834,13 @@ rtbm_app_server <- function(id, tab_selected) {
       return(TRUE)
     }
 
+    # Clear cache at midnight to get fresh data
+    observe({
+      invalidateLater(calculate_seconds_until_midnight())
+      # Update local cache when time crosses midnight
+      # update_local_cache(days_back = 14)  # Temporarily disabled
+    })
+
     # Date slider for manual navigation
     output$dateSlider <- renderUI({
       req(available_dates())
@@ -835,6 +871,62 @@ rtbm_app_server <- function(id, tab_selected) {
           )
         )
       )
+    })
+
+    # Observe date slider changes
+    observeEvent(input$date_slider, {
+      req(available_dates())
+      selected_date_str <- input$date_slider
+      selected_date <- as_date(selected_date_str)
+
+      # Update current date when slider changes
+      current_date(selected_date)
+
+      dates <- available_dates()
+      date_strings <- sapply(dates, format_date_for_display)
+      new_frame <- which(date_strings == selected_date_str)
+
+      if (length(new_frame) > 0 && !is.na(new_frame)) {
+        current_frame_index(new_frame)
+        update_map_with_frame(new_frame)
+        
+        # Re-add bird info card after this map update
+        if (info_card_added() && 
+            !is.null(input$speciesPicker) && 
+            !is.null(photo_url()) && 
+            !is.null(scientific_name()) && 
+            !is.null(wiki_link()) && 
+            !is.null(song_url())) {
+            
+          # Create bird info card HTML with inline styles
+          bird_info_html <- HTML(paste0(
+            "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+            "<h5>", input$speciesPicker, "</h5>",
+            "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+            "<div style='text-align: center;'>",
+            "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+            "</div>",
+            "<div style='margin-top: 10px;'>",
+            "<audio controls style='width: 100%;'>",
+            "<source src='", song_url(), "' type='audio/mp3'>",
+            "Your browser does not support the audio element.",
+            "</audio>",
+            "</div>",
+            "</div>"
+          ))
+          
+          # Add bird info card using leafletProxy after the map update
+          shinyjs::delay(100, {
+            leafletProxy(ns("rasterMap")) |>
+              removeControl(layerId = "bird-info-card") |>
+              addControl(
+                html = bird_info_html,
+                position = "topleft",
+                layerId = "bird-info-card"
+              )
+          })
+        }
+      }
     })
 
     # Play/Pause button UI
@@ -925,36 +1017,97 @@ rtbm_app_server <- function(id, tab_selected) {
       }
     }
 
-    # Clear cache at midnight to get fresh data
+    # Add observer to ensure bird info card persists after any map operations
     observe({
-      invalidateLater(calculate_seconds_until_midnight())
-      # Update local cache when time crosses midnight
-      # update_local_cache(days_back = 14)  # Temporarily disabled
+      # Watch for map changes that might affect the bird info card
+      input$rasterMap_zoom
+      input$rasterMap_bounds
+      input$loadData
+      
+      # Only proceed if we should show the bird info card
+      if (info_card_added() && 
+          !is.null(input$speciesPicker) && 
+          !is.null(photo_url()) && 
+          !is.null(scientific_name()) && 
+          !is.null(wiki_link()) && 
+          !is.null(song_url())) {
+        
+        # Add a small delay to ensure this runs after other map operations
+        shinyjs::delay(200, {
+          # Create bird info card HTML with inline styles
+          bird_info_html <- HTML(paste0(
+            "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+            "<h5>", input$speciesPicker, "</h5>",
+            "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+            "<div style='text-align: center;'>",
+            "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+            "</div>",
+            "<div style='margin-top: 10px;'>",
+            "<audio controls style='width: 100%;'>",
+            "<source src='", song_url(), "' type='audio/mp3'>",
+            "Your browser does not support the audio element.",
+            "</audio>",
+            "</div>",
+            "</div>"
+          ))
+          
+          # Add bird info card to the map
+          leafletProxy(ns("rasterMap")) |>
+            removeControl(layerId = "bird-info-card") |>
+            addControl(
+              html = bird_info_html,
+              position = "topleft",
+              layerId = "bird-info-card"
+            )
+        })
+      }
     })
 
-    # Handle manual date slider change
-    observeEvent(input$date_slider, {
-      req(available_dates())
-      selected_date_str <- input$date_slider
-      selected_date <- as_date(selected_date_str)
+    # Observe species selection and update the info card on the map
+    observeEvent(input$speciesPicker, {
+      # Only proceed if we have all required data
+      req(photo_url(), scientific_name(), wiki_link(), song_url())
 
-      # Update current date when slider changes
-      current_date(selected_date)
+      # Create bird info card HTML with inline styles
+      bird_info_html <- HTML(paste0(
+        "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+        "<h5>", input$speciesPicker, "</h5>",
+        "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+        "<div style='text-align: center;'>",
+        "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+        "</div>",
+        "<div style='margin-top: 10px;'>",
+        "<audio controls style='width: 100%;'>",
+        "<source src='", song_url(), "' type='audio/mp3'>",
+        "Your browser does not support the audio element.",
+        "</audio>",
+        "</div>",
+        "</div>"
+      ))
 
-      dates <- available_dates()
-      date_strings <- sapply(dates, format_date_for_display)
-      new_frame <- which(date_strings == selected_date_str)
+      # Add the bird info card to the map, replacing any existing one
+      leafletProxy(ns("rasterMap")) |>
+        removeControl(layerId = "bird-info-card") |>
+        addControl(
+          html = bird_info_html,
+          position = "topleft",
+          layerId = "bird-info-card"
+        )
 
-      if (length(new_frame) > 0 && new_frame > 0) {
-        update_map_with_frame(new_frame)
+      # Update flag to indicate the info card is added
+      info_card_added(TRUE)
+      
+      # Also update the map frame if we have data available
+      if (!is.null(current_frame_index())) {
+        update_map_with_frame(current_frame_index())
       }
     })
 
     # Changed from reactive to eventReactive to only load data when the button is clicked
     raster_data <- eventReactive(input$loadData, {
-      # Reset flags when loading new data
+      # Reset legend flag when loading new data, but keep info card flag
       legend_added(FALSE)
-      info_card_added(FALSE)
+      # Do NOT reset info_card_added flag here - important for persistence
 
       # Process all dates and prepare data
       success <- process_all_dates()
@@ -973,120 +1126,107 @@ rtbm_app_server <- function(id, tab_selected) {
       }
     })
 
-    # Base leaflet map
-    output$rasterMap <- renderLeaflet({
-      leaflet() |>
-        addProviderTiles("CartoDB.Positron", layerId = "base_map") |>
-        setView(lng = 25, lat = 65.5, zoom = 5) |>
-        # Add empty controls that will be filled later
-        addControl(
-          html = "<div id='hover-info' class='map-hover-display d-none'></div>",
-          position = "topright",
-          layerId = "hover-info-control"
-        )
-    })
-
-    # Initial status message prompting user action
-    output$statusMsg <- renderUI({
-      div(
-        class = "alert alert-info",
-        role = "alert",
-        "Select a date range and species, then click 'Load Data' to view the distribution map. Use the date slider to navigate through time."
-      )
-    })
-
     # Observe button click to trigger initial data load
     observeEvent(input$loadData, {
       raster_data()
-    })
-
-    # Track map view changes
-    observeEvent(input$rasterMap_zoom, {
-      # Store current zoom level
-      current_zoom <- input$rasterMap_zoom
-      print(paste0("Zoom level changed to: ", current_zoom))
-
-      # Just track zoom level but don't try to manipulate markers directly
-      # Let the CSS solution handle consistent appearance
-    })
-
-    # Track map bounds changes
-    observeEvent(input$rasterMap_bounds, {
-      # Store current bounds
-      current_bounds <- input$rasterMap_bounds
-      print(paste0("Map bounds changed"))
-
-      # This could be used to load more detailed data for the visible area
-      # or adjust data display based on the current view
-    })
-
-    # Handle marker clicks
-    observeEvent(input$rasterMap_marker_click, {
-      click_data <- input$rasterMap_marker_click
-      print(paste0("Marker clicked: ", click_data$id))
-
-      # Extract marker ID from the layerId
-      marker_id <- sub("marker_", "", click_data$id)
-
-      # Additional click handling can be implemented here
-      # For example, showing detailed information about the specific observation
-    })
-
-    # Handle map shape hover events
-    observeEvent(input$rasterMap_shape_mouseover, {
-      hover_data <- input$rasterMap_shape_mouseover
-
-      if (!is.null(hover_data)) {
-        # Show hover info with the observation value
-        intensity_value <- if (is.numeric(hover_data$value)) {
-          round(hover_data$value, 2)
-        } else {
-          "N/A" # Fallback for non-numeric values
+      
+      # Add a slight delay and then re-add both legend and bird info card
+      shinyjs::delay(500, {
+        # Re-add the legend
+        if (legend_added()) {
+          # We need to recreate the legend with the same parameters
+          # Assuming points_data is available from the most recent update
+          leafletProxy(ns("rasterMap")) |>
+            clearControls() |>  # Clear existing controls
+            addLegend(
+              position = "bottomright",
+              pal = colorNumeric(palette = "viridis", domain = c(0, 1))(seq(0, 1, length.out = 5)),
+              values = seq(0, 1, length.out = 5),
+              title = "Observation Intensity",
+              opacity = 0.7
+            )
         }
-
-        leafletProxy(ns("rasterMap")) |>
-          addControl(
-            html = HTML(paste0(
-              "<div class='map-hover-display'>",
-              "<strong>Intensity:</strong> ", intensity_value,
+        
+        # Re-add the bird info card if needed
+        if (info_card_added()) {
+          # Make sure we have all the required bird info available
+          if (!is.null(input$speciesPicker) && 
+              !is.null(photo_url()) && 
+              !is.null(scientific_name()) && 
+              !is.null(wiki_link()) && 
+              !is.null(song_url())) {
+              
+            # Create bird info card HTML with inline styles
+            bird_info_html <- HTML(paste0(
+              "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+              "<h5>", input$speciesPicker, "</h5>",
+              "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+              "<div style='text-align: center;'>",
+              "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+              "</div>",
+              "<div style='margin-top: 10px;'>",
+              "<audio controls style='width: 100%;'>",
+              "<source src='", song_url(), "' type='audio/mp3'>",
+              "Your browser does not support the audio element.",
+              "</audio>",
+              "</div>",
               "</div>"
-            )),
-            position = "topright",
-            layerId = "hover-info-control"
-          )
-      }
-    })
-
-    observeEvent(input$rasterMap_shape_mouseout, {
-      # Hide or clear hover information
-      leafletProxy(ns("rasterMap")) |>
-        addControl(
-          html = "<div class='map-hover-display d-none'></div>",
-          position = "topright",
-          layerId = "hover-info-control"
-        )
-    })
-
-    # Handle animation control button
-    observeEvent(input$animateControl, {
-      # Toggle animation state
-      animation_running(!animation_running())
-
-      # Force UI update for button
-      output$playPauseButton <- renderUI({
-        actionButton(
-          inputId = ns("animateControl"),
-          label = if (animation_running()) "Pause" else "Play",
-          icon = if (animation_running()) icon("pause") else icon("play"),
-          class = "btn-primary btn-lg",
-          width = "100%"
-        )
+            ))
+            
+            # Add bird info card back to the map
+            leafletProxy(ns("rasterMap")) |>
+              removeControl(layerId = "bird-info-card") |>
+              addControl(
+                html = bird_info_html,
+                position = "topleft",
+                layerId = "bird-info-card"
+              )
+          }
+        }
       })
+    })
 
-      # Start animation if now playing
-      if (animation_running()) {
-        animation_step()
+    # Base leaflet map
+    output$rasterMap <- renderLeaflet({
+      # Create the base map
+      m <- leaflet() |>
+        addProviderTiles("CartoDB.Positron") |>
+        setView(lng = 25, lat = 65.5, zoom = 4) |>
+        addControl(html = "<div id='hover-info' class='map-hover-display d-none'></div>", 
+                   position = "topright", 
+                   layerId = "hover-info-control")
+      
+      # If we already have the bird info card, add it to the initial map
+      if (info_card_added() && !is.null(input$speciesPicker) && 
+          !is.null(photo_url()) && !is.null(scientific_name()) && 
+          !is.null(wiki_link()) && !is.null(song_url())) {
+        
+        # Create bird info card HTML with inline styles
+        bird_info_html <- HTML(paste0(
+          "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+          "<h5>", input$speciesPicker, "</h5>",
+          "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+          "<div style='text-align: center;'>",
+          "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+          "</div>",
+          "<div style='margin-top: 10px;'>",
+          "<audio controls style='width: 100%;'>",
+          "<source src='", song_url(), "' type='audio/mp3'>",
+          "Your browser does not support the audio element.",
+          "</audio>",
+          "</div>",
+          "</div>"
+        ))
+        
+        # Add bird info card to the initial map
+        m <- m |> addControl(
+          html = bird_info_html,
+          position = "topleft",
+          layerId = "bird-info-card"
+        )
       }
+      
+      return(m)
     })
   })
 }
