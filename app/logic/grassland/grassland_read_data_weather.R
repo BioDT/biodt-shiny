@@ -97,12 +97,3 @@ read_weather_data <- function(
 
   return(series)
 }
-
-# weather_col_names <- c(
-#   "Precipitation[mm]",
-#   "Temperature[degC]",
-#   "Temperature_Daylight[degC]",
-#   "PAR[µmolm-2s-1]",
-#   "Daylength[h]",
-#   "PET[mm]"
-# )

@@ -89,6 +89,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
         )
 
         colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
+        colors_for_grass_lighter <- c("#73eb9b", "#e28bb7", "#998be2")
         colors_for_weather <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00") #colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
         end_date <- "2015-12-31"
 
@@ -96,7 +97,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
           generate_chart_lines(
             filepaths_grass = files_grass,
             filepath_weather = file_weather,
-            colors_for_grass = colors_for_grass,
+            colors_for_grass = colors_for_grass_lighter,
             colors_for_weather = colors_for_weather,
             grass_end_date = end_date
           )

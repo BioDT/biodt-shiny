@@ -17,7 +17,7 @@ generate_chart_lines <- function(
   filepath_weather,
   colors_for_grass,
   colors_for_weather,
-  grass_end_date = "2015-12-31"
+  grass_end_date
 ) {
   simulations <- NULL
 
@@ -29,20 +29,11 @@ generate_chart_lines <- function(
           filename = filepath,
           plot_type = "line",
           colors = colors_for_grass,
-          stack = NULL
+          stack = NULL,
+          file_nr = (i - 1)
         )
       )
   }
-
-  # Prepare time
-  time <- get_time(filepaths_grass[1])
-
-  # Prepare tooltip formatter
-  # kl <- (length(simulations) - length(pft_unique)):(length(simulations) - 1)
-  kl <- 0:length(simulations) # hardcoded, TODO figure out better, with a function or so...
-
-  formatter <- paste0("{a", kl, "}:   {c", kl, "}", collapse = "<br />")
-  formatter <- paste0("DATE: {b1}<br />\n", formatter)
 
   # generate chart - Weather data ----
   weather_data <- read_weather_data(
@@ -54,31 +45,43 @@ generate_chart_lines <- function(
   simulations <- simulations |>
     append(weather_data)
 
+  # Prepare time
+  time <- get_time(filepaths_grass[1])
+
+  # Prepare tooltip formatter
+  kl <- 0:(length(simulations) - 1) # hardcoded, TODO figure out better, with a function or so...
+
+  formatter <- paste0("{a", kl, "}:   {c", kl, "}", collapse = "<br />")
+  formatter <- paste0("DATE: {b1}<br />\n", formatter)
+
   # Echarty: making chart ----
   #' @export
   chart <- ec.init()
   chart$x$opts <-
     list(
-      # title = list(text = "Grassland Simulation & Weather"),
       tooltip = list(
         trigger = "axis",
-        formatter = formatter,
-        # formatter = JS(
-        #   "
-        #   function (param) {
-        #       return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #117733\"></i>Mean PFT 0: ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #882255\"></i>Mean PFT 1: ' + param.find(item => item.seriesName ==  'PFT 1 mean').value + '<br />' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #332288\"></i>Mean PFT 2: ' + param.find(item => item.seriesName ==  'PFT 2 mean').value + '<hr size=1 style=\"margin: 4px 0\">' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<hr size=1 style=\"margin: 4px 0\">' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #009E73\"></i>Temperature_Daylight[degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Daylength[h]: ' + param.find(item => item.seriesName ==  'Daylength[h]').value + '<br />' +
-        #         '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
-        #     }
-        # "
-        # ),
+        formatter = JS(
+          "
+          function (param) {
+            console.log(param)
+            return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #0').value +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #1').value + 
+              '<hr size=1 style=\"margin: 4px 0\">' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #009E73\"></i>Temperature_Daylight[degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<hr size=1 style=\"margin: 4px 0\">' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Daylength[h]: ' + param.find(item => item.seriesName ==  'Daylength[h]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
+          }
+        "
+        ),
         axisPointer = list(
           type = "cross"
         ),
@@ -103,19 +106,12 @@ generate_chart_lines <- function(
           backgroundColor = "#777"
         )
       ),
-      # legend = list(
-      #   show = FALSE,
-      #   orient = "vertical",
-      #   bottom = "50%",
-      #   right = "2%",
-      #   # data = pft_unique
-      # ),
       grid = list(
         list(left = "10%", right = "8%", top = "4%", height = "13%"),
-        list(left = "10%", right = "8%", top = "20%", height = "13%"),
-        list(left = "10%", right = "8%", top = "36%", height = "13%"),
-        list(left = "10%", right = "8%", bottom = "35%", height = "13%"),
-        list(left = "10%", right = "8%", bottom = "19%", height = "13%"),
+        list(left = "10%", right = "8%", top = "22%", height = "13%"),
+        list(left = "10%", right = "8%", top = "38%", height = "13%"),
+        list(left = "10%", right = "8%", bottom = "34%", height = "13%"),
+        list(left = "10%", right = "8%", bottom = "18%", height = "13%"),
         list(left = "10%", right = "8%", bottom = "3", height = "13%")
       ),
       xAxis = list(
@@ -230,22 +226,22 @@ generate_chart_lines <- function(
       ),
       yAxis = list(
         list(
+          name = "Fraction",
           type = "value",
           boundaryGap = FALSE,
-          name = "Fraction",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
+          scale = TRUE,
+          gridIndex = 0,
           min = 0,
           max = 100,
-          gridIndex = 0,
-          scale = TRUE,
           splitArea = list(
             show = TRUE
           )
         ),
         list(
-          name = "Precipitation[mm]",
+          name = "Precipitation [mm]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -268,7 +264,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "Temperature[degC] & <br/>Temperature_Daylight[degC]",
+          name = "Temperature [degC] & \nTemp. Daylight [degC]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -291,7 +287,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "PAR[µmolm-2s-1]",
+          name = "PAR [µmolm-2s-1]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -314,7 +310,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "Daylength[h]",
+          name = "Daylength [h]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -337,7 +333,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "PET[mm]",
+          name = "PET [mm]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),

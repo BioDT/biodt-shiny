@@ -1,5 +1,6 @@
 box::use(
   readr[read_delim],
+  utils[str]
 )
 
 # loads and restructure GRASSLAND data ----
@@ -16,7 +17,7 @@ read_grass_simulations <- function(
   plot_type,
   colors,
   stack,
-  series_opacity = 0.2
+  file_nr
 ) {
   input_data <- read_delim(
     file = filename,
@@ -30,10 +31,11 @@ read_grass_simulations <- function(
 
   series_list <- list()
   pft_list <- sort(unique(input_data$PFT))
+
   for (i in seq_along(pft_list)) {
     series_list[[length(series_list) + 1]] <-
       list(
-        name = paste("PFT", pft_list[i]),
+        name = paste0("PFT ", pft_list[i], " file #", file_nr),
         type = plot_type,
         stack = stack,
         color = colors[i],
