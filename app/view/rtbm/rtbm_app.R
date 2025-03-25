@@ -1,64 +1,59 @@
 box::use(
   # HTML structure (htmltools)
   htmltools[
-    a, div, em, HTML, img, p, renderTags,
-    strong, tagList, tags, tagQuery, span, hr
+    a, div, em, HTML, img, p, renderTags, br, h1, h2, h3, h4, h5, h6,
+    strong, tagList, tags, tagQuery, span, hr, includeCSS, includeScript
   ],
 
-  # Reactive components (Shiny)
+  # Shiny fundamentals
   shiny[
-    NS, uiOutput, actionButton, dateRangeInput,
-    moduleServer, observe, observeEvent,
-    reactive, req, renderUI, eventReactive,
-    invalidateLater, reactiveVal, sliderInput,
-    icon, textOutput, renderText, isTruthy,
-    selectInput, isolate
+    moduleServer, NS, renderUI, tags, icon, div, observe, observeEvent,
+    isolate, reactiveVal, reactiveValues, req, reactive, renderPlot,
+    invalidateLater, updateSliderInput, withProgress, incProgress, removeUI,
+    actionButton, column, fluidRow, selectInput, sliderInput, tagList,
+    insertUI, uiOutput, h4, h5, h6, hr, p, pre, plotOutput, dateRangeInput,
+    textOutput, renderText, updateDateRangeInput, updateSelectInput, eventReactive
   ],
 
-  # UI enhancement
-  shinyjs,
+  # UI components
+  bslib[card, card_header, card_body, card_footer, tooltip, value_box, layout_column_wrap],
+  shinyWidgets[sliderTextInput, pickerInput, updateSliderTextInput, progressBar, updateProgressBar],
+  shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass],
+  htmlwidgets[onRender],
 
-  # Bootstrap components
-  bslib[
-    card, card_body, card_footer, card_header
-  ],
-
-  # Leaflet map components
+  # Interactive map
   leaflet[
-    leaflet, leafletOutput, leafletProxy, renderLeaflet,
-    addProviderTiles, addTiles, setView, addControl,
-    addLegend, addRasterImage, clearControls,
-    clearImages, colorNumeric, clearShapes, addMarkers,
-    clearGroup, makeIcon, addCircleMarkers, addRectangles
+    leaflet, addTiles, setView, addProviderTiles, clearShapes, addCircles,
+    addCircleMarkers, addControl, clearControls, addLegend, addPolylines,
+    layersControlOptions, addLayersControl, leafletOutput, renderLeaflet, leafletProxy,
+    addRasterImage, clearImages, colorNumeric, addMarkers, clearGroup, makeIcon,
+    addRectangles, removeControl
   ],
+  leaflet.extras[addHeatmap],
 
   # Data manipulation
-  dplyr[arrange, filter, mutate, pull, select, slice],
-  stringr[str_detect],
-  sf[st_crs, st_as_sf, st_sfc, st_sf, st_transform, st_coordinates],
-  tibble[as_tibble],
-  jsonlite[fromJSON],
-  tidyjson[spread_all],
-  lubridate[today, as_date, interval],
-  httr2[request, req_perform, req_url_path, req_url_query, resp_status, resp_body_json],
+  dplyr[filter, mutate, select, pull, arrange, group_by, summarize, n, between, row_number],
+  magrittr[`%>%`],
+  lubridate[as_date, ymd, `%within%`, interval],
+  tibble[tibble, as_tibble],
+  stringr[str_replace],
+  tidyr[unnest, pivot_longer],
+  arrow[read_parquet, write_parquet, Schema, schema],
+  jsonlite[fromJSON, toJSON],
 
-  # File and data handling
-  terra[rast],
-  utils[download.file],
-  stats[na.omit, quantile],
-  raster[crs, projectRaster, raster, values, projection, xyFromCell],
-  tools[file_ext],
-  grDevices[colorRampPalette],
-  memoise[memoise, forget],
+  # Raster and spatial handling
+  sf[st_read, st_drop_geometry, st_as_sf, st_bbox, st_coordinates, st_as_sfc, st_crs],
+  terra[rast, values, global, crs, project, ext, as.polygons],
+  fs[dir_create, path, path_package],
 
-  # UI widgets
-  shinyWidgets[pickerInput, sliderTextInput, updateSliderTextInput],
+  # Stats and utilities
+  stats[na.omit, quantile, median, sd, var],
+  utils[head, tail, str, capture.output],
 
-  # Color palettes
-  viridisLite[magma, inferno],
-
-  # JavaScript interface
-  htmlwidgets
+  # Local dependencies
+  ./rtbm_data_preprocessing[
+    load_bird_species, update_local_cache, load_species_data
+  ],
 )
 
 #' Load and prepare bird species information
@@ -67,10 +62,22 @@ load_bird_species <- function() {
   bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
   bird_info <- fromJSON(bird_info_url)
 
-  bird_info |>
-    spread_all() |>
-    as_tibble() |>
-    select(-document.id) |>
+  # Process the nested JSON structure
+  bird_df <- do.call(rbind, lapply(names(bird_info), function(species_key) {
+    info <- bird_info[[species_key]]
+    data.frame(
+      common_name = info$common_name,
+      scientific_name = info$scientific_name,
+      finnish_name = info$finnish_name,
+      photo_url = info$photo_url,
+      wiki_link = info$wiki_link,
+      song_url = info$song_url,
+      stringsAsFactors = FALSE
+    )
+  }))
+
+  # Convert to tibble and arrange by common name
+  as_tibble(bird_df) |>
     arrange(common_name) |>
     mutate(
       scientific_name = stringr::str_replace(
@@ -229,19 +236,50 @@ rtbm_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # Load Finland border for the map
+    get_finland_border <- function() {
+      # Try to load Finland border shapefile
+      finland_file <- "app/data/rtbm/finland_border.geojson"
+
+      if (file.exists(finland_file)) {
+        tryCatch(
+          {
+            # Read border file
+            finland <- st_read(finland_file, quiet = TRUE)
+            return(finland)
+          },
+          error = function(e) {
+            # If reading fails, create a bounding box
+            print("Error reading Finland border file, using a bounding box instead")
+            create_finland_bbox()
+          }
+        )
+      } else {
+        print("Finland border file not found, using a bounding box instead")
+        create_finland_bbox()
+      }
+    }
+
+    # Create a simple bounding box for Finland as fallback
+    create_finland_bbox <- function() {
+      # Create a bounding box for Finland as a fallback
+      bbox <- st_bbox(c(xmin = 19, xmax = 32, ymin = 59, ymax = 71), crs = st_crs(4326))
+      bbox_sf <- st_as_sfc(bbox)
+      return(bbox_sf)
+    }
+
+    # Load Finland border
+    finland_border <- get_finland_border()
+
     # Reactive values for data storage
     available_dates <- reactiveVal(NULL)
-    frames_data <- reactiveVal(list())
-    current_date <- reactive({
-      req(input$date_slider, available_dates())
-      selected_date_str <- input$date_slider
-      selected_date <- as_date(selected_date_str)
-      return(selected_date)
-    })
-    current_frame <- reactiveVal(1)
+    current_date <- reactiveVal(NULL)
+    current_frame_index <- reactiveVal(1)
+    species_data <- reactiveVal(NULL)
 
     # Animation controls
-    animation_active <- reactiveVal(FALSE)
+    animation_speed <- reactiveVal(1000) # milliseconds between frames
+    animation_running <- reactiveVal(FALSE)
 
     # Sidebar state management
     sidebar_expanded <- reactiveVal(TRUE) # Start expanded
@@ -292,115 +330,312 @@ rtbm_app_server <- function(id, tab_selected) {
       if (!is.null(current_date())) {
         span(
           class = "current-date",
-          format(current_date(), "%B %d, %Y")
+          format_date_for_display(current_date())
         )
       }
     })
 
-    # Date slider for manual navigation
-    output$dateSlider <- renderUI({
-      req(available_dates())
-      dates <- available_dates()
-
-      if (length(dates) == 0) {
-        return(NULL)
+    # Format date for display
+    format_date_for_display <- function(date) {
+      if (is.null(date)) {
+        return("")
       }
 
-      tagList(
-        sliderTextInput(
-          inputId = ns("date_slider"),
-          label = "Select Date:",
-          choices = format(dates, "%Y-%m-%d"),
-          selected = format(dates[1], "%Y-%m-%d"),
-          grid = TRUE,
-          animate = FALSE,
-          width = "100%"
-        ),
+      # Handle various date formats
+      tryCatch(
+        {
+          # First check if it's already a Date object
+          if (inherits(date, "Date")) {
+            return(format(date, "%b %d, %Y"))
+          }
 
-        # Animation controls - only shown after data is loaded
-        div(
-          class = "animation-controls mt-3",
-          # Play/Pause Button (centered)
-          div(
-            class = "d-flex justify-content-center",
-            div(
-              class = "animation-button-container",
-              uiOutput(ns("playPauseButton"))
-            )
+          # Try to parse as ISO date
+          parsed_date <- try(as.Date(date), silent = TRUE)
+          if (!inherits(parsed_date, "try-error") && !is.na(parsed_date)) {
+            return(format(parsed_date, "%b %d, %Y"))
+          }
+
+          # If all else fails, return as is
+          return(as.character(date))
+        },
+        error = function(e) {
+          # Fallback for any errors
+          return(as.character(date))
+        }
+      )
+    }
+
+    # Format multiple dates for display
+    format_dates_for_display <- function(dates) {
+      if (is.null(dates) || length(dates) == 0) {
+        return(character(0))
+      }
+      vapply(dates, format_date_for_display, FUN.VALUE = character(1))
+    }
+
+    # Update map with a specific frame
+    update_map_with_frame <- function(frame_index) {
+      # Make sure we have required data
+      if (is.null(available_dates()) || is.null(species_data())) {
+        print("No dates or species data available")
+        return(FALSE)
+      }
+
+      # Use tryCatch around the entire function to prevent any unexpected errors
+      tryCatch(
+        {
+          # Convert frame_index to integer if needed
+          frame_index <- as.integer(frame_index)
+
+          # Safe print function to avoid formatting issues
+          safe_print <- function(...) {
+            args <- list(...)
+            msg <- paste0(args, collapse = "")
+            cat(msg, "\n")
+          }
+
+          safe_print("Updating map with frame index: ", frame_index)
+          safe_print("Total available dates: ", length(available_dates()))
+
+          # Validate frame index
+          if (frame_index <= 0 || frame_index > length(available_dates())) {
+            safe_print("Invalid frame index: ", frame_index)
+            return(FALSE)
+          }
+
+          # Get the current date and data path (with validation)
+          date <- available_dates()[[frame_index]]
+          if (is.null(date)) {
+            safe_print("Date is NULL for index: ", frame_index)
+            return(FALSE)
+          }
+
+          # Ensure date is properly formatted
+          if (!inherits(date, "Date")) {
+            date <- as.Date(date)
+          }
+
+          scientific_name <- species_data()$scientific_name
+          if (is.null(scientific_name) || is.na(scientific_name) || scientific_name == "") {
+            safe_print("Invalid scientific name")
+            return(FALSE)
+          }
+
+          # Format the date for file path
+          date_str <- format(date, "%Y-%m-%d")
+
+          # Construct path to parquet file
+          parquet_path <- file.path(
+            "app/data/rtbm/parquet",
+            paste0("species=", scientific_name),
+            paste0("date=", date_str, ".parquet")
           )
-        )
+
+          safe_print("Looking for parquet file: ", parquet_path)
+
+          # Check if file exists
+          if (!file.exists(parquet_path)) {
+            safe_print("Parquet file not found: ", parquet_path)
+
+            output$statusMsg <- renderUI({
+              div(
+                class = "alert alert-warning",
+                role = "alert",
+                HTML(paste0("Data file not found for date: <strong>", date_str, "</strong>"))
+              )
+            })
+
+            return(FALSE)
+          }
+
+          # Update current date
+          current_date(date)
+          safe_print("Current date set to: ", format(date, "%Y-%m-%d"))
+
+          # Update map
+          output$rasterMap <- renderLeaflet({
+            # Read the parquet file directly
+            tryCatch(
+              {
+                safe_print("Reading parquet file")
+                points_data <- arrow::read_parquet(parquet_path)
+
+                safe_print("Loaded parquet file with ", nrow(points_data), " points")
+
+                if (ncol(points_data) > 0) {
+                  safe_print("Columns in parquet: ", paste(colnames(points_data), collapse = ", "))
+                }
+
+                # Base map with a more neutral style
+                m <- leaflet() |>
+                  addProviderTiles("CartoDB.Positron") |>
+                  setView(lng = 25, lat = 65, zoom = 4)
+
+                # Add Finland border if available
+                if (!is.null(finland_border)) {
+                  tryCatch(
+                    {
+                      m <- m |>
+                        addPolylines(
+                          data = finland_border,
+                          color = "#FF6B6B",
+                          weight = 2,
+                          opacity = 0.8,
+                          group = "Finland Border"
+                        )
+                    },
+                    error = function(e) {
+                      safe_print("Error adding Finland border: ", e$message)
+                      # Continue without the border
+                    }
+                  )
+                }
+
+                # Only add bird data if we have points
+                if (nrow(points_data) > 0) {
+                  # Get column names
+                  coord_cols <- c("longitude", "latitude", "intensity")
+
+                  # Check if we need to rename columns
+                  if (all(coord_cols %in% colnames(points_data))) {
+                    # Debug intensities
+                    safe_print(
+                      "Intensity range: ",
+                      min(points_data$intensity, na.rm = TRUE), " to ",
+                      max(points_data$intensity, na.rm = TRUE)
+                    )
+
+                    # Create a color palette for intensity values
+                    intensity_min <- min(points_data$intensity, na.rm = TRUE)
+                    intensity_max <- max(points_data$intensity, na.rm = TRUE)
+
+                    if (intensity_min == intensity_max) {
+                      # If all values are the same, create a range to avoid domain error
+                      domain <- c(intensity_min, intensity_min + 0.000001)
+                    } else {
+                      domain <- c(intensity_min, intensity_max)
+                    }
+
+                    pal <- colorNumeric(
+                      palette = "viridis",
+                      domain = domain
+                    )
+
+                    # Add visualization layers
+
+                    # 1. Circle markers for better visibility at all zoom levels
+                    m <- m |>
+                      addCircleMarkers(
+                        data = points_data,
+                        lng = ~longitude,
+                        lat = ~latitude,
+                        radius = ~ pmin(8, 3 + intensity * 5), # Size based on intensity (capped)
+                        color = "#000",
+                        weight = 1,
+                        fillColor = ~ pal(intensity),
+                        fillOpacity = 0.7,
+                        popup = ~ paste0("<strong>Intensity:</strong> ", round(intensity, 4)),
+                        group = "Bird Markers"
+                      )
+
+                    # 2. Add heatmap for density visualization
+                    if (requireNamespace("leaflet.extras", quietly = TRUE)) {
+                      m <- m |>
+                        leaflet.extras::addHeatmap(
+                          data = points_data,
+                          lng = ~longitude,
+                          lat = ~latitude,
+                          intensity = ~intensity,
+                          blur = 15,
+                          max = intensity_max,
+                          radius = 10,
+                          group = "Heat Map"
+                        )
+                    }
+
+                    # 3. Add layer controls to switch between visualizations
+                    m <- m |>
+                      addLayersControl(
+                        baseGroups = c("Base Map"),
+                        overlayGroups = c("Finland Border", "Bird Markers", "Heat Map"),
+                        options = layersControlOptions(collapsed = FALSE)
+                      )
+
+                    # 4. Add legend
+                    m <- m |>
+                      addLegend(
+                        position = "bottomright",
+                        pal = pal,
+                        values = points_data$intensity,
+                        title = "Observation intensity",
+                        opacity = 0.7
+                      )
+
+                    # Log success
+                    safe_print("Successfully added ", nrow(points_data), " observation points to map")
+                  } else {
+                    safe_print("WARNING: Expected columns not found in parquet file")
+                    safe_print("Available columns: ", paste(colnames(points_data), collapse = ", "))
+                  }
+                } else {
+                  safe_print("No data points available for visualization")
+                }
+
+                # Add date display to map
+                date_to_display <- tryCatch(
+                  {
+                    format_date_for_display(current_date())
+                  },
+                  error = function(e) {
+                    safe_print("Error formatting date: ", e$message)
+                    # Fallback to basic format
+                    if (!is.null(current_date())) {
+                      as.character(current_date())
+                    } else {
+                      "Unknown date"
+                    }
+                  }
+                )
+
+                m <- m |> addControl(
+                  html = HTML(paste0(
+                    "<div class='map-date-display'>",
+                    "<strong>Date:</strong> ", date_to_display,
+                    "</div>"
+                  )),
+                  position = "bottomleft"
+                )
+
+                return(m)
+              },
+              error = function(e) {
+                safe_print("Error updating map: ", e$message)
+
+                # Return a basic map if there's an error
+                leaflet() |>
+                  addProviderTiles("CartoDB.Positron") |>
+                  setView(lng = 25, lat = 65, zoom = 4) |>
+                  addControl(
+                    html = HTML(paste0(
+                      "<div class='alert alert-danger'>",
+                      "Error loading data: ", e$message,
+                      "</div>"
+                    )),
+                    position = "topright"
+                  )
+              }
+            )
+          })
+
+          return(TRUE)
+        },
+        error = function(e) {
+          # Handle any unexpected errors
+          cat("Error in update_map_with_frame: ", e$message, "\n")
+          return(FALSE)
+        }
       )
-    })
-
-    # Play/Pause button UI
-    output$playPauseButton <- renderUI({
-      if (animation_active()) {
-        # Show pause button when animation is running
-        actionButton(
-          inputId = ns("pause_animation"),
-          label = "Pause",
-          icon = icon("pause"),
-          class = "btn btn-secondary"
-        )
-      } else {
-        # Show play button when animation is stopped
-        actionButton(
-          inputId = ns("play_animation"),
-          label = "Play",
-          icon = icon("play"),
-          class = "btn btn-primary"
-        )
-      }
-    })
-
-    # Handle play button
-    observeEvent(input$play_animation, {
-      animation_active(TRUE)
-    })
-
-    # Handle pause button
-    observeEvent(input$pause_animation, {
-      animation_active(FALSE)
-    })
-
-    # Animation loop
-    observe({
-      # Only run when animation is active
-      req(animation_active())
-      req(available_dates())
-
-      # Get dates and current index
-      dates <- available_dates()
-      current_idx <- which(format(dates, "%Y-%m-%d") == input$date_slider)
-
-      # Move to next date (or cycle back to beginning)
-      next_idx <- if (current_idx < length(dates)) current_idx + 1 else 1
-      next_date <- dates[next_idx]
-
-      # Update the date slider input (which will trigger map update)
-      updateSliderTextInput(
-        session = session,
-        inputId = "date_slider",
-        selected = format(next_date, "%Y-%m-%d")
-      )
-
-      # Fixed delay of 1 second between animations
-      invalidateLater(1000)
-    })
-
-    # Handle manual date slider change
-    observeEvent(input$date_slider, {
-      req(available_dates())
-      selected_date_str <- input$date_slider
-      selected_date <- as_date(selected_date_str)
-
-      dates <- available_dates()
-      new_frame <- which(format(dates, "%Y-%m-%d") == selected_date_str)
-
-      if (length(new_frame) > 0 && new_frame > 0) {
-        updateMapWithFrame(new_frame)
-      }
-    })
+    }
 
     # Get Finnish name for URL construction
     finnish_name <- reactive({
@@ -469,384 +704,251 @@ rtbm_app_server <- function(id, tab_selected) {
       s_url
     })
 
-    # Cache bird data to prevent repeated API calls
-    cached_get_bird_data <- memoise(function(date, species) {
-      scientific <- bird_spp_info |>
+    # Process data for all dates in the selected range
+    process_all_dates <- function() {
+      req(input$dateRange, input$speciesPicker)
+
+      start_date <- as_date(input$dateRange[1])
+      end_date <- as_date(input$dateRange[2])
+      species <- input$speciesPicker
+
+      # Find scientific name for the selected species
+      scientific_name <- bird_spp_info |>
         filter(common_name == species) |>
         pull(scientific_name)
 
-      if (length(scientific) == 0) {
-        return(NULL)
-      }
-
-      # Format date for URL
-      formatted_date <- format(date, "%Y-%m-%d")
-
-      # Build URL for the tif file
-      url_tif <- paste0(
-        "https://2007581-webportal.a3s.fi/daily/",
-        formatted_date, "/",
-        scientific,
-        "_occurrences.tif"
-      )
-
-      tryCatch(
-        {
-          resp <- request(url_tif) |> req_perform()
-          status <- resp$status
-
-          if (status != 200) {
-            return(NULL)
-          }
-
-          tmp_file <- tempfile(fileext = ".tif")
-          download_result <- download.file(url_tif, tmp_file, mode = "wb", quiet = TRUE)
-
-          if (download_result != 0 || !file.exists(tmp_file) || file.size(tmp_file) == 0) {
-            return(NULL)
-          }
-
-          r <- terra::rast(tmp_file)
-          r[r == 0] <- NA
-
-          # Check for invalid observation data (-1 values)
-          if (any(terra::values(r) == -1, na.rm = TRUE)) {
-            return(NULL) # Skip dates with invalid observation data
-          }
-
-          return(r)
-        },
-        error = function(e) {
-          return(NULL)
-        }
-      )
-    })
-
-    # Clear cache at midnight to get fresh data
-    observe({
-      invalidateLater(calculate_seconds_until_midnight())
-      forget(cached_get_bird_data)
-    })
-
-    # Calculate global min/max values for legend scale
-    global_min_max <- reactive({
-      req(frames_data())
-      frames <- frames_data()
-      if (length(frames) == 0) {
-        return(c(0, 1))
-      }
-
-      # Collect all values across all frames
-      all_values <- numeric(0)
-      for (frame in frames) {
-        if (!is.null(frame$values) && length(frame$values) > 0) {
-          all_values <- c(all_values, frame$values)
-        }
-      }
-
-      if (length(all_values) == 0) {
-        return(c(0, 1))
-      }
-
-      # Return min and max values
-      c(min(all_values, na.rm = TRUE), max(all_values, na.rm = TRUE))
-    })
-
-    # Function to process and update map with a specific frame
-    updateMapWithFrame <- function(frame_index) {
-      frames <- frames_data()
-
-      # Check if frames data exists and frame index is valid
-      if (length(frames) == 0 || frame_index > length(frames) || frame_index < 1) {
-        return(NULL)
-      }
-
-      frame_data <- frames[[frame_index]]
-
-      if (is.null(frame_data) || is.null(frame_data$raster)) {
-        return(NULL)
-      }
-
-      rt <- frame_data$raster
-      vals <- frame_data$values
-
-      # Use standard color palette as requested
-      pal <- colorNumeric(
-        palette = "magma",
-        domain = global_min_max(),
-        na.color = "#00000000"
-      )
-
-      # Start with a leaflet proxy that only clears the raster images
-      # Use layerId for raster image to enable targeted updates
-      map_update <- leafletProxy(ns("rasterMap")) |>
-        clearImages() |>
-        addRasterImage(
-          rt,
-          colors = pal,
-          opacity = 0.8,
-          project = FALSE,
-          layerId = paste0("raster_", frame_index)
-        )
-
-      # Convert raster data to point markers for interactivity
-      # Extract points with values above threshold for markers
-      if (length(vals) > 0) {
-        # Convert raster to points where values are above minimum threshold
-        # This creates interactive markers at observation hotspots
-        threshold <- quantile(vals, 0.75, na.rm = TRUE) # Use top 25% as hotspots
-        significant_cells <- which(values(rt) > threshold & !is.na(values(rt)))
-
-        if (length(significant_cells) > 0) {
-          # Convert cell indices to spatial coordinates
-          cell_coords <- xyFromCell(rt, significant_cells)
-          cell_values <- values(rt)[significant_cells]
-
-          # Create sf points
-          points_df <- data.frame(
-            x = cell_coords[, 1],
-            y = cell_coords[, 2],
-            value = cell_values,
-            id = seq_along(cell_values)
-          )
-
-          # Convert to sf object
-          points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = projection(rt))
-
-          # Transform to WGS84 (EPSG:4326) for Leaflet compatibility
-          points_sf <- st_transform(points_sf, 4326)
-
-          # Clear previous markers but leave existing squares
-          map_update <- map_update |>
-            clearGroup("observation_markers")
-
-          # No need to add new shapes - existing squares are already displayed
-        }
-      }
-
-      # Update only the date display
-      map_update <- map_update |>
-        addControl(
-          html = paste(
-            "<div class='map-date-display'>",
-            "<strong>Date:</strong> ", format(current_date(), "%Y-%m-%d"),
-            "</div>"
-          ),
-          position = "bottomleft",
-          layerId = "date-display" # Add layerId for easy replacement
-        )
-
-      # Only add the legend once when data is first loaded
-      if (!legend_added()) {
-        # Create info card with species info (only once)
-        info_card_components <- isolate(createInfoCard())
-        info_card_html <- div(
-          class = "leaflet-info-card",
-          style = paste(
-            "background-color: rgba(255, 255, 255, 0.9);",
-            "padding: 15px;",
-            "border-radius: 4px;",
-            "border: 1px solid rgba(0,0,0,0.1);",
-            "width: 220px;",
-            "box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
-          ),
-          info_card_components
-        )
-
-        # Convert htmltools tags to HTML for leaflet
-        info_card_html_str <- renderTags(info_card_html)$html
-
-        # Add the legend and info card
-        map_update <- map_update |>
-          addLegend(
-            position = "bottomright",
-            pal = pal,
-            values = global_min_max(),
-            title = "Observations",
-            opacity = 0.8,
-            layerId = "legend"
-          ) |>
-          addControl(
-            html = info_card_html_str,
-            position = "topleft",
-            layerId = "info-card"
-          )
-
-        # Set flags to indicate legend and info card have been added
-        legend_added(TRUE)
-        info_card_added(TRUE)
-      }
-
-      # Execute the map update
-      map_update
-    }
-
-    # Create the info card with species details
-    createInfoCard <- function() {
-      list(
-        # Photo section
-        if (!is.null(photo_url())) {
+      if (length(scientific_name) == 0) {
+        output$statusMsg <- renderUI({
           div(
-            class = "info-card-photo mb-3",
-            img(
-              src = photo_url(),
-              alt = paste("Photo of", common_name()),
-              class = "img-fluid rounded"
-            )
+            class = "alert alert-danger",
+            role = "alert",
+            "Error: Could not find scientific name for the selected species."
           )
-        } else {
-          div(
-            class = "info-card-photo mb-3 text-muted",
-            em("No image available")
-          )
-        },
+        })
+        return(FALSE)
+      }
 
-        # Bird information section
-        div(
-          class = "info-card-details",
-          # Common name
-          if (!is.null(common_name())) {
-            div(
-              class = "mb-2",
-              strong("Common Name: "),
-              span(common_name())
-            )
-          },
-
-          # Scientific name with optional wiki link
-          if (!is.null(scientific_name())) {
-            div(
-              class = "mb-2 scientific-name",
-              if (!is.null(wiki_link())) {
-                a(
-                  href = wiki_link(),
-                  target = "_blank",
-                  rel = "noopener",
-                  em(scientific_name()),
-                  class = "text-decoration-none"
-                )
-              } else {
-                em(scientific_name())
-              }
-            )
-          },
-
-          # Audio player
-          if (!is.null(song_url())) {
-            div(
-              class = "mt-3",
-              tags$audio(
-                class = "w-100",
-                controls = NA,
-                tags$source(
-                  src = song_url(),
-                  type = "audio/mpeg"
-                ),
-                "Your browser does not support the audio element."
-              )
-            )
-          }
-        )
-      )
-    }
-
-    # Process and prepare data for all dates in the range
-    processAllDates <- function() {
-      req(date_sequence(), input$speciesPicker)
-
-      dates <- date_sequence()
-      species <- input$speciesPicker
-
-      print(paste("Processing data for", length(dates), "dates for species:", species))
-
+      # Update status message
       output$statusMsg <- renderUI({
         div(
           class = "alert alert-info",
           role = "alert",
-          "Loading data for all dates... This may take a moment."
+          "Loading data... This may take a few moments, especially if new data needs to be downloaded."
         )
       })
 
-      # Store available dates and their data
-      valid_dates <- c()
-      all_frames <- list()
+      # Use withProgress to show progress
+      result <- NULL
+      withProgress(
+        message = "Processing data",
+        value = 0,
+        {
+          # Load data using the parquet-based approach
+          incProgress(0.2, detail = "Fetching observation data")
+          result <- load_species_data(
+            scientific_name = scientific_name,
+            start_date = start_date,
+            end_date = end_date
+          )
 
-      for (i in seq_along(dates)) {
-        date <- dates[i]
-        print(paste("Processing date:", date))
+          incProgress(0.3, detail = "Processing observations")
 
-        # Get data for this date
-        r <- cached_get_bird_data(date, species)
-
-        if (!is.null(r)) {
-          print(paste("Found data for date:", date))
-          # Process raster data
-          rt <- raster::raster(r)
-          vals <- na.omit(raster::values(rt))
-
-          # Check for invalid observation data (values of -1)
-          if (length(vals) > 0 && any(vals == -1)) {
-            print(paste("Invalid observation data (value -1) found for date:", date))
-            next
+          if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
+            output$statusMsg <- renderUI({
+              div(
+                class = "alert alert-warning",
+                role = "alert",
+                "No data available for the selected species and date range. Try a different date range or species."
+              )
+            })
+            return(FALSE)
           }
 
-          if (length(vals) > 0) {
-            # Ensure proper projection
-            crs_rt <- raster::crs(rt)
-            if (!is.na(crs_rt) && !sf::st_crs(crs_rt) == sf::st_crs(3857)) {
-              rt <- raster::projectRaster(rt, crs = sf::st_crs(3857))
-              vals <- na.omit(raster::values(rt))
-            }
+          # Store dates and data paths
+          available_dates(result$dates)
+          species_data(list(
+            scientific_name = scientific_name,
+            data_paths = result$data_paths
+          ))
 
-            # Store this date and its data
-            valid_dates <- c(valid_dates, date)
-            all_frames[[length(valid_dates)]] <- list(
-              raster = rt,
-              values = vals
+          # Initialize with the first date
+          if (length(result$dates) > 0) {
+            current_date(result$dates[1])
+            current_frame_index(1)
+          }
+
+          # Update slider with new date range
+          updateSliderTextInput(
+            session = session,
+            inputId = "date_slider",
+            choices = format_dates_for_display(result$dates),
+            selected = format_date_for_display(result$dates[1])
+          )
+
+          # Update status message
+          output$statusMsg <- renderUI({
+            div(
+              class = "alert alert-success",
+              role = "alert",
+              paste0(
+                "Loaded data for ", length(result$dates), " dates. ",
+                "Use the timeline slider or animation controls to view changes over time."
+              )
             )
-            print(paste("Added frame for date:", date, "- Frame count now:", length(valid_dates)))
-          } else {
-            print(paste("No valid values for date:", date))
-          }
-        } else {
-          print(paste("No data available for date:", date))
+          })
+
+          # Update map with the first frame
+          update_map_with_frame(1)
         }
+      )
+
+      return(TRUE)
+    }
+
+    # Date slider for manual navigation
+    output$dateSlider <- renderUI({
+      req(available_dates())
+      dates <- available_dates()
+
+      if (length(dates) == 0) {
+        return(NULL)
       }
 
-      print(paste("Total valid dates found:", length(valid_dates)))
+      tagList(
+        sliderTextInput(
+          inputId = ns("date_slider"),
+          label = "Select Date:",
+          choices = sapply(dates, format_date_for_display),
+          selected = format_date_for_display(dates[1]),
+          grid = TRUE,
+          animate = FALSE,
+          width = "100%"
+        ),
 
-      # Update available dates and frame data
-      if (length(valid_dates) > 0) {
-        available_dates(as_date(valid_dates))
-        frames_data(all_frames)
-        print("Updated available_dates and frames_data reactiveVals")
-      } else {
-        available_dates(NULL)
-        frames_data(list())
-        print("No valid dates found, setting empty values")
+        # Animation controls - only shown after data is loaded
+        div(
+          class = "animation-controls mt-3",
+          # Play/Pause Button (centered)
+          div(
+            class = "d-flex justify-content-center",
+            uiOutput(ns("playPauseButton"))
+          )
+        )
+      )
+    })
+
+    # Play/Pause button UI
+    output$playPauseButton <- renderUI({
+      actionButton(
+        inputId = ns("animateControl"),
+        label = if (animation_running()) "Pause" else "Play",
+        icon = if (animation_running()) icon("pause") else icon("play"),
+        class = "btn-primary btn-lg",
+        width = "100%"
+      )
+    })
+
+    # Handle play button
+    observeEvent(input$play_animation, {
+      animation_running(TRUE)
+      # Start the animation immediately
+      animation_step()
+    })
+
+    # Handle pause button
+    observeEvent(input$pause_animation, {
+      animation_running(FALSE)
+    })
+
+    # Handle animation control button
+    observeEvent(input$animateControl, {
+      # Toggle animation state
+      animation_running(!animation_running())
+
+      # Force UI update for button
+      output$playPauseButton <- renderUI({
+        actionButton(
+          inputId = ns("animateControl"),
+          label = if (animation_running()) "Pause" else "Play",
+          icon = if (animation_running()) icon("pause") else icon("play"),
+          class = "btn-primary btn-lg",
+          width = "100%"
+        )
+      })
+
+      # Start animation if now playing
+      if (animation_running()) {
+        animation_step()
+      }
+    })
+
+    # Function to handle a single animation step
+    animation_step <- function() {
+      req(animation_running())
+
+      # Get dates and current index
+      dates <- available_dates()
+      if (length(dates) == 0) {
+        return()
       }
 
-      # Show appropriate message based on results
-      if (length(valid_dates) == 0) {
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-warning",
-            role = "alert",
-            paste("No observation data available for", species, "in the selected date range.")
-          )
-        })
-        return(FALSE)
-      } else {
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-success",
-            role = "alert",
-            paste("Data loaded successfully. Found observations for", length(valid_dates), "dates.")
-          )
-        })
-        return(TRUE)
+      date_strings <- sapply(dates, format_date_for_display)
+      current_idx <- which(date_strings == input$date_slider)
+
+      if (length(current_idx) == 0 || current_idx < 1) {
+        current_idx <- 1 # Default to first frame if not found
+      }
+
+      # Move to next date (or cycle back to beginning)
+      next_idx <- if (current_idx < length(dates)) current_idx + 1 else 1
+      next_date <- dates[next_idx]
+
+      # Update slider to new date
+      updateSliderTextInput(
+        session = session,
+        inputId = "date_slider",
+        selected = format_date_for_display(next_date)
+      )
+
+      # Update map with the new frame
+      update_map_with_frame(next_idx)
+
+      # Schedule next animation step after a delay if still playing
+      if (animation_running()) {
+        invalidateLater(animation_speed()) # delay between frames
+        observeEvent(invalidateLater(animation_speed()),
+          {
+            animation_step()
+          },
+          once = TRUE
+        )
       }
     }
+
+    # Clear cache at midnight to get fresh data
+    observe({
+      invalidateLater(calculate_seconds_until_midnight())
+      # Update local cache when time crosses midnight
+      # update_local_cache(days_back = 14)  # Temporarily disabled
+    })
+
+    # Handle manual date slider change
+    observeEvent(input$date_slider, {
+      req(available_dates())
+      selected_date_str <- input$date_slider
+      selected_date <- as_date(selected_date_str)
+
+      # Update current date when slider changes
+      current_date(selected_date)
+
+      dates <- available_dates()
+      date_strings <- sapply(dates, format_date_for_display)
+      new_frame <- which(date_strings == selected_date_str)
+
+      if (length(new_frame) > 0 && new_frame > 0) {
+        update_map_with_frame(new_frame)
+      }
+    })
 
     # Changed from reactive to eventReactive to only load data when the button is clicked
     raster_data <- eventReactive(input$loadData, {
@@ -855,13 +957,13 @@ rtbm_app_server <- function(id, tab_selected) {
       info_card_added(FALSE)
 
       # Process all dates and prepare data
-      success <- processAllDates()
-      print(paste("Data processing complete. Success:", success))
+      success <- process_all_dates()
+      print(paste0("Data processing complete. Success: ", success))
 
       if (success) {
         # Show the first frame
         print("Displaying first frame")
-        updateMapWithFrame(1)
+        update_map_with_frame(1)
       } else {
         # Clear the map if no data
         print("No data available - clearing the map")
@@ -902,7 +1004,7 @@ rtbm_app_server <- function(id, tab_selected) {
     observeEvent(input$rasterMap_zoom, {
       # Store current zoom level
       current_zoom <- input$rasterMap_zoom
-      print(paste("Zoom level changed to:", current_zoom))
+      print(paste0("Zoom level changed to: ", current_zoom))
 
       # Just track zoom level but don't try to manipulate markers directly
       # Let the CSS solution handle consistent appearance
@@ -912,7 +1014,7 @@ rtbm_app_server <- function(id, tab_selected) {
     observeEvent(input$rasterMap_bounds, {
       # Store current bounds
       current_bounds <- input$rasterMap_bounds
-      print(paste("Map bounds changed"))
+      print(paste0("Map bounds changed"))
 
       # This could be used to load more detailed data for the visible area
       # or adjust data display based on the current view
@@ -921,7 +1023,7 @@ rtbm_app_server <- function(id, tab_selected) {
     # Handle marker clicks
     observeEvent(input$rasterMap_marker_click, {
       click_data <- input$rasterMap_marker_click
-      print(paste("Marker clicked:", click_data$id))
+      print(paste0("Marker clicked: ", click_data$id))
 
       # Extract marker ID from the layerId
       marker_id <- sub("marker_", "", click_data$id)
@@ -944,11 +1046,11 @@ rtbm_app_server <- function(id, tab_selected) {
 
         leafletProxy(ns("rasterMap")) |>
           addControl(
-            html = paste0(
+            html = HTML(paste0(
               "<div class='map-hover-display'>",
               "<strong>Intensity:</strong> ", intensity_value,
               "</div>"
-            ),
+            )),
             position = "topright",
             layerId = "hover-info-control"
           )
@@ -963,6 +1065,28 @@ rtbm_app_server <- function(id, tab_selected) {
           position = "topright",
           layerId = "hover-info-control"
         )
+    })
+
+    # Handle animation control button
+    observeEvent(input$animateControl, {
+      # Toggle animation state
+      animation_running(!animation_running())
+
+      # Force UI update for button
+      output$playPauseButton <- renderUI({
+        actionButton(
+          inputId = ns("animateControl"),
+          label = if (animation_running()) "Pause" else "Play",
+          icon = if (animation_running()) icon("pause") else icon("play"),
+          class = "btn-primary btn-lg",
+          width = "100%"
+        )
+      })
+
+      # Start animation if now playing
+      if (animation_running()) {
+        animation_step()
+      }
     })
   })
 }
