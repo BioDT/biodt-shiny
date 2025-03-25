@@ -52,7 +52,7 @@ box::use(
 
   # Local dependencies
   ./rtbm_data_preprocessing[
-    load_bird_species, update_local_cache, load_species_data 
+    load_bird_species, update_local_cache, load_species_data
   ],
 )
 
