@@ -98,8 +98,7 @@ read_weather_data <- function(
     show_col_types = FALSE,
     id = NULL,
   ) |>
-    dplyr::filter(Date <= end_date) # |>
-  # dplyr::select(!(`PAR[µmolm-2s-1]`))
+    dplyr::filter(Date <= end_date)
 
   series <- list()
 
@@ -180,7 +179,6 @@ read_weather_data <- function(
           data = unname(as.list(unlist(input_data[, col_name])))
         )
     }
-    # print(str(series[[i]]))
   }
   print("separating data for echarts done")
 
@@ -360,8 +358,7 @@ generate_chart_with_weather <- function(
         list(left = "10%", right = "8%", top = "36", height = "13%"),
         list(left = "10%", right = "8%", bottom = "35%", height = "13%"),
         list(left = "10%", right = "8%", bottom = "19%", height = "13%"),
-        list(left = "10%", right = "8%", bottom = "3", height = "13%"
-        )
+        list(left = "10%", right = "8%", bottom = "3", height = "13%")
       ),
       xAxis = list(
         list(
@@ -596,23 +593,5 @@ generate_chart_with_weather <- function(
       series = final_simulations
     )
 
-  if (return_series) {
-    return(final_simulations)
-  } else {
-    return(chart)
-  }
-
-  # chart$x$customEvents <- htmlwidgets::JS("
-  #   function(el, x) {
-  #     console.log('Initializing chart');
-  #     var myChart = echarts.init(el);
-
-  #     // Store chart instance globally
-  #     window.currentEchartsInstance = myChart;
-  #     console.log('Chart instance stored globally');
-
-  #     myChart.setOption(x.opts);
-  #     console.log('Chart initialized with options:', x.opts);
-  #   }
-  # ")
+  return(chart)
 }

@@ -9,6 +9,7 @@ box::use(
 
 box::use(
   app / logic / grassland / grassland_weather_double_chart[generate_chart_with_weather],
+  app / logic / grassland / grassland_multichart_lines[generate_chart_lines],
   app / logic / waiter[waiter_text],
 )
 
@@ -86,17 +87,15 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
           "weather",
           "lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt"
         )
+
         colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
-        #colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
-        colors_for_weather <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00")
+        colors_for_weather <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00") #colors_for_weather <- c("#440154FF", "#414487FF", "#2A788EFF", "#22A884FF", "#7AD151FF", "#FDE725FF")
         end_date <- "2015-12-31"
 
         chart_reactive <- reactive({
-          generate_chart_with_weather(
+          generate_chart_lines(
             filepaths_grass = files_grass,
             filepath_weather = file_weather,
-            plot_type = plot_type(),
-            plot_series = ifelse(mean_switch(), "mean", "all"),
             colors_for_grass = colors_for_grass,
             colors_for_weather = colors_for_weather,
             grass_end_date = end_date

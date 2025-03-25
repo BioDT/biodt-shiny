@@ -25,7 +25,7 @@ grassland_dynamics_double_chart_controls_ui <- function(id, i18n) {
           "Bars" = "bar",
           "Lines" = "line"
         ),
-        selected = "bar"
+        selected = "line"
       ),
       disabled(
         input_switch(
@@ -38,7 +38,8 @@ grassland_dynamics_double_chart_controls_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_double_chart_controls_server <- function(id, plot_type, mean_switch) { # nolint
+grassland_dynamics_double_chart_controls_server <- function(id, plot_type, mean_switch) {
+  # nolint
   moduleServer(id, function(input, output, session) {
     observeEvent(input$line_or_bar, ignoreInit = TRUE, {
       req(input$line_or_bar)
