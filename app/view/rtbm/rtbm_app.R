@@ -569,7 +569,7 @@ rtbm_app_server <- function(id, tab_selected) {
                       title = "Observation intensity",
                       opacity = 0.7
                     )
-                    
+
                     # Always re-add the bird info card if it's supposed to be there
                     if (info_card_added()) {
                       # Make sure we have all bird info available
@@ -590,7 +590,7 @@ rtbm_app_server <- function(id, tab_selected) {
                           "</div>",
                           "</div>"
                         ))
-                        
+
                         # Add the bird info card directly to the map
                         m <- m |> addControl(
                           html = bird_info_html,
@@ -733,47 +733,22 @@ rtbm_app_server <- function(id, tab_selected) {
       s_url
     })
 
-    # Process data for all dates in the selected range
-    process_all_dates <- function() {
-      req(input$dateRange, input$speciesPicker)
-
-      start_date <- as_date(input$dateRange[1])
-      end_date <- as_date(input$dateRange[2])
-      species <- input$speciesPicker
-
-      # Find scientific name for the selected species
-      scientific_name <- bird_spp_info |>
-        filter(common_name == species) |>
-        pull(scientific_name)
-
-      if (length(scientific_name) == 0) {
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-danger",
-            role = "alert",
-            "Error: Could not find scientific name for the selected species."
-          )
-        })
-        return(FALSE)
-      }
-
-      # Update status message
-      output$statusMsg <- renderUI({
-        div(
-          class = "alert alert-info",
-          role = "alert",
-          "Loading data... This may take a few moments, especially if new data needs to be downloaded."
-        )
-      })
-
-      # Use withProgress to show progress
-      result <- NULL
+    # Process all dates in the date range
+    process_all_dates <- function(scientific_name, common_name, start_date, end_date) {
+      # Use withProgress to show a loading indicator
       withProgress(
-        message = "Processing data",
+        message = paste("Loading data for", common_name),
         value = 0,
         {
-          # Load data using the parquet-based approach
-          incProgress(0.2, detail = "Fetching observation data")
+          # Reset reactive values
+          available_dates(NULL)
+          species_data(NULL)
+          current_date(NULL)
+          current_frame_index(NULL)
+
+          incProgress(0.1, detail = "Checking for data files")
+
+          # Load data for the species
           result <- load_species_data(
             scientific_name = scientific_name,
             start_date = start_date,
@@ -782,14 +757,26 @@ rtbm_app_server <- function(id, tab_selected) {
 
           incProgress(0.3, detail = "Processing observations")
 
-          if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
+          # Check if there was an error or no data is available
+          if (result$error || is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
+            # Show specific error message if available, otherwise a generic one
             output$statusMsg <- renderUI({
               div(
                 class = "alert alert-warning",
                 role = "alert",
-                "No data available for the selected species and date range. Try a different date range or species."
+                if (!is.null(result$error_message)) {
+                  result$error_message
+                } else {
+                  "No data available for the selected species and date range. Try a different date range or species."
+                }
               )
             })
+
+            # Clear the map
+            leafletProxy(ns("rasterMap")) |>
+              clearImages() |>
+              clearControls()
+
             return(FALSE)
           }
 
@@ -889,15 +876,14 @@ rtbm_app_server <- function(id, tab_selected) {
       if (length(new_frame) > 0 && !is.na(new_frame)) {
         current_frame_index(new_frame)
         update_map_with_frame(new_frame)
-        
+
         # Re-add bird info card after this map update
-        if (info_card_added() && 
-            !is.null(input$speciesPicker) && 
-            !is.null(photo_url()) && 
-            !is.null(scientific_name()) && 
-            !is.null(wiki_link()) && 
-            !is.null(song_url())) {
-            
+        if (info_card_added() &&
+          !is.null(input$speciesPicker) &&
+          !is.null(photo_url()) &&
+          !is.null(scientific_name()) &&
+          !is.null(wiki_link()) &&
+          !is.null(song_url())) {
           # Create bird info card HTML with inline styles
           bird_info_html <- HTML(paste0(
             "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
@@ -914,8 +900,8 @@ rtbm_app_server <- function(id, tab_selected) {
             "</div>",
             "</div>"
           ))
-          
-          # Add bird info card using leafletProxy after the map update
+
+          # Add the bird info card directly to the map
           shinyjs::delay(100, {
             leafletProxy(ns("rasterMap")) |>
               removeControl(layerId = "bird-info-card") |>
@@ -1023,15 +1009,14 @@ rtbm_app_server <- function(id, tab_selected) {
       input$rasterMap_zoom
       input$rasterMap_bounds
       input$loadData
-      
+
       # Only proceed if we should show the bird info card
-      if (info_card_added() && 
-          !is.null(input$speciesPicker) && 
-          !is.null(photo_url()) && 
-          !is.null(scientific_name()) && 
-          !is.null(wiki_link()) && 
-          !is.null(song_url())) {
-        
+      if (info_card_added() &&
+        !is.null(input$speciesPicker) &&
+        !is.null(photo_url()) &&
+        !is.null(scientific_name()) &&
+        !is.null(wiki_link()) &&
+        !is.null(song_url())) {
         # Add a small delay to ensure this runs after other map operations
         shinyjs::delay(200, {
           # Create bird info card HTML with inline styles
@@ -1050,7 +1035,7 @@ rtbm_app_server <- function(id, tab_selected) {
             "</div>",
             "</div>"
           ))
-          
+
           # Add bird info card to the map
           leafletProxy(ns("rasterMap")) |>
             removeControl(layerId = "bird-info-card") |>
@@ -1096,7 +1081,7 @@ rtbm_app_server <- function(id, tab_selected) {
 
       # Update flag to indicate the info card is added
       info_card_added(TRUE)
-      
+
       # Also update the map frame if we have data available
       if (!is.null(current_frame_index())) {
         update_map_with_frame(current_frame_index())
@@ -1110,7 +1095,7 @@ rtbm_app_server <- function(id, tab_selected) {
       # Do NOT reset info_card_added flag here - important for persistence
 
       # Process all dates and prepare data
-      success <- process_all_dates()
+      success <- process_all_dates(scientific_name = scientific_name(), common_name = common_name(), start_date = as_date(input$dateRange[1]), end_date = as_date(input$dateRange[2]))
       print(paste0("Data processing complete. Success: ", success))
 
       if (success) {
@@ -1129,7 +1114,7 @@ rtbm_app_server <- function(id, tab_selected) {
     # Observe button click to trigger initial data load
     observeEvent(input$loadData, {
       raster_data()
-      
+
       # Add a slight delay and then re-add both legend and bird info card
       shinyjs::delay(500, {
         # Re-add the legend
@@ -1137,7 +1122,7 @@ rtbm_app_server <- function(id, tab_selected) {
           # We need to recreate the legend with the same parameters
           # Assuming points_data is available from the most recent update
           leafletProxy(ns("rasterMap")) |>
-            clearControls() |>  # Clear existing controls
+            clearControls() |> # Clear existing controls
             addLegend(
               position = "bottomright",
               pal = colorNumeric(palette = "viridis", domain = c(0, 1))(seq(0, 1, length.out = 5)),
@@ -1146,16 +1131,15 @@ rtbm_app_server <- function(id, tab_selected) {
               opacity = 0.7
             )
         }
-        
+
         # Re-add the bird info card if needed
         if (info_card_added()) {
           # Make sure we have all the required bird info available
-          if (!is.null(input$speciesPicker) && 
-              !is.null(photo_url()) && 
-              !is.null(scientific_name()) && 
-              !is.null(wiki_link()) && 
-              !is.null(song_url())) {
-              
+          if (!is.null(input$speciesPicker) &&
+            !is.null(photo_url()) &&
+            !is.null(scientific_name()) &&
+            !is.null(wiki_link()) &&
+            !is.null(song_url())) {
             # Create bird info card HTML with inline styles
             bird_info_html <- HTML(paste0(
               "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
@@ -1172,7 +1156,7 @@ rtbm_app_server <- function(id, tab_selected) {
               "</div>",
               "</div>"
             ))
-            
+
             # Add bird info card back to the map
             leafletProxy(ns("rasterMap")) |>
               removeControl(layerId = "bird-info-card") |>
@@ -1192,15 +1176,16 @@ rtbm_app_server <- function(id, tab_selected) {
       m <- leaflet() |>
         addProviderTiles("CartoDB.Positron") |>
         setView(lng = 25, lat = 65.5, zoom = 4) |>
-        addControl(html = "<div id='hover-info' class='map-hover-display d-none'></div>", 
-                   position = "topright", 
-                   layerId = "hover-info-control")
-      
+        addControl(
+          html = "<div id='hover-info' class='map-hover-display d-none'></div>",
+          position = "topright",
+          layerId = "hover-info-control"
+        )
+
       # If we already have the bird info card, add it to the initial map
-      if (info_card_added() && !is.null(input$speciesPicker) && 
-          !is.null(photo_url()) && !is.null(scientific_name()) && 
-          !is.null(wiki_link()) && !is.null(song_url())) {
-        
+      if (info_card_added() && !is.null(input$speciesPicker) &&
+        !is.null(photo_url()) && !is.null(scientific_name()) &&
+        !is.null(wiki_link()) && !is.null(song_url())) {
         # Create bird info card HTML with inline styles
         bird_info_html <- HTML(paste0(
           "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
@@ -1217,7 +1202,7 @@ rtbm_app_server <- function(id, tab_selected) {
           "</div>",
           "</div>"
         ))
-        
+
         # Add bird info card to the initial map
         m <- m |> addControl(
           html = bird_info_html,
@@ -1225,7 +1210,7 @@ rtbm_app_server <- function(id, tab_selected) {
           layerId = "bird-info-card"
         )
       }
-      
+
       return(m)
     })
   })
