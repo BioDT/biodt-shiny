@@ -281,8 +281,9 @@ rtbm_app_server <- function(id, tab_selected) {
     species_data <- reactiveVal(NULL)
 
     # Animation controls
-    animation_speed <- reactiveVal(1000) # milliseconds between frames
+    animation_speed <- reactiveVal(1000) # 1 second between frames
     animation_running <- reactiveVal(FALSE)
+    animation_last_step <- reactiveVal(Sys.time()) # Track when the last step occurred
 
     # Sidebar state management
     sidebar_expanded <- reactiveVal(TRUE) # Start expanded
@@ -996,6 +997,12 @@ rtbm_app_server <- function(id, tab_selected) {
       # Toggle animation state
       animation_running(!animation_running())
 
+      # Reset the last step time when starting animation
+      if (animation_running()) {
+        # Set to a time in the past to ensure first step happens immediately
+        animation_last_step(Sys.time() - 3)
+      }
+
       # Force UI update for button
       output$playPauseButton <- renderUI({
         actionButton(
@@ -1047,14 +1054,29 @@ rtbm_app_server <- function(id, tab_selected) {
       # Schedule next animation step after a delay if still playing
       if (animation_running()) {
         invalidateLater(animation_speed()) # delay between frames
-        observeEvent(invalidateLater(animation_speed()),
-          {
-            animation_step()
-          },
-          once = TRUE
-        )
       }
     }
+
+    # Observer to handle continuous animation playback
+    observe({
+      req(animation_running())
+
+      # This observer will trigger whenever animation_running() is TRUE
+      # and after each invalidateLater() call
+      invalidateLater(animation_speed())
+      
+      # Check if enough time has passed since the last animation step
+      current_time <- Sys.time()
+      time_since_last_step <- as.numeric(difftime(current_time, animation_last_step(), units = "secs"))
+      
+      # Only proceed with animation step if still running and at least 2 seconds have passed
+      if (animation_running() && time_since_last_step >= 2) {
+        # Update the last step time
+        animation_last_step(current_time)
+        # Perform the animation step
+        animation_step()
+      }
+    })
 
     # Add observer to ensure bird info card persists after any map operations
     observe({
