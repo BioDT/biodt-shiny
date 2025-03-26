@@ -365,168 +365,51 @@ load_species_data <- function(scientific_name,
                               start_date,
                               end_date,
                               dirs = init_storage_dirs()) {
-  tryCatch(
-    {
-      # Check if storage directories are initialized
-      if (is.null(dirs) || !dir.exists(dirs$parquet_dir)) {
-        log_error("Storage directories not initialized properly")
-        return(list(
-          data = NULL,
-          dates = NULL,
-          data_paths = NULL,
-          error = TRUE,
-          error_message = "Storage directories not initialized properly"
-        ))
-      }
+  # Create date sequence and convert to character strings
+  start_date <- as.Date(start_date)
+  end_date <- as.Date(end_date)
+  dates <- seq(from = start_date, to = end_date, by = "day")
+  date_strings <- as.character(dates)
 
-      # Check if scientific name is valid
-      if (is.null(scientific_name) || scientific_name == "") {
-        log_error("Invalid scientific name")
-        return(list(
-          data = NULL,
-          dates = NULL,
-          data_paths = NULL,
-          error = TRUE,
-          error_message = "Invalid scientific name"
-        ))
-      }
+  # Get path to species directory
+  species_dir <- path(dirs$parquet_dir, paste0("species=", scientific_name))
 
-      # First check for locally available data and download if needed
-      check_result <- check_and_download_species_data(
-        scientific_name = scientific_name,
-        start_date = start_date,
-        end_date = end_date,
-        dirs = dirs
-      )
+  if (!dir.exists(species_dir)) {
+    log_warn(paste("No data directory found for", scientific_name))
+    return(NULL)
+  }
 
-      # Log the check result
-      log_info(paste("Data check result:", check_result$message))
+  # Look for files matching the dates
+  all_data <- list()
+  available_dates <- c()
 
-      # If no data is available after checking and attempting downloads
-      if (check_result$status == "empty" || is.null(check_result$available_dates) ||
-        length(check_result$available_dates) == 0) {
-        log_warn(paste("No data available for", scientific_name, "in the specified date range"))
-        return(list(
-          data = NULL,
-          dates = NULL,
-          data_paths = NULL,
-          error = TRUE,
-          error_message = paste(
-            "No observation data available for", scientific_name,
-            "between", start_date, "and", end_date
-          )
-        ))
-      }
+  for (i in seq_along(date_strings)) {
+    date_str <- date_strings[i]
+    date_file <- path(species_dir, paste0("date=", date_str, ".parquet"))
 
-      # Get available dates (already sorted from check_and_download_species_data)
-      available_dates <- check_result$available_dates
-
-      # Get paths for all available dates
-      data_paths <- path(
-        dirs$parquet_dir,
-        paste0("species=", scientific_name),
-        paste0("date=", as.character(available_dates), ".parquet")
-      )
-
-      # Verify all file paths exist
-      if (!all(file.exists(data_paths))) {
-        missing_paths <- data_paths[!file.exists(data_paths)]
-        log_warn(paste("Some data paths do not exist:", paste(missing_paths, collapse = ", ")))
-
-        # Filter to keep only existing files
-        existing_indices <- which(file.exists(data_paths))
-        data_paths <- data_paths[existing_indices]
-        available_dates <- available_dates[existing_indices]
-
-        if (length(data_paths) == 0) {
-          return(list(
-            data = NULL,
-            dates = NULL,
-            data_paths = NULL,
-            error = TRUE,
-            error_message = "No valid data files found after filtering"
-          ))
-        }
-      }
-
-      # Load the first file to initialize the dataset
-      first_file <- data_paths[1]
-
-      # Check if file exists and has content
-      if (!file.exists(first_file) || file.size(first_file) == 0) {
-        log_error(paste("Invalid first file:", first_file))
-        return(list(
-          data = NULL,
-          dates = NULL,
-          data_paths = NULL,
-          error = TRUE,
-          error_message = paste("Data file is empty or not found:", first_file)
-        ))
-      }
-
-      # Load first file to check columns
-      first_data <- tryCatch(
-        {
-          arrow::read_parquet(first_file)
-        },
-        error = function(e) {
-          log_error(paste("Error reading parquet file:", e$message))
-          return(NULL)
-        }
-      )
-
-      # Check if data was loaded and has required columns
-      if (is.null(first_data) || nrow(first_data) == 0) {
-        log_error("First parquet file is empty or invalid")
-        return(list(
-          data = NULL,
-          dates = NULL,
-          data_paths = NULL,
-          error = TRUE,
-          error_message = "First parquet file is empty or invalid"
-        ))
-      }
-
-      # Check required columns
-      required_columns <- c("x", "y", "date", "value")
-      missing_columns <- required_columns[!required_columns %in% colnames(first_data)]
-
-      if (length(missing_columns) > 0) {
-        log_error(paste("Missing required columns:", paste(missing_columns, collapse = ", ")))
-        return(list(
-          data = NULL,
-          dates = NULL,
-          data_paths = NULL,
-          error = TRUE,
-          error_message = paste("Missing required columns:", paste(missing_columns, collapse = ", "))
-        ))
-      }
-
-      log_success(paste(
-        "Successfully loaded data for", scientific_name,
-        "with", length(available_dates), "dates"
-      ))
-
-      # Return the dates and data paths
-      return(list(
-        data = first_data, # Return the first data file for immediate use
-        dates = available_dates,
-        data_paths = data_paths,
-        error = FALSE,
-        error_message = NULL
-      ))
-    },
-    error = function(e) {
-      log_error(paste("Error in load_species_data:", e$message))
-      return(list(
-        data = NULL,
-        dates = NULL,
-        data_paths = NULL,
-        error = TRUE,
-        error_message = paste("Error loading species data:", e$message)
-      ))
+    if (file.exists(date_file)) {
+      # Read data
+      df <- read_parquet(date_file)
+      all_data[[length(all_data) + 1]] <- df
+      available_dates <- c(available_dates, dates[i])
     }
-  )
+  }
+
+  # Combine all data
+  if (length(all_data) == 0) {
+    log_warn(paste(
+      "No data available for", scientific_name, "in the date range",
+      as.character(start_date), "to", as.character(end_date)
+    ))
+    return(list(data = NULL, dates = NULL))
+  }
+
+  combined_data <- bind_rows(all_data)
+
+  return(list(
+    data = combined_data,
+    dates = available_dates
+  ))
 }
 
 #' Create a frame data structure for a specific date
@@ -759,7 +642,7 @@ get_or_create_parquet <- function(scientific_name, date, data_dir) {
 
         # Check if the dataframe has the expected columns
         expected_cols <- c("x", "y", "value", "date")
-        missing_cols <- expected_cols[!expected_cols %in% colnames(df)]
+        missing_cols <- setdiff(expected_cols, names(df))
 
         if (length(missing_cols) > 0) {
           print(paste("WARNING: Parquet file missing columns:", paste(missing_cols, collapse = ", ")))
@@ -796,7 +679,7 @@ download_and_create_parquet <- function(scientific_name, date, data_dir, parquet
   if (!is.null(raster_data)) {
     print("Downloaded raster data successfully")
 
-    # Convert to dataframe
+    # Create points from raster
     points_df <- raster_to_points_df(raster_data, date)
     print(paste("Converted raster to", nrow(points_df), "points"))
 
@@ -1218,154 +1101,4 @@ match_species_name <- function(scientific_name, bird_info) {
 
   # No match found
   return(integer(0))
-}
-
-#' Check for data availability and download if needed
-#'
-#' @param scientific_name Scientific name of the bird species
-#' @param start_date Start date for data
-#' @param end_date End date for data
-#' @param dirs Directory structure from init_storage_dirs
-#' @return List with status information and available dates
-#' @export
-check_and_download_species_data <- function(scientific_name,
-                                            start_date,
-                                            end_date,
-                                            dirs = init_storage_dirs()) {
-  # Convert dates to Date objects
-  start_date <- as.Date(start_date)
-  end_date <- as.Date(end_date)
-
-  # Create sequence of dates
-  dates <- seq(from = start_date, to = end_date, by = "day")
-  date_strings <- as.character(dates)
-
-  # Get path to species directory
-  species_dir <- path(dirs$parquet_dir, paste0("species=", scientific_name))
-
-  # Create species directory if it doesn't exist
-  if (!dir.exists(species_dir)) {
-    dir_create(species_dir, recurse = TRUE, mode = "0755")
-  }
-
-  # Check which dates already have parquet files
-  available_files <- list.files(species_dir, pattern = "^date=.*\\.parquet$", full.names = TRUE)
-  file_dates <- as.Date(gsub("^date=(.+)\\.parquet$", "\\1", basename(available_files)))
-
-  # Identify which dates are in our range and have files
-  in_range_indices <- which(file_dates >= start_date & file_dates <= end_date)
-  available_dates_with_files <- if (length(in_range_indices) > 0) file_dates[in_range_indices] else NULL
-
-  # Which dates need to be downloaded
-  dates_to_download <- dates[!dates %in% available_dates_with_files]
-
-  log_info(paste(
-    "For species", scientific_name, ":",
-    "Found", length(available_dates_with_files), "existing files,",
-    length(dates_to_download), "dates need downloading"
-  ))
-
-  # If we have all dates, no need to download
-  if (length(dates_to_download) == 0) {
-    return(list(
-      status = "complete",
-      message = "All data already available locally",
-      available_dates = available_dates_with_files
-    ))
-  }
-
-  # Try to download missing dates
-  new_dates <- c()
-  downloaded_count <- 0
-  not_available_count <- 0
-
-  for (date in dates_to_download) {
-    date_str <- as.character(date)
-
-    # Check if geotiff is available remotely
-    tif_url <- get_tif_url(date, scientific_name)
-    cache_dir <- dirs$cache_dir
-
-    # Try to download and process the raster
-    log_info(paste("Checking for remote data for", scientific_name, "on", date_str))
-
-    resp <- tryCatch(
-      {
-        httr2::request(tif_url) |>
-          httr2::req_method("HEAD") |>
-          httr2::req_error(is_error = function(resp) FALSE) |>
-          httr2::req_perform()
-      },
-      error = function(e) {
-        log_warn(paste("Error checking remote file:", e$message))
-        return(NULL)
-      }
-    )
-
-    if (!is.null(resp) && httr2::resp_status(resp) == 200) {
-      # File exists remotely
-      log_info(paste("Found remote data for", scientific_name, "on", date_str))
-
-      # Download and process
-      raster_data <- download_and_process_raster(date, scientific_name, cache_dir)
-
-      if (!is.null(raster_data)) {
-        # Convert to dataframe
-        df <- tryCatch(
-          {
-            raster_to_dataframe(raster_data, date, scientific_name)
-          },
-          error = function(e) {
-            log_error(paste("Error converting raster to dataframe:", e$message))
-            return(NULL)
-          }
-        )
-
-        if (!is.null(df) && nrow(df) > 0) {
-          # Save to parquet
-          parquet_file <- path(species_dir, paste0("date=", date_str, ".parquet"))
-
-          arrow::write_parquet(df, parquet_file)
-          log_success(paste("Downloaded and saved data for", scientific_name, "on", date_str))
-
-          new_dates <- c(new_dates, date)
-          downloaded_count <- downloaded_count + 1
-        } else {
-          log_warn(paste("No valid points in raster for", scientific_name, "on", date_str))
-          not_available_count <- not_available_count + 1
-        }
-      } else {
-        log_warn(paste("Failed to process raster for", scientific_name, "on", date_str))
-        not_available_count <- not_available_count + 1
-      }
-    } else {
-      log_warn(paste("Remote data not available for", scientific_name, "on", date_str))
-      not_available_count <- not_available_count + 1
-    }
-  }
-
-  # Combine existing and new dates
-  all_available_dates <- c(available_dates_with_files, new_dates)
-
-  # Sort dates
-  all_available_dates <- sort(all_available_dates)
-
-  # Return summary of results
-  if (length(all_available_dates) == 0) {
-    return(list(
-      status = "empty",
-      message = paste("No data available for", scientific_name, "in the specified date range"),
-      available_dates = NULL
-    ))
-  } else {
-    return(list(
-      status = "partial",
-      message = paste(
-        "Found", length(available_dates_with_files), "existing files,",
-        "downloaded", downloaded_count, "new files,",
-        not_available_count, "dates had no data available"
-      ),
-      available_dates = all_available_dates
-    ))
-  }
 }

@@ -1064,13 +1064,13 @@ rtbm_app_server <- function(id, tab_selected) {
       # This observer will trigger whenever animation_running() is TRUE
       # and after each invalidateLater() call
       invalidateLater(animation_speed())
-      
+
       # Check if enough time has passed since the last animation step
       current_time <- Sys.time()
       time_since_last_step <- as.numeric(difftime(current_time, animation_last_step(), units = "secs"))
-      
-      # Only proceed with animation step if still running and at least 2 seconds have passed
-      if (animation_running() && time_since_last_step >= 2) {
+
+      # Only proceed with animation step if still running and at least 1 second have passed
+      if (animation_running() && time_since_last_step >= 1) {
         # Update the last step time
         animation_last_step(current_time)
         # Perform the animation step
