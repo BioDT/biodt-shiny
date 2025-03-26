@@ -27,7 +27,7 @@ box::use(
     addCircleMarkers, addControl, clearControls, addLegend, addPolylines,
     layersControlOptions, addLayersControl, leafletOutput, renderLeaflet, leafletProxy,
     addRasterImage, clearImages, colorNumeric, addMarkers, clearGroup, makeIcon,
-    addRectangles, removeControl, removeTiles
+    addRectangles, removeControl, removeTiles, hideGroup, showGroup, labelFormat
   ],
   leaflet.extras[addHeatmap],
 
@@ -54,6 +54,9 @@ box::use(
   . / rtbm_data_preprocessing[
     load_bird_species, update_local_cache, load_species_data
   ],
+  viridisLite[magma],
+  RColorBrewer[brewer.pal],
+  grDevices[colorRampPalette]
 )
 
 #' Load and prepare bird species information
@@ -469,7 +472,8 @@ rtbm_app_server <- function(id, tab_selected) {
                 # Base map with a more neutral style
                 m <- leaflet() |>
                   addProviderTiles("CartoDB.Positron") |>
-                  setView(lng = 25, lat = 65, zoom = 4)
+                  # Set view to focus on southern Finland where most observations are
+                  setView(lng = 25.0, lat = 62.0, zoom = 6)
 
                 # Add Finland border if available
                 if (!is.null(finland_border)) {
@@ -505,99 +509,134 @@ rtbm_app_server <- function(id, tab_selected) {
                       max(points_data$intensity, na.rm = TRUE)
                     )
 
-                    # Create a color palette for intensity values
+                    # Use YlGnBu colormap from RColorBrewer (from CES module) instead of magma
+                    # Create a sequential yellow-green-blue color palette
+                    ylgnbu_colors <- colorRampPalette(brewer.pal(9, "YlGnBu"))(20)
+
+                    # Create color function for intensity values
                     intensity_min <- min(points_data$intensity, na.rm = TRUE)
                     intensity_max <- max(points_data$intensity, na.rm = TRUE)
 
+                    # Make sure we have a valid domain even when all values are the same
                     if (intensity_min == intensity_max) {
-                      # If all values are the same, create a range to avoid domain error
                       domain <- c(intensity_min, intensity_min + 0.000001)
                     } else {
                       domain <- c(intensity_min, intensity_max)
                     }
 
-                    pal <- colorNumeric(
-                      palette = "viridis",
-                      domain = domain
-                    )
-
-                    # Add visualization layers
-
-                    # 1. Circle markers for better visibility at all zoom levels
-                    m <- m |>
-                      addCircleMarkers(
-                        data = points_data,
-                        lng = ~longitude,
-                        lat = ~latitude,
-                        radius = ~ pmin(8, 3 + intensity * 5), # Size based on intensity (capped)
-                        color = "#000",
-                        weight = 1,
-                        fillColor = ~ pal(intensity),
-                        fillOpacity = 0.7,
-                        popup = ~ paste0("<strong>Intensity:</strong> ", round(intensity, 4)),
-                        group = "Bird Markers"
-                      )
-
-                    # 2. Add heatmap for density visualization
-                    if (requireNamespace("leaflet.extras", quietly = TRUE)) {
-                      m <- m |>
-                        leaflet.extras::addHeatmap(
-                          data = points_data,
-                          lng = ~longitude,
-                          lat = ~latitude,
-                          intensity = ~intensity,
-                          blur = 15,
-                          max = intensity_max,
-                          radius = 10,
-                          group = "Heat Map"
-                        )
+                    base_pal <- colorNumeric(ylgnbu_colors, domain = domain, na.color = NA)
+                    pal_na <- function(x) {
+                      col <- base_pal(x)
+                      col[is.na(col)] <- "#00000000" # Transparent for NA values
+                      col
                     }
 
-                    # 3. Add layer controls to switch between visualizations
+                    # Add heatmap with YlGnBu colormap - confined to Finland's boundaries
+                    if (requireNamespace("leaflet.extras", quietly = TRUE)) {
+                      # Use YlGnBu colors for heatmap gradient
+                      ylgnbu_heatmap_colors <- rev(ylgnbu_colors)
+
+                      # Create a multiplier to enhance intensity values while preserving data relationships
+                      intensity_enhancer <- 4.0
+
+                      # Filter points to ensure they're only within Finland
+                      # This is a key step to prevent the heatmap from extending beyond borders
+                      if (!is.null(finland_border) && nrow(finland_border) > 0) {
+                        # Create a simple bounding box for quick filtering
+                        fin_bbox <- st_bbox(finland_border)
+
+                        # Pre-filter points to those within Finland's bounding box
+                        points_in_finland <- points_data |>
+                          filter(
+                            longitude >= fin_bbox["xmin"] &
+                              longitude <= fin_bbox["xmax"] &
+                              latitude >= fin_bbox["ymin"] &
+                              latitude <= fin_bbox["ymax"]
+                          )
+
+                        # More moderate parameters to reduce boundary spillover
+                        m <- m |>
+                          leaflet.extras::addHeatmap(
+                            data = points_in_finland,
+                            lng = ~longitude,
+                            lat = ~latitude,
+                            intensity = ~ intensity * intensity_enhancer,
+                            blur = 18,
+                            max = intensity_max * intensity_enhancer * 0.8,
+                            radius = 15,
+                            minOpacity = 0.7,
+                            gradient = ylgnbu_heatmap_colors,
+                            group = "Heat Map"
+                          )
+
+                        safe_print("Added heatmap with", nrow(points_in_finland), "points within Finland")
+                      } else {
+                        # Fallback if Finland boundary isn't available
+                        m <- m |>
+                          leaflet.extras::addHeatmap(
+                            data = points_data,
+                            lng = ~longitude,
+                            lat = ~latitude,
+                            intensity = ~ intensity * intensity_enhancer,
+                            blur = 18,
+                            max = intensity_max * intensity_enhancer * 0.8,
+                            radius = 15,
+                            minOpacity = 0.7,
+                            gradient = ylgnbu_heatmap_colors,
+                            group = "Heat Map"
+                          )
+
+                        safe_print("Added heatmap without Finland boundary filtering")
+                      }
+                    }
+
+                    # Add layer controls with Heat Map as the only visualization option
                     m <- m |>
                       addLayersControl(
                         baseGroups = c("Base Map"),
-                        overlayGroups = c("Finland Border", "Bird Markers", "Heat Map"),
+                        overlayGroups = c("Finland Border", "Heat Map"),
                         options = layersControlOptions(collapsed = FALSE)
                       )
 
-                    # 4. Add legend
+                    # Add legend with enhanced visualization
                     m <- m |> addLegend(
                       position = "bottomright",
-                      pal = pal,
-                      values = points_data$intensity,
+                      pal = base_pal,
+                      values = domain,
                       title = "Observation intensity",
-                      opacity = 0.7
+                      opacity = 1.0 # Full opacity for better visibility
                     )
 
                     # Always re-add the bird info card if it's supposed to be there
-                    if (info_card_added()) {
-                      # Make sure we have all bird info available
-                      if (!is.null(input$speciesPicker) && !is.null(photo_url()) && !is.null(scientific_name()) && !is.null(wiki_link()) && !is.null(song_url())) {
-                        # Create bird info card HTML with inline styles
-                        bird_info_html <- HTML(paste0(
-                          "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
-                          "<h5>", input$speciesPicker, "</h5>",
-                          "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
-                          "<div style='text-align: center;'>",
-                          "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
-                          "</div>",
-                          "<div style='margin-top: 10px;'>",
-                          "<audio controls style='width: 100%;'>",
-                          "<source src='", song_url(), "' type='audio/mp3'>",
-                          "Your browser does not support the audio element.",
-                          "</audio>",
-                          "</div>",
-                          "</div>"
-                        ))
+                    if (info_card_added() &&
+                      !is.null(input$speciesPicker) &&
+                      !is.null(photo_url()) &&
+                      !is.null(scientific_name()) &&
+                      !is.null(wiki_link()) &&
+                      !is.null(song_url())) {
+                      # Create bird info card HTML with inline styles
+                      bird_info_html <- HTML(paste0(
+                        "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
+                        "<h5>", input$speciesPicker, "</h5>",
+                        "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
+                        "<div style='text-align: center;'>",
+                        "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
+                        "</div>",
+                        "<div style='margin-top: 10px;'>",
+                        "<audio controls style='width: 100%;'>",
+                        "<source src='", song_url(), "' type='audio/mp3'>",
+                        "Your browser does not support the audio element.",
+                        "</audio>",
+                        "</div>",
+                        "</div>"
+                      ))
 
-                        # Add the bird info card directly to the map
-                        m <- m |> addControl(
-                          html = bird_info_html,
-                          position = "topleft",
-                          layerId = "bird-info-card"
-                        )
-                      }
+                      # Add the bird info card directly to the map
+                      m <- m |> addControl(
+                        html = bird_info_html,
+                        position = "topleft",
+                        layerId = "bird-info-card"
+                      )
                     }
 
                     # Log success
@@ -643,7 +682,8 @@ rtbm_app_server <- function(id, tab_selected) {
                 # Return a basic map if there's an error
                 leaflet() |>
                   addProviderTiles("CartoDB.Positron") |>
-                  setView(lng = 25, lat = 65, zoom = 4) |>
+                  # Set view to focus on southern Finland where most observations are
+                  setView(lng = 25.0, lat = 62.0, zoom = 6) |>
                   addControl(
                     html = HTML(paste0(
                       "<div class='alert alert-danger'>",
@@ -733,22 +773,47 @@ rtbm_app_server <- function(id, tab_selected) {
       s_url
     })
 
-    # Process all dates in the date range
-    process_all_dates <- function(scientific_name, common_name, start_date, end_date) {
-      # Use withProgress to show a loading indicator
+    # Process data for all dates in the selected range
+    process_all_dates <- function() {
+      req(input$dateRange, input$speciesPicker)
+
+      start_date <- as_date(input$dateRange[1])
+      end_date <- as_date(input$dateRange[2])
+      species <- input$speciesPicker
+
+      # Find scientific name for the selected species
+      scientific_name <- bird_spp_info |>
+        filter(common_name == species) |>
+        pull(scientific_name)
+
+      if (length(scientific_name) == 0) {
+        output$statusMsg <- renderUI({
+          div(
+            class = "alert alert-danger",
+            role = "alert",
+            "Error: Could not find scientific name for the selected species."
+          )
+        })
+        return(FALSE)
+      }
+
+      # Update status message
+      output$statusMsg <- renderUI({
+        div(
+          class = "alert alert-info",
+          role = "alert",
+          "Loading data... This may take a few moments, especially if new data needs to be downloaded."
+        )
+      })
+
+      # Use withProgress to show progress
+      result <- NULL
       withProgress(
-        message = paste("Loading data for", common_name),
+        message = "Processing data",
         value = 0,
         {
-          # Reset reactive values
-          available_dates(NULL)
-          species_data(NULL)
-          current_date(NULL)
-          current_frame_index(NULL)
-
-          incProgress(0.1, detail = "Checking for data files")
-
-          # Load data for the species
+          # Load data using the parquet-based approach
+          incProgress(0.2, detail = "Fetching observation data")
           result <- load_species_data(
             scientific_name = scientific_name,
             start_date = start_date,
@@ -757,26 +822,14 @@ rtbm_app_server <- function(id, tab_selected) {
 
           incProgress(0.3, detail = "Processing observations")
 
-          # Check if there was an error or no data is available
-          if (result$error || is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
-            # Show specific error message if available, otherwise a generic one
+          if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
             output$statusMsg <- renderUI({
               div(
                 class = "alert alert-warning",
                 role = "alert",
-                if (!is.null(result$error_message)) {
-                  result$error_message
-                } else {
-                  "No data available for the selected species and date range. Try a different date range or species."
-                }
+                "No data available for the selected species and date range. Try a different date range or species."
               )
             })
-
-            # Clear the map
-            leafletProxy(ns("rasterMap")) |>
-              clearImages() |>
-              clearControls()
-
             return(FALSE)
           }
 
@@ -1095,7 +1148,7 @@ rtbm_app_server <- function(id, tab_selected) {
       # Do NOT reset info_card_added flag here - important for persistence
 
       # Process all dates and prepare data
-      success <- process_all_dates(scientific_name = scientific_name(), common_name = common_name(), start_date = as_date(input$dateRange[1]), end_date = as_date(input$dateRange[2]))
+      success <- process_all_dates()
       print(paste0("Data processing complete. Success: ", success))
 
       if (success) {
@@ -1175,7 +1228,8 @@ rtbm_app_server <- function(id, tab_selected) {
       # Create the base map
       m <- leaflet() |>
         addProviderTiles("CartoDB.Positron") |>
-        setView(lng = 25, lat = 65.5, zoom = 4) |>
+        # Set view to focus on southern Finland where most observations are
+        setView(lng = 25.0, lat = 62.0, zoom = 6) |>
         addControl(
           html = "<div id='hover-info' class='map-hover-display d-none'></div>",
           position = "topright",
