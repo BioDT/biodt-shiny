@@ -64,55 +64,16 @@ box::use(
   grDevices[colorRampPalette],
 
   # Local dependencies
-  . / rtbm_data_preprocessing[load_bird_species, update_local_cache, load_species_data]
+  . / rtbm_data_handlers[load_bird_species_info, load_parquet_data],
 )
 
 # Import infix operator separately
-`%within%` <- lubridate::`%within%`
-
-#' Load and prepare bird species information
-#' @noRd
-load_bird_species <- function() {
-  bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
-  bird_info <- fromJSON(bird_info_url)
-
-  # Process the nested JSON structure
-  bird_df <- do.call(rbind, lapply(names(bird_info), function(species_key) {
-    info <- bird_info[[species_key]]
-    data.frame(
-      common_name = info$common_name,
-      scientific_name = info$scientific_name,
-      finnish_name = info$finnish_name,
-      photo_url = info$photo_url,
-      wiki_link = info$wiki_link,
-      song_url = info$song_url,
-      stringsAsFactors = FALSE
-    )
-  }))
-
-  # Convert to tibble and arrange by common name
-  as_tibble(bird_df) |>
-    arrange(common_name) |>
-    mutate(
-      scientific_name = str_replace(
-        string = scientific_name,
-        pattern = " ",
-        replacement = "_"
-      )
-    )
-}
+lubridate <- asNamespace("lubridate")
+`%within%` <- lubridate$`%within%`
 
 # Initialize bird species data
-bird_spp_info <- load_bird_species()
+bird_spp_info <- load_bird_species_info()
 species_choices <- bird_spp_info$common_name
-
-#' Calculate seconds until midnight for cache refresh
-#' @noRd
-calculate_seconds_until_midnight <- function() {
-  current_time <- Sys.time()
-  midnight <- as.POSIXct(format(current_time + 86400, "%Y-%m-%d 00:00:00"))
-  as.numeric(difftime(midnight, current_time, units = "secs"))
-}
 
 #' Real-time Bird Monitoring UI Module
 #'
@@ -229,7 +190,7 @@ rtbm_app_ui <- function(id, i18n) {
       # Global styles (with RTBM styles now integrated into main.scss)
       tags$link(rel = "stylesheet", type = "text/css", href = "styles/main.css")
     ),
-    shinyjs::useShinyjs(), # Initialize shinyjs
+    useShinyjs(), # Initialize shinyjs
     base_layout
   )
 }
@@ -294,27 +255,26 @@ rtbm_app_server <- function(id, tab_selected) {
     # Sidebar state management
     sidebar_expanded <- reactiveVal(TRUE) # Start expanded
 
-    # Handle sidebar toggle on mobile
+    # Toggle sidebar collapse/expand
     observeEvent(input$toggleSidebar, {
-      shinyjs::toggleClass(id = "sidebarCol", class = "d-none")
+      # Toggle the sidebar visibility
+      toggleClass(id = "sidebarCol", class = "d-none")
     })
 
-    # Handle sidebar collapse on desktop
+    # Collapse sidebar button
     observeEvent(input$collapseSidebar, {
-      sidebar_expanded(FALSE)
-      shinyjs::addClass(id = "sidebarCol", class = "d-none")
-      shinyjs::removeClass(id = "collapsedSidebar", class = "d-none")
-      shinyjs::removeClass(id = "mapCol", class = "col-md-9")
-      shinyjs::addClass(id = "mapCol", class = "col-md-11")
+      addClass(id = "sidebarCol", class = "d-none")
+      removeClass(id = "collapsedSidebar", class = "d-none")
+      removeClass(id = "mapCol", class = "col-md-9")
+      addClass(id = "mapCol", class = "col-md-11")
     })
 
-    # Handle sidebar expand on desktop
+    # Expand sidebar button
     observeEvent(input$expandSidebar, {
-      sidebar_expanded(TRUE)
-      shinyjs::removeClass(id = "sidebarCol", class = "d-none")
-      shinyjs::addClass(id = "collapsedSidebar", class = "d-none")
-      shinyjs::removeClass(id = "mapCol", class = "col-md-11")
-      shinyjs::addClass(id = "mapCol", class = "col-md-9")
+      removeClass(id = "sidebarCol", class = "d-none")
+      addClass(id = "collapsedSidebar", class = "d-none")
+      removeClass(id = "mapCol", class = "col-md-11")
+      addClass(id = "mapCol", class = "col-md-9")
     })
 
     # Create flags to track if legend and info card are already added
@@ -468,7 +428,7 @@ rtbm_app_server <- function(id, tab_selected) {
             tryCatch(
               {
                 safe_print("Reading parquet file")
-                points_data <- arrow::read_parquet(parquet_path)
+                points_data <- arrow$read_parquet(parquet_path)
 
                 safe_print("Loaded parquet file with ", nrow(points_data), " points")
 
@@ -563,7 +523,7 @@ rtbm_app_server <- function(id, tab_selected) {
 
                         # More moderate parameters to reduce boundary spillover
                         m <- m |>
-                          leaflet.extras::addHeatmap(
+                          leaflet.extras$addHeatmap(
                             data = points_in_finland,
                             lng = ~longitude,
                             lat = ~latitude,
@@ -580,7 +540,7 @@ rtbm_app_server <- function(id, tab_selected) {
                       } else {
                         # Fallback if Finland boundary isn't available
                         m <- m |>
-                          leaflet.extras::addHeatmap(
+                          leaflet.extras$addHeatmap(
                             data = points_data,
                             lng = ~longitude,
                             lat = ~latitude,
@@ -821,7 +781,7 @@ rtbm_app_server <- function(id, tab_selected) {
         {
           # Load data using the parquet-based approach
           incProgress(0.2, detail = "Fetching observation data")
-          result <- load_species_data(
+          result <- load_parquet_data(
             scientific_name = scientific_name,
             start_date = start_date,
             end_date = end_date
@@ -856,7 +816,7 @@ rtbm_app_server <- function(id, tab_selected) {
           # Update slider with new date range
           dates <- available_dates()
           date_strings <- sapply(dates, format_date_for_display)
-          date_mapping <- setNames(1:length(dates), date_strings)
+          date_mapping <- setNames(seq_along(dates), date_strings)
           session$userData$date_mapping <- date_mapping
           session$userData$dates <- dates
 
@@ -881,11 +841,11 @@ rtbm_app_server <- function(id, tab_selected) {
     }
 
     # Clear cache at midnight to get fresh data
-    observe({
-      invalidateLater(calculate_seconds_until_midnight())
-      # Update local cache when time crosses midnight
-      # update_local_cache(days_back = 14)  # Temporarily disabled
-    })
+    # observe({
+    #   invalidateLater(calculate_seconds_until_midnight())
+    #   Update local cache when time crosses midnight
+    #   update_local_cache(days_back = 14)  # Temporarily disabled
+    # })
 
     # Create a custom date slider UI using bslib components
     output$dateSlider <- renderUI({
@@ -898,7 +858,7 @@ rtbm_app_server <- function(id, tab_selected) {
       date_strings <- sapply(dates, format_date_for_display)
 
       # Create a mapping from index to date for the slider
-      date_mapping <- setNames(1:length(dates), date_strings)
+      date_mapping <- setNames(seq_along(dates), date_strings)
 
       # Store the mapping in session data for server access
       session$userData$date_mapping <- date_mapping
@@ -1156,7 +1116,7 @@ rtbm_app_server <- function(id, tab_selected) {
         !is.null(wiki_link()) &&
         !is.null(song_url())) {
         # Add a small delay to ensure this runs after other map operations
-        shinyjs::delay(200, {
+        delay(200, {
           # Add bird info card to the map
           add_bird_info_card()
         })
@@ -1205,7 +1165,7 @@ rtbm_app_server <- function(id, tab_selected) {
       raster_data()
 
       # Add a slight delay and then re-add both legend and bird info card
-      shinyjs::delay(500, {
+      delay(500, {
         # Re-add the legend
         if (legend_added()) {
           # We need to recreate the legend with the same parameters
