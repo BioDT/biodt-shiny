@@ -359,3 +359,239 @@
   border: #a86200 !important;
   background: white !important;
 }
+
+/* RTBM module styles */
+.rtbm-container {
+  .container-fluid {
+    --control-panel-bg: var(--bs-light);
+    --control-panel-border: var(--bs-border-color);
+  }
+  
+  // Layout and transitions
+  .sidebar-column {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .sidebar-collapsed {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .map-column {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  // Map controls
+  .control-panel {
+    padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
+    background-color: var(--control-panel-bg);
+    border: 1px solid var(--control-panel-border);
+    border-radius: var(--bs-border-radius);
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  // Sidebar buttons
+  .collapse-sidebar-btn {
+    border: none;
+    background: transparent;
+    padding: 4px 8px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: var(--bs-gray-200);
+    }
+  }
+  
+  .expand-sidebar-btn {
+    height: 40px;
+    width: 40px;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+  
+  // Control Panel
+  .control-panel {
+    border-radius: var(--bs-border-radius);
+    background-color: var(--control-panel-bg);
+    border: 1px solid var(--control-panel-border);
+    height: 100%;
+    padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
+  }
+  
+  // Date slider
+  .date-slider-container {
+    margin-top: 15px;
+    min-height: 60px;
+    
+    .date-display {
+      font-weight: 500;
+      color: var(--bs-primary);
+    }
+    
+    // Style the bslib slider to match design
+    .bslib-slider {
+      margin-top: 1rem;
+      
+      .noUi-handle {
+        cursor: pointer;
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+      }
+      
+      .noUi-connect {
+        background-color: var(--bs-primary);
+      }
+    }
+    
+    .animation-controls {
+      margin-top: 1rem;
+      text-align: center;
+    }
+  }
+  
+  // Map container
+  .leaflet-container {
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+  }
+  
+  // Legend styles
+  .info.legend {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 6px 8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    
+    i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+  }
+  
+  // Alternate info card styles (for leaflet controls)
+  .info-card-container,
+  .leaflet-control.info-card-container {
+    background-color: var(--bs-white);
+    padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
+    width: 220px;
+    box-shadow: var(--bs-box-shadow-sm);
+  }
+  
+  .leaflet-info-card {
+    width: 100%;
+  }
+  
+  // Map display elements
+  .map-date-display {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 4px;
+  }
+  
+  // Time display
+  .time-display {
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  .current-date {
+    color: var(--bs-primary);
+  }
+  
+  // Animation controls
+  .animation-button-container {
+    display: flex;
+    align-items: center;
+    
+    .btn {
+      min-width: 80px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  // Status Messages
+  .alert-container {
+    min-height: 60px;
+  }
+  
+  // Map hover display
+  .map-hover-display {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+    min-width: 120px;
+    font-size: 0.9rem;
+    
+    &.d-none {
+      display: none;
+    }
+  }
+  
+  // Observation popup styles
+  .observation-popup {
+    padding: 5px;
+    min-width: 150px;
+    font-size: 0.9rem;
+  }
+  
+  // Leaflet controls and overlays
+  .leaflet-weather-control {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  }
+
+  .time-controls {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .time-slider .js-range-slider {
+    width: 100%;
+  }
+
+  .date-label {
+    font-weight: bold;
+    font-size: 1.2em;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .rain-legend {
+    background: linear-gradient(to right, #f0f9ff, #0077be, #00305a);
+    height: 20px;
+    border-radius: 4px;
+    margin-top: 5px;
+  }
+
+  .rain-legend-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 0.8em;
+  }
+}
+
+// Responsive styles for RTBM
+@media (max-width: 767.98px) {
+  .rtbm-container .sidebar-column {
+    margin-bottom: 1rem;
+  }
+  
+  .rtbm-container .control-panel {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}

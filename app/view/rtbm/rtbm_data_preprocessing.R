@@ -1,32 +1,35 @@
 box::use(
-  # Data handling
+  # Core data handling
   arrow[
     read_parquet, write_parquet, Schema, schema,
     float64, string, date32, ParquetFileWriter, ParquetFileReader
   ],
   dplyr[filter, select, mutate, arrange, pull, bind_rows, n],
+
+  # Spatial data handling
   sf[st_crs, st_as_sf, st_transform, st_coordinates],
-  terra[rast, values, xyFromCell, crs],
-  raster[raster, projectRaster, values, xyFromCell, extent, crs, `crs<-`],
+  terra[rast, values, xyFromCell, crs, project],
+
+  # Date handling
   lubridate[today, as_date, days, interval],
+
+  # String operations
   stringr[str_match_all, str_replace],
 
-  # File system operations
+  # File system operations (consider fs.extra from Rhinoverse if available)
   fs[dir_create, path, path_join, file_exists],
 
-  # HTTP requests
+  # HTTP requests (using httr2 for modern API interactions)
   httr2[request, req_perform, resp_status, resp_body_json, req_method, req_error],
 
-  # JSON handling
-  jsonlite[fromJSON, toJSON],
-
-  # JSON/Data parsing
+  # Data structures
   tibble[tibble, as_tibble],
+  jsonlite[fromJSON, toJSON],
 
   # Logging and utilities
   logger[log_info, log_error, log_success, log_warn],
   memoise[memoise, forget],
-  utils[download.file],
+  utils[download.file]
 )
 
 # Import infix operator separately
@@ -233,7 +236,7 @@ raster_to_dataframe <- function(raster_data, date, scientific_name) {
   }
 
   # Convert to raster for compatibility with existing code
-  r_raster <- raster(raster_data)
+  r_raster <- terra::rast(raster_data)
 
   # Get values and filter out NAs
   vals <- values(r_raster)
@@ -440,16 +443,16 @@ create_frame_data <- function(data, date) {
   y_range <- range(date_data$latitude)
 
   # Create empty raster grid
-  r <- raster(
-    xmn = x_range[1] - grid_size,
-    xmx = x_range[2] + grid_size,
-    ymn = y_range[1] - grid_size,
-    ymx = y_range[2] + grid_size,
+  r <- terra::rast(
+    xmin = x_range[1] - grid_size,
+    xmax = x_range[2] + grid_size,
+    ymin = y_range[1] - grid_size,
+    ymax = y_range[2] + grid_size,
     resolution = grid_size
   )
 
   # Set CRS to WGS84
-  crs(r) <- "+proj=longlat +datum=WGS84 +no_defs"
+  terra::crs(r) <- "EPSG:4326"
 
   # Create a spatial points dataframe
   pts <- st_as_sf(
@@ -488,7 +491,7 @@ points_to_raster <- function(points_df) {
   tryCatch(
     {
       # Create an empty raster with appropriate extent
-      ext <- raster::extent(
+      ext <- terra::extent(
         min(points_df$x) - 0.05,
         max(points_df$x) + 0.05,
         min(points_df$y) - 0.05,
@@ -504,15 +507,15 @@ points_to_raster <- function(points_df) {
       ))
 
       # Create raster with 0.05 degree resolution
-      r <- raster::raster(ext, resolution = 0.05)
+      r <- terra::rast(ext, resolution = 0.05)
       print(paste("Empty raster dimensions:", ncol(r), "x", nrow(r)))
 
       # Set coordinate reference system to WGS84 (EPSG:4326)
-      raster::crs(r) <- "EPSG:4326"
+      terra::crs(r) <- "EPSG:4326"
 
       # Rasterize points
       print("Rasterizing points...")
-      r <- raster::rasterize(
+      r <- terra::rasterize(
         points_df[, c("x", "y")],
         r,
         field = points_df$value,
@@ -520,7 +523,7 @@ points_to_raster <- function(points_df) {
       )
 
       # Check result
-      vals <- raster::values(r)
+      vals <- terra::values(r)
       non_na_count <- sum(!is.na(vals))
       print(paste("Final raster contains", non_na_count, "non-NA cells"))
 
@@ -583,15 +586,15 @@ raster_to_points_df <- function(r, date = NULL) {
       if (inherits(r, "SpatRaster")) {
         # Method 1: Using terra
         print("Using terra method")
-        df <- as.data.frame(r, xy = TRUE)
+        df <- terra::as.data.frame(r, xy = TRUE)
         names(df) <- c("x", "y", "value")
         df <- df[!is.na(df$value), ]
       } else {
-        # Method 2: Using raster package
-        print("Using raster package method")
-        r_raster <- raster::raster(r)
-        df <- raster::rasterToPoints(r_raster) |> as.data.frame()
+        # Method 2: Using terra package
+        print("Using terra package method")
+        df <- terra::as.data.frame(r, xy = TRUE)
         names(df) <- c("x", "y", "value")
+        df <- df[!is.na(df$value), ]
       }
 
       print(paste("Extracted", nrow(df), "points from raster"))
