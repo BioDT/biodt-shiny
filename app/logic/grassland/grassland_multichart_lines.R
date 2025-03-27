@@ -66,19 +66,46 @@ generate_chart_lines <- function(
           function (param) {
             console.log(param)
             return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #0').value +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #1').value + 
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 0 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 0 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 0 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 1 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 1 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 1 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 2 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #2').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 2 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #2').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 2 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #2').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 3 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #3').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 3 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #3').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 3 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #3').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 4 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #4').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 4 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #4').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 4 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #4').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 5 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #5').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 5 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #5').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 5 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #5').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 6 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #6').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 6 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #6').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 6 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #6').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 7 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #7').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 7 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #7').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 7 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #7').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 8 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #8').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 8 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #8').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 8 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #8').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 9 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #9').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 9 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #9').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 9 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #9').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 10 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #10').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 10 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #10').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 10 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #10').value +
               '<hr size=1 style=\"margin: 4px 0\">' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #009E73\"></i>Temperature_Daylight[degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<hr size=1 style=\"margin: 4px 0\">' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR[µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Daylength[h]: ' + param.find(item => item.seriesName ==  'Daylength[h]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value + '<br />'
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>PET[mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value
           }
         "
         ),
