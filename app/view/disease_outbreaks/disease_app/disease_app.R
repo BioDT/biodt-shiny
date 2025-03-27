@@ -10,7 +10,7 @@ box::use(
   terra,
   readr,
   echarty[ecs.render, ecs.output],
-  shinyjs[hide, show, hidden, delay],
+  shinyjs[hide, show, hidden, delay, disabled, disable, enable],
 )
 
 box::use(
@@ -30,7 +30,7 @@ disease_app_ui <- function(id, i18n) {
           "Upload a GeoTIFF file",
           accept = c(".tiff", ".tif")
         ),
-        shiny$actionButton(ns("run_command"), "Run model"),
+        disabled(shiny$actionButton(ns("run_command"), "Run model")),
         shiny$verbatimTextOutput(ns("command_output")), # Display WSL command output
         shiny$hr(), # Add a horizontal line for visual separation
         hidden(
@@ -50,7 +50,8 @@ disease_app_ui <- function(id, i18n) {
             icon = shiny$icon("file-zipper")
           )
         ),
-        width = 3
+        width = 3,
+        shiny$uiOutput(ns("statusMsg")),
       ),
       shiny$mainPanel(
         leaflet$leafletOutput(ns("map"), height = "600px"),
@@ -62,6 +63,7 @@ disease_app_ui <- function(id, i18n) {
 }
 
 #' @export
+
 disease_app_server <- function(
   id,
   tab_disease_selected,
@@ -120,6 +122,14 @@ disease_app_server <- function(
         )
       }
     )
+    
+    output$statusMsg <- shiny$renderUI({
+      shiny$div(
+        class = "alert alert-info",
+        role = "alert",
+        "Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon."
+      )
+    })
 
     # shiny$reactive expression to read and process the TIFF file
     shiny$observeEvent(
@@ -206,7 +216,14 @@ disease_app_server <- function(
             leaflet$addGeoJSON(
               feature,
               group = "Bounds",
-              layerId = "Bounds"
+              layerId = "Bounds",
+              output$statusMsg <- shiny$renderUI({
+                shiny$div(
+                  class = "alert alert-info",
+                  role = "alert",
+                  "Area selected"
+                )
+              })
             )
 
           helper_bbox <- terra::ext(
@@ -232,7 +249,14 @@ disease_app_server <- function(
               fillOpacity = 0.2, # fill
               opacity = 0.2, # border
               color = "#a20101",
-              fillColor = "#a20101"
+              fillColor = "#a20101",
+              output$statusMsg <- shiny$renderUI({
+                shiny$div(
+                  class = "alert alert-info",
+                  role = "alert",
+                  "Fences selected"
+                )
+              })
             )
 
           # Convert the coordinates list to a matrix
@@ -263,7 +287,14 @@ disease_app_server <- function(
             leaflet$addGeoJSON(
               feature,
               group = "Release Point",
-              layerId = "Release Point"
+              layerId = "Release Point",
+              output$statusMsg <- shiny$renderUI({
+                shiny$div(
+                  class = "alert alert-info",
+                  role = "alert",
+                  "Releasing point selected"
+                )
+              })
             )
           temp <- terra$vect(
             matrix(
@@ -284,6 +315,21 @@ disease_app_server <- function(
         }
       }
     )
+    
+    shiny$observe({
+      # Check if bounds, release_point, and fences are set
+      all_set <- !is.null(r_disease$bounds) &&
+        !is.null(r_disease$release_point) &&
+        !is.null(r_disease$fences)
+      
+      if (all_set) {
+        enable("run_command")
+      } else {
+        disable("run_command")
+      }
+    })
+    
+    
 
     # Run WSL Command
     shiny$observeEvent(
@@ -304,6 +350,15 @@ disease_app_server <- function(
 
         # Show a notification
         shiny$showNotification("Modelling started.", type = "message")
+        
+        output$statusMsg <- shiny$renderUI({
+          shiny$div(
+            class = "alert alert-info",
+            role = "alert",
+            "Please wait, modelling started"
+          )
+        })
+        
 
         shiny$req(input$file) # Ensure a file is uploaded
 
@@ -351,8 +406,16 @@ disease_app_server <- function(
         shiny$req(r_disease$run_dir)
         load_simulated_data(
           r_disease$run_dir,
-          r_disease
+          r_disease,
         )
+        
+        output$statusMsg <- shiny$renderUI({
+          shiny$div(
+            class = "alert alert-info",
+            role = "alert",
+            "Modelling successfull"
+          )
+        })
 
         show("tick_slider")
         show("export_zip")
