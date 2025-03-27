@@ -8,8 +8,8 @@ box::use(
 )
 
 box::use(
-  app / logic / grassland / grassland_weather_double_chart[generate_chart_with_weather],
   app / logic / grassland / grassland_multichart_lines[generate_chart_lines],
+  app / logic / grassland / grassland_multichart_bars_stack[generate_chart_bars_mean],
   app / logic / waiter[waiter_text],
 )
 
@@ -22,7 +22,7 @@ grassland_dynamics_double_chart_ui <- function(
 ) {
   ns <- NS(id)
   card(
-    id = ns("double_chart_wrap"),
+    id = ns("multichart_wrap"),
     class = "mx-md-3 card-shadow mb-2",
     full_screen = TRUE,
     card_header(
@@ -48,7 +48,7 @@ grassland_dynamics_double_chart_ui <- function(
         )
       ),
       ecs.output(
-        ns("double_chart"),
+        ns("multichart"),
         width = plot_width,
         height = plot_height
       )
@@ -63,7 +63,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
     # Define waiter ----
     msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
     w <- Waiter$new(
-      id = ns("double_chart_wrap"),
+      id = ns("multichart_wrap"),
       html = msg,
       color = "rgba(256,256,256,0.9)",
     )
@@ -94,16 +94,26 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
         end_date <- "2015-12-31"
 
         chart_reactive <- reactive({
-          generate_chart_lines(
-            filepaths_grass = files_grass,
-            filepath_weather = file_weather,
-            colors_for_grass = colors_for_grass_lighter,
-            colors_for_weather = colors_for_weather,
-            grass_end_date = end_date
-          )
+          if (plot_type() == "bar") {
+            generate_chart_bars_mean(
+              filepaths_grass = files_grass,
+              filepath_weather = file_weather,
+              colors_for_grass = colors_for_grass,
+              colors_for_weather = colors_for_weather,
+              grass_end_date = end_date
+            )
+          } else if (plot_type() == "line") {
+            generate_chart_lines(
+              filepaths_grass = files_grass,
+              filepath_weather = file_weather,
+              colors_for_grass = colors_for_grass_lighter,
+              colors_for_weather = colors_for_weather,
+              grass_end_date = end_date
+            )
+          }
         })
 
-        output$double_chart <- ecs.render(
+        output$multichart <- ecs.render(
           chart_reactive()
         )
         w$hide()

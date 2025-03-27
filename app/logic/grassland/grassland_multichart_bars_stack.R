@@ -1,6 +1,7 @@
 box::use(
   echarty[ec.init],
   htmlwidgets[JS],
+  purrr[map_chr],
 )
 
 box::use(
@@ -9,9 +10,9 @@ box::use(
   app / logic / grassland / grassland_read_data_weather[read_weather_data]
 )
 
-# create CHART with lines for ALL PFTs ----
+# create CHART with BARs as MEAN of PFTs ----
 #' @export
-generate_chart_lines <- function(
+generate_chart_bars_mean <- function(
   filepaths_grass,
   filepath_weather,
   colors_for_grass,
@@ -19,7 +20,6 @@ generate_chart_lines <- function(
   grass_end_date
 ) {
   simulations <- NULL
-
   for (i in 1:length(filepaths_grass)) {
     filepath <- filepaths_grass[i]
     simulations <- simulations |>
@@ -29,9 +29,50 @@ generate_chart_lines <- function(
           plot_type = "line",
           colors = colors_for_grass,
           stack = NULL,
-          file_nr = (i - 1)
+          file_nr = NULL
         )
       )
+  }
+
+  # Compute mean ----
+  # list of all (repeating) names from `simulations` list (33)
+  pft_list <- map_chr(simulations, "name")
+  # unique names from pft_list (eg. 3 variables)
+  pft_unique <- sort(unique(pft_list))
+  # init `final_means`
+  final_means <- NULL
+  # loop through each of three PFTs
+  for (i in seq_along(sort(pft_unique))) {
+    # subset simulations of the given single PFT (11)
+    sub_simulations <- simulations[pft_list == pft_list[i]]
+    n_series <- length(sub_simulations)
+
+    # initialize vector `series_mean` with all observations being zero ((1095)
+    series_mean <- rep(0, length(sub_simulations[[1]]$data))
+
+    # compute each mean from subset of 11 values
+    for (series in sub_simulations) {
+      series_mean <- series_mean + unlist(series$data) / n_series
+    }
+
+    # round values and change type of `series_mean` from vector to list
+    series_mean <- series_mean |>
+      round(2) |>
+      as.list()
+
+    final_means <- final_means |>
+      append(list(
+        list(
+          name = paste(pft_unique[i], "mean"),
+          type = "bar",
+          showSymbol = FALSE,
+          stack = "total",
+          symbolSize = 20,
+          color = colors_for_grass[i],
+          emphasis = list(disabled = TRUE),
+          data = series_mean
+        )
+      ))
   }
 
   # Weather data ----
@@ -41,13 +82,14 @@ generate_chart_lines <- function(
     colors = colors_for_weather
   )
 
-  simulations <- simulations |>
-    append(weather_data)
-
   # Prepare time
   time <- get_time(filepaths_grass[1])
 
-  # Echarty: making chart ----
+  # final list with Grass means and weather, which goes into Echarty
+  final <- final_means
+  final <- final |>
+    append(weather_data)
+
   chart <- ec.init()
   chart$x$opts <-
     list(
@@ -56,41 +98,10 @@ generate_chart_lines <- function(
         formatter = JS(
           "
           function (param) {
-            console.log(param)
             return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 0 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 0 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 0 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 1 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 1 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 1 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 2 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #2').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 2 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #2').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 2 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #2').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 3 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #3').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 3 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #3').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 3 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #3').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 4 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #4').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 4 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #4').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 4 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #4').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 5 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #5').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 5 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #5').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 5 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #5').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 6 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #6').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 6 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #6').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 6 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #6').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 7 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #7').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 7 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #7').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 7 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #7').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 8 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #8').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 8 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #8').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 8 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #8').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 9 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #9').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 9 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #9').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 9 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #9').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 10 - PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 file #10').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 10 - PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 file #10').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 10 - PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 file #10').value +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #18A547\"></i>Mean of PFT 0 - ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #AF2C6E\"></i>Mean of PFT 1 - ' + param.find(item => item.seriesName ==  'PFT 1 mean').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #422CAF\"></i>Mean of PFT 2 - ' + param.find(item => item.seriesName ==  'PFT 2 mean').value +
               '<hr size=1 style=\"margin: 4px 0\">' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Precipitation[mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>Temperature[degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
@@ -375,7 +386,7 @@ generate_chart_lines <- function(
           )
         )
       ),
-      series = simulations
+      series = final
     )
 
   return(chart)

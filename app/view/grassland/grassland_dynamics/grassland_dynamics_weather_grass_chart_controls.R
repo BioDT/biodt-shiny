@@ -25,7 +25,7 @@ grassland_dynamics_double_chart_controls_ui <- function(id, i18n) {
           "Bars" = "bar",
           "Lines" = "line"
         ),
-        selected = "line"
+        selected = "bar"
       ),
       disabled(
         input_switch(

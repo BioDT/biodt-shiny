@@ -35,7 +35,7 @@ read_grass_simulations <- function(
   for (i in seq_along(pft_list)) {
     series_list[[length(series_list) + 1]] <-
       list(
-        name = paste0("PFT ", pft_list[i], " file #", file_nr),
+        name = ifelse(is.null(file_nr), paste0("PFT ", pft_list[i]), paste0("PFT ", pft_list[i], " file #", file_nr)),
         type = plot_type,
         stack = stack,
         color = colors[i],
