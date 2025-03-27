@@ -10,6 +10,7 @@ box::use(
 box::use(
   app / logic / grassland / grassland_multichart_lines[generate_chart_lines],
   app / logic / grassland / grassland_multichart_bars_stack[generate_chart_bars_mean],
+  app / logic / grassland / grassland_multichart_lines_mean[generate_chart_lines_mean],
   app / logic / waiter[waiter_text],
 )
 
@@ -57,7 +58,7 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, tab_grassland_selected) {
+grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
@@ -107,6 +108,14 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, mean_switch, t
               filepaths_grass = files_grass,
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass_lighter,
+              colors_for_weather = colors_for_weather,
+              grass_end_date = end_date
+            )
+          } else if (plot_type() == "line_mean") {
+            generate_chart_lines_mean(
+              filepaths_grass = files_grass,
+              filepath_weather = file_weather,
+              colors_for_grass = colors_for_grass,
               colors_for_weather = colors_for_weather,
               grass_end_date = end_date
             )
