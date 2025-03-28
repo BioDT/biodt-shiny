@@ -8,7 +8,7 @@ box::use(
 
   # Spatial data handling
   sf[st_crs, st_as_sf, st_transform, st_coordinates],
-  terra[rast, values, xyFromCell, crs, project, extent, rasterize, as.data.frame],
+  terra[rast, values, xyFromCell, crs, project, ext, rasterize, as.data.frame],
 
   # Date handling
   lubridate[today, as_date, days, interval, `%within%`],
@@ -93,7 +93,7 @@ load_bird_species <- function(use_local = TRUE,
 #' @param date Date for the data
 #' @param scientific_name Scientific name of the bird species
 #' @return URL string for the TIF file
-#' @noRd
+#' @export
 get_tif_url <- function(date, scientific_name) {
   # Format date for URL
   date_str <- format(as.Date(date), "%Y-%m-%d")
