@@ -11,6 +11,7 @@ box::use(
     resp_check_status,
     resp_stream_lines
   ],
+  jsonlite[fromJSON],
 )
 
 create_and_wait_k8s_job <- function(data_subpath, run_id) {
@@ -44,7 +45,7 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
           containers = list(
             list(
               name = "beehave",
-              image = "ghcr.io/biodt/beehave:0.3.9",
+              image = "ghcr.io/biodt/beehave:0.3.11",
               command = list("/scripts/cloud/run_docker_flow.sh"),
               env = list(
                 list(name = "INPUT_DIR", value = "/data"),
@@ -64,8 +65,6 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
                 limits = list(cpu = "1")
               ),
               volumeMounts = list(
-                list(name = "biodt-scripts-volume", mountPath = "/scripts/cloud"),
-                list(name = "biodt-pollinators-r-volume", mountPath = "/R"),
                 list(
                   name = paste0("biodt-shared-dir-volume-", shinyproxy_id),
                   mountPath = "/data",

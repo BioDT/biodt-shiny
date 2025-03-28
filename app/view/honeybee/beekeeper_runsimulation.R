@@ -18,7 +18,6 @@ box::use(
   waiter[Waiter],
   fs[file_copy],
   utils[write.csv],
-  jsonlite[fromJSON],
   config,
 )
 
@@ -229,7 +228,7 @@ beekeeper_runsimulation_server <- function(
         } else if (config$get("executor") == "k8s") {
           data_subpath <- stringr::str_remove(
             run_dir,
-            file.path(config$get("home_path"), "shared/")
+            paste0(config$get("base_path"), "/")
           )
           create_and_wait_k8s_job(data_subpath, run_id)
         } else {
