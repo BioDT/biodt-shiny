@@ -1,26 +1,30 @@
 box::use(
-  # Data handling
+  # Core data handling
   arrow[
     read_parquet, write_parquet, Schema, schema,
     float64, string, date32, ParquetFileWriter, ParquetFileReader
   ],
   dplyr[filter, select, mutate, arrange, pull, bind_rows, n],
+
+  # Spatial data handling
   sf[st_crs, st_as_sf, st_transform, st_coordinates],
-  terra[rast, values, xyFromCell, crs],
-  raster[raster, projectRaster, values, xyFromCell, extent, crs, `crs<-`],
-  lubridate[today, as_date, days, interval],
+  terra[rast, values, xyFromCell, crs, project, extent, rasterize, as.data.frame],
 
-  # File system operations
-  fs[dir_create, path, path_join],
+  # Date handling
+  lubridate[today, as_date, days, interval, `%within%`],
 
-  # HTTP requests
-  httr2[request, req_perform, resp_status, resp_body_json, req_method, req_error],
+  # String operations
+  stringr[str_match_all, str_replace],
 
-  # JSON handling
-  jsonlite[fromJSON, toJSON],
+  # File system operations (consider fs.extra from Rhinoverse if available)
+  fs[dir_create, path, path_join, file_exists],
 
-  # JSON/Data parsing
+  # HTTP requests (using httr2 for modern API interactions)
+  httr2[request, req_perform, resp_status, resp_body_json, resp_body_string, req_method, req_error],
+
+  # Data structures
   tibble[tibble, as_tibble],
+  jsonlite[fromJSON, toJSON],
 
   # Logging and utilities
   logger[log_info, log_error, log_success, log_warn],
@@ -28,29 +32,7 @@ box::use(
   utils[download.file],
 )
 
-# Import infix operator separately
-`%within%` <- lubridate::`%within%`
 
-#' Initialize storage directories for RTBM data
-#'
-#' @param base_dir Base directory for RTBM data
-#' @return List of path objects for various data directories
-#' @noRd
-init_storage_dirs <- function(base_dir = "/home/artyinfact/biodt-shiny/app/data/rtbm") {
-  # Create main directories
-  parquet_dir <- path(base_dir, "parquet")
-  cache_dir <- path(base_dir, "cache")
-
-  # Create species-specific directories if they don't exist
-  dir_create(parquet_dir, recurse = TRUE, mode = "0755")
-  dir_create(cache_dir, recurse = TRUE, mode = "0755")
-
-  return(list(
-    base_dir = base_dir,
-    parquet_dir = parquet_dir,
-    cache_dir = cache_dir
-  ))
-}
 
 #' Load bird species information from JSON file or remote URL
 #'
@@ -72,7 +54,7 @@ load_bird_species <- function(use_local = TRUE,
 
     # Save locally for future use
     write(
-      jsonlite::toJSON(bird_info, auto_unbox = TRUE, pretty = TRUE),
+      toJSON(bird_info, auto_unbox = TRUE, pretty = TRUE),
       local_path
     )
   }
@@ -96,7 +78,7 @@ load_bird_species <- function(use_local = TRUE,
   bird_info_tbl <- as_tibble(bird_df) |>
     arrange(common_name) |>
     mutate(
-      scientific_name = stringr::str_replace(
+      scientific_name = str_replace(
         string = scientific_name,
         pattern = " ",
         replacement = "_"
@@ -156,12 +138,12 @@ download_and_process_raster <- function(date, scientific_name, cache_dir) {
       {
         # Check if file exists remotely first
         log_info(paste("Checking if remote file exists:", url_tif))
-        resp <- httr2::request(url_tif) |>
-          httr2::req_method("HEAD") |>
-          httr2::req_error(is_error = function(resp) FALSE) |>
-          httr2::req_perform()
+        resp <- request(url_tif) |>
+          req_method("HEAD") |>
+          req_error(is_error = function(resp) FALSE) |>
+          req_perform()
 
-        status <- httr2::resp_status(resp)
+        status <- resp_status(resp)
 
         if (status != 200) {
           log_info(paste("No data available for", scientific_name, "on", date_str, "- Status:", status))
@@ -189,15 +171,15 @@ download_and_process_raster <- function(date, scientific_name, cache_dir) {
     tryCatch(
       {
         # Load raster data
-        r <- terra::rast(tmp_file)
+        r <- rast(tmp_file)
 
         # Reproject if necessary to ensure it works with leaflet
-        if (terra::crs(r) != "EPSG:4326") {
-          r <- terra::project(r, "EPSG:4326")
+        if (crs(r) != "EPSG:4326") {
+          r <- project(r, "EPSG:4326")
         }
 
         # Check if the raster has valid values
-        vals <- terra::values(r)
+        vals <- values(r)
         valid_vals <- vals[!is.na(vals)]
 
         if (length(valid_vals) > 0) {
@@ -232,7 +214,7 @@ raster_to_dataframe <- function(raster_data, date, scientific_name) {
   }
 
   # Convert to raster for compatibility with existing code
-  r_raster <- raster(raster_data)
+  r_raster <- rast(raster_data)
 
   # Get values and filter out NAs
   vals <- values(r_raster)
@@ -318,17 +300,19 @@ process_species_data <- function(species_name,
 
 #' Process data for all species for recent dates
 #'
-#' @param days_back Number of days back to process
+#' @param start_date Start date for data processing (default: 2025-01-16)
+#' @param end_date End date for data processing (default: today)
 #' @param bird_info Bird species information dataframe
 #' @param dirs Directory structure from init_storage_dirs
 #' @return TRUE if processing was successful, FALSE otherwise
 #' @export
-process_recent_data <- function(days_back = 14,
+process_recent_data <- function(start_date = as.Date("2025-01-16"),
+                                end_date = as.Date(today()),
                                 bird_info = load_bird_species(),
                                 dirs = init_storage_dirs()) {
   # Convert dates to character strings to avoid formatting issues
-  end_date <- as.Date(today())
-  start_date <- as.Date(end_date - days(days_back))
+  start_date <- as.Date(start_date)
+  end_date <- as.Date(end_date)
   end_date_str <- as.character(end_date)
   start_date_str <- as.character(start_date)
 
@@ -437,16 +421,16 @@ create_frame_data <- function(data, date) {
   y_range <- range(date_data$latitude)
 
   # Create empty raster grid
-  r <- raster(
-    xmn = x_range[1] - grid_size,
-    xmx = x_range[2] + grid_size,
-    ymn = y_range[1] - grid_size,
-    ymx = y_range[2] + grid_size,
+  r <- rast(
+    xmin = x_range[1] - grid_size,
+    xmax = x_range[2] + grid_size,
+    ymin = y_range[1] - grid_size,
+    ymax = y_range[2] + grid_size,
     resolution = grid_size
   )
 
   # Set CRS to WGS84
-  crs(r) <- "+proj=longlat +datum=WGS84 +no_defs"
+  crs(r) <- "EPSG:4326"
 
   # Create a spatial points dataframe
   pts <- st_as_sf(
@@ -456,7 +440,7 @@ create_frame_data <- function(data, date) {
   )
 
   # Rasterize the points (simplified approach)
-  # In a real implementation, you might use terra::rasterize or similar
+  # In a real implementation, you might use rasterize or similar
 
   # Return frame data structure
   list(
@@ -485,7 +469,7 @@ points_to_raster <- function(points_df) {
   tryCatch(
     {
       # Create an empty raster with appropriate extent
-      ext <- raster::extent(
+      ext <- extent(
         min(points_df$x) - 0.05,
         max(points_df$x) + 0.05,
         min(points_df$y) - 0.05,
@@ -501,15 +485,15 @@ points_to_raster <- function(points_df) {
       ))
 
       # Create raster with 0.05 degree resolution
-      r <- raster::raster(ext, resolution = 0.05)
+      r <- rast(ext, resolution = 0.05)
       print(paste("Empty raster dimensions:", ncol(r), "x", nrow(r)))
 
       # Set coordinate reference system to WGS84 (EPSG:4326)
-      raster::crs(r) <- "EPSG:4326"
+      crs(r) <- "EPSG:4326"
 
       # Rasterize points
       print("Rasterizing points...")
-      r <- raster::rasterize(
+      r <- rasterize(
         points_df[, c("x", "y")],
         r,
         field = points_df$value,
@@ -517,7 +501,7 @@ points_to_raster <- function(points_df) {
       )
 
       # Check result
-      vals <- raster::values(r)
+      vals <- values(r)
       non_na_count <- sum(!is.na(vals))
       print(paste("Final raster contains", non_na_count, "non-NA cells"))
 
@@ -527,17 +511,17 @@ points_to_raster <- function(points_df) {
 
         # Try alternative method
         print("Trying alternative rasterization method")
-        r_terra <- terra::rast(ext, resolution = 0.05)
-        terra::crs(r_terra) <- "EPSG:4326"
+        r_terra <- rast(ext, resolution = 0.05)
+        crs(r_terra) <- "EPSG:4326"
 
         # Convert points_df to sf object
-        points_sf <- sf::st_as_sf(points_df, coords = c("x", "y"), crs = 4326)
+        points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = 4326)
 
         # Rasterize with terra
-        r_terra <- terra::rasterize(points_sf, r_terra, field = "value")
+        r_terra <- rasterize(points_sf, r_terra, field = "value")
 
         # Check result
-        vals_terra <- terra::values(r_terra)
+        vals_terra <- values(r_terra)
         non_na_count_terra <- sum(!is.na(vals_terra))
         print(paste("Alternative method: raster contains", non_na_count_terra, "non-NA cells"))
 
@@ -568,7 +552,7 @@ raster_to_points_df <- function(r, date = NULL) {
   tryCatch(
     {
       # Get non-NA cells
-      vals <- terra::values(r)
+      vals <- values(r)
       non_na_count <- sum(!is.na(vals))
       print(paste("Raster has", non_na_count, "non-NA cells"))
 
@@ -584,11 +568,11 @@ raster_to_points_df <- function(r, date = NULL) {
         names(df) <- c("x", "y", "value")
         df <- df[!is.na(df$value), ]
       } else {
-        # Method 2: Using raster package
-        print("Using raster package method")
-        r_raster <- raster::raster(r)
-        df <- raster::rasterToPoints(r_raster) |> as.data.frame()
+        # Method 2: Using terra package
+        print("Using terra package method")
+        df <- as.data.frame(r, xy = TRUE)
         names(df) <- c("x", "y", "value")
+        df <- df[!is.na(df$value), ]
       }
 
       print(paste("Extracted", nrow(df), "points from raster"))
@@ -634,7 +618,7 @@ get_or_create_parquet <- function(scientific_name, date, data_dir) {
     # Read the Parquet file
     tryCatch(
       {
-        df <- arrow::read_parquet(parquet_file)
+        df <- read_parquet(parquet_file)
         print(paste("Successfully read parquet file with", nrow(df), "rows"))
 
         # Check if the dataframe has the expected columns
@@ -685,7 +669,7 @@ download_and_create_parquet <- function(scientific_name, date, data_dir, parquet
       print(paste("Writing", nrow(points_df), "points to parquet:", parquet_file))
       tryCatch(
         {
-          arrow::write_parquet(points_df, parquet_file)
+          write_parquet(points_df, parquet_file)
           print("Successfully wrote parquet file")
           return(points_df)
         },
@@ -704,24 +688,398 @@ download_and_create_parquet <- function(scientific_name, date, data_dir, parquet
   }
 }
 
-#' Update local data cache
+#' List available dates in the data bucket
 #'
-#' @param days_back Number of days back to process
+#' @return Vector of available dates in YYYY-MM-DD format
+#' @export
+list_available_dates <- function() {
+  log_info("Listing available dates in the data bucket")
+
+  # Query the bucket to list all date directories
+  url <- "https://2007581-webportal.a3s.fi/?list-type=2&delimiter=/&prefix=daily/"
+
+  tryCatch(
+    {
+      # Download and parse XML
+      xml_content <- request(url) |>
+        req_perform() |>
+        resp_body_string()
+
+      # Extract date directories using regex
+      date_dirs <- str_match_all(
+        xml_content,
+        "<Prefix>daily/([0-9]{4}-[0-9]{2}-[0-9]{2})/</Prefix>"
+      )[[1]][, 2]
+
+      if (length(date_dirs) == 0) {
+        log_warn("No date directories found in the data bucket")
+        return(character(0))
+      }
+
+      log_info(paste("Found", length(date_dirs), "date directories"))
+      return(date_dirs)
+    },
+    error = function(e) {
+      log_error(paste("Error listing date directories:", e$message))
+      return(character(0))
+    }
+  )
+}
+
+#' List available species for a specific date
+#'
+#' @param date_str Date in YYYY-MM-DD format
+#' @return Data frame with scientific names extracted from file names
+#' @export
+list_available_species <- function(date_str) {
+  log_info(paste("Listing available species for date:", date_str))
+
+  # Query the bucket to list all files for this date
+  url <- paste0("https://2007581-webportal.a3s.fi/?list-type=2&prefix=daily/", date_str, "/")
+
+  tryCatch(
+    {
+      # Download and parse XML
+      xml_content <- request(url) |>
+        req_perform() |>
+        resp_body_string()
+
+      # Extract file keys using regex
+      file_keys <- str_match_all(
+        xml_content,
+        "<Key>daily/[0-9]{4}-[0-9]{2}-[0-9]{2}/([A-Za-z_]+)_occurrences\\.tif</Key>"
+      )[[1]][, 2]
+
+      if (length(file_keys) == 0) {
+        log_warn(paste("No species files found for date:", date_str))
+        return(data.frame(scientific_name = character(0)))
+      }
+
+      # Create data frame with scientific names
+      species_df <- data.frame(
+        scientific_name = file_keys,
+        stringsAsFactors = FALSE
+      )
+
+      log_info(paste("Found", nrow(species_df), "species for date:", date_str))
+      return(species_df)
+    },
+    error = function(e) {
+      log_error(paste("Error listing species for date", date_str, ":", e$message))
+      return(data.frame(scientific_name = character(0)))
+    }
+  )
+}
+
+#' Download and process data for a date range using bucket listing
+#'
+#' @param start_date Start date (Date object or string in YYYY-MM-DD format)
+#' @param end_date End date (Date object or string in YYYY-MM-DD format)
+#' @param bird_info Bird species information dataframe
+#' @param dirs Directory structure from init_storage_dirs
+#' @return TRUE if processing was successful, FALSE otherwise
+#' @export
+process_data_from_bucket <- function(start_date = as.Date("2025-01-16"),
+                                     end_date = as.Date(today()),
+                                     bird_info = load_bird_species(),
+                                     dirs = init_storage_dirs()) {
+  # Convert dates to Date objects
+  start_date <- as.Date(start_date)
+  end_date <- as.Date(end_date)
+
+  log_info(paste(
+    "Processing data from bucket for date range:",
+    as.character(start_date), "to", as.character(end_date)
+  ))
+
+  # Get all available dates from the bucket
+  all_dates_str <- list_available_dates()
+
+  if (length(all_dates_str) == 0) {
+    log_error("No dates available in the bucket")
+    return(FALSE)
+  }
+
+  # Convert to Date objects and filter by date range
+  all_dates <- as.Date(all_dates_str)
+  dates_in_range <- all_dates[all_dates >= start_date & all_dates <= end_date]
+  dates_str_in_range <- all_dates_str[all_dates >= start_date & all_dates <= end_date]
+
+  if (length(dates_in_range) == 0) {
+    log_warn(paste(
+      "No dates found in the specified range:",
+      as.character(start_date), "to", as.character(end_date)
+    ))
+    return(FALSE)
+  }
+
+  log_info(paste("Found", length(dates_in_range), "dates in the specified range"))
+
+  # Process each date
+  results <- list()
+
+  for (i in seq_along(dates_in_range)) {
+    date <- dates_in_range[i]
+    date_str <- dates_str_in_range[i]
+
+    log_info(paste("Processing data for date:", date_str))
+
+    # Get available species for this date
+    available_species <- list_available_species(date_str)
+
+    if (nrow(available_species) == 0) {
+      log_warn(paste("No species data available for date:", date_str))
+      next
+    }
+
+    # Match available species with our bird info
+    for (j in seq_len(nrow(available_species))) {
+      scientific_name <- available_species$scientific_name[j]
+
+      # Find matching species in bird_info using our improved matching function
+      species_idx <- match_species_name(scientific_name, bird_info)
+
+      if (length(species_idx) == 0) {
+        log_warn(paste(
+          "Species not found in bird_info:", scientific_name,
+          "- Consider updating the taxonomic mapping"
+        ))
+        next
+      }
+
+      species_row <- bird_info[species_idx[1], ]
+
+      # Create species directory if it doesn't exist
+      species_dir <- path(dirs$parquet_dir, paste0("species=", scientific_name))
+      dir_create(species_dir, recurse = TRUE, mode = "0755")
+
+      # Check if we already have data for this date and species
+      output_file <- path(species_dir, paste0("date=", date_str, ".parquet"))
+
+      if (file.exists(output_file) && file.size(output_file) > 0) {
+        log_info(paste("Data for", scientific_name, "on", date_str, "already exists, skipping"))
+        next
+      }
+
+      # Download and process the raster data
+      log_info(paste("Processing", species_row$common_name, "(", scientific_name, ")", "for", date_str))
+
+      # Get URL for the TIF file
+      tif_url <- get_tif_url(date, scientific_name)
+
+      # Create path for cache file
+      tmp_file <- path(dirs$cache_dir, paste0(scientific_name, "_", date_str, ".tif"))
+
+      # Ensure cache directory exists
+      dir_create(dirs$cache_dir, recurse = TRUE, mode = "0755")
+
+      # Download the file
+      log_info(paste("Downloading data for", scientific_name, "on", date_str))
+      download_result <- download.file(tif_url, tmp_file, mode = "wb", quiet = TRUE)
+
+      if (download_result != 0 || !file.exists(tmp_file) || file.size(tmp_file) == 0) {
+        log_error(paste("Failed to download data for", scientific_name, "on", date_str))
+        next
+      }
+
+      # Process the raster file
+      if (file.exists(tmp_file) && file.size(tmp_file) > 0) {
+        # Load raster data
+        r <- tryCatch(
+          {
+            rast(tmp_file)
+          },
+          error = function(e) {
+            log_error(paste("Error loading raster for", scientific_name, "on", date_str, ":", e$message))
+            return(NULL)
+          }
+        )
+
+        if (is.null(r)) {
+          next
+        }
+
+        # Reproject if necessary to ensure it works with leaflet
+        if (crs(r) != "EPSG:4326") {
+          r <- tryCatch(
+            {
+              project(r, "EPSG:4326")
+            },
+            error = function(e) {
+              log_error(paste("Error reprojecting raster for", scientific_name, "on", date_str, ":", e$message))
+              return(NULL)
+            }
+          )
+
+          if (is.null(r)) {
+            next
+          }
+        }
+
+        # Convert to dataframe
+        df <- tryCatch(
+          {
+            raster_to_dataframe(r, date, scientific_name)
+          },
+          error = function(e) {
+            log_error(paste("Error converting raster to dataframe for", scientific_name, "on", date_str, ":", e$message))
+            return(NULL)
+          }
+        )
+
+        if (!is.null(df) && nrow(df) > 0) {
+          # Write to parquet file
+          write_parquet(df, output_file)
+          log_success(paste("Saved", nrow(df), "observations for", scientific_name, "on", date_str))
+        } else {
+          log_warn(paste("No valid points extracted from raster for", scientific_name, "on", date_str))
+        }
+      }
+    }
+  }
+
+  return(TRUE)
+}
+
+#' Update local data cache using bucket listing
+#'
+#' @param start_date Start date for data processing (default: 2025-01-16)
+#' @param end_date End date for data processing (default: today)
 #' @return TRUE if update was successful, FALSE otherwise
 #' @export
-update_local_cache <- function(days_back = 14) {
+update_local_cache_from_bucket <- function(start_date = as.Date("2025-01-16"),
+                                           end_date = as.Date(today())) {
   # Initialize directories
   dirs <- init_storage_dirs()
 
   # Load bird species info
   bird_info <- load_bird_species()
 
-  # Process recent data
-  success <- process_recent_data(
-    days_back = days_back,
+  # Process data from bucket
+  success <- process_data_from_bucket(
+    start_date = start_date,
+    end_date = end_date,
     bird_info = bird_info,
     dirs = dirs
   )
 
   return(success)
+}
+
+#' Update local data cache
+#'
+#' @param start_date Start date for data processing (default: 2025-01-16)
+#' @param end_date End date for data processing (default: today)
+#' @param use_bucket_listing Whether to use bucket listing (more efficient) or date-by-date processing
+#' @return TRUE if update was successful, FALSE otherwise
+#' @export
+update_local_cache <- function(start_date = as.Date("2025-01-16"),
+                               end_date = as.Date(today()),
+                               use_bucket_listing = TRUE) {
+  # Initialize directories
+  dirs <- init_storage_dirs()
+
+  # Load bird species info
+  bird_info <- load_bird_species()
+
+  if (use_bucket_listing) {
+    # Use the more efficient bucket listing approach
+    log_info("Using bucket listing approach for data processing")
+    success <- process_data_from_bucket(
+      start_date = start_date,
+      end_date = end_date,
+      bird_info = bird_info,
+      dirs = dirs
+    )
+  } else {
+    # Use the original date-by-date approach
+    log_info("Using date-by-date approach for data processing")
+    success <- process_recent_data(
+      start_date = start_date,
+      end_date = end_date,
+      bird_info = bird_info,
+      dirs = dirs
+    )
+  }
+
+  return(success)
+}
+
+#' Create a mapping for taxonomic name changes
+#'
+#' @return A dataframe with old and new scientific names
+#' @export
+create_taxonomic_mapping <- function() {
+  # Create a mapping for species with taxonomic changes
+  # Format: data.frame with columns old_name and new_name
+  taxonomic_changes <- data.frame(
+    old_name = c(
+      "Carduelis_chloris",
+      "Carduelis_flammea",
+      "Carduelis_spinus",
+      "Corvus_corone",
+      "Dendrocopos_minor",
+      "Parus_ater",
+      "Parus_caeruleus",
+      "Parus_cinctus",
+      "Parus_cristatus",
+      "Parus_montanus"
+    ),
+    new_name = c(
+      "Chloris_chloris", # European Greenfinch
+      "Acanthis_flammea", # Common Redpoll
+      "Spinus_spinus", # Eurasian Siskin
+      "Corvus_cornix", # Hooded Crow (often treated as subspecies of Corvus corone)
+      "Dryobates_minor", # Lesser Spotted Woodpecker
+      "Periparus_ater", # Coal Tit
+      "Cyanistes_caeruleus", # Blue Tit
+      "Poecile_cinctus", # Siberian Tit
+      "Lophophanes_cristatus", # Crested Tit
+      "Poecile_montanus" # Willow Tit
+    ),
+    stringsAsFactors = FALSE
+  )
+
+  return(taxonomic_changes)
+}
+
+#' Match a species name from the bucket with bird_info
+#'
+#' @param scientific_name Scientific name with underscores (e.g., "Carduelis_chloris")
+#' @param bird_info Bird species information dataframe
+#' @return Index of the matching species in bird_info, or integer(0) if not found
+#' @export
+match_species_name <- function(scientific_name, bird_info) {
+  # Get taxonomic mapping
+  taxonomic_changes <- create_taxonomic_mapping()
+
+  # 1. Check if this is a known taxonomic change
+  idx <- match(scientific_name, taxonomic_changes$old_name)
+  if (!is.na(idx)) {
+    # Use the new name for matching
+    new_name <- taxonomic_changes$new_name[idx]
+    species_idx <- which(bird_info$scientific_name == new_name)
+    if (length(species_idx) > 0) {
+      return(species_idx)
+    }
+  }
+
+  # 2. Direct match
+  species_idx <- which(bird_info$scientific_name == scientific_name)
+  if (length(species_idx) > 0) {
+    return(species_idx)
+  }
+
+  # 3. Try to match with the species part (second part of binomial name)
+  species_parts <- unlist(strsplit(scientific_name, "_"))
+  if (length(species_parts) >= 2) {
+    species_part <- species_parts[2] # The species part of the binomial name
+    species_idx <- which(grepl(paste0("_", species_part, "$"), bird_info$scientific_name))
+    if (length(species_idx) > 0) {
+      return(species_idx)
+    }
+  }
+
+  # No match found
+  return(integer(0))
 }
