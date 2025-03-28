@@ -64,7 +64,7 @@ box::use(
   grDevices[colorRampPalette],
 
   # Local dependencies
-  . / rtbm_data_handlers[load_bird_species_info, load_parquet_data],
+  app/logic/rtbm/rtbm_data_handlers[load_bird_species_info, load_parquet_data],
 )
 
 # Initialize bird species data

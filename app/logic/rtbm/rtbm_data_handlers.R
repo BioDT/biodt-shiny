@@ -15,6 +15,8 @@ box::use(
   stringr[str_extract, str_detect, str_replace, str_extract_all],
   arrow[read_parquet, write_parquet],
   tibble[as_tibble],
+  logger[log_info, log_debug, log_error],
+  sf
 )
 
 # --- Configuration & Setup ---
@@ -254,8 +256,27 @@ convert_tiffs_to_parquet <- function(force_update = FALSE) {
     safe_convert <- safely(\(tif_in, pq_out) {
       message("Converting: ", path_file(tif_in), " to Parquet.")
       rast_data <- rast(tif_in)
-      # Convert raster to dataframe - adjust parameters if needed (e.g., xy=TRUE)
-      df_data <- as.data.frame(rast_data, xy = TRUE)
+
+      # Get non-NA values and their coordinates
+      vals <- values(rast_data)
+      valid_cells <- which(!is.na(vals))
+
+      if (length(valid_cells) == 0) {
+        message("No valid values found in raster: ", path_file(tif_in))
+        return(list(file = path_file(tif_in), status = "no_data", path = pq_out))
+      }
+
+      # Extract coordinates for valid cells
+      coords <- xyFromCell(rast_data, valid_cells)
+
+      # Create dataframe with valid values
+      df_data <- data.frame(
+        x = coords[, 1],
+        y = coords[, 2],
+        value = vals[valid_cells],
+        stringsAsFactors = FALSE
+      )
+
       # Add any necessary cleaning or transformation here
       safe_write <- safely(\(df_data, pq_out) {
         write_parquet(df_data, sink = pq_out)
@@ -279,6 +300,125 @@ convert_tiffs_to_parquet <- function(force_update = FALSE) {
     message("- ", status_name, ": ", status_summary[[status_name]])
   }
   invisible(NULL)
+}
+
+#' Convert raster to points dataframe
+#'
+#' @param r Raster object
+#' @param date Date for the data
+#' @return Data frame with x, y coordinates, value, and date
+#' @export
+raster_to_points_df <- function(r, date = NULL) {
+  log_debug("Converting raster to points dataframe for storage")
+
+  tryCatch(
+    {
+      # Get values and filter out NAs and zeros
+      vals <- terra::values(r)
+      valid_cells <- which(!is.na(vals) & vals > 0)
+
+      log_debug(paste(
+        "Value analysis:",
+        "\n  Total cells:", length(vals),
+        "\n  Valid cells (non-NA and positive):", length(valid_cells)
+      ))
+
+      if (length(valid_cells) == 0) {
+        log_debug("No valid (positive) values found in raster")
+        return(data.frame())
+      }
+
+      # Extract coordinates for valid cells
+      coords <- terra::xyFromCell(r, valid_cells)
+
+      # Create dataframe with valid points
+      df <- data.frame(
+        x = coords[, 1],
+        y = coords[, 2],
+        value = vals[valid_cells]
+      )
+
+      log_debug(paste("Created dataframe with", nrow(df), "points"))
+      log_debug(paste("Value range:", min(df$value), "to", max(df$value)))
+
+      # Add date column if provided
+      if (!is.null(date)) {
+        df$date <- date
+      }
+
+      return(df)
+    },
+    error = function(e) {
+      log_error(paste("Error in raster_to_points_df:", e$message))
+      return(data.frame())
+    }
+  )
+}
+
+#' Convert points data frame to a raster
+#'
+#' @param points_df Data frame with x, y coordinates and value
+#' @return A raster object
+#' @export
+points_to_raster <- function(points_df) {
+  # Debug information
+  print("=============================================")
+  print("Starting points_to_raster conversion")
+  print(paste("Input data frame has", nrow(points_df), "rows"))
+  print(paste("x range:", min(points_df$x), "to", max(points_df$x)))
+  print(paste("y range:", min(points_df$y), "to", max(points_df$y)))
+  print(paste("Value range:", min(points_df$value, na.rm = TRUE), "to", max(points_df$value, na.rm = TRUE)))
+
+  tryCatch(
+    {
+      # Create an empty raster with appropriate extent
+      ext <- extent(
+        min(points_df$x) - 0.05,
+        max(points_df$x) + 0.05,
+        min(points_df$y) - 0.05,
+        max(points_df$y) + 0.05
+      )
+
+      print(paste(
+        "Creating raster with extent:",
+        paste(
+          min(points_df$x) - 0.05, max(points_df$x) + 0.05,
+          min(points_df$y) - 0.05, max(points_df$y) + 0.05
+        )
+      ))
+
+      # Create raster with 0.05 degree resolution
+      r <- rast(ext, resolution = 0.05)
+      print(paste("Empty raster dimensions:", ncol(r), "x", nrow(r)))
+
+      # Set coordinate reference system to WGS84 (EPSG:4326)
+      crs(r) <- "EPSG:4326"
+
+      # Convert points_df to sf object for rasterization
+      points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = 4326)
+
+      # Rasterize points
+      print("Rasterizing points...")
+      r <- rasterize(points_sf, r, field = "value", fun = max)
+
+      # Check result
+      vals <- values(r)
+      non_na_count <- sum(!is.na(vals))
+      print(paste("Final raster contains", non_na_count, "non-NA cells"))
+
+      # Validate that we have data in the raster
+      if (non_na_count == 0) {
+        print("WARNING: Raster has no valid values!")
+        return(NULL)
+      }
+
+      return(r)
+    },
+    error = function(e) {
+      print(paste("ERROR in points_to_raster:", e$message))
+      return(NULL)
+    }
+  )
 }
 
 # --- Data Access & Processing ---
