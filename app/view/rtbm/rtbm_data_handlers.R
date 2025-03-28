@@ -257,7 +257,13 @@ convert_tiffs_to_parquet <- function(force_update = FALSE) {
       # Convert raster to dataframe - adjust parameters if needed (e.g., xy=TRUE)
       df_data <- as.data.frame(rast_data, xy = TRUE)
       # Add any necessary cleaning or transformation here
-      write_parquet(df_data, sink = pq_out)
+      safe_write <- safely(\(df_data, pq_out) {
+        write_parquet(df_data, sink = pq_out)
+      })
+      result <- safe_write(df_data, pq_out)
+      if (!is.null(result$error)) {
+        stop("Error writing to Parquet: ", result$error)
+      }
       return(list(file = path_file(tif_in), status = "converted", path = pq_out))
     })
     result <- safe_convert(tiff_path, parquet_path)

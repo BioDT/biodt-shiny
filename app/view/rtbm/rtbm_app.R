@@ -42,7 +42,7 @@ box::use(
 
   # Data manipulation with tidyverse
   dplyr[filter, mutate, select, pull, arrange, group_by, summarize, n, between, row_number],
-  lubridate[as_date, ymd, interval],
+  lubridate[as_date, ymd, interval, `%within%`],
   tibble[tibble, as_tibble],
   stringr[str_replace],
   tidyr[unnest, pivot_longer],
@@ -66,10 +66,6 @@ box::use(
   # Local dependencies
   . / rtbm_data_handlers[load_bird_species_info, load_parquet_data],
 )
-
-# Import infix operator separately
-lubridate <- asNamespace("lubridate")
-`%within%` <- lubridate$`%within%`
 
 # Initialize bird species data
 bird_spp_info <- load_bird_species_info()
@@ -428,7 +424,7 @@ rtbm_app_server <- function(id, tab_selected) {
             tryCatch(
               {
                 safe_print("Reading parquet file")
-                points_data <- arrow$read_parquet(parquet_path)
+                points_data <- read_parquet(parquet_path)
 
                 safe_print("Loaded parquet file with ", nrow(points_data), " points")
 
@@ -499,63 +495,19 @@ rtbm_app_server <- function(id, tab_selected) {
                     }
 
                     # Add heatmap with YlGnBu colormap - confined to Finland's boundaries
-                    if (requireNamespace("leaflet.extras", quietly = TRUE)) {
-                      # Use YlGnBu colors for heatmap gradient
-                      ylgnbu_heatmap_colors <- rev(ylgnbu_colors)
-
-                      # Create a multiplier to enhance intensity values while preserving data relationships
-                      intensity_enhancer <- 4.0
-
-                      # Filter points to ensure they're only within Finland
-                      # This is a key step to prevent the heatmap from extending beyond borders
-                      if (!is.null(finland_border) && nrow(finland_border) > 0) {
-                        # Create a simple bounding box for quick filtering
-                        fin_bbox <- st_bbox(finland_border)
-
-                        # Pre-filter points to those within Finland's bounding box
-                        points_in_finland <- points_data |>
-                          filter(
-                            longitude >= fin_bbox["xmin"] &
-                              longitude <= fin_bbox["xmax"] &
-                              latitude >= fin_bbox["ymin"] &
-                              latitude <= fin_bbox["ymax"]
-                          )
-
-                        # More moderate parameters to reduce boundary spillover
-                        m <- m |>
-                          leaflet.extras$addHeatmap(
-                            data = points_in_finland,
-                            lng = ~longitude,
-                            lat = ~latitude,
-                            intensity = ~ intensity * intensity_enhancer,
-                            blur = 18,
-                            max = intensity_max * intensity_enhancer * 0.8,
-                            radius = 15,
-                            minOpacity = 0.7,
-                            gradient = ylgnbu_heatmap_colors,
-                            group = "Heat Map"
-                          )
-
-                        safe_print("Added heatmap with", nrow(points_in_finland), "points within Finland")
-                      } else {
-                        # Fallback if Finland boundary isn't available
-                        m <- m |>
-                          leaflet.extras$addHeatmap(
-                            data = points_data,
-                            lng = ~longitude,
-                            lat = ~latitude,
-                            intensity = ~ intensity * intensity_enhancer,
-                            blur = 18,
-                            max = intensity_max * intensity_enhancer * 0.8,
-                            radius = 15,
-                            minOpacity = 0.7,
-                            gradient = ylgnbu_heatmap_colors,
-                            group = "Heat Map"
-                          )
-
-                        safe_print("Added heatmap without Finland boundary filtering")
-                      }
-                    }
+                    m <- m |>
+                      addHeatmap(
+                        data = points_data,
+                        lng = ~longitude,
+                        lat = ~latitude,
+                        intensity = ~ intensity * 4.0,
+                        blur = 18,
+                        max = intensity_max * 4.0 * 0.8,
+                        radius = 15,
+                        minOpacity = 0.7,
+                        gradient = rev(ylgnbu_colors),
+                        group = "Heat Map"
+                      )
 
                     # Add layer controls with Heat Map as the only visualization option
                     m <- m |>

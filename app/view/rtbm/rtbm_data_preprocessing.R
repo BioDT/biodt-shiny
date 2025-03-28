@@ -8,10 +8,10 @@ box::use(
 
   # Spatial data handling
   sf[st_crs, st_as_sf, st_transform, st_coordinates],
-  terra[rast, values, xyFromCell, crs, project],
+  terra[rast, values, xyFromCell, crs, project, extent, rasterize, as.data.frame],
 
   # Date handling
-  lubridate[today, as_date, days, interval],
+  lubridate[today, as_date, days, interval, `%within%`],
 
   # String operations
   stringr[str_match_all, str_replace],
@@ -20,7 +20,7 @@ box::use(
   fs[dir_create, path, path_join, file_exists],
 
   # HTTP requests (using httr2 for modern API interactions)
-  httr2[request, req_perform, resp_status, resp_body_json, req_method, req_error],
+  httr2[request, req_perform, resp_status, resp_body_json, resp_body_string, req_method, req_error],
 
   # Data structures
   tibble[tibble, as_tibble],
@@ -29,32 +29,10 @@ box::use(
   # Logging and utilities
   logger[log_info, log_error, log_success, log_warn],
   memoise[memoise, forget],
-  utils[download.file]
+  utils[download.file],
 )
 
-# Import infix operator separately
-`%within%` <- lubridate::`%within%`
 
-#' Initialize storage directories for RTBM data
-#'
-#' @param base_dir Base directory for RTBM data
-#' @return List of path objects for various data directories
-#' @noRd
-init_storage_dirs <- function(base_dir = "/home/artyinfact/biodt-shiny/app/data/rtbm") {
-  # Create main directories
-  parquet_dir <- path(base_dir, "parquet")
-  cache_dir <- path(base_dir, "cache")
-
-  # Create species-specific directories if they don't exist
-  dir_create(parquet_dir, recurse = TRUE, mode = "0755")
-  dir_create(cache_dir, recurse = TRUE, mode = "0755")
-
-  return(list(
-    base_dir = base_dir,
-    parquet_dir = parquet_dir,
-    cache_dir = cache_dir
-  ))
-}
 
 #' Load bird species information from JSON file or remote URL
 #'
@@ -76,7 +54,7 @@ load_bird_species <- function(use_local = TRUE,
 
     # Save locally for future use
     write(
-      jsonlite::toJSON(bird_info, auto_unbox = TRUE, pretty = TRUE),
+      toJSON(bird_info, auto_unbox = TRUE, pretty = TRUE),
       local_path
     )
   }
@@ -100,7 +78,7 @@ load_bird_species <- function(use_local = TRUE,
   bird_info_tbl <- as_tibble(bird_df) |>
     arrange(common_name) |>
     mutate(
-      scientific_name = stringr::str_replace(
+      scientific_name = str_replace(
         string = scientific_name,
         pattern = " ",
         replacement = "_"
@@ -160,12 +138,12 @@ download_and_process_raster <- function(date, scientific_name, cache_dir) {
       {
         # Check if file exists remotely first
         log_info(paste("Checking if remote file exists:", url_tif))
-        resp <- httr2::request(url_tif) |>
-          httr2::req_method("HEAD") |>
-          httr2::req_error(is_error = function(resp) FALSE) |>
-          httr2::req_perform()
+        resp <- request(url_tif) |>
+          req_method("HEAD") |>
+          req_error(is_error = function(resp) FALSE) |>
+          req_perform()
 
-        status <- httr2::resp_status(resp)
+        status <- resp_status(resp)
 
         if (status != 200) {
           log_info(paste("No data available for", scientific_name, "on", date_str, "- Status:", status))
@@ -193,15 +171,15 @@ download_and_process_raster <- function(date, scientific_name, cache_dir) {
     tryCatch(
       {
         # Load raster data
-        r <- terra::rast(tmp_file)
+        r <- rast(tmp_file)
 
         # Reproject if necessary to ensure it works with leaflet
-        if (terra::crs(r) != "EPSG:4326") {
-          r <- terra::project(r, "EPSG:4326")
+        if (crs(r) != "EPSG:4326") {
+          r <- project(r, "EPSG:4326")
         }
 
         # Check if the raster has valid values
-        vals <- terra::values(r)
+        vals <- values(r)
         valid_vals <- vals[!is.na(vals)]
 
         if (length(valid_vals) > 0) {
@@ -236,7 +214,7 @@ raster_to_dataframe <- function(raster_data, date, scientific_name) {
   }
 
   # Convert to raster for compatibility with existing code
-  r_raster <- terra::rast(raster_data)
+  r_raster <- rast(raster_data)
 
   # Get values and filter out NAs
   vals <- values(r_raster)
@@ -443,7 +421,7 @@ create_frame_data <- function(data, date) {
   y_range <- range(date_data$latitude)
 
   # Create empty raster grid
-  r <- terra::rast(
+  r <- rast(
     xmin = x_range[1] - grid_size,
     xmax = x_range[2] + grid_size,
     ymin = y_range[1] - grid_size,
@@ -452,7 +430,7 @@ create_frame_data <- function(data, date) {
   )
 
   # Set CRS to WGS84
-  terra::crs(r) <- "EPSG:4326"
+  crs(r) <- "EPSG:4326"
 
   # Create a spatial points dataframe
   pts <- st_as_sf(
@@ -462,7 +440,7 @@ create_frame_data <- function(data, date) {
   )
 
   # Rasterize the points (simplified approach)
-  # In a real implementation, you might use terra::rasterize or similar
+  # In a real implementation, you might use rasterize or similar
 
   # Return frame data structure
   list(
@@ -491,7 +469,7 @@ points_to_raster <- function(points_df) {
   tryCatch(
     {
       # Create an empty raster with appropriate extent
-      ext <- terra::extent(
+      ext <- extent(
         min(points_df$x) - 0.05,
         max(points_df$x) + 0.05,
         min(points_df$y) - 0.05,
@@ -507,15 +485,15 @@ points_to_raster <- function(points_df) {
       ))
 
       # Create raster with 0.05 degree resolution
-      r <- terra::rast(ext, resolution = 0.05)
+      r <- rast(ext, resolution = 0.05)
       print(paste("Empty raster dimensions:", ncol(r), "x", nrow(r)))
 
       # Set coordinate reference system to WGS84 (EPSG:4326)
-      terra::crs(r) <- "EPSG:4326"
+      crs(r) <- "EPSG:4326"
 
       # Rasterize points
       print("Rasterizing points...")
-      r <- terra::rasterize(
+      r <- rasterize(
         points_df[, c("x", "y")],
         r,
         field = points_df$value,
@@ -523,7 +501,7 @@ points_to_raster <- function(points_df) {
       )
 
       # Check result
-      vals <- terra::values(r)
+      vals <- values(r)
       non_na_count <- sum(!is.na(vals))
       print(paste("Final raster contains", non_na_count, "non-NA cells"))
 
@@ -533,17 +511,17 @@ points_to_raster <- function(points_df) {
 
         # Try alternative method
         print("Trying alternative rasterization method")
-        r_terra <- terra::rast(ext, resolution = 0.05)
-        terra::crs(r_terra) <- "EPSG:4326"
+        r_terra <- rast(ext, resolution = 0.05)
+        crs(r_terra) <- "EPSG:4326"
 
         # Convert points_df to sf object
-        points_sf <- sf::st_as_sf(points_df, coords = c("x", "y"), crs = 4326)
+        points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = 4326)
 
         # Rasterize with terra
-        r_terra <- terra::rasterize(points_sf, r_terra, field = "value")
+        r_terra <- rasterize(points_sf, r_terra, field = "value")
 
         # Check result
-        vals_terra <- terra::values(r_terra)
+        vals_terra <- values(r_terra)
         non_na_count_terra <- sum(!is.na(vals_terra))
         print(paste("Alternative method: raster contains", non_na_count_terra, "non-NA cells"))
 
@@ -574,7 +552,7 @@ raster_to_points_df <- function(r, date = NULL) {
   tryCatch(
     {
       # Get non-NA cells
-      vals <- terra::values(r)
+      vals <- values(r)
       non_na_count <- sum(!is.na(vals))
       print(paste("Raster has", non_na_count, "non-NA cells"))
 
@@ -586,13 +564,13 @@ raster_to_points_df <- function(r, date = NULL) {
       if (inherits(r, "SpatRaster")) {
         # Method 1: Using terra
         print("Using terra method")
-        df <- terra::as.data.frame(r, xy = TRUE)
+        df <- as.data.frame(r, xy = TRUE)
         names(df) <- c("x", "y", "value")
         df <- df[!is.na(df$value), ]
       } else {
         # Method 2: Using terra package
         print("Using terra package method")
-        df <- terra::as.data.frame(r, xy = TRUE)
+        df <- as.data.frame(r, xy = TRUE)
         names(df) <- c("x", "y", "value")
         df <- df[!is.na(df$value), ]
       }
@@ -640,7 +618,7 @@ get_or_create_parquet <- function(scientific_name, date, data_dir) {
     # Read the Parquet file
     tryCatch(
       {
-        df <- arrow::read_parquet(parquet_file)
+        df <- read_parquet(parquet_file)
         print(paste("Successfully read parquet file with", nrow(df), "rows"))
 
         # Check if the dataframe has the expected columns
@@ -691,7 +669,7 @@ download_and_create_parquet <- function(scientific_name, date, data_dir, parquet
       print(paste("Writing", nrow(points_df), "points to parquet:", parquet_file))
       tryCatch(
         {
-          arrow::write_parquet(points_df, parquet_file)
+          write_parquet(points_df, parquet_file)
           print("Successfully wrote parquet file")
           return(points_df)
         },
@@ -723,12 +701,12 @@ list_available_dates <- function() {
   tryCatch(
     {
       # Download and parse XML
-      xml_content <- httr2::request(url) |>
-        httr2::req_perform() |>
-        httr2::resp_body_string()
+      xml_content <- request(url) |>
+        req_perform() |>
+        resp_body_string()
 
       # Extract date directories using regex
-      date_dirs <- stringr::str_match_all(
+      date_dirs <- str_match_all(
         xml_content,
         "<Prefix>daily/([0-9]{4}-[0-9]{2}-[0-9]{2})/</Prefix>"
       )[[1]][, 2]
@@ -762,12 +740,12 @@ list_available_species <- function(date_str) {
   tryCatch(
     {
       # Download and parse XML
-      xml_content <- httr2::request(url) |>
-        httr2::req_perform() |>
-        httr2::resp_body_string()
+      xml_content <- request(url) |>
+        req_perform() |>
+        resp_body_string()
 
       # Extract file keys using regex
-      file_keys <- stringr::str_match_all(
+      file_keys <- str_match_all(
         xml_content,
         "<Key>daily/[0-9]{4}-[0-9]{2}-[0-9]{2}/([A-Za-z_]+)_occurrences\\.tif</Key>"
       )[[1]][, 2]
@@ -909,7 +887,7 @@ process_data_from_bucket <- function(start_date = as.Date("2025-01-16"),
         # Load raster data
         r <- tryCatch(
           {
-            terra::rast(tmp_file)
+            rast(tmp_file)
           },
           error = function(e) {
             log_error(paste("Error loading raster for", scientific_name, "on", date_str, ":", e$message))
@@ -922,10 +900,10 @@ process_data_from_bucket <- function(start_date = as.Date("2025-01-16"),
         }
 
         # Reproject if necessary to ensure it works with leaflet
-        if (terra::crs(r) != "EPSG:4326") {
+        if (crs(r) != "EPSG:4326") {
           r <- tryCatch(
             {
-              terra::project(r, "EPSG:4326")
+              project(r, "EPSG:4326")
             },
             error = function(e) {
               log_error(paste("Error reprojecting raster for", scientific_name, "on", date_str, ":", e$message))
