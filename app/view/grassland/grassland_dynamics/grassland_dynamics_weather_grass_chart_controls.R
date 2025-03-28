@@ -1,7 +1,6 @@
 box::use(
   shiny[NS, moduleServer, tags, radioButtons, observeEvent, req, observe],
-  bslib[card, card_header, card_body, input_switch],
-  shinyjs[disabled, toggleState]
+  bslib[card, card_header, card_body, input_switch]
 )
 
 #' @export
@@ -20,37 +19,25 @@ grassland_dynamics_double_chart_controls_ui <- function(id, i18n) {
     card_body(
       radioButtons(
         inputId = ns("line_or_bar"),
-        label = i18n$translate("Show line(s) or bars in the chart?"),
+        label = i18n$translate("Plot type:"),
         choices = list(
-          "Bars" = "bar",
-          "Lines" = "line"
+          "Bars - PFT's mean" = "bar",
+          "Lines - PFT's mean" = "line_mean",
+          "Lines - all PFT" = "line"
         ),
         selected = "bar"
-      ),
-      disabled(
-        input_switch(
-          id = ns("lines_mean_switch"),
-          label = "Show mean only",
-        )
       )
     )
   )
 }
 
 #' @export
-grassland_dynamics_double_chart_controls_server <- function(id, plot_type, mean_switch) { # nolint
+grassland_dynamics_double_chart_controls_server <- function(id, plot_type) {
+  # nolint
   moduleServer(id, function(input, output, session) {
     observeEvent(input$line_or_bar, ignoreInit = TRUE, {
       req(input$line_or_bar)
       plot_type(input$line_or_bar)
-    })
-
-    observe({
-      toggleState(id = "lines_mean_switch", condition = input$line_or_bar == "line")
-    })
-
-    observeEvent(input$lines_mean_switch, ignoreInit = TRUE, {
-      mean_switch(input$lines_mean_switch)
     })
   })
 }

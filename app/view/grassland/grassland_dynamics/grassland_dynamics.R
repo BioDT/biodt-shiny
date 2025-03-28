@@ -96,7 +96,6 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     ns <- session$ns
 
     plot_type <- reactiveVal("bar")
-    mean_switch <- reactiveVal(FALSE)
 
     # LOCATION settings ----
     coordinates <- grassland_dynamics_location_server("location")
@@ -119,11 +118,10 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     grassland_dynamics_double_chart_server(
       "double_chart",
       plot_type,
-      mean_switch,
       tab_grassland_selected
     )
 
-    grassland_dynamics_double_chart_controls_server("controls", plot_type, mean_switch)
+    grassland_dynamics_double_chart_controls_server("controls", plot_type)
 
     # Soil data table
     grassland_dynamics_soil_datatable_server(
