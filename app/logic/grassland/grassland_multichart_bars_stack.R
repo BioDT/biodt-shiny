@@ -120,10 +120,22 @@ generate_chart_bars_mean <- function(
         padding = 10,
         textStyle = list(color = "#000"),
         backgroundColor = 'rgba(255, 255, 255, 0.8)',
-        position = htmlwidgets::JS(
-          "function (point, params, dom, rect, size) {
-            return [point[0], '0%'];
-          }"
+        position = JS(
+          "
+          function (pos, params, el, elRect, size) {
+            var obj = {}
+
+            obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+            
+            if (pos[1] < (size.viewSize[1]/2)) {
+              obj['top'] = 5
+            } else {
+              obj[['top', 'bottom'][+(pos[1] > (size.viewSize[1]/2))]] = +(size.viewSize[1] / 3)
+            }
+
+            return obj;
+          }
+        "
         )
       ),
       axisPointer = list(
