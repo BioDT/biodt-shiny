@@ -38,6 +38,7 @@ box::use(
   app / view / cwr / cwr_main[mod_cwr_server, mod_cwr_ui],
   app / view / ias / ias_main[ias_ui, ias_main_server],
   app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
+  app / view / forest / forest_main[forest_main_ui, forest_main_server]
 )
 
 shiny$enableBookmarking("server")
@@ -141,6 +142,27 @@ ui <- function(id) {
         ),
         nav_panel(
           class = "p-0",
+          title = i18n$translate("Forest Biodiversity Dynamics"),
+          value = "Forest",
+          forest_main_ui(
+            ns("forest_main"),
+            i18n
+          )
+        ),
+        if (env_active == "dev") {
+          nav_panel(
+            class = "p-0",
+            title = i18n$translate(
+              "Real-time Bird Monitoring with Citizen Science Data"
+            ),
+            rtbm_ui(
+              ns("rtbm_main"),
+              i18n
+            )
+          )
+        },
+        nav_panel(
+          class = "p-0",
           title = i18n$translate("Cultural Ecosystem Services"),
           value = "CES",
           ces_ui(
@@ -168,18 +190,6 @@ ui <- function(id) {
             i18n
           )
         ),
-        if (env_active == "dev") {
-          nav_panel(
-            class = "p-0",
-            title = i18n$translate(
-              "Real-time Bird Monitoring with Citizen Science Data"
-            ),
-            rtbm_ui(
-              ns("rtbm_main"),
-              i18n
-            )
-          )
-        },
         ## Species interactions (themselves, human) - menu subitem ----
         nav_item(
           shiny$div(
@@ -297,6 +307,10 @@ server <- function(id) {
     # Grassland pDT ----
     grassland_main_server(
       "grassland_main"
+    )
+    # Forest pDT ----
+    forest_main_server(
+      "forest_main"
     )
     # Cultural Ecosystem Services pDT ----
     ces_server(
