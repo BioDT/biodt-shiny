@@ -7,6 +7,7 @@ box::use(
   config,
   bslib,
   utils,
+  shinyjs,
 )
 
 box::use(
@@ -14,7 +15,7 @@ box::use(
     logic /
     forest /
     analysis_functions[
-      # get_file_list,
+      get_file_list,
       get_file_name,
       get_data,
       get_figure,
@@ -162,16 +163,13 @@ forest_app_server <- function(id, app_selected) {
           replacement = as.character(tick())
         ))
 
-        input_selection <- get_file_name(
+        input_selection <- get_file_list(
           input,
-          tick(),
           data_folder
         )
         print("input_selection")
         print(input_selection)
 
-        # TODO test files exists
-        res_file(input_selection$res_file)
         experiment_data_file(input_selection$experiment_data_file)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
@@ -197,6 +195,15 @@ forest_app_server <- function(id, app_selected) {
             max = max_value,
             value = value,
             step = sort(res_file_list_tick)[2] - sort(res_file_list_tick)[1]
+          )
+
+          shinyjs$delay(
+            100,
+            {
+              # Update res_file based on the slider value
+              res_file_name <- get_file_name(input, input_selection$res_folder, value)
+              res_file(res_file_name)
+            }
           )
         }
       }
@@ -229,11 +236,7 @@ forest_app_server <- function(id, app_selected) {
         ext <- terra$ext(raster_data)
         pal <- leaflet$colorNumeric(
           palette = "YlOrBr",
-          domain = c(
-            min(terra$values(raster_data), na.rm = TRUE) -
-              mean(terra$values(raster_data), na.rm = TRUE) * 2,
-            max(terra$values(raster_data), na.rm = TRUE) * 1.5
-          ),
+          domain = terra$values(raster_data),
           na.color = "transparent",
           reverse = TRUE
         )
@@ -241,6 +244,7 @@ forest_app_server <- function(id, app_selected) {
 
         leaflet$leafletProxy("map") |>
           leaflet$clearImages() |>
+          leaflet$clearControls() |>
           leaflet$addRasterImage(
             raster_data,
             opacity = 0.4,
@@ -251,17 +255,11 @@ forest_app_server <- function(id, app_selected) {
             position = "bottomright",
             pal = leaflet$colorNumeric(
               palette = "YlOrBr",
-              domain = c(
-                min(terra$values(raster_data), na.rm = TRUE) -
-                  mean(terra$values(raster_data), na.rm = TRUE) * 2,
-                max(terra$values(raster_data), na.rm = TRUE) * 1.5
-              ) *
-                -1,
+              domain = terra$values(raster_data),
               na.color = "transparent"
             ),
-            values = terra$values(raster_data) * -1,
-            opacity = 0.4,
-            labFormat = leaflet$labelFormat(transform = function(x) x * -1)
+            values = terra$values(raster_data),
+            opacity = 0.4
           )
       }
     )

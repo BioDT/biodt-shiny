@@ -42,8 +42,6 @@ get_data <- function(
   years,
   data_folder
 ) {
-  print("get_data")
-  print(data_folder)
   # Create an empty list to store the data
   all_data <- list()
 
@@ -143,9 +141,8 @@ get_figure <- function(
 ######################
 
 #' @export
-get_file_name <- function(
+get_file_list <- function(
   input,
-  tick,
   data_folder
 ) {
   if (input$climate == "Current climate") {
@@ -179,11 +176,11 @@ get_file_name <- function(
     pattern = ".zip",
     replacement = ""
   )
-  if (stringr::str_starts(experiment, "/")) {
-    experiment <- stringr::str_replace(experiment, "/", "")
+  if (stringr$str_starts(experiment, "/")) {
+    experiment <- stringr$str_replace(experiment, "/", "")
   }
 
-  data_file_list <- utils::unzip(experiment_data, exdir = tempdir(), list = TRUE)
+  data_file_list <- utils$unzip(experiment_data, exdir = tempdir(), list = TRUE)
 
   if (input$output == "Above-ground biomass") {
     # todo implement update in case of "all species"
@@ -202,43 +199,39 @@ get_file_name <- function(
     res_folder <- paste0(experiment, "/output/agbiomass/", type)
     res_working_folder <- res_folder
 
-    res_file_list <- data_file_list$Name[grep(
-      paste0("^", res_folder, "/AGBiomass[0-9]+\\.img$"),
-      data_file_list$Name
-    )]
+    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "/AGBiomass[0-9]+\\.img$"), data_file_list$Name)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
-    res_file <- paste0(res_folder, "/AGBiomass", tick, ".img")
+    # res_file <- paste0(res_folder, "/AGBiomass", tick, ".img")
   } else if (input$output == "Below-ground biomass") {
     res_folder <- paste0(experiment, "/output/BelowGroundBiom/")
     res_working_folder <- res_folder
 
-    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "/BGB[0-9]+\\.img$"), data_file_list$Name)]
+    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "BGB[0-9]+\\.img$"), data_file_list$Name)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
-    res_file <- paste0(res_folder, "BGB", tick, ".img")
+    # res_file <- paste0(res_folder, "BGB", tick, ".img")
   } else if (input$output == "Harvested biomass") {
     res_folder <- paste0(experiment, "/output/harvest/")
     res_working_folder <- res_folder
 
     res_file_list <- data_file_list$Name[grep(
-      paste0("^", res_folder, "/biomass-removed[0-9]+\\.img$"),
+      paste0("^", res_folder, "biomass-removed-[0-9]+\\.img$"),
       data_file_list$Name
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-
-    res_file <- paste0(res_folder, "biomass-removed-", tick, ".img")
+    # res_file <- paste0(res_folder, "biomass-removed-", tick, ".img")
   } else if (input$output == "Woody Debris") {
     res_folder <- paste0(experiment, "/output/WoodyDebris/")
     res_working_folder <- res_folder
 
     res_file_list <- data_file_list$Name[grep(
-      paste0("^", res_folder, "/WoodyDebris-[0-9]+\\.img$"),
+      paste0("^", res_folder, "WoodyDebris-[0-9]+\\.img$"),
       data_file_list$Name
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
-    res_file <- paste0(res_folder, "WoodyDebris-", tick, ".img")
+    # res_file <- paste0(res_folder, "WoodyDebris-", tick, ".img")
   } else if (input$output == "Max-age of selected species") {
     if (input$species == "Birch (betulaSP)") {
       type <- "betulaSP"
@@ -257,31 +250,66 @@ get_file_name <- function(
     res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, type, "-[0-9]+\\.gis$"), data_file_list$Name)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
-    res_file <- paste0(res_folder, type, "-", tick, ".gis")
+    # res_file <- paste0(res_folder, type, "-", tick, ".gis")
   } else if (input$output == "Average age of all trees") {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
 
-    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "/AGE-AVG-[0-9]+\\.img$"), data_file_list$Name)]
+    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "AGE-AVG-[0-9]+\\.img$"), data_file_list$Name)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
-    res_file <- paste0(res_folder, "AGE-AVG-", tick, ".img")
+    # res_file <- paste0(res_folder, "AGE-AVG-", tick, ".img")
   } else if (input$output == "Median age of all trees") {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
 
-    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "/AGE-MED-[0-9]+\\.img$"), data_file_list$Name)]
+    res_file_list <- data_file_list$Name[grep(paste0("^", res_folder, "AGE-MED-[0-9]+\\.img$"), data_file_list$Name)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
-    res_file <- paste0(res_folder, "AGE-MED-", tick, ".img")
+    # res_file <- paste0(res_folder, "AGE-MED-", tick, ".img")
   }
-  print("get_file_name_finished")
+
   return(list(
-    res_file = res_file,
     experiment_data_file = experiment_data_file,
     res_working_folder = res_working_folder,
-    res_file_list_tick = res_file_list_tick
+    res_file_list_tick = res_file_list_tick,
+    res_folder = res_folder
   ))
+}
+
+######################
+
+#' @export
+get_file_name <- function(input, res_folder, tick) {
+  if (input$output == "Above-ground biomass") {
+    res_file <- paste0(res_folder, "/AGBiomass", tick, ".img")
+  } else if (input$output == "Below-ground biomass") {
+    res_file <- paste0(res_folder, "BGB", tick, ".img")
+  } else if (input$output == "Harvested biomass") {
+    res_file <- paste0(res_folder, "biomass-removed-", tick, ".img")
+  } else if (input$output == "Woody Debris") {
+    res_file <- paste0(res_folder, "WoodyDebris-", tick, ".img")
+  } else if (input$output == "Max-age of selected species") {
+    if (input$species == "Birch (betulaSP)") {
+      type <- "betulaSP"
+    } else if (input$species == "Pine (pinussyl)") {
+      type <- "pinussyl"
+    } else if (input$species == "Spruce (piceabbies)") {
+      type <- "piceabies"
+    } else if (input$species == "All species") {
+      type <- "AllSppMaxAge"
+    } else if (input$species == "Other trees (other)") {
+      type <- "other"
+    }
+
+    res_file <- paste0(res_folder, type, "-", tick, ".gis")
+  } else if (input$output == "Average age of all trees") {
+    res_file <- paste0(res_folder, "AGE-AVG-", tick, ".img")
+  } else if (input$output == "Median age of all trees") {
+    res_file <- paste0(res_folder, "AGE-MED-", tick, ".img")
+  }
+
+  return(res_file)
 }
 
 # get_raster_image <- function(experiment_data_file, res_file){
