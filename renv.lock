@@ -1759,15 +1759,15 @@
     },
     "terra": {
       "Package": "terra",
-      "Version": "1.8-10",
+      "Version": "1.8-29",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rcpp",
         "methods"
       ],
-      "Hash": "03e35a7e2b044d284afe186c9b9f833d"
+      "Hash": "10321b092e16e7c5c02a3bf22727ef39"
     },
     "testthat": {
       "Package": "testthat",
