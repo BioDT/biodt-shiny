@@ -22,7 +22,8 @@ update_leaflet_map <- function(
 ) {
   # Use leaflet proxy to clear and update the raster layer
   leaflet$leafletProxy("map", session) |>
-    leaflet$clearImages()
+    leaflet$clearImages() |>
+    leaflet$removeControl("stress_legend")
 
   # Create a list to hold the base groups for the layers control
   baseGroups <- list()
@@ -70,14 +71,16 @@ update_leaflet_map <- function(
       leaflet$addLegend(
         pal = leaflet$colorNumeric(
           c("blue", "green", "red"),
-          c(stressor_range[1], stressor_range[2]),
-          na.color = "transparent"
+          c(stressor_range[1], stressor_range[2]) * -1,
+          na.color = "transparent",
+          reverse = TRUE
         ),
-        values = c(stressor_range[1], stressor_range[2]),
+        values = c(stressor_range[1], stressor_range[2]) * -1,
         opacity = 0.6,
         group = "Stressor",
         layerId = "stress_legend",
-        position = "bottomleft"
+        position = "bottomleft",
+        labFormat = leaflet$labelFormat(transform = function(x) x * -1)
       )
   }
 

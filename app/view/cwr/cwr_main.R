@@ -55,6 +55,56 @@ box::use(
   app / logic / cwr / tolerance_plot[create_tolerance_plot],
 )
 
+crop_table <-
+  list(
+    "Peanut" = "Arachis",
+    "Taro" = "Colocasia",
+    "Yam" = "Dioscorea",
+    "Soybean" = "Glycine",
+    "Barley" = "Hordeum",
+    "Rice" = "Oryza",
+    "Wheat" = "Triticum",
+    "Maize" = "Zea",
+    "Sweet Potato" = "Ipomoea",
+    "Grasspea" = "Lathyrus",
+    "Cassava" = "Manihot",
+    "Banana" = "Musa",
+    "Beans" = "Phaseolus",
+    "Coconut" = "Cocos",
+    "Cotton" = "Gossypium",
+    "Cowpea" = "Vigna",
+    "Cucumber" = "Cucumis",
+    "Grape" = "Vitis",
+    "Guava" = "Psidium",
+    "Jute" = "Corchorus",
+    "Kangkong" = "Ipomoea",
+    "Lentil" = "Lens",
+    "Lettuce" = "Lactuca",
+    "Millet" = "Panicum",
+    "Mung Bean" = "Vigna",
+    "Mustard" = "Sinapis",
+    "Oat" = "Avena",
+    "Onion" = "Allium",
+    "Papaya" = "Carica",
+    "Potato" = "Solanum",
+    "Quinoa" = "Chenopodium",
+    "Rapeseed" = "Brassica",
+    "Rhubarb" = "Rheum",
+    "Sorghum" = "Sorghum",
+    "Spinach" = "Spinacia",
+    "Sugarcane" = "Saccharum",
+    "Sunflower" = "Helianthus",
+    "Tapioca" = "Cassava",
+    "Tobacco" = "Nicotiana",
+    "Tomato" = "Lycopersicon",
+    "Tumeric" = "Curcumin",
+    "Taro" = "Colocasia",
+    "Turnip" = "Brassica",
+    "Wheat" = "Triticum",
+    "Yam" = "Dioscorea",
+    "Zucchini" = "Cucurbita"
+  )
+
 mod_cwr_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
@@ -133,7 +183,7 @@ mod_cwr_ui <- function(id, i18n) {
               ),
               pickerInput(
                 ns("genus"),
-                label = "Choose genus",
+                label = "Choose Crop",
                 choices = list(""),
                 multiple = FALSE,
                 options = list(
@@ -144,10 +194,10 @@ mod_cwr_ui <- function(id, i18n) {
               ),
               pickerInput(
                 ns("species"),
-                label = "Choose species",
+                label = "Choose Wild Relatives",
                 choices = list(""),
                 multiple = TRUE,
-                selected = c("Sativus"),
+                selected = c(""),
                 options = pickerOptions(
                   `actions-box` = NULL,
                   `live-search` = TRUE,
@@ -243,10 +293,12 @@ mod_cwr_server <- function(id, i18n) {
           list_genus <- list_genus |>
             setdiff("climate")
 
+          list_genus_options <- crop_table[list_genus == crop_table]
+
           updatePickerInput(
             inputId = "genus",
-            choices = list_genus,
-            selected = list_genus[1]
+            choices = list_genus_options,
+            selected = list_genus_options[1]
           )
 
           if (r_cwr$first_visit) {
@@ -263,8 +315,10 @@ mod_cwr_server <- function(id, i18n) {
       input$genus,
       ignoreInit = TRUE,
       {
+        print(input$genus)
         # print("Change species")
         species_list <- list.files(file.path(cwr_path, input$genus))
+        names(species_list) <- paste(input$genus, species_list)
 
         updatePickerInput(
           inputId = "species",
