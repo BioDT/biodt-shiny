@@ -4,86 +4,81 @@
 
 The Real-Time Bird Monitoring (RTBM) module provides interactive visualization of bird species distribution data in Finland. This user-friendly tool helps researchers track and analyze bird populations with intuitive controls and informative visualizations.
 
-## Module Structure
+This document provides an overview of the Shiny modules responsible for the Real-Time Bird Monitoring (RTBM) interface.
 
-The RTBM module follows a clear, organized structure that makes maintenance and updates straightforward:
+## 1. RTBM Application Module (`app/view/rtbm/rtbm_app.R`)
 
-```
-app/view/rtbm/
-├── rtbm_app.R        # Main module with UI and server components
-├── rtbm_contributors.R  # Module contributor information
-├── rtbm_info.R       # Info tab content
-├── rtbm_main.R       # Main module entry point
-├── styles.css        # Module-specific styles
-└── README.md         # This documentation
-```
+This module serves as the main container for the RTBM visualization tool. It orchestrates the user interface layout, data loading controls, timeline animation, and communication with the map module.
 
-## Key Features
+### Exported Functions
 
-- Interactive date selection for historical bird distribution data
-- Species selection with searchable dropdown
-- Dynamic map visualization of species density across Finland
-- Species information cards with photos and taxonomic data
-- Integration with external APIs for bird data retrieval
+*   `rtbm_app_ui(id, i18n)`: Creates the user interface for the RTBM tab. This includes the control panel sidebar (date range, species picker, load button, timeline slider) and the main map display area.
+*   `rtbm_app_server(id, tab_selected)`: Defines the server-side logic for the RTBM tab. It handles user inputs, manages application state (available dates, current date, species data, animation state), processes data loading triggers, and initializes the map module.
 
-## Key Improvements for Users & Developers
+### Internal Helper Functions
 
-### Simplified Style Management 🔧→🎨
-**Previous Challenge**:  
-Changing visual elements required searching through 1,200+ lines of code with mixed HTML and styling
+*   `get_finland_border()`: Loads the GeoJSON file defining the border of Finland for map display. Includes fallback to a bounding box.
+*   `create_finland_bbox()`: Creates a simple bounding box for Finland as a fallback if the GeoJSON file cannot be loaded.
+*   `format_date_for_display(date)`: Formats a date object into a user-friendly string (e.g., "Mar 15, 2025").
+*   `format_dates_for_display(dates)`: Applies `format_date_for_display` to a vector of dates.
+*   `process_all_dates()`: Orchestrates the data loading process for the selected species and date range by calling `load_parquet_data`. Handles progress display and status messages. Updates reactive values (`available_dates`, `species_data`, `current_date`). Triggers the initial map update.
+*   `animation_step()`: Advances the timeline slider and map display by one step during animation.
 
-**Our Solution**:  
-Centralized styles.css with clear visual rules and consistent naming conventions
+### Reactive Values & Observers
 
-**Direct Benefits**:  
-- Researchers can request UI changes through simple CSS edits without touching application code
-- New team members understand styling patterns in 15 mins vs 2 hours
-- Consistent branding across all BioDT modules
-- Visual updates can be applied module-wide in seconds rather than hours
+*   Manages application state using `reactiveVal`: `available_dates`, `current_date`, `current_frame_index`, `species_data`, `animation_running`, `animation_last_step`, `sidebar_expanded`, `legend_added`, `info_card_added`.
+*   Uses `reactive` expressions to derive values based on inputs (e.g., `finnish_name`, `photo_url`, `scientific_name`, `wiki_link`, `song_url`, `date_sequence`).
+*   Uses `observeEvent` to handle user actions (sidebar toggling, load data button, timeline slider changes, animation controls).
+*   Uses `eventReactive` (`raster_data`) to trigger data processing only when the "Load Data" button is clicked.
+*   Includes observers for sidebar state management (`observeEvent(input$toggleSidebar, ...)` etc.) and animation (`observe({...})`).
 
-### Structured UI Building Blocks 🧩→🏗️
-**Previous Challenge**:  
-UI elements were created with direct code that mixed presentation and logic, making updates risky
+### Dependencies on `app/logic/rtbm/`
 
-**Our Solution**:  
-Implemented htmltools for cleaner, component-based UI construction
+*   **From `rtbm_data_handlers`:**
+    *   `load_bird_species_info()`: Used at the start to populate the species picker dropdown.
+    *   `load_parquet_data(scientific_name, start_date, end_date)`: Called by `process_all_dates` when the "Load Data" button is clicked to fetch and potentially process observation data for the selected species and date range.
 
-**Direct Benefits**:  
-- UI elements are now easier to locate and modify
-- Changes to one component don't accidentally break others
-- Mobile responsiveness improved for field researchers
-- Interface elements maintain consistent behavior across different screen sizes
+### Dependencies on other Local Modules
 
-### Modular Architecture 📦→🔌
-**Previous Challenge**:  
-Finding and fixing issues required navigating through a single massive file with intertwined functionality
+*   **From `app/view/rtbm/rtbm_map`:**
+    *   `map_module_ui(ns("map"))`: Called within `rtbm_app_ui` to embed the map UI component.
+    *   `map_module_server(...)`: Called within `rtbm_app_server` to initialize the map module's server logic, passing necessary reactive values and data (border, date, species data, species info URLs).
 
-**Our Solution**:  
-Split the application into logical components with clear boundaries and responsibilities
+---
 
-**Direct Benefits**:  
-- Debugging time reduced by 60% through targeted component testing
-- New features can be developed in parallel without conflicts
-- Researchers experience fewer disruptions from maintenance activities
-- Updates to one feature (e.g., map visualization) won't affect others (e.g., species selection)
+## 2. RTBM Map Module (`app/view/rtbm/rtbm_map.R`)
 
-### Enhanced Data Flow 🌊→⚡
-**Previous Challenge**:  
-Data processing bottlenecks caused delays when selecting different species or dates
+This module is dedicated to displaying the Leaflet map, rendering bird observation heatmaps, handling map controls (legend, date display), and showing the bird information card.
 
-**Our Solution**:  
-Optimized reactive dependencies with improved error handling
+### Exported Functions
 
-**Direct Benefits**:  
-- Species data loads up to 40% faster
-- More reliable performance during peak usage periods
-- Field researchers spend less time waiting and more time analyzing
-- Clearer error messages when external data sources are unavailable
+*   `map_module_ui(id)`: Creates the UI element for the Leaflet map output.
+*   `map_module_server(id, finland_border, current_date, species_data, selected_species, photo_url, scientific_name, wiki_link, song_url)`: Defines the server logic for the map. It receives reactive data from the parent module (`rtbm_app.R`) and is responsible for rendering the base map, updating layers (border, heatmap), adding controls (legend, date display), and managing the bird info card display. Returns a list containing the `update_map_with_frame` function.
 
-## External APIs
+### Internal Helper Functions
+
+*   `create_bird_info_card(...)`: Creates the HTML structure for the bird information card using `htmltools`.
+*   `update_bird_info_card()`: Adds, updates, or removes the bird info card control on the map using `leafletProxy` based on the reactive inputs.
+*   `update_map_with_frame(frame_index)`: The core function for updating the map display. It reads the appropriate parquet file based on the `current_date()` and `species_data()`, validates the data, clears existing layers/controls using `leafletProxy`, and adds the Finland border, observation heatmap, legend, and date display to the map.
+*   `format_date_for_display(date)`: Formats a date object into a user-friendly string (duplicates the one in `rtbm_app.R`, could potentially be moved to a shared utility module).
+*   `create_hover_info_display()`: Helper to create the (currently unused) hover info div structure.
+*   `create_date_display(date_str)`: Helper to create the date display control HTML.
+*   `create_error_display(error_message)`: Helper to create an error message control HTML.
+*   `create_status_message(message, type)`: Helper to create status message controls (currently unused in this module).
+*   `safe_print(...)`: Internal helper for controlled console logging.
+
+### Reactive Values & Observers
+
+*   Manages internal state `info_card_visible` using `reactiveVal`.
+*   Uses `renderLeaflet` (`output$rasterMap`) to create the initial base map.
+*   Uses `observeEvent` to react to changes in the bird information reactives passed from the parent (`selected_species()`, `photo_url()`, etc.) and trigger `update_bird_info_card()`.
+
+### Dependencies on `app/logic/rtbm/`
+
+*   **From `rtbm_data_handlers`:**
+    *   `load_bird_species_info()`: Currently imported but **not used** within `rtbm_map.R` itself (its result is used in `rtbm_app.R` and relevant derived values are passed *into* `map_module_server`). This import could potentially be removed from `rtbm_map.R`.
+
+---
+## External Links
 - Bird photos API (https://bird-photos.a3s.fi/)
 - Distribution data API (https://2007581-webportal.a3s.fi/)
-
-## Future Enhancements
-
-- TBD
