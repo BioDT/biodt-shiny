@@ -1,22 +1,23 @@
+# External packages
 box::use(
   # Shiny fundamentals and UI
   shiny[
     moduleServer, NS, renderUI, observe, observeEvent,
     isolate, reactiveVal, reactiveValues, req, reactive, renderPlot,
     invalidateLater, updateSliderInput, updateTextInput, withProgress, incProgress, removeUI,
-    actionButton, column, fluidRow, selectInput, sliderInput, tagList,
-    insertUI, uiOutput, h4, h5, h6, hr, p, pre, plotOutput, dateRangeInput,
-    textOutput, renderText, updateDateRangeInput, updateSelectInput, eventReactive,
-    icon, div, tags, textInput, showNotification, verbatimTextOutput, renderPrint, HTML
+    actionButton, column, fluidRow, selectInput, sliderInput,
+    insertUI, uiOutput, renderText, updateDateRangeInput, updateSelectInput, eventReactive,
+    icon, textInput, showNotification, verbatimTextOutput, renderPrint,
+    dateRangeInput, textOutput
   ],
 
   # Base R functions needed
   stats[setNames, na.omit, quantile, median, sd, var],
 
-  # HTML structure (using shiny.semantic instead of direct htmltools)
+  # HTML structure
   htmltools[
-    a, div, em, HTML, img, p, br, h1, h2, h3,
-    strong, tagList, span, hr
+    a, div, em, HTML, img, p, br, h1, h2, h3, h4, h5, h6,
+    strong, tagList, span, hr, tags, pre
   ],
 
   # Rhinoverse ecosystem UI components
@@ -26,19 +27,9 @@ box::use(
     as_fill_carrier, as_fill_item
   ],
 
-  # Modern Shiny components (consider replacing with Rhinoverse equivalents when available)
+  # Modern Shiny components
   shinyWidgets[pickerInput, progressBar, updateProgressBar],
   shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass, delay],
-
-  # Interactive map
-  leaflet[
-    leaflet, addTiles, setView, addProviderTiles, clearShapes, addCircles,
-    addCircleMarkers, addControl, clearControls, addLegend, addPolylines,
-    layersControlOptions, addLayersControl, leafletOutput, renderLeaflet, leafletProxy,
-    addRasterImage, clearImages, colorNumeric, addMarkers, clearGroup, makeIcon,
-    addRectangles, removeControl, removeTiles, hideGroup, showGroup, labelFormat
-  ],
-  leaflet.extras[addHeatmap],
 
   # Data manipulation with tidyverse
   dplyr[filter, mutate, select, pull, arrange, group_by, summarize, n, between, row_number],
@@ -52,19 +43,16 @@ box::use(
 
   # Spatial data handling
   sf[st_read, st_drop_geometry, st_as_sf, st_bbox, st_coordinates, st_as_sfc, st_crs],
-  terra[rast, values, global, crs, project, ext, as.polygons],
 
   # Basic utilities
   utils[head, tail],
   jsonlite[fromJSON, toJSON],
+)
 
-  # Color palettes
-  viridisLite[magma],
-  RColorBrewer[brewer.pal],
-  grDevices[colorRampPalette],
-
-  # Local dependencies
+# Local modules
+box::use(
   app/logic/rtbm/rtbm_data_handlers[load_bird_species_info, load_parquet_data],
+  app/view/rtbm/rtbm_map[map_module_ui, map_module_server],
 )
 
 # Initialize bird species data
@@ -174,7 +162,7 @@ rtbm_app_ui <- function(id, i18n) {
       div(
         id = ns("mapCol"),
         class = "col-md-9 map-column",
-        leafletOutput(ns("rasterMap"), height = "800px")
+        map_module_ui(ns("map"))
       )
     )
   )
@@ -339,292 +327,6 @@ rtbm_app_server <- function(id, tab_selected) {
       vapply(dates, format_date_for_display, FUN.VALUE = character(1))
     }
 
-    # Update map with a specific frame
-    update_map_with_frame <- function(frame_index) {
-      # Make sure we have required data
-      if (is.null(available_dates()) || is.null(species_data())) {
-        print("No dates or species data available")
-        return(FALSE)
-      }
-
-      # Use tryCatch around the entire function to prevent any unexpected errors
-      tryCatch(
-        {
-          # Convert frame_index to integer if needed
-          frame_index <- as.integer(frame_index)
-
-          # Safe print function to avoid formatting issues
-          safe_print <- function(...) {
-            args <- list(...)
-            msg <- paste0(args, collapse = "")
-            cat(msg, "\n")
-          }
-
-          safe_print("Updating map with frame index: ", frame_index)
-          safe_print("Total available dates: ", length(available_dates()))
-
-          # Validate frame index
-          if (frame_index <= 0 || frame_index > length(available_dates())) {
-            safe_print("Invalid frame index: ", frame_index)
-            return(FALSE)
-          }
-
-          # Get the current date and data path (with validation)
-          date <- available_dates()[[frame_index]]
-          if (is.null(date)) {
-            safe_print("Date is NULL for index: ", frame_index)
-            return(FALSE)
-          }
-
-          # Ensure date is properly formatted
-          if (!inherits(date, "Date")) {
-            date <- as.Date(date)
-          }
-
-          scientific_name <- species_data()$scientific_name
-          if (is.null(scientific_name) || is.na(scientific_name) || scientific_name == "") {
-            safe_print("Invalid scientific name")
-            return(FALSE)
-          }
-
-          # Format the date for file path
-          date_str <- format(date, "%Y-%m-%d")
-
-          # Construct path to parquet file
-          parquet_path <- file.path(
-            "app/data/rtbm/parquet",
-            paste0("species=", scientific_name),
-            paste0("date=", date_str, ".parquet")
-          )
-
-          safe_print("Looking for parquet file: ", parquet_path)
-
-          # Check if file exists
-          if (!file.exists(parquet_path)) {
-            safe_print("Parquet file not found: ", parquet_path)
-
-            output$statusMsg <- renderUI({
-              div(
-                class = "alert alert-warning",
-                role = "alert",
-                HTML(paste0("Data file not found for date: <strong>", date_str, "</strong>"))
-              )
-            })
-
-            return(FALSE)
-          }
-
-          # Update current date
-          current_date(date)
-          safe_print("Current date set to: ", format(date, "%Y-%m-%d"))
-
-          # Update map
-          output$rasterMap <- renderLeaflet({
-            # Read the parquet file directly
-            tryCatch(
-              {
-                safe_print("Reading parquet file")
-                points_data <- read_parquet(parquet_path)
-
-                safe_print("Loaded parquet file with ", nrow(points_data), " points")
-
-                if (ncol(points_data) > 0) {
-                  safe_print("Columns in parquet: ", paste(colnames(points_data), collapse = ", "))
-                }
-
-                # Base map with a more neutral style
-                m <- leaflet() |>
-                  addProviderTiles("CartoDB.Positron") |>
-                  # Set view to focus on southern Finland where most observations are
-                  setView(lng = 25.0, lat = 62.0, zoom = 6)
-
-                # Add Finland border if available
-                if (!is.null(finland_border)) {
-                  tryCatch(
-                    {
-                      m <- m |>
-                        addPolylines(
-                          data = finland_border,
-                          color = "#FF6B6B",
-                          weight = 2,
-                          opacity = 0.8,
-                          group = "Finland Border"
-                        )
-                    },
-                    error = function(e) {
-                      safe_print("Error adding Finland border: ", e$message)
-                      # Continue without the border
-                    }
-                  )
-                }
-
-                # Only add bird data if we have points
-                if (nrow(points_data) > 0) {
-                  # Get column names
-                  coord_cols <- c("longitude", "latitude", "intensity")
-
-                  # Check if we need to rename columns
-                  if (all(coord_cols %in% colnames(points_data))) {
-                    # Debug intensities
-                    safe_print(
-                      "Intensity range: ",
-                      min(points_data$intensity, na.rm = TRUE), " to ",
-                      max(points_data$intensity, na.rm = TRUE)
-                    )
-
-                    # Use YlGnBu colormap from RColorBrewer (from CES module) instead of magma
-                    # Create a sequential yellow-green-blue color palette
-                    ylgnbu_colors <- colorRampPalette(brewer.pal(9, "YlGnBu"))(20)
-
-                    # Create color function for intensity values
-                    intensity_min <- min(points_data$intensity, na.rm = TRUE)
-                    intensity_max <- max(points_data$intensity, na.rm = TRUE)
-
-                    # Make sure we have a valid domain even when all values are the same
-                    if (intensity_min == intensity_max) {
-                      domain <- c(intensity_min, intensity_min + 0.000001)
-                    } else {
-                      domain <- c(intensity_min, intensity_max)
-                    }
-
-                    base_pal <- colorNumeric(ylgnbu_colors, domain = domain, na.color = NA)
-                    pal_na <- function(x) {
-                      col <- base_pal(x)
-                      col[is.na(col)] <- "#00000000" # Transparent for NA values
-                      col
-                    }
-
-                    # Add heatmap with YlGnBu colormap - confined to Finland's boundaries
-                    m <- m |>
-                      addHeatmap(
-                        data = points_data,
-                        lng = ~longitude,
-                        lat = ~latitude,
-                        intensity = ~ intensity * 4.0,
-                        blur = 18,
-                        max = intensity_max * 4.0 * 0.8,
-                        radius = 15,
-                        minOpacity = 0.7,
-                        gradient = rev(ylgnbu_colors),
-                        group = "Heat Map"
-                      )
-
-                    # Add layer controls with Heat Map as the only visualization option
-                    m <- m |>
-                      addLayersControl(
-                        baseGroups = c("Base Map"),
-                        overlayGroups = c("Finland Border", "Heat Map"),
-                        options = layersControlOptions(collapsed = FALSE)
-                      )
-
-                    # Add legend with enhanced visualization
-                    m <- m |> addLegend(
-                      position = "bottomright",
-                      pal = base_pal,
-                      values = domain,
-                      title = "Observation intensity",
-                      opacity = 1.0 # Full opacity for better visibility
-                    )
-
-                    # Always re-add the bird info card if it's supposed to be there
-                    if (info_card_added() &&
-                      !is.null(input$speciesPicker) &&
-                      !is.null(photo_url()) &&
-                      !is.null(scientific_name()) &&
-                      !is.null(wiki_link()) &&
-                      !is.null(song_url())) {
-                      # Create bird info card HTML with inline styles
-                      bird_info_html <- HTML(paste0(
-                        "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
-                        "<h5>", input$speciesPicker, "</h5>",
-                        "<p><em><a href='", wiki_link(), "' target='_blank'>", scientific_name(), "</a></em></p>",
-                        "<div style='text-align: center;'>",
-                        "<img src='", photo_url(), "' alt='", input$speciesPicker, "' style='width: 200px;'>",
-                        "</div>",
-                        "<div style='margin-top: 10px;'>",
-                        "<audio controls style='width: 100%;'>",
-                        "<source src='", song_url(), "' type='audio/mp3'>",
-                        "Your browser does not support the audio element.",
-                        "</audio>",
-                        "</div>",
-                        "</div>"
-                      ))
-
-                      # Add the bird info card directly to the map
-                      m <- m |> addControl(
-                        html = bird_info_html,
-                        position = "topleft",
-                        layerId = "bird-info-card"
-                      )
-                    }
-
-                    # Log success
-                    safe_print("Successfully added ", nrow(points_data), " observation points to map")
-                  } else {
-                    safe_print("WARNING: Expected columns not found in parquet file")
-                    safe_print("Available columns: ", paste(colnames(points_data), collapse = ", "))
-                  }
-                } else {
-                  safe_print("No data points available for visualization")
-                }
-
-                # Add date display to map
-                date_to_display <- tryCatch(
-                  {
-                    format_date_for_display(current_date())
-                  },
-                  error = function(e) {
-                    safe_print("Error formatting date: ", e$message)
-                    # Fallback to basic format
-                    if (!is.null(current_date())) {
-                      as.character(current_date())
-                    } else {
-                      "Unknown date"
-                    }
-                  }
-                )
-
-                m <- m |> addControl(
-                  html = HTML(paste0(
-                    "<div class='map-date-display'>",
-                    "<strong>Date:</strong> ", date_to_display,
-                    "</div>"
-                  )),
-                  position = "bottomleft"
-                )
-
-                return(m)
-              },
-              error = function(e) {
-                safe_print("Error updating map: ", e$message)
-
-                # Return a basic map if there's an error
-                leaflet() |>
-                  addProviderTiles("CartoDB.Positron") |>
-                  # Set view to focus on southern Finland where most observations are
-                  setView(lng = 25.0, lat = 62.0, zoom = 6) |>
-                  addControl(
-                    html = HTML(paste0(
-                      "<div class='alert alert-danger'>",
-                      "Error loading data: ", e$message,
-                      "</div>"
-                    )),
-                    position = "topright"
-                  )
-              }
-            )
-          })
-
-          return(TRUE)
-        },
-        error = function(e) {
-          # Handle any unexpected errors
-          cat("Error in update_map_with_frame: ", e$message, "\n")
-          return(FALSE)
-        }
-      )
-    }
-
     # Get Finnish name for URL construction
     finnish_name <- reactive({
       req(input$speciesPicker)
@@ -785,19 +487,12 @@ rtbm_app_server <- function(id, tab_selected) {
           })
 
           # Update map with the first frame
-          update_map_with_frame(1)
+          map_functions$update_map_with_frame(1)
         }
       )
 
       return(TRUE)
     }
-
-    # Clear cache at midnight to get fresh data
-    # observe({
-    #   invalidateLater(calculate_seconds_until_midnight())
-    #   Update local cache when time crosses midnight
-    #   update_local_cache(days_back = 14)  # Temporarily disabled
-    # })
 
     # Create a custom date slider UI using bslib components
     output$dateSlider <- renderUI({
@@ -874,33 +569,7 @@ rtbm_app_server <- function(id, tab_selected) {
       # Check if we have species data
       if (!is.null(species_data()) && !is.null(input$date_slider_index)) {
         # Update map with the selected date's frame
-        update_map_with_frame(input$date_slider_index)
-
-        # Re-add bird info card after this map update
-        if (info_card_added() &&
-          !is.null(input$speciesPicker) &&
-          !is.null(photo_url()) &&
-          !is.null(scientific_name()) &&
-          !is.null(wiki_link()) &&
-          !is.null(song_url())) {
-          # Create bird info card using our reusable function
-          bird_info_html <- create_bird_info_card(
-            species_name = input$speciesPicker,
-            scientific_name = scientific_name(),
-            wiki_url = wiki_link(),
-            photo_url = photo_url(),
-            song_url = song_url()
-          )
-
-          # Add the bird info card directly to the map
-          leafletProxy(ns("rasterMap")) |>
-            removeControl(layerId = "bird-info-card") |>
-            addControl(
-              html = bird_info_html,
-              position = "topleft",
-              layerId = "bird-info-card"
-            )
-        }
+        map_functions$update_map_with_frame(input$date_slider_index)
       }
     })
 
@@ -1001,94 +670,6 @@ rtbm_app_server <- function(id, tab_selected) {
       }
     })
 
-    # Function to create bird info card HTML with inline styles
-    create_bird_info_card <- function(species_name, scientific_name, wiki_url, photo_url, song_url) {
-      HTML(paste0(
-        "<div style='background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6; width: 220px; box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);'>",
-        "<h5>", species_name, "</h5>",
-        "<p><em><a href='", wiki_url, "' target='_blank'>", scientific_name, "</a></em></p>",
-        "<div style='text-align: center;'>",
-        "<img src='", photo_url, "' alt='", species_name, "' style='width: 200px;'>",
-        "</div>",
-        "<div style='margin-top: 10px;'>",
-        "<audio controls style='width: 100%;'>",
-        "<source src='", song_url, "' type='audio/mp3'>",
-        "Your browser does not support the audio element.",
-        "</audio>",
-        "</div>",
-        "</div>"
-      ))
-    }
-
-    # Function to add bird info card to map
-    add_bird_info_card <- function() {
-      # Only proceed if we have all the required data
-      req(
-        input$speciesPicker,
-        photo_url(),
-        scientific_name(),
-        wiki_link(),
-        song_url()
-      )
-
-      # Create bird info card using our reusable function
-      bird_info_html <- create_bird_info_card(
-        species_name = input$speciesPicker,
-        scientific_name = scientific_name(),
-        wiki_url = wiki_link(),
-        photo_url = photo_url(),
-        song_url = song_url()
-      )
-
-      # Add the card to the map, replacing any existing one
-      leafletProxy(ns("rasterMap")) |>
-        removeControl(layerId = "bird-info-card") |>
-        addControl(
-          html = bird_info_html,
-          position = "topleft",
-          layerId = "bird-info-card"
-        )
-
-      # Update flag to indicate the info card is added
-      info_card_added(TRUE)
-    }
-
-    # Add observer to ensure bird info card persists after any map operations
-    observe({
-      # Watch for map changes that might affect the bird info card
-      input$rasterMap_zoom
-      input$rasterMap_bounds
-      input$loadData
-
-      # Only proceed if we should show the bird info card
-      if (info_card_added() &&
-        !is.null(input$speciesPicker) &&
-        !is.null(photo_url()) &&
-        !is.null(scientific_name()) &&
-        !is.null(wiki_link()) &&
-        !is.null(song_url())) {
-        # Add a small delay to ensure this runs after other map operations
-        delay(200, {
-          # Add bird info card to the map
-          add_bird_info_card()
-        })
-      }
-    })
-
-    # Observe species selection and update the info card on the map
-    observeEvent(input$speciesPicker, {
-      # Only proceed if we have all required data
-      req(photo_url(), scientific_name(), wiki_link(), song_url())
-
-      # Add bird info card to the map
-      add_bird_info_card()
-
-      # Also update the map frame if we have data available
-      if (!is.null(current_frame_index())) {
-        update_map_with_frame(current_frame_index())
-      }
-    })
-
     # Changed from reactive to eventReactive to only load data when the button is clicked
     raster_data <- eventReactive(input$loadData, {
       # Reset legend flag when loading new data, but keep info card flag
@@ -1102,11 +683,11 @@ rtbm_app_server <- function(id, tab_selected) {
       if (success) {
         # Show the first frame
         print("Displaying first frame")
-        update_map_with_frame(1)
+        map_functions$update_map_with_frame(1)
       } else {
         # Clear the map if no data
         print("No data available - clearing the map")
-        leafletProxy(ns("rasterMap")) |>
+        leafletProxy(ns("map-rasterMap")) |>
           clearImages() |>
           clearControls()
       }
@@ -1115,61 +696,19 @@ rtbm_app_server <- function(id, tab_selected) {
     # Observe button click to trigger initial data load
     observeEvent(input$loadData, {
       raster_data()
-
-      # Add a slight delay and then re-add both legend and bird info card
-      delay(500, {
-        # Re-add the legend
-        if (legend_added()) {
-          # We need to recreate the legend with the same parameters
-          # Assuming points_data is available from the most recent update
-          leafletProxy(ns("rasterMap")) |>
-            clearControls() |> # Clear existing controls
-            addLegend(
-              position = "bottomright",
-              pal = colorNumeric(palette = "viridis", domain = c(0, 1))(seq(0, 1, length.out = 5)),
-              values = seq(0, 1, length.out = 5),
-              title = "Observation Intensity",
-              opacity = 0.7
-            )
-        }
-
-        # Re-add the bird info card if needed
-        if (info_card_added()) {
-          # Make sure we have all the required bird info available
-          if (!is.null(input$speciesPicker) &&
-            !is.null(photo_url()) &&
-            !is.null(scientific_name()) &&
-            !is.null(wiki_link()) &&
-            !is.null(song_url())) {
-            # Add bird info card to the map
-            add_bird_info_card()
-          }
-        }
-      })
     })
 
-    # Base leaflet map
-    output$rasterMap <- renderLeaflet({
-      # Create the base map
-      m <- leaflet() |>
-        addProviderTiles("CartoDB.Positron") |>
-        # Set view to focus on southern Finland where most observations are
-        setView(lng = 25.0, lat = 62.0, zoom = 6) |>
-        addControl(
-          html = "<div id='hover-info' class='map-hover-display d-none'></div>",
-          position = "topright",
-          layerId = "hover-info-control"
-        )
-
-      # If we already have the bird info card, add it to the initial map
-      if (info_card_added() && !is.null(input$speciesPicker) &&
-        !is.null(photo_url()) && !is.null(scientific_name()) &&
-        !is.null(wiki_link()) && !is.null(song_url())) {
-        # Add bird info card to the map
-        add_bird_info_card()
-      }
-
-      return(m)
-    })
+    # Initialize map module
+    map_functions <- map_module_server(
+      "map",
+      finland_border = finland_border,
+      current_date = current_date,
+      species_data = species_data,
+      selected_species = reactive(input$speciesPicker),
+      photo_url = photo_url,
+      scientific_name = scientific_name,
+      wiki_link = wiki_link,
+      song_url = song_url
+    )
   })
 }
