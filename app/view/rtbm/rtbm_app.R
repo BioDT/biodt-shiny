@@ -2,13 +2,41 @@
 box::use(
   # Shiny fundamentals and UI
   shiny[
-    moduleServer, NS, renderUI, observe, observeEvent,
-    isolate, reactiveVal, reactiveValues, req, reactive, renderPlot,
-    invalidateLater, updateSliderInput, updateTextInput, withProgress, incProgress, removeUI,
-    actionButton, column, fluidRow, selectInput, sliderInput,
-    insertUI, uiOutput, renderText, updateDateRangeInput, updateSelectInput, eventReactive,
-    icon, textInput, showNotification, verbatimTextOutput, renderPrint,
-    dateRangeInput, textOutput
+    moduleServer,
+    NS,
+    renderUI,
+    observe,
+    observeEvent,
+    isolate,
+    reactiveVal,
+    reactiveValues,
+    req,
+    reactive,
+    renderPlot,
+    invalidateLater,
+    updateSliderInput,
+    updateTextInput,
+    withProgress,
+    incProgress,
+    removeUI,
+    actionButton,
+    column,
+    fluidRow,
+    selectInput,
+    sliderInput,
+    insertUI,
+    uiOutput,
+    renderText,
+    updateDateRangeInput,
+    updateSelectInput,
+    eventReactive,
+    icon,
+    textInput,
+    showNotification,
+    verbatimTextOutput,
+    renderPrint,
+    dateRangeInput,
+    textOutput
   ],
 
   # Base R functions needed
@@ -16,19 +44,49 @@ box::use(
 
   # HTML structure
   htmltools[
-    a, div, em, HTML, img, p, br, h1, h2, h3, h4, h5, h6,
-    strong, tagList, span, hr, tags, pre
+    a,
+    div,
+    em,
+    HTML,
+    img,
+    p,
+    br,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    tagList,
+    span,
+    hr,
+    tags,
+    pre
   ],
 
   # Rhinoverse ecosystem UI components
   bslib[
-    card, card_header, card_body, card_footer, tooltip, value_box, layout_column_wrap,
-    page_fluid, nav_panel, nav_spacer, nav_menu, nav_item, nav, navset_bar,
-    as_fill_carrier, as_fill_item
+    card,
+    card_header,
+    card_body,
+    card_footer,
+    tooltip,
+    value_box,
+    layout_column_wrap,
+    page_fluid,
+    nav_panel,
+    nav_spacer,
+    nav_menu,
+    nav_item,
+    nav,
+    navset_bar,
+    as_fill_carrier,
+    as_fill_item
   ],
 
   # Modern Shiny components
-  shinyWidgets[pickerInput, progressBar, updateProgressBar],
+  shinyWidgets[pickerInput, progressBar, updateProgressBar, updatePickerInput],
   shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass, delay],
 
   # Data manipulation with tidyverse
@@ -51,13 +109,9 @@ box::use(
 
 # Local modules
 box::use(
-  app/logic/rtbm/rtbm_data_handlers[load_bird_species_info, load_parquet_data],
-  app/view/rtbm/rtbm_map[map_module_ui, map_module_server],
+  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data],
+  app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
 )
-
-# Initialize bird species data
-bird_spp_info <- load_bird_species_info()
-species_choices <- bird_spp_info$common_name
 
 #' Real-time Bird Monitoring UI Module
 #'
@@ -123,8 +177,8 @@ rtbm_app_ui <- function(id, i18n) {
             pickerInput(
               inputId = ns("speciesPicker"),
               label = "Select Species",
-              choices = bird_spp_info$common_name,
-              selected = bird_spp_info$common_name[1],
+              choices = "", #bird_spp_info$common_name,
+              selected = "", #bird_spp_info$common_name[1],
               multiple = FALSE,
               options = list(
                 `live-search` = TRUE,
@@ -230,6 +284,8 @@ rtbm_app_server <- function(id, tab_selected) {
     current_date <- reactiveVal(NULL)
     current_frame_index <- reactiveVal(1)
     species_data <- reactiveVal(NULL)
+    bird_spp_info <- reactiveVal(NULL)
+    species_choices <- reactiveVal(NULL)
 
     # Animation controls
     animation_speed <- reactiveVal(1000) # 1 second between frames
@@ -238,6 +294,20 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Sidebar state management
     sidebar_expanded <- reactiveVal(TRUE) # Start expanded
+
+    # Initialize bird species data
+    observeEvent(tab_selected(), ignoreInit = TRUE, {
+      bird_spp_info(load_bird_species_info())
+      species_choices(bird_spp_info()$common_name)
+
+      req(bird_spp_info())
+      updatePickerInput(
+        inputId = "speciesPicker",
+        session = session,
+        choices = bird_spp_info()$common_name,
+        selected = bird_spp_info()$common_name[1]
+      )
+    })
 
     # Toggle sidebar collapse/expand
     observeEvent(input$toggleSidebar, {
@@ -329,8 +399,8 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Get Finnish name for URL construction
     finnish_name <- reactive({
-      req(input$speciesPicker)
-      fn <- bird_spp_info |>
+      req(input$speciesPicker, bird_spp_info())
+      fn <- bird_spp_info() |>
         filter(common_name == input$speciesPicker) |>
         pull(finnish_name)
       print(fn)
@@ -342,8 +412,8 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Get photo URL for display
     photo_url <- reactive({
-      req(input$speciesPicker)
-      url <- bird_spp_info |>
+      req(input$speciesPicker, bird_spp_info())
+      url <- bird_spp_info() |>
         filter(common_name == input$speciesPicker) |>
         pull(photo_url)
       if (length(url) == 0 || url == "") {
@@ -360,8 +430,8 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # 4) Scientific name
     scientific_name <- reactive({
-      req(input$speciesPicker)
-      sn <- bird_spp_info |>
+      req(input$speciesPicker, bird_spp_info())
+      sn <- bird_spp_info() |>
         filter(common_name == input$speciesPicker) |>
         pull(scientific_name)
       if (length(sn) == 0) {
@@ -372,8 +442,8 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # 4b) Wiki link (for the hyperlink on the scientific name)
     wiki_link <- reactive({
-      req(input$speciesPicker)
-      wl <- bird_spp_info |>
+      req(input$speciesPicker, bird_spp_info())
+      wl <- bird_spp_info() |>
         filter(common_name == input$speciesPicker) |>
         pull(wiki_link)
       if (length(wl) == 0 || wl == "") {
@@ -384,8 +454,8 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # 5) Song URL
     song_url <- reactive({
-      req(input$speciesPicker)
-      s_url <- bird_spp_info |>
+      req(input$speciesPicker, bird_spp_info())
+      s_url <- bird_spp_info() |>
         filter(common_name == input$speciesPicker) |>
         pull(song_url)
       if (length(s_url) == 0 || s_url == "") {
@@ -396,14 +466,14 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # Process data for all dates in the selected range
     process_all_dates <- function() {
-      req(input$dateRange, input$speciesPicker)
+      req(input$dateRange, input$speciesPicker, bird_spp_info())
 
       start_date <- as_date(input$dateRange[1])
       end_date <- as_date(input$dateRange[2])
       species <- input$speciesPicker
 
       # Find scientific name for the selected species
-      scientific_name <- bird_spp_info |>
+      scientific_name <- bird_spp_info() |>
         filter(common_name == species) |>
         pull(scientific_name)
 
@@ -480,7 +550,9 @@ rtbm_app_server <- function(id, tab_selected) {
               class = "alert alert-success",
               role = "alert",
               paste0(
-                "Loaded data for ", length(result$dates), " dates. ",
+                "Loaded data for ",
+                length(result$dates),
+                " dates. ",
                 "Use the timeline slider or animation controls to view changes over time."
               )
             )
