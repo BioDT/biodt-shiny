@@ -62,7 +62,7 @@ get_data <- function(
 
   # Combine all data into a single data frame
   combined_data <- dplyr$bind_rows(all_data)
-
+  print(typeof(combined_data))
   return(combined_data)
 }
 
@@ -140,7 +140,17 @@ get_file_list <- function(
   }
 
   data_file_list <- list.files(path = experiment_data, recursive = TRUE)
-
+  
+  # get simulated years
+  lines <- readLines(file.path(experiment_data, "PnET-succession.txt"))
+  start_year_line <- grep("^StartYear", lines, value = TRUE)
+  start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
+  timestep_line <- grep("^Timestep", lines, value = TRUE)
+  timestep <- as.numeric(sub(".*?(\\d+).*", "\\1", timestep_line))
+  lines <- readLines(file.path(experiment_data, "scenario.txt"))
+  duration_line <- grep("^Duration", lines, value = TRUE)
+  duration <- as.numeric(sub(".*?(\\d+).*", "\\1", duration_line))
+  
   if (input$output == "Above-ground biomass") {
     # todo implement update in case of "all species"
     if (input$species == "All species") {
@@ -225,7 +235,10 @@ get_file_list <- function(
     experiment_data_file = experiment_data_file,
     res_working_folder = res_working_folder,
     res_file_list_tick = res_file_list_tick,
-    res_folder = res_folder
+    res_folder = res_folder,
+    start_year = start_year,
+    timestep = timestep,
+    duration = duration
   ))
 }
 

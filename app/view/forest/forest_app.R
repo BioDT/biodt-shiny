@@ -80,7 +80,7 @@ forest_app_ui <- function(id, i18n) {
         ),
         shiny$sliderInput(
           ns("res_file_slider"),
-          "Select tick number:",
+          "Select year:",
           min = 0,
           max = 0,
           value = 0
@@ -119,7 +119,6 @@ forest_app_server <- function(id, app_selected) {
       text
     })
 
-    tick <- shiny$reactiveVal(0)
     res_working_folder <- shiny$reactiveVal(NULL)
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
@@ -149,12 +148,6 @@ forest_app_server <- function(id, app_selected) {
       ignoreInit = TRUE,
       {
         shiny$req(app_selected())
-        tick(input$res_file_slider)
-        res_file(stringr$str_replace(
-          string = res_file(),
-          pattern = "\\d+(?=\\D*$)",
-          replacement = as.character(tick())
-        ))
 
         input_selection <- get_file_list(
           input,
@@ -164,10 +157,14 @@ forest_app_server <- function(id, app_selected) {
         experiment_data_file(input_selection$experiment_data_file)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
-        
-        if (length(res_file_list_tick) > 0) {
-          min_value <- min(res_file_list_tick, na.rm = TRUE)
-          max_value <- max(res_file_list_tick, na.rm = TRUE)
+        timestep <- input_selection$timestep
+        start_year <- input_selection$start_year
+        # duration <- input_selection$duration
+        simulated_years <- res_file_list_tick + start_year
+
+        if (length(simulated_years) > 0) {
+          min_value <- min(simulated_years, na.rm = TRUE)
+          max_value <- max(simulated_years, na.rm = TRUE)
 
           # Get the current value of the slider
           value <- shiny$isolate(input$res_file_slider)
@@ -185,14 +182,14 @@ forest_app_server <- function(id, app_selected) {
             min = min_value,
             max = max_value,
             value = value,
-            step = sort(res_file_list_tick)[2] - sort(res_file_list_tick)[1]
+            step = timestep
           )
 
           shinyjs$delay(
             100,
             {
-              # Update res_file based on the slider value
-              res_file_name <- get_file_name(input, input_selection$res_folder, value)
+              # Update res_file based on the slider value (file names starts from 0)
+              res_file_name <- get_file_name(input, input_selection$res_folder, value - start_year)
               res_file(res_file_name)
             }
           )
@@ -254,6 +251,12 @@ forest_app_server <- function(id, app_selected) {
         climate_scenarios <- c("current", "4.5", "8.5")
         management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
         years <- seq(0, 100, by = 10)
+        
+        # timestep <- input_selection$timestep
+        # start_year <- input_selection$start_year
+        # duration <- input_selection$duration
+        # years <- seq(2000, 2100, by = 10)
+        
         combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
         
         plots <- list()
