@@ -33,6 +33,7 @@ grassland_dynamics_double_chart_ui <- function(
       )
     ),
     card_body(
+      style = "min-width: 900px !important; overflow-x: scroll;",
       layout_column_wrap(
         width = 1 / 2,
         selectInput(
