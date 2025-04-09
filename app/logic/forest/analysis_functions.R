@@ -62,7 +62,6 @@ get_data <- function(
 
   # Combine all data into a single data frame
   combined_data <- dplyr$bind_rows(all_data)
-  print(typeof(combined_data))
   return(combined_data)
 }
 

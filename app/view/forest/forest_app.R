@@ -84,7 +84,8 @@ forest_app_ui <- function(id, i18n) {
           min = 0,
           max = 0,
           value = 0
-        )
+        ), 
+        shiny$checkboxInput(ns("show_results"), "Show results", value = FALSE)
       )
     ),
     bslib$card(
@@ -246,55 +247,61 @@ forest_app_server <- function(id, app_selected) {
     output_plot <- shiny$reactiveVal(NULL)
     
     shiny$observeEvent(
-      app_selected(),
+      c(app_selected(), input$show_results),
       {
-        climate_scenarios <- c("current", "4.5", "8.5")
-        management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
-        years <- seq(0, 100, by = 10)
-        
-        # timestep <- input_selection$timestep
-        # start_year <- input_selection$start_year
-        # duration <- input_selection$duration
-        # years <- seq(2000, 2100, by = 10)
-        
-        combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
-        
         plots <- list()
         
-        plots[[1]] <- get_figure(
-          combined_data,
-          column = "AverageB.g.m2.",
-          unit = expression(paste("AGBiomass (g/m"^2, ")")),
-          title = "Average above-ground biomass over time (until 2100)"
-        )
-        
-        plots[[2]] <- get_figure(
-          combined_data,
-          column = "AverageBelowGround.g.m2.",
-          unit = expression(paste("BGBiomass (g/m"^2, ")")),
-          title = "Average below-ground biomass over time (until 2100)"
-        )
-        
-        plots[[3]] <- get_figure(
-          combined_data,
-          column = "AverageAge",
-          unit = expression(paste("Age (years)")),
-          title = "Average age over time (until 2100)"
-        )
-        
-        plots[[4]] <- get_figure(
-          combined_data,
-          column = "WoodyDebris.kgDW.m2.",
-          unit = expression(paste("Woody Debris (kgDW/m"^2, ")")),
-          title = "Woody debris over time (until 2100)"
-        )
+        if(input$show_results){
+          climate_scenarios <- c("current", "4.5", "8.5")
+          management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
+          years <- seq(0, 100, by = 10)
+          
+          # timestep <- input_selection$timestep
+          # start_year <- input_selection$start_year
+          # duration <- input_selection$duration
+          # years <- seq(2000, 2100, by = 10)
+          
+          combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
+
+          plots[[1]] <- get_figure(
+            combined_data,
+            column = "AverageB.g.m2.",
+            unit = expression(paste("AGBiomass (g/m"^2, ")")),
+            title = "Average above-ground biomass over time (until 2100)"
+          )
+          
+          plots[[2]] <- get_figure(
+            combined_data,
+            column = "AverageBelowGround.g.m2.",
+            unit = expression(paste("BGBiomass (g/m"^2, ")")),
+            title = "Average below-ground biomass over time (until 2100)"
+          )
+          
+          plots[[3]] <- get_figure(
+            combined_data,
+            column = "AverageAge",
+            unit = expression(paste("Age (years)")),
+            title = "Average age over time (until 2100)"
+          )
+          
+          plots[[4]] <- get_figure(
+            combined_data,
+            column = "WoodyDebris.kgDW.m2.",
+            unit = expression(paste("Woody Debris (kgDW/m"^2, ")")),
+            title = "Woody debris over time (until 2100)"
+          )
+        }
         
         output_plot(plots)
       }
     )
     
     output$plot <- shiny$renderPlot({
-      do.call(gridExtra$grid.arrange, c(output_plot(), nrow = 4))
+      plots <- output_plot()
+      if (length(plots) == 0) {
+        return(NULL)  # clear the existing plot in the UI
+      }
+      do.call(gridExtra$grid.arrange, c(plots, nrow = 4))
       # output_plot()
       })
   })
