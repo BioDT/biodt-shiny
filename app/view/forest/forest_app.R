@@ -18,8 +18,7 @@ box::use(
       get_file_list,
       get_file_name,
       get_data,
-      get_figure,
-      convert_landis_output
+      get_figure
     ]
 )
 
@@ -82,9 +81,9 @@ forest_app_ui <- function(id, i18n) {
         shiny$sliderInput(
           ns("res_file_slider"),
           "Select tick number:",
-          min = 0, # Set minimum value
-          max = 0, # Set maximum value
-          value = 0 # Default value
+          min = 0,
+          max = 0,
+          value = 0
         )
       )
     ),
@@ -101,7 +100,6 @@ forest_app_server <- function(id, app_selected) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
     data_folder <- file.path(config$get("data_path"), "forest_bird")
-
     output$selection <- shiny$renderText({
       text <- paste(
         "Management Regime:",
@@ -126,10 +124,6 @@ forest_app_server <- function(id, app_selected) {
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
 
-    # observeEvent(input$res_file_slider, {
-    #   tick(input$res_file_slider)
-    #   res_file(stringr$str_replace(string = res_file(), pattern = "\\d+(?=\\D*$)", replacement = as.character(tick())))
-    # })
     output$map <- NULL
 
     shiny$observeEvent(
@@ -155,7 +149,6 @@ forest_app_server <- function(id, app_selected) {
       ignoreInit = TRUE,
       {
         shiny$req(app_selected())
-        print("load data")
         tick(input$res_file_slider)
         res_file(stringr$str_replace(
           string = res_file(),
@@ -167,13 +160,11 @@ forest_app_server <- function(id, app_selected) {
           input,
           data_folder
         )
-        print("input_selection")
-        print(input_selection)
 
         experiment_data_file(input_selection$experiment_data_file)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
-
+        
         if (length(res_file_list_tick) > 0) {
           min_value <- min(res_file_list_tick, na.rm = TRUE)
           max_value <- max(res_file_list_tick, na.rm = TRUE)
@@ -209,11 +200,6 @@ forest_app_server <- function(id, app_selected) {
       }
     )
 
-    # shiny$observeEvent(input$res_file_slider, {
-    #   tick(input$res_file_slider)
-    #   res_file(stringr::str_replace(string = res_file(), pattern = "\\d+(?=\\D*$)", replacement = as.character(tick())))
-    # })
-
     # Map update ----
     shiny$observeEvent(
       c(
@@ -224,15 +210,11 @@ forest_app_server <- function(id, app_selected) {
       {
         shiny$req(res_file())
         shiny$req(experiment_data_file())
-        raster_path <- terra$rast(
-          utils$unzip(
-            experiment_data_file(),
-            files = res_file(),
-            exdir = tempdir()
-          )
-        )
-        raster_data <- convert_landis_output(raster_path)
-        raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+
+        raster_data <- terra$rast(
+          file.path(data_folder, res_file())
+        ) 
+        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
         ext <- terra$ext(raster_data)
         pal <- leaflet$colorNumeric(
           palette = "YlOrBr",
@@ -240,7 +222,7 @@ forest_app_server <- function(id, app_selected) {
           na.color = "transparent",
           reverse = TRUE
         )
-        raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
 
         leaflet$leafletProxy("map") |>
           leaflet$clearImages() |>
@@ -264,53 +246,53 @@ forest_app_server <- function(id, app_selected) {
       }
     )
 
+    output_plot <- shiny$reactiveVal(NULL)
+    
+    shiny$observeEvent(
+      app_selected(),
+      {
+        climate_scenarios <- c("current", "4.5", "8.5")
+        management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
+        years <- seq(0, 100, by = 10)
+        combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
+        
+        plots <- list()
+        
+        plots[[1]] <- get_figure(
+          combined_data,
+          column = "AverageB.g.m2.",
+          unit = expression(paste("AGBiomass (g/m"^2, ")")),
+          title = "Average above-ground biomass over time (until 2100)"
+        )
+        
+        plots[[2]] <- get_figure(
+          combined_data,
+          column = "AverageBelowGround.g.m2.",
+          unit = expression(paste("BGBiomass (g/m"^2, ")")),
+          title = "Average below-ground biomass over time (until 2100)"
+        )
+        
+        plots[[3]] <- get_figure(
+          combined_data,
+          column = "AverageAge",
+          unit = expression(paste("Age (years)")),
+          title = "Average age over time (until 2100)"
+        )
+        
+        plots[[4]] <- get_figure(
+          combined_data,
+          column = "WoodyDebris.kgDW.m2.",
+          unit = expression(paste("Woody Debris (kgDW/m"^2, ")")),
+          title = "Woody debris over time (until 2100)"
+        )
+        
+        output_plot(plots)
+      }
+    )
+    
     output$plot <- shiny$renderPlot({
-      # tryCatch(
-      #   {
-      shiny$req(res_file()) # Ensure the file exists before proceeding
-      print("plot data")
-      climate_scenarios <- c("current", "4.5", "8.5")
-      management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
-      years <- seq(0, 100, by = 10)
-      combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
-
-      plots <- list()
-
-      plots[[1]] <- get_figure(
-        combined_data,
-        column = "AverageB.g.m2.",
-        unit = expression(paste("AGBiomass (g/m"^2, ")")),
-        title = "Average above-ground biomass over time (until 2100)"
-      )
-
-      plots[[2]] <- get_figure(
-        combined_data,
-        column = "AverageBelowGround.g.m2.",
-        unit = expression(paste("BGBiomass (g/m"^2, ")")),
-        title = "Average below-ground biomass over time (until 2100)"
-      )
-
-      plots[[3]] <- get_figure(
-        combined_data,
-        column = "AverageAge",
-        unit = expression(paste("Age (years)")),
-        title = "Average age over time (until 2100)"
-      )
-
-      plots[[4]] <- get_figure(
-        combined_data,
-        column = "WoodyDebris.kgDW.m2.",
-        unit = expression(paste("Woody Debris (kgDW/m"^2, ")")),
-        title = "Woody debris over time (until 2100)"
-      )
-
-      do.call(gridExtra$grid.arrange, c(plots, nrow = 4))
-      #   },
-      #   error = function(e) {
-      #     shiny$showNotification("Error generating analysis plot", type = "error")
-      #     NULL
-      #   }
-      # )
-    })
+      do.call(gridExtra$grid.arrange, c(output_plot(), nrow = 4))
+      # output_plot()
+      })
   })
 }
