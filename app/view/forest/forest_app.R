@@ -267,28 +267,28 @@ forest_app_server <- function(id, app_selected) {
             combined_data,
             column = "AverageB.g.m2.",
             unit = expression(paste("AGBiomass (g/m"^2, ")")),
-            title = "Average above-ground biomass over time (until 2100)"
+            title = "Average above-ground biomass over time"
           )
           
           plots[[2]] <- get_figure(
             combined_data,
             column = "AverageBelowGround.g.m2.",
             unit = expression(paste("BGBiomass (g/m"^2, ")")),
-            title = "Average below-ground biomass over time (until 2100)"
+            title = "Average below-ground biomass over time"
           )
           
           plots[[3]] <- get_figure(
             combined_data,
             column = "AverageAge",
             unit = expression(paste("Age (years)")),
-            title = "Average age over time (until 2100)"
+            title = "Average age over time"
           )
           
           plots[[4]] <- get_figure(
             combined_data,
             column = "WoodyDebris.kgDW.m2.",
             unit = expression(paste("Woody Debris (kgDW/m"^2, ")")),
-            title = "Woody debris over time (until 2100)"
+            title = "Woody debris over time"
           )
         }
         

@@ -47,14 +47,20 @@ get_data <- function(
   # Loop through each combination of climate and management scenarios
   for (climate in climate_scenarios) {
     for (management in management_scenarios) {
-      zip_file <- paste0(data_folder, "/run_landis_", paste0(climate, "_", management), "_7141504")
+      # zip_file <- paste0(data_folder, "/run_landis_", paste0(climate, "_", management), "_7141504")
       file_inside_zip <- file.path(data_folder, paste0("run_landis_", paste0(climate, "_", management), "_7141504/output/", "TotalCohorts.txt"))
-
+      
+      # get simulation start year
+      lines <- readLines(file.path(data_folder, paste0("run_landis_", paste0(climate, "_", management), "_7141504"), "PnET-succession.txt"))
+      start_year_line <- grep("^StartYear", lines, value = TRUE)
+      start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
+      
       # Read the data if the file exists
       if (file.exists(file_inside_zip)) {
         data <- utils$read.csv(file_inside_zip)
         data$Climate <- climate
         data$Management <- management
+        data$Time <- data$Time + start_year
         all_data[[paste(climate, management, sep = "_")]] <- data
       }
     }
@@ -91,8 +97,8 @@ get_figure <- function(
     ggplot2$geom_line(linewidth = 1) +
     ggplot2$facet_wrap(~Management, ncol = 7, scales = "free_x") +
     ggplot2$ylab(unit) +
-    ggplot2$xlab("Time") +
-    ggplot2$scale_x_continuous(breaks = seq(0, 100, 25)) +
+    ggplot2$xlab("Year") +
+    # ggplot2$scale_x_continuous(breaks = seq(0, 100, 25)) +
     ggplot2$theme_minimal(base_size = 14) +
     ggplot2$labs(title = title) # +
   return(p)
