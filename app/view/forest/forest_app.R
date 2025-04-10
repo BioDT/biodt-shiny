@@ -26,74 +26,82 @@ box::use(
 forest_app_ui <- function(id, i18n) {
   ns <- shiny$NS(id)
   shiny$tagList(
-    bslib$card(
-      shiny$tagList(
-        shiny$selectInput(
-          ns("management"),
-          "Select Forest Management Regime:",
-          choices = c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
-        ),
-        shiny$selectInput(
-          ns("climate"),
-          "Select Climate Scenario:",
-          choices = c("Current climate", "RCP4.5", "RCP8.5")
-        ),
-        shiny$selectInput(
-          ns("output"),
-          "Select Output Type:",
-          choices = c(
-            "Above-ground biomass",
-            "Below-ground biomass",
-            "Harvested biomass",
-            "Woody Debris",
-            "Max-age of selected species",
-            "Average age of all trees",
-            "Median age of all trees"
-          )
-        ),
-        shiny$conditionalPanel(
-          condition = sprintf(
-            "input['%s'] == 'Above-ground biomass' || input['%s'] == 'Max-age of selected species'",
-            ns("output"), ns("output")
+    bslib::layout_columns(
+      col_widths = c(4, 8),
+      bslib$card(
+        shiny$tagList(
+          shiny$selectInput(
+            ns("management"),
+            "Select Forest Management Regime:",
+            choices = c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
           ),
           shiny$selectInput(
-            ns("species"),
-            "Select Species Type:",
+            ns("climate"),
+            "Select Climate Scenario:",
+            choices = c("Current climate", "RCP4.5", "RCP8.5")
+          ),
+          shiny$selectInput(
+            ns("output"),
+            "Select Output Type:",
             choices = c(
-              "Birch (betulaSP)",
-              "Pine (pinussyl)",
-              "Spruce (piceabbies)",
-              "Other trees (other)"
+              "Above-ground biomass",
+              "Below-ground biomass",
+              "Harvested biomass",
+              "Woody Debris",
+              "Max-age of selected species",
+              "Average age of all trees",
+              "Median age of all trees"
             )
           ),
-        ),
-        # shiny$conditionalPanel(
-        #   condition = "input.output == 'Max-age of selected species'",
-        #   shiny$selectInput(
-        #     ns("species"),
-        #     "Select Species Type:",
-        #     choices = c(
-        #       "Birch (betulaSP)",
-        #       "Pine (pinussyl)",
-        #       "Spruce (piceabbies)",
-        #       "Other trees (other)",
-        #       "All species"
-        #     )
-        #   )
-        # ),
-        shiny$sliderInput(
-          ns("res_file_slider"),
-          "Select year:",
-          min = 0,
-          max = 0,
-          value = 0
-        ), 
-        shiny$checkboxInput(ns("show_results"), "Show results", value = FALSE)
+          shiny$conditionalPanel(
+            condition = sprintf(
+              "input['%s'] == 'Above-ground biomass' || input['%s'] == 'Max-age of selected species'",
+              ns("output"), ns("output")
+            ),
+            shiny$selectInput(
+              ns("species"),
+              "Select Species Type:",
+              choices = c(
+                "Birch (betulaSP)",
+                "Pine (pinussyl)",
+                "Spruce (piceabbies)",
+                "Other trees (other)"
+              )
+            ),
+          ),
+          # shiny$conditionalPanel(
+          #   condition = "input.output == 'Max-age of selected species'",
+          #   shiny$selectInput(
+          #     ns("species"),
+          #     "Select Species Type:",
+          #     choices = c(
+          #       "Birch (betulaSP)",
+          #       "Pine (pinussyl)",
+          #       "Spruce (piceabbies)",
+          #       "Other trees (other)",
+          #       "All species"
+          #     )
+          #   )
+          # ),
+          shiny$sliderInput(
+            ns("res_file_slider"),
+            "Select year:",
+            min = 0,
+            max = 0,
+            value = 0
+          ), 
+          shiny$checkboxInput(ns("show_results"), "Show results", value = FALSE)
+        )
+      ),
+      bslib$card(
+        shiny$textOutput("selection"),
+        leaflet$leafletOutput(ns("map")),
+        # shiny$plotOutput(ns("plot"), height = "800px")
       )
     ),
     bslib$card(
-      shiny$textOutput("selection"),
-      leaflet$leafletOutput(ns("map")),
+      # shiny$textOutput("selection"),
+      # leaflet$leafletOutput(ns("map")),
       shiny$plotOutput(ns("plot"), height = "800px")
     )
   )
