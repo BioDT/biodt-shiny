@@ -216,7 +216,7 @@ get_file_list <- function(
     }
     res_folder <- paste0(experiment, "/output/max-age-selected-spp/")
     res_working_folder <- res_folder
-
+# print(paste("type:", type))
     res_file_list <- data_file_list[grep(paste0("output/max-age-selected-spp/", type, "-[0-9]+\\.tif$"), data_file_list)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 

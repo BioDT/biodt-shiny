@@ -52,7 +52,10 @@ forest_app_ui <- function(id, i18n) {
           )
         ),
         shiny$conditionalPanel(
-          condition = "input.output == 'Above-ground biomass'",
+          condition = sprintf(
+            "input['%s'] == 'Above-ground biomass' || input['%s'] == 'Max-age of selected species'",
+            ns("output"), ns("output")
+          ),
           shiny$selectInput(
             ns("species"),
             "Select Species Type:",
@@ -64,20 +67,20 @@ forest_app_ui <- function(id, i18n) {
             )
           ),
         ),
-        shiny$conditionalPanel(
-          condition = "input.output == 'Max-age of selected species'",
-          shiny$selectInput(
-            ns("species"),
-            "Select Species Type:",
-            choices = c(
-              "Birch (betulaSP)",
-              "Pine (pinussyl)",
-              "Spruce (piceabbies)",
-              "Other trees (other)",
-              "All species"
-            )
-          )
-        ),
+        # shiny$conditionalPanel(
+        #   condition = "input.output == 'Max-age of selected species'",
+        #   shiny$selectInput(
+        #     ns("species"),
+        #     "Select Species Type:",
+        #     choices = c(
+        #       "Birch (betulaSP)",
+        #       "Pine (pinussyl)",
+        #       "Spruce (piceabbies)",
+        #       "Other trees (other)",
+        #       "All species"
+        #     )
+        #   )
+        # ),
         shiny$sliderInput(
           ns("res_file_slider"),
           "Select year:",
