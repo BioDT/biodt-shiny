@@ -78,18 +78,21 @@ clean_empty_parquets <- function() {
 
             if (coord_range[1] > 1000) {
               cat("Coordinate range > 1000. Attempting conversion from EPSG:3857 to EPSG:4326...\n")
-              tryCatch({
-                points_sf <- st_as_sf(df, coords = c("longitude", "latitude"), crs = 3857)
-                points_sf <- st_transform(points_sf, 4326)
-                coords <- st_coordinates(points_sf)
-                df$longitude <- coords[, 1]
-                df$latitude <- coords[, 2]
-                cat("Coordinate conversion successful.\n")
-              }, error = function(e) {
-                cat(sprintf("ERROR during coordinate conversion: %s\n", e$message))
-                # Decide if this should make the file invalid
-                # invalid_file <- TRUE 
-              })
+              tryCatch(
+                {
+                  points_sf <- st_as_sf(df, coords = c("longitude", "latitude"), crs = 3857)
+                  points_sf <- st_transform(points_sf, 4326)
+                  coords <- st_coordinates(points_sf)
+                  df$longitude <- coords[, 1]
+                  df$latitude <- coords[, 2]
+                  cat("Coordinate conversion successful.\n")
+                },
+                error = function(e) {
+                  cat(sprintf("ERROR during coordinate conversion: %s\n", e$message))
+                  # Decide if this should make the file invalid
+                  # invalid_file <- TRUE
+                }
+              )
             } else {
               cat("Coordinate range <= 1000. No conversion needed.\n")
             }

@@ -105,6 +105,7 @@ box::use(
   # Basic utilities
   utils[head, tail],
   jsonlite[fromJSON, toJSON],
+  fs[dir_exists]
 )
 
 # Local modules
@@ -522,6 +523,38 @@ rtbm_app_server <- function(id, tab_selected) {
               )
             })
             return(FALSE)
+          }
+
+          # Check if the base directory for the species exists before trying to load
+          data_base_path <- config::get("data_path")
+          if (is.null(data_base_path)) {
+            output$statusMsg <- renderUI({
+              div(class = "alert alert-danger", role = "alert", "Configuration Error: 'data_path' not set.")
+            })
+            return(FALSE)
+          }
+          species_parquet_dir <- file.path(
+              data_base_path,
+              "rtbm",
+              "parquet",
+              paste0("species=", scientific_name)
+          )
+
+          if (!fs::dir_exists(species_parquet_dir)) {
+              output$statusMsg <- renderUI({
+                div(
+                  class = "alert alert-warning",
+                  role = "alert",
+                  paste0(
+                    "Data for '", species, "' is currently unavailable or has not been processed yet.",
+                    " Please check back later or select a different species."
+                  )
+                )
+              })
+              # Clear potentially outdated data/dates
+              available_dates(NULL)
+              species_data(NULL)
+              return(FALSE)
           }
 
           # Store dates and data paths
