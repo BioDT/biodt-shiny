@@ -18,8 +18,8 @@ read_weather_data <- function(
     show_col_types = FALSE,
     id = NULL,
   ) |>
-    filter(Date <= end_date) |>
-    select(!Daylength[h])
+    filter(Date <= end_date)
+  #|> select(!'Daylength[h]')
 
   series <- list()
 
