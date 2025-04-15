@@ -19,11 +19,11 @@ grassland_dynamics_double_chart_controls_ui <- function(id, i18n) {
     card_body(
       radioButtons(
         inputId = ns("line_or_bar"),
-        label = i18n$translate("Plot type:"),
+        label = i18n$translate("PFT plot type:"),
         choices = list(
-          "Bars - PFT's mean" = "bar",
-          "Lines - PFT's mean" = "line_mean",
-          "Lines - all PFT" = "line"
+          "Bars - mean over all runs" = "bar",
+          "Lines - mean over all runs" = "line_mean",
+          "Lines - all runs" = "line"
         ),
         selected = "bar"
       )
