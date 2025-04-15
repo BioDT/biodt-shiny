@@ -86,16 +86,19 @@ forest_app_ui <- function(id, i18n) {
       bslib$card(
         shiny$textOutput("selection"),
         leaflet$leafletOutput(ns("map")),
-        # shiny$plotOutput(ns("plot"), height = "800px")
+        # echarty$ecs.output(
+        #   ns("multichart"),
+        #   # width = "100%",
+        #   # height = "400px"
+        # ),
       )
     ),
     bslib$card(
       echarty$ecs.output(
         ns("multichart"),
-        width = "100%",
-        height = "800px"
+        # width = "100%",
+        height = "400px"
       ),
-      # shiny$textOutput("selection"),
       # leaflet$leafletOutput(ns("map")),
       shiny$plotOutput(ns("plot"), height = "800px")
     )

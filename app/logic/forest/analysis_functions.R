@@ -310,7 +310,7 @@ get_multichart <- function(
   # Read the data if the file exists
   # if (file.exists(file_inside_zip)) {
     data <- utils$read.csv(file_inside_zip)
-    
+
     data$Time <- data$Time + start_year
     chart <- echarty$ec.init()
     chart$x$opts <- list(
@@ -321,12 +321,70 @@ get_multichart <- function(
       yAxis = list(
         type = "value"
       ),
+      tooltip = list(
+        trigger = 'axis'
+      ),
       series = list(
+        # list(
+        #   data = data$X.Cohorts,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
         list(
           data = data$AverageAge,
           type = "line",
           smooth = TRUE
+        ),
+        list(
+          data = data$AverageB.g.m2.,
+          type = "line",
+          smooth = TRUE
+        ),
+        # list(
+        #   data = data$AverageLAI.m2.,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
+        # list(
+        #   data = data$AverageWater.mm.,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
+        # list(
+        #   data = data$SubCanopyPAR.W.m2.,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
+        # list(
+        #   data = data$Litter.kgDW.m2.,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
+        list(
+          data = data$WoodyDebris.kgDW.m2.,
+          type = "line",
+          smooth = TRUE
+        ),
+        list(
+          data = data$AverageBelowGround.g.m2.,
+          type = "line",
+          smooth = TRUE
         )
+        # list(
+        #   data = data$AverageFoliage.g.m2.,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
+        # list(
+        #   data = data$AverageNSC.gC.m2.,
+        #   type = "line",
+        #   smooth = TRUE
+        # ),
+        # list(
+        #   data = data$AverageAET.mm.,
+        #   type = "line",
+        #   smooth = TRUE
+        # )
       )
     )
     # }
