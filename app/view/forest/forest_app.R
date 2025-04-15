@@ -8,6 +8,8 @@ box::use(
   bslib,
   utils,
   shinyjs,
+  echarty,
+  echarty[ecs.output, ecs.render, ec.init]
 )
 
 box::use(
@@ -18,7 +20,8 @@ box::use(
       get_file_list,
       get_file_name,
       get_data,
-      get_figure
+      get_figure,
+      get_multichart
     ]
 )
 
@@ -100,6 +103,11 @@ forest_app_ui <- function(id, i18n) {
       )
     ),
     bslib$card(
+      echarty$ecs.output(
+        ns("multichart"),
+        width = "100%",
+        height = "800px"
+      ),
       # shiny$textOutput("selection"),
       # leaflet$leafletOutput(ns("map")),
       shiny$plotOutput(ns("plot"), height = "800px")
@@ -222,7 +230,7 @@ forest_app_server <- function(id, app_selected) {
 
         raster_data <- terra$rast(
           file.path(data_folder, res_file())
-        ) 
+        )
         # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
         ext <- terra$ext(raster_data)
         pal <- leaflet$colorNumeric(
@@ -252,8 +260,77 @@ forest_app_server <- function(id, app_selected) {
             values = terra$values(raster_data),
             opacity = 0.4
           )
+
+        #########
+        chart <- get_multichart(experiment_data_file())
+        experiment_chart(chart)
+        output$multichart <- echarty$ecs.render(
+          experiment_chart()
+        )
+        #########
       }
     )
+    
+    # # Map update ----
+    # shiny$observeEvent(
+    #   c(
+    #     res_file(),
+    #   ),
+    #   ignoreInit = TRUE,
+    #   {
+    #     shiny$req(res_file())
+    #     shiny$req(experiment_data_file())
+    #     
+    #     raster_data <- terra$rast(
+    #       file.path(data_folder, res_file())
+    #     ) 
+    #     # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+    #     ext <- terra$ext(raster_data)
+    #     pal <- leaflet$colorNumeric(
+    #       palette = "YlOrBr",
+    #       domain = terra$values(raster_data),
+    #       na.color = "transparent",
+    #       reverse = TRUE
+    #     )
+    #     # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+    #     
+    #     leaflet$leafletProxy("map") |>
+    #       leaflet$clearImages() |>
+    #       leaflet$clearControls() |>
+    #       leaflet$addRasterImage(
+    #         raster_data,
+    #         opacity = 0.4,
+    #         colors = pal,
+    #         project = FALSE
+    #       ) |>
+    #       leaflet$addLegend(
+    #         position = "bottomright",
+    #         pal = leaflet$colorNumeric(
+    #           palette = "YlOrBr",
+    #           domain = terra$values(raster_data),
+    #           na.color = "transparent"
+    #         ),
+    #         values = terra$values(raster_data),
+    #         opacity = 0.4
+    #       )
+    #   }
+    # )
+    # 
+    # # graph update
+    # shiny$observeEvent(
+    #   c(
+    #     experiment_data_file()
+    #   ),
+    #   ignoreInit = TRUE,
+    #   {
+    #     chart <- get_multichart(experiment_data_file())
+    #     experiment_chart(chart)
+    #     output$multichart <- echarty$ecs.render(
+    #       experiment_chart()
+    #     )
+    #   }
+    # )
+    
 
     output_plot <- shiny$reactiveVal(NULL)
     
@@ -315,5 +392,31 @@ forest_app_server <- function(id, app_selected) {
       do.call(gridExtra$grid.arrange, c(plots, nrow = 4))
       # output_plot()
       })
+  
+  
+    ####################################################
+    
+    experiment_chart <- shiny$reactiveVal(NULL)
+    
+    shiny$observeEvent(
+      app_selected(),
+      {
+        
+        # Create a basic bar chart
+        chart <- echarty$ec.init()
+        
+        ############################################
+        # chart <- get_multichart(chart)
+        ############################################
+        
+        experiment_chart(chart)
+        
+      }
+    )
+    
+    output$multichart <- echarty$ecs.render(
+      experiment_chart()
+    )
+    #######################################################################
   })
 }

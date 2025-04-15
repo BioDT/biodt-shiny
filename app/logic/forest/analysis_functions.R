@@ -7,6 +7,7 @@ box::use(
   stringr,
   utils,
   shiny,
+  echarty
 )
 
 #' @export
@@ -216,7 +217,7 @@ get_file_list <- function(
     }
     res_folder <- paste0(experiment, "/output/max-age-selected-spp/")
     res_working_folder <- res_folder
-# print(paste("type:", type))
+
     res_file_list <- data_file_list[grep(paste0("output/max-age-selected-spp/", type, "-[0-9]+\\.tif$"), data_file_list)]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
 
@@ -280,4 +281,50 @@ get_file_name <- function(input, res_folder, tick) {
 
   return(res_file)
 }
+
+#' @export
+get_multichart <- function(
+    experiment_data_file
+    ) 
+  {
+  
+  # get data to plot
+  
+  all_data <- list()
+
+  file_inside_zip <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
+
+  # get simulation start year
+  lines <- readLines(file.path(experiment_data_file, "PnET-succession.txt"))
+  start_year_line <- grep("^StartYear", lines, value = TRUE)
+  start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
+
+  # Read the data if the file exists
+  # if (file.exists(file_inside_zip)) {
+    data <- utils$read.csv(file_inside_zip)
+    
+    data$Time <- data$Time + start_year
+    chart <- echarty$ec.init()
+    chart$x$opts <- list(
+      xAxis = list(
+        type = "category",
+        data = as.character(data$Time)
+      ),
+      yAxis = list(
+        type = "value"
+      ),
+      series = list(
+        list(
+          data = data$AverageAge,
+          type = "line",
+          smooth = TRUE
+        )
+      )
+    )
+    # }
+
+  return(chart)
+  
+}
+
 
