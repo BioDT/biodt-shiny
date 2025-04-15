@@ -1,6 +1,6 @@
 box::use(
   readr[read_delim],
-  dplyr[filter]
+  dplyr[filter, select]
 )
 
 # loads and restructure WEATHER data ----
@@ -18,7 +18,8 @@ read_weather_data <- function(
     show_col_types = FALSE,
     id = NULL,
   ) |>
-    dplyr::filter(Date <= end_date)
+    filter(Date <= end_date) |>
+    select(!Daylength[h])
 
   series <- list()
 
@@ -70,19 +71,19 @@ read_weather_data <- function(
       yAxisIndex = 3,
       data = unname(as.list(unlist(input_data[, "PAR[µmolm-2s-1]"])))
     )
+  # series[[5]] <-
+  #   list(
+  #     name = "Daylength[h]",
+  #     type = "line",
+  #     color = colors[5],
+  #     symbol = "none",
+  #     showSymbol = FALSE,
+  #     emphasis = list(disabled = TRUE),
+  #     xAxisIndex = 4,
+  #     yAxisIndex = 4,
+  #     data = unname(as.list(unlist(input_data[, "Daylength[h]"])))
+  #   )
   series[[5]] <-
-    list(
-      name = "Daylength[h]",
-      type = "line",
-      color = colors[5],
-      symbol = "none",
-      showSymbol = FALSE,
-      emphasis = list(disabled = TRUE),
-      xAxisIndex = 4,
-      yAxisIndex = 4,
-      data = unname(as.list(unlist(input_data[, "Daylength[h]"])))
-    )
-  series[[6]] <-
     list(
       name = "PET[mm]",
       type = "line",

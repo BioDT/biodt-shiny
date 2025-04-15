@@ -107,7 +107,6 @@ generate_chart_bars_mean <- function(
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>Temperature [degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Temperature Daylight [degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR [µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #009E73\"></i>Daylength [h]: ' + param.find(item => item.seriesName ==  'Daylength[h]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>PET [mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value
           }
         "
@@ -149,12 +148,12 @@ generate_chart_bars_mean <- function(
         )
       ),
       grid = list(
-        list(left = "10%", right = "8%", top = "4%", height = "13%"),
-        list(left = "10%", right = "8%", top = "22%", height = "13%"),
-        list(left = "10%", right = "8%", top = "38%", height = "13%"),
-        list(left = "10%", right = "8%", bottom = "34%", height = "13%"),
-        list(left = "10%", right = "8%", bottom = "18%", height = "13%"),
-        list(left = "10%", right = "8%", bottom = "3", height = "13%")
+        list(left = "10%", right = "8%", top = "5%", height = "16%"),
+        list(left = "10%", right = "8%", top = "39.5%", height = "16%"),
+        list(left = "10%", right = "8%", bottom = "39.5%", height = "16%"),
+        list(left = "10%", right = "8%", bottom = "21%", height = "16%"),
+        #list(left = "10%", right = "8%", bottom = "18%", height = "13%"),
+        list(left = "10%", right = "8%", bottom = "5%", height = "16%")
       ),
       xAxis = list(
         list(
@@ -230,25 +229,6 @@ generate_chart_bars_mean <- function(
         list(
           type = "category",
           gridIndex = 4,
-          scale = TRUE,
-          boundaryGap = FALSE,
-          axisLine = list(
-            onZero = TRUE
-          ),
-          axisTick = list(
-            show = TRUE
-          ),
-          splitLine = list(
-            show = TRUE
-          ),
-          axisLabel = list(
-            show = FALSE
-          ),
-          data = time
-        ),
-        list(
-          type = "category",
-          gridIndex = 5,
           scale = TRUE,
           boundaryGap = FALSE,
           axisLine = list(
@@ -352,35 +332,12 @@ generate_chart_bars_mean <- function(
           )
         ),
         list(
-          name = "Daylength [h]",
-          nameLocation = "middle",
-          nameGap = 40,
-          nameTextStyle = list(fontWeight = "bolder"),
-          scale = TRUE,
-          gridIndex = 4,
-          splitNumber = 5,
-          min = 0,
-          max = 24,
-          axisLabel = list(
-            show = TRUE
-          ),
-          axisLine = list(
-            show = TRUE
-          ),
-          axisTick = list(
-            show = TRUE
-          ),
-          splitLine = list(
-            show = FALSE
-          )
-        ),
-        list(
           name = "PET [mm]",
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
           scale = TRUE,
-          gridIndex = 5,
+          gridIndex = 4,
           splitNumber = 5,
           min = 0,
           max = 10,
