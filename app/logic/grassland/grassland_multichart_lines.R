@@ -94,7 +94,7 @@ generate_chart_lines <- function(
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Precipitation [mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #D55E00\"></i>Temperature [degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #E69F00\"></i>Temperature Daylight [degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #F0E442\"></i>PAR [µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #42f09f\"></i>PAR [µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>PET [mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value
           }
         "
@@ -137,10 +137,9 @@ generate_chart_lines <- function(
       ),
       grid = list(
         list(left = "10%", right = "8%", top = "5%", height = "16%"),
-        list(left = "10%", right = "8%", top = "39.5%", height = "16%"),
-        list(left = "10%", right = "8%", bottom = "39.5%", height = "16%"),
-        list(left = "10%", right = "8%", bottom = "21%", height = "16%"),
-        #list(left = "10%", right = "8%", bottom = "18%", height = "13%"),
+        list(left = "10%", right = "8%", top = "25%", height = "16%"),
+        list(left = "10%", right = "8%", bottom = "41%", height = "16%"),
+        list(left = "10%", right = "8%", bottom = "23%", height = "16%"),
         list(left = "10%", right = "8%", bottom = "5%", height = "16%")
       ),
       xAxis = list(

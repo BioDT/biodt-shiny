@@ -18,8 +18,8 @@ read_weather_data <- function(
     show_col_types = FALSE,
     id = NULL,
   ) |>
-    filter(Date <= end_date)
-  #|> select(!'Daylength[h]')
+    filter(Date <= end_date) |>
+    select(!'Daylength[h]')
 
   series <- list()
 
@@ -71,18 +71,6 @@ read_weather_data <- function(
       yAxisIndex = 3,
       data = unname(as.list(unlist(input_data[, "PAR[µmolm-2s-1]"])))
     )
-  # series[[5]] <-
-  #   list(
-  #     name = "Daylength[h]",
-  #     type = "line",
-  #     color = colors[5],
-  #     symbol = "none",
-  #     showSymbol = FALSE,
-  #     emphasis = list(disabled = TRUE),
-  #     xAxisIndex = 4,
-  #     yAxisIndex = 4,
-  #     data = unname(as.list(unlist(input_data[, "Daylength[h]"])))
-  #   )
   series[[5]] <-
     list(
       name = "PET[mm]",
@@ -91,8 +79,8 @@ read_weather_data <- function(
       symbol = "none",
       showSymbol = FALSE,
       emphasis = list(disabled = TRUE),
-      xAxisIndex = 5,
-      yAxisIndex = 5,
+      xAxisIndex = 4,
+      yAxisIndex = 4,
       data = unname(as.list(unlist(input_data[, "PET[mm]"])))
     )
 
