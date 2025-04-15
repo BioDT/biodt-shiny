@@ -33,8 +33,6 @@ convert_landis_output <- function(r_in) {
   return(r_wgs84)
 }
 
-########################################
-
 #' @export
 get_data <- function(
   climate_scenarios,
@@ -110,22 +108,9 @@ get_figure <- function(
 #' @export
 get_file_list <- function(
   input,
-  data_folder
+  data_folder,
+  experiment_data
 ) {
-  if (input$climate == "Current climate") {
-    climate <- "current"
-  } else if (input$climate == "RCP4.5") {
-    climate <- "4.5"
-  } else if (input$climate == "RCP8.5") {
-    climate <- "8.5"
-  }
-
-  # Scan for files with the specified structure
-  pattern <- paste0("^.+_", climate, "_", input$management, "_.+\\$")
-  experiment_data <- list.dirs(path = data_folder, full.names = TRUE, recursive = FALSE)
-  experiment_data <- experiment_data[grepl(paste0("_", climate, "_", input$management, "_"), experiment_data)]
-  
-  experiment_data_file <- experiment_data
 
   if (length(experiment_data) == 0) {
     shiny$showNotification("No files found matching the specified structure.", type = "error")
@@ -238,7 +223,7 @@ get_file_list <- function(
   }
 
   return(list(
-    experiment_data_file = experiment_data_file,
+    # experiment_data_file = experiment_data_file,
     res_working_folder = res_working_folder,
     res_file_list_tick = res_file_list_tick,
     res_folder = res_folder,
@@ -246,6 +231,29 @@ get_file_list <- function(
     timestep = timestep,
     duration = duration
   ))
+}
+
+#' @export
+get_experiment_data_file <- function(
+    input,
+    data_folder
+) {
+  if (input$climate == "Current climate") {
+    climate <- "current"
+  } else if (input$climate == "RCP4.5") {
+    climate <- "4.5"
+  } else if (input$climate == "RCP8.5") {
+    climate <- "8.5"
+  }
+  
+  # Scan for files with the specified structure
+  pattern <- paste0("^.+_", climate, "_", input$management, "_.+\\$")
+  experiment_data <- list.dirs(path = data_folder, full.names = TRUE, recursive = FALSE)
+  experiment_data <- experiment_data[grepl(paste0("_", climate, "_", input$management, "_"), experiment_data)]
+  
+  experiment_data_file <- experiment_data
+  
+  return(experiment_data_file)
 }
 
 
