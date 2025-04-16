@@ -155,6 +155,7 @@ ui <- function(id) {
             title = i18n$translate(
               "Real-time Bird Monitoring with Citizen Science Data"
             ),
+            value = "rtbm",
             rtbm_ui(
               ns("rtbm_main"),
               i18n
@@ -185,6 +186,7 @@ ui <- function(id) {
           title = i18n$translate(
             "Crop wild relatives and genetic resources for food security"
           ),
+          value = "cwr",
           mod_cwr_ui(
             ns("cwr_main"),
             i18n
@@ -215,6 +217,7 @@ ui <- function(id) {
         ),
         nav_panel(
           title = i18n$translate("Disease Outbreaks"),
+          value = "disease",
           class = "p-0",
           disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
         ),
@@ -236,6 +239,7 @@ ui <- function(id) {
         if (env_active == "dev") {
           nav_panel(
             title = i18n$translate("Invasive Alien Species"),
+            value = "ias",
             class = "p-0",
             ias_ui(ns("ias_main"), i18n)
           )

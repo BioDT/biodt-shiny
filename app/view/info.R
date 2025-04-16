@@ -77,12 +77,18 @@ mod_info_ui <- function(id, i18n) {
                     )
                 ),
                 tags$li(
-                  class = "w-100 not-active",
+                  actionLink(
+                  class = "w-100",
+                  inputId = ns("forest_selector"),
                   i18n$translate("Forest Biodiversity Dynamics")
+                  )
                 ),
                 tags$li(
-                  class = "w-100 not-active",
+                  actionLink(
+                  class = "w-100",
+                  inputId = ns("rtbm_selector"),
                   i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
+                  )
                 ),
                 tags$li(
                   actionLink(
@@ -120,8 +126,11 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  class = "w-100 not-active",
+                  actionLink(
+                  class = "w-100",
+                  inputId = ns("cwr_selector"),
                   i18n$translate("Crop Wild Relatives")
+                  )
                 ),
                 tags$li(
                   class = "w-100 not-active",
@@ -160,8 +169,11 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  class = "w-100 not-active",
-                  i18n$translate("Invasive Species")
+                  actionLink(
+                  class = "w-100",
+                  inputId = ns("ias_selector"),
+                  i18n$translate("Invasive Alien Species")
+                  )
                 )
               )
             )
@@ -199,8 +211,11 @@ mod_info_ui <- function(id, i18n) {
                   )
                 ),
                 tags$li(
-                  class = "w-100 not-active",
+                  actionLink(
+                  class = "w-100",
+                  inputId = ns("disease_selector"),
                   i18n$translate("Disease Outbreaks")
+                  )
                 )
               )
             )
@@ -217,13 +232,9 @@ mod_info_server <- function(id, r, main_session) {
     ns <- session$ns
 
     observeEvent(input$honeybee_selector, {
-      print("actionlink selected")
+      print("actionlink 'Honeybee' selected")
       nav_select("navbar",
         selected = "Honeybee",
-        session = main_session
-      )
-      nav_select("honeybee_main-tab",
-        selected = "Beekeeper",
         session = main_session
       )
     })
@@ -237,15 +248,54 @@ mod_info_server <- function(id, r, main_session) {
     })
 
     observeEvent(input$ces_selector, {
-      print("actionlink selected")
+      print("actionlink 'CES' selected")
       nav_select("navbar",
         selected = "CES",
         session = main_session
       )
-      nav_select("ces_main-tab",
-        selected = "Info",
-        session = main_session
+    })
+    
+    observeEvent(input$forest_selector, {
+      print("actionlink 'Forest Dynamics' selected")
+      nav_select("navbar",
+                 selected = "Forest",
+                 session = main_session
       )
     })
+    
+    observeEvent(input$rtbm_selector, {
+      print("actionlink 'RTBM' selected")
+      nav_select("navbar",
+                 selected = "rtbm",
+                 session = main_session
+      )
+    })
+    
+    observeEvent(input$cwr_selector, {
+      print("actionlink 'CWR' selected")
+      nav_select("navbar",
+                 selected = "cwr",
+                 session = main_session
+      )
+    })
+    
+    observeEvent(input$ias_selector, {
+      print("actionlink 'IAS' selected")
+      nav_select("navbar",
+                 selected = "ias",
+                 session = main_session
+      )
+    })
+    
+    observeEvent(input$disease_selector, {
+      print("actionlink 'disease outbreaks' selected")
+      nav_select("navbar",
+                 selected = "disease",
+                 session = main_session
+      )
+    })
+    
+    
+    
   })
 }
