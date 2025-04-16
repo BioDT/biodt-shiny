@@ -77,11 +77,11 @@ mod_info_ui <- function(id, i18n) {
                     )
                 ),
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Forest Biodiversity Dynamics")
                 ),
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
                 ),
                 tags$li(
@@ -120,15 +120,15 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Crop Wild Relatives")
                 ),
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Prioritisation of DNA metabarcoding sampling locations")
                 ),
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Phylogenetic Diversity")
                 ),
               )
@@ -160,7 +160,7 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Invasive Species")
                 )
               )
@@ -199,7 +199,7 @@ mod_info_ui <- function(id, i18n) {
                   )
                 ),
                 tags$li(
-                  class = "w-100",
+                  class = "w-100 not-active",
                   i18n$translate("Disease Outbreaks")
                 )
               )
