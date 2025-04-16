@@ -1,83 +1,105 @@
-# RTBM Data Update Scripts
+# Real-Time Bird Monitoring (RTBM) Data Update Script (`update_rtbm_parquet_data.R`)
 
-This directory contains scripts related to updating the data used by the Real-time Bird Monitoring (RTBM) pDT.
+## Overview
 
-## `update_rtbm_parquet_data.R`
+This R script automates the process of fetching, processing, and storing bird occurrence data for the Real-Time Bird Monitoring (RTBM) component of the BioDT Shiny application. It retrieves daily species occurrence data (originally in TIFF format) from an S3-compatible source, converts it into an efficient Parquet format suitable for analysis and visualization within the application, and stores it locally.
 
-**Purpose:**
+The script is designed to be run periodically (e.g., daily via a cron job) to keep the local data store up-to-date.
 
-This script fetches the latest raw RTBM data (TIFF files) from the source bucket, caches them, and converts them into the partitioned Parquet format required by the Shiny application. It is designed to be run periodically (e.g., daily) by an external scheduler like cron, managed by the LifeWatch ERIC infrastructure.
+## Features
 
-**Operation:**
+-   **Efficient Data Fetching:** Retrieves the list of available data files (keys) from the S3 bucket once per run, optimizing performance for date range processing.
+-   **Local Caching:** Downloads TIFF files to a local cache directory (`app/data/rtbm/cache/`) to avoid redundant downloads.
+-   **Data Conversion:** Converts geospatial TIFF files into tabular Parquet format (`app/data/rtbm/parquet/`).
+-   **Coordinate System Handling:** Automatically detects and converts coordinates from the source projection (likely meters) to WGS84 (latitude/longitude) during the conversion process.
+-   **Data Validation:** Checks processed Parquet files for valid data (e.g., positive intensity values) and removes empty or invalid files.
+-   **Parallel Processing:** Utilizes multiple CPU cores (if available) to speed up the computationally intensive raster-to-point conversion process.
+-   **Flexible Date Processing:** Supports processing data for a single specific date, a date range, or defaults to processing from a defined start date up to the previous day.
+-   **Configuration:** Uses command-line arguments for specifying dates and forcing data refresh.
+-   **Dependency Management:** Lists required R packages.
+-   **Bird Metadata:** Optionally downloads and uses `bird_info.json` for mapping species names if the local file is missing.
 
-1.  Reads configuration (expects `data_path` to be defined in `config.yml` accessible from the execution environment).
-2.  Determines the cache path (`[data_path]/rtbm/cache`) and Parquet output path (`[data_path]/rtbm/parquet`).
-3.  Lists available TIFF files from the source URL (`https://2007581-webportal.a3s.fi/`).
-4.  Downloads new or updated TIFF files into the cache path.
-5.  Iterates through cached TIFF files:
-    *   Parses the species name and date from the filename (assumes `Scientific_Name_YYYYMMDD.tif` format).
-    *   Converts the TIFF data (non-NA values) into a dataframe (`x`, `y`, `value`, `date`).
-    *   Writes the dataframe to a Parquet file within a partitioned directory structure: `[data_path]/rtbm/parquet/species=[Species_Name]/date=[YYYY-MM-DD].parquet`.
-6.  Logs progress and summary information to standard output.
+## Dependencies
 
-**Prerequisites:**
+The script requires the following R packages:
 
-The environment running this script must have the following R packages installed:
-*   `httr2`
-*   `stringr`
-*   `fs`
-*   `config`
-*   `purrr`
-*   `terra`
-*   `arrow`
-*   `lubridate`
-*   `(Optional) logger`
+-   `httr2` (for HTTP requests)
+-   `xml2` (for parsing S3 bucket listings)
+-   `stringr` (for string manipulation)
+-   `fs` (for file system operations)
+-   `purrr` (for functional programming utilities)
+-   `terra` (for geospatial data handling - raster operations)
+-   `arrow` (for reading/writing Parquet files)
+-   `lubridate` (for date/time manipulation)
+-   `jsonlite` (for reading `bird_info.json`)
+-   `optparse` (for command-line argument parsing)
+-   `dplyr` (for data manipulation)
+-   `sf` (for Simple Features, used in coordinate transformations)
+-   `stats` (provides `complete.cases`)
+-   `parallel` (for parallel processing)
 
-The `config.yml` file defining `data_path` must be accessible.
+Ensure these packages are installed in the R environment where the script will run.
 
-**Usage:**
+## Configuration
+
+-   **`PROJECT_ROOT`:** The script assumes it is run from the project's root directory (`biodt-shiny`). Paths are constructed relative to this root.
+-   **`RTBM_CACHE_PATH`:** Path to the local cache for downloaded TIFF files (Default: `app/data/rtbm/cache/`).
+-   **`RTBM_PARQUET_PATH`:** Path to store the output Parquet files (Default: `app/data/rtbm/parquet/`).
+-   **`BIRD_INFO_JSON_PATH`:** Path to the local `bird_info.json` file (Default: `app/data/rtbm/bird_info.json`).
+-   **`BIRD_INFO_URL`:** URL to download `bird_info.json` if it's missing locally.
+-   **`RTBM_TIFF_BUCKET_URL_BASE`:** **Important:** This needs to be set to the correct base URL of the S3 bucket containing the daily TIFF files (e.g., `https://your-bucket-url/daily/`). The script currently uses a placeholder.
+-   **`DEFAULT_START_DATE`:** The default date to start processing from if no start date is specified via command line (Default: `"2025-01-16"`).
+
+## Usage
+
+Run the script from the project root directory using `Rscript`.
 
 ```bash
+# Example: Process data for a specific date, forcing redownload/overwrite
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -d YYYY-MM-DD -f
+
+# Example: Process data for a specific date range
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -s YYYY-MM-DD -e YYYY-MM-DD
+
+# Example: Process data from the default start date up to yesterday
 Rscript app/scripts/rtbm/update_rtbm_parquet_data.R
+
+# Example: Process data from a specific start date up to yesterday
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -s YYYY-MM-DD
 ```
 
-You can modify the `force_update` arguments within the script's main execution block if you need to force re-downloading or re-conversion.
+### Command Line Options
 
-**Note on Filename Pattern:**
+-   `-d`, `--date YYYY-MM-DD`: Process data only for this specific date. Overrides `-s` and `-e`.
+-   `-s`, `--start-date YYYY-MM-DD`: Start date for processing range. Defaults to `DEFAULT_START_DATE` if omitted.
+-   `-e`, `--end-date YYYY-MM-DD`: End date for processing range. Defaults to yesterday if omitted.
+-   `-f`, `--force`: Force redownload of TIFF files (ignore cache) and overwrite existing Parquet files. Default is `FALSE` (use cache, don't overwrite).
+-   `-h`, `--help`: Show help message and exit.
 
-The script currently assumes TIFF filenames are in the format `Scientific_Name_YYYYMMDD.tif` (e.g., `Parus_major_20231026.tif`). If the actual format differs, the regex pattern and parsing logic within the `convert_tiffs_to_parquet` function must be updated accordingly.
+## Workflow
 
-## `clean_rtbm_parquet_data.R`
+For each date in the target sequence:
 
-**Purpose:**
+1.  **Fetch S3 Keys (Once per run):** Retrieves the full list of file keys from the S3 bucket.
+2.  **Filter Keys:** Identifies keys relevant to the current processing date.
+3.  **Download & Cache TIFFs:** Downloads TIFF files corresponding to the filtered keys if they are not already present in the cache (or if `--force` is used).
+4.  **Convert TIFF to Parquet:**
+    -   Iterates through cached TIFF files for the date.
+    -   Reads the raster data using `terra`.
+    -   Extracts the scientific name from the filename.
+    -   Converts raster data to a data frame of points (lon, lat, intensity, scientific_name, date).
+    -   **Transforms Coordinates:** Converts coordinates to WGS84 (EPSG:4326).
+    -   **Validates Data:** Checks if the resulting data frame has valid points with positive intensity.
+    -   Writes the valid data to a partitioned Parquet file (`app/data/rtbm/parquet/date=YYYY-MM-DD/`). If `--force` is used, existing files are overwritten. Invalid or empty files are removed.
+5.  **Logging:** Provides informative messages about progress, downloads, conversions, errors, and final summaries.
 
-This script cleans the partitioned Parquet files generated by `update_rtbm_parquet_data.R`. It is designed to run *after* the update script (potentially in the same scheduled job) to ensure data integrity.
+## Output
 
-**Operation:**
+-   Cached TIFF files in `app/data/rtbm/cache/<YYYY-MM-DD>/`.
+-   Partitioned Parquet dataset in `app/data/rtbm/parquet/`. The data is partitioned by `date` (e.g., `app/data/rtbm/parquet/date=2025-04-15/part-0.parquet`). Each Parquet file contains columns: `lon`, `lat`, `intensity`, `scientific_name`.
 
-1.  Reads configuration (expects `data_path`).
-2.  Locates the RTBM Parquet data directory (`[data_path]/rtbm/parquet`).
-3.  Iterates through each species directory and the Parquet files within.
-4.  For each Parquet file, it performs checks:
-    *   Can the file be read by `arrow`?
-    *   Does the file contain any rows?
-    *   Does the file contain the required columns (`longitude`, `latitude`, `intensity`, `date`)?
-    *   Does the file contain any valid (non-NA, positive) `intensity` values?
-5.  If any check fails, the invalid Parquet file is removed.
-6.  After processing all files in a species directory, if the directory becomes empty, it is removed.
-7.  Logs progress and summary information (files checked, files removed, directories removed) to standard output.
+## Notes
 
-**Prerequisites:**
-
-The environment running this script must have the following R packages installed:
-*   `arrow`
-*   `fs`
-*   `config`
-*   `purrr`
-
-The `config.yml` file defining `data_path` must be accessible.
-
-**Usage:**
-
-```bash
-Rscript app/scripts/rtbm/clean_rtbm_parquet_data.R
+-   The script relies heavily on the `terra` package for efficient raster processing and `arrow` for Parquet handling.
+-   Parallel processing significantly speeds up the conversion step. The number of cores used is typically `total cores - 1`.
+-   Ensure the S3 bucket URL (`RTBM_TIFF_BUCKET_URL_BASE`) is correctly configured.
