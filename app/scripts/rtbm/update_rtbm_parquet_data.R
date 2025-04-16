@@ -20,9 +20,8 @@ library(lubridate)
 library(jsonlite) # Added for reading bird_info.json
 library(optparse) # Added for command line argument parsing
 library(dplyr) # Added for bind_rows if needed, and potentially in raster_to_points_df
-library(sf)       # Added for CRS projection
-library(stats)    # Added for complete.cases used in raster_to_points_df
-# library(logger) # Optional: for more advanced logging
+library(sf) # Added for CRS projection
+library(stats) # Added for complete.cases used in raster_to_points_df
 
 # --- Standalone Configuration ---
 # Define paths relative to the project root assuming the script is run from there.
@@ -31,6 +30,7 @@ PROJECT_ROOT <- getwd() # Assuming script is run from project root
 RTBM_CACHE_PATH <- fs::path(PROJECT_ROOT, "app", "data", "rtbm", "cache")
 RTBM_PARQUET_PATH <- fs::path(PROJECT_ROOT, "app", "data", "rtbm", "parquet")
 BIRD_INFO_JSON_PATH <- fs::path(PROJECT_ROOT, "app", "data", "rtbm", "bird_info.json")
+BIRD_INFO_URL <- "https://bird-photos.a3s.fi/bird_info.json" # Added URL for download
 
 # !!! IMPORTANT: Replace this placeholder with the actual base URL for the TIFF files !!!
 RTBM_TIFF_BUCKET_URL_BASE <- "https://2007581-webportal.a3s.fi/daily/"
@@ -40,7 +40,7 @@ RTBM_TIFF_BUCKET_URL_BASE <- "https://2007581-webportal.a3s.fi/daily/"
 message("--- Script Start: RTBM Parquet Update - ", Sys.time(), " ---")
 
 # Default start date if no specific date is provided
-DEFAULT_START_DATE <- "2025-03-30"
+DEFAULT_START_DATE <- "2025-01-16"
 
 # Create directories if they don't exist
 if (!dir_exists(RTBM_CACHE_PATH)) dir_create(RTBM_CACHE_PATH, recurse = TRUE)
@@ -98,9 +98,35 @@ if (!is.null(opts$date)) {
 #' Load Scientific Names from bird_info.json
 load_scientific_names <- function() {
   if (!file_exists(BIRD_INFO_JSON_PATH)) {
-    message("Error: bird_info.json not found at ", BIRD_INFO_JSON_PATH)
+    message("Local bird_info.json not found at ", BIRD_INFO_JSON_PATH, ". Attempting download...")
+    tryCatch(
+      {
+        download_result <- download.file(BIRD_INFO_URL, BIRD_INFO_JSON_PATH, mode = "wb", quiet = TRUE)
+        if (download_result != 0) {
+          # Non-zero status often indicates an error
+          stop("Download failed with status: ", download_result)
+        }
+        if (!file_exists(BIRD_INFO_JSON_PATH)) {
+          # Check again if file actually exists after download attempt
+          stop("File still does not exist after download attempt.")
+        }
+        message("Successfully downloaded bird_info.json to ", BIRD_INFO_JSON_PATH)
+      },
+      error = function(e) {
+        message("Error downloading bird_info.json from ", BIRD_INFO_URL, ": ", e$message)
+        # Attempt to clean up potentially incomplete file
+        if (file_exists(BIRD_INFO_JSON_PATH)) file.remove(BIRD_INFO_JSON_PATH)
+        return(NULL) # Return NULL if download fails
+      }
+    )
+  }
+
+  # Proceed to read the file (either pre-existing or just downloaded)
+  if (!file_exists(BIRD_INFO_JSON_PATH)) {
+    message("Error: bird_info.json still not available after download attempt.")
     return(NULL)
   }
+
   tryCatch(
     {
       # simplifyVector = TRUE is the default and often helpful,
@@ -279,21 +305,23 @@ raster_to_points_df <- function(r, date = NULL) {
   # Note: Removed logger dependency for standalone script
   tryCatch(
     {
-      # --- CRS Check and Projection --- 
+      # --- CRS Check and Projection ---
       # Target CRS is WGS84 (degrees)
       target_crs <- "EPSG:4326"
       current_crs_info <- terra::crs(r, proj = TRUE)
 
       # Check if the current CRS is geographic (uses degrees)
       # Simple check: if it's not geographic, assume it needs projection
-      is_geographic <- grepl("+proj=longlat", current_crs_info, fixed = TRUE) || 
-                       grepl("UNIT[\"']degree[\"']", terra::crs(r, describe=TRUE)$proj_unit, ignore.case=TRUE)
+      is_geographic <- grepl("+proj=longlat", current_crs_info, fixed = TRUE) ||
+        grepl("UNIT[\"']degree[\"']", terra::crs(r, describe = TRUE)$proj_unit, ignore.case = TRUE)
 
-      if (!is_geographic) {
-        message(sprintf("Projecting raster from %s to %s", terra::crs(r, describe=TRUE)$name, target_crs))
+      # Use isFALSE to safely handle NA values from the is_geographic check
+      if (isFALSE(is_geographic)) {
+        message(sprintf("Projecting raster from %s to %s", terra::crs(r, describe = TRUE)$name, target_crs))
         # Ensure sf is available for projection
-        # requireNamespace("sf", quietly = TRUE) 
-        r_projected <- tryCatch({
+        # requireNamespace("sf", quietly = TRUE)
+        r_projected <- tryCatch(
+          {
             terra::project(r, target_crs)
           },
           error = function(e) {
@@ -303,13 +331,13 @@ raster_to_points_df <- function(r, date = NULL) {
         # Convert the *projected* raster to data frame
         df <- terra::as.data.frame(r_projected, xy = TRUE)
       } else {
-         # If already geographic, just use the original data frame
-         df <- terra::as.data.frame(r, xy = TRUE)
+        # If already geographic, just use the original data frame
+        df <- terra::as.data.frame(r, xy = TRUE)
       }
-      # --- End CRS Check --- 
+      # --- End CRS Check ---
 
       # Rename columns directly to the final required schema
-      names(df) <- c("longitude", "latitude", "intensity") 
+      names(df) <- c("longitude", "latitude", "intensity")
 
       # Filter out NA values
       df <- df[stats::complete.cases(df), ]
