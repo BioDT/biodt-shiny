@@ -410,9 +410,11 @@ fetch_and_cache_tiffs <- function(target_date, all_keys, force_download = FALSE)
     return(invisible(NULL))
   }
 
-  # Ensure the cache directory exists
-  if (!fs::dir_exists(RTBM_CACHE_PATH)) {
-    dir_create(RTBM_CACHE_PATH, recurse = TRUE)
+  # Define and create the date-specific cache directory
+  date_cache_dir <- fs::path(RTBM_CACHE_PATH, date_str)
+  if (!fs::dir_exists(date_cache_dir)) {
+    message("Creating date-specific cache directory: ", date_cache_dir)
+    fs::dir_create(date_cache_dir, recurse = TRUE)
   }
 
   for (key in relevant_keys) {
@@ -428,7 +430,7 @@ fetch_and_cache_tiffs <- function(target_date, all_keys, force_download = FALSE)
     # Construct local file path (use original filename with underscores)
     # Use file_name_in_url directly which has the underscores
     local_file_name <- file_name_in_url
-    target_local_path <- file.path(RTBM_CACHE_PATH, local_file_name)
+    target_local_path <- file.path(date_cache_dir, local_file_name)
 
     # Check cache
     file_exists_check <- file.exists(target_local_path)
@@ -445,8 +447,9 @@ fetch_and_cache_tiffs <- function(target_date, all_keys, force_download = FALSE)
     }
 
     # Construct full URL for download
-    # Assuming xml_list_url is the base endpoint, and key is the path
-    target_url <- paste0(xml_list_url, "/", key)
+    # Assuming RTBM_TIFF_BUCKET_URL_BASE is the base endpoint, and key is the path
+    key_suffix <- sub("^daily/", "", key) # Remove leading 'daily/' from the key
+    target_url <- paste0(RTBM_TIFF_BUCKET_URL_BASE, key_suffix) # Use correct base URL for download
 
     # Attempt download
     tryCatch(
@@ -728,14 +731,17 @@ convert_tiffs_to_parquet <- function(target_date, force_update = FALSE) {
   date_str <- format(target_date, "%Y-%m-%d")
   message(sprintf("--- Starting Parquet Conversion for %s ---", date_str))
 
-  # Find TIFF files specifically for this date
+  # Define the date-specific cache directory to look for TIFFs
+  date_cache_dir <- fs::path(RTBM_CACHE_PATH, date_str)
+  abs_date_cache_dir <- fs::path_abs(date_cache_dir)
+
+  # Find TIFF files specifically within this date's cache directory
   date_pattern <- paste0("*_occurrences.tif")
-  message(sprintf("Looking for TIFF files with pattern: %s", date_pattern))
-  cached_files <- fs::dir_ls(RTBM_CACHE_PATH, glob = date_pattern, type = "file")
+  cached_files <- fs::dir_ls(abs_date_cache_dir, glob = date_pattern, type = "file")
   message(sprintf("Found %d cached TIFF files to process.", length(cached_files)))
 
   if (length(cached_files) == 0) {
-    message("No cached TIFF files found to process.")
+    message("No cached TIFF files found to process in the specific directory.")
     return(invisible(NULL))
   }
 
@@ -776,13 +782,13 @@ convert_tiffs_to_parquet <- function(target_date, force_update = FALSE) {
       # Remove '_occurrences.tif' to get 'Genus_species'
       name_part <- gsub("_occurrences.tif$", "", file_name)
       # Replace underscores with spaces for the scientific name
-      scientific_name <- stringr::str_replace_all(name_part, "_", " ")
-      message("  Extracted scientific name: ", scientific_name)
+      scientific_name_with_space <- stringr::str_replace_all(name_part, "_", " ")
+      message("  Extracted scientific name: ", scientific_name_with_space)
     } else {
       # Fallback if filename doesn't match expected pattern
       message("  Warning: Unexpected filename format: ", file_name)
       # Just use the file name without extension as species
-      scientific_name <- tools::file_path_sans_ext(file_name)
+      scientific_name_with_space <- tools::file_path_sans_ext(file_name)
     }
 
     # Skip species check - we want to process all files
@@ -794,7 +800,7 @@ convert_tiffs_to_parquet <- function(target_date, force_update = FALSE) {
 
     # --- Hive Partitioning --- START ---
     # Create species directory
-    species_partition <- paste0("species=", scientific_name)
+    species_partition <- paste0("species=", stringr::str_replace_all(scientific_name_with_space, " ", "_"))
     species_dir <- fs::path(RTBM_PARQUET_PATH, species_partition)
     fs::dir_create(species_dir, recurse = TRUE)
 
@@ -805,7 +811,7 @@ convert_tiffs_to_parquet <- function(target_date, force_update = FALSE) {
 
     # Skip if Parquet file already exists AND force_update is FALSE
     if (fs::file_exists(parquet_file_path) && !force_update) {
-      # message(sprintf("Skipping conversion for %s on %s (Parquet exists)", scientific_name, date_str))
+      # message(sprintf("Skipping conversion for %s on %s (Parquet exists)", scientific_name_with_space, date_str))
       skipped_count <- skipped_count + 1
       next # Move to the next file
     }
@@ -839,14 +845,14 @@ convert_tiffs_to_parquet <- function(target_date, force_update = FALSE) {
         # Only write if data exists (handles empty rasters / cleaning)
         if (nrow(points_df) > 0) {
           # Add species column before writing
-          points_df$species <- scientific_name # Ensure species column matches partition
+          points_df$species <- stringr::str_replace_all(scientific_name_with_space, " ", "_") # Use underscores
 
           # Write to Parquet file (Overwrite if force_update or if skipped check above passed)
           arrow::write_parquet(points_df, parquet_file_path)
           conversion_successful <- TRUE
           # message(sprintf("Successfully converted %s to %s", file_name, basename(parquet_file_path)))
         } else {
-          message(sprintf("Skipping write for %s on %s (No data points after raster_to_points_df)", scientific_name, date_str))
+          message(sprintf("Skipping write for %s on %s (No data points after raster_to_points_df)", scientific_name_with_space, date_str))
           skipped_count <- skipped_count + 1 # Count as skipped due to no data
         }
       },
