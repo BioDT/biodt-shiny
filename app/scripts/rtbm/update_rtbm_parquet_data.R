@@ -51,102 +51,107 @@ if (!dir_exists(RTBM_PARQUET_PATH)) dir_create(RTBM_PARQUET_PATH, recurse = TRUE
 
 # --- Argument Parsing --- START ---
 option_list <- list(
-  make_option(c("-d", "--date"),
-    type = "character", default = NULL,
-    help = "Target date in YYYY-MM-DD format. If omitted, processes from --start-date (or default) to --end-date (or yesterday). Overrides --start-date and --end-date.",
-    metavar = "YYYY-MM-DD"
-  ),
-  # Reverted back to --force, default FALSE (meaning use cache by default)
   make_option(c("-f", "--force"),
     action = "store_true", default = FALSE,
     help = "Force re-download of TIFF files and overwrite existing Parquet files"
   ),
-  # Add start and end date options
+  # Option for specific single date
+  make_option(c("-d", "--date"),
+    type = "character", default = NULL,
+    help = "Specific date to process (YYYY-MM-DD). Cannot be used with --start-date or --end-date.",
+    metavar = "YYYY-MM-DD"
+  ),
+  # Options for date range
   make_option(c("-s", "--start-date"),
     type = "character", default = NULL,
-    help = "Start date for processing range (YYYY-MM-DD). Defaults to internal DEFAULT_START_DATE if omitted.",
+    help = "Start date for processing range (YYYY-MM-DD). Must be used with --end-date.",
     metavar = "YYYY-MM-DD"
   ),
   make_option(c("-e", "--end-date"),
     type = "character", default = NULL,
-    help = "End date for processing range (YYYY-MM-DD). Defaults to yesterday if omitted.",
+    help = "End date for processing range (YYYY-MM-DD). Must be used with --start-date.",
     metavar = "YYYY-MM-DD"
   ),
   make_option(c("-v", "--validate-parquet"),
     action = "store_true", default = FALSE,
-    help = "Skip S3 listing/downloading. Validate existing Parquet files in date range and force re-process only invalid/missing ones."
+    help = "Skip S3 listing/downloading. Validate existing Parquet files in date range and force re-process only invalid/missing ones if source TIFF exists on S3."
   )
 )
 
 opt_parser <- OptionParser(option_list = option_list)
 opts <- parse_args(opt_parser)
 
-# Determine target date(s)
-date_sequence <- NULL
+# --- Determine target date(s) --- START ---
 
+date_sequence <- NULL
+yesterday_str <- format(Sys.Date() - 1, "%Y-%m-%d")
+
+# Check for conflicting arguments
+if (!is.null(opts$date) && (!is.null(opts$`start-date`) || !is.null(opts$`end-date`))) {
+  stop("Cannot use --date option with --start-date or --end-date.")
+}
+
+# Check for incomplete range arguments
+if (xor(!is.null(opts$`start-date`), !is.null(opts$`end-date`))) {
+  stop("Both --start-date and --end-date must be provided to specify a range.")
+}
+
+# Scenario 1: Specific date provided
 if (!is.null(opts$date)) {
-  # Highest priority: Specific date provided
   parsed_date <- ymd(opts$date, quiet = TRUE)
-  if (!is.na(parsed_date)) {
-    date_sequence <- c(parsed_date)
-    message(sprintf("Processing specified target date: %s", format(date_sequence[1], "%Y-%m-%d")))
-  } else {
+  if (is.na(parsed_date)) {
     stop(sprintf("Invalid format for --date ('%s'). Please use YYYY-MM-DD.", opts$date))
   }
-} else {
-  # No specific date, determine range
-  start_date_input <- opts$`start-date`
-  end_date_input <- opts$`end-date`
+  date_sequence <- c(parsed_date)
+  message(sprintf("Processing specified single date: %s", format(date_sequence[1], "%Y-%m-%d")))
 
-  # --- Default to yesterday if NO date arguments are given --- START ---
-  if (is.null(start_date_input) && is.null(end_date_input)) {
-    yesterday_str <- format(Sys.Date() - 1, "%Y-%m-%d")
-    start_date_input <- yesterday_str
-    end_date_input <- yesterday_str
-    message(sprintf("No date arguments provided. Defaulting to processing yesterday: %s", yesterday_str))
+  # Scenario 2: Date range provided
+} else if (!is.null(opts$`start-date`) && !is.null(opts$`end-date`)) {
+  start_date <- ymd(opts$`start-date`, quiet = TRUE)
+  end_date <- ymd(opts$`end-date`, quiet = TRUE)
+
+  if (is.na(start_date)) {
+    stop(sprintf("Invalid format for --start-date ('%s'). Please use YYYY-MM-DD.", opts$`start-date`))
   }
-  # --- Default to yesterday if NO date arguments are given --- END ---
-
-  # Determine start date
-  if (!is.null(start_date_input)) {
-    start_date <- ymd(start_date_input, quiet = TRUE)
-    if (is.na(start_date)) {
-      stop(sprintf("Invalid format for --start-date ('%s'). Please use YYYY-MM-DD.", start_date_input))
-    }
-  } else {
-    start_date <- ymd(DEFAULT_START_DATE, quiet = TRUE)
-    if (is.na(start_date)) {
-      stop(sprintf("Invalid internal DEFAULT_START_DATE: %s", DEFAULT_START_DATE))
-    }
+  if (is.na(end_date)) {
+    stop(sprintf("Invalid format for --end-date ('%s'). Please use YYYY-MM-DD.", opts$`end-date`))
   }
 
-  # Determine end date
-  if (!is.null(end_date_input)) {
-    end_date <- ymd(end_date_input, quiet = TRUE)
-    if (is.na(end_date)) {
-      stop(sprintf("Invalid format for --end-date ('%s'). Please use YYYY-MM-DD.", end_date_input))
-    }
-  } else {
-    end_date <- Sys.Date() - days(1)
-  }
-
-  # Validate and create sequence
   if (start_date > end_date) {
     stop(sprintf(
-      "Calculated start date (%s) is after end date (%s). Check inputs or system date.",
+      "Start date (%s) cannot be after end date (%s).",
       format(start_date, "%Y-%m-%d"), format(end_date, "%Y-%m-%d")
     ))
   }
+
   date_sequence <- seq(start_date, end_date, by = "day")
   message(sprintf(
-    "Processing date range from %s to %s (%d dates).",
-    format(start_date, "%Y-%m-%d"),
-    format(end_date, "%Y-%m-%d"),
-    length(date_sequence)
+    "Processing specified date range: %s to %s",
+    format(start_date, "%Y-%m-%d"), format(end_date, "%Y-%m-%d")
   ))
+
+  # Scenario 3: No date arguments provided (Default to yesterday)
+} else {
+  default_date <- ymd(yesterday_str, quiet = TRUE)
+  if (is.na(default_date)) {
+    stop(sprintf("Failed to parse default date (yesterday): %s", yesterday_str))
+  }
+  date_sequence <- c(default_date)
+  message(sprintf("No date arguments provided. Defaulting to processing yesterday: %s", yesterday_str))
 }
 
-# --- Argument Parsing --- END ---
+# --- Determine target date(s) --- END ---
+
+if (is.null(date_sequence) || length(date_sequence) == 0) {
+  stop("Error: Could not determine a valid date or date sequence to process.")
+}
+
+message(sprintf(
+  "Processing date range from %s to %s (%d dates).",
+  format(min(date_sequence), "%Y-%m-%d"),
+  format(max(date_sequence), "%Y-%m-%d"),
+  length(date_sequence)
+))
 
 # --- Function Definitions ---
 
@@ -1166,6 +1171,22 @@ validate_and_reprocess_parquet <- function(date_str) {
           )
           if (process_result$success) {
             reprocessed_count <- reprocessed_count + 1
+            # --- ADD VALIDATION FOR THE NEWLY REPROCESSED FILE --- START ---
+            # Get the path to the file just created
+            new_parquet_file_path <- fs::path(species_dir, paste0("date=", date_str, ".parquet"))
+            if (fs::file_exists(new_parquet_file_path)) {
+              message(sprintf("  Validating newly reprocessed file: %s", basename(new_parquet_file_path)))
+              validation_result <- validate_and_clean_parquet_file(new_parquet_file_path)
+
+              if (validation_result$status %in% c("removed_read_error", "removed_empty", "removed_missing_cols", "removed_coord_error", "removed_intensity_error")) {
+                message(sprintf("    -> Newly reprocessed file was subsequently removed due to: %s", validation_result$reason))
+                # Optionally, decrement reprocessed_count if removal happens? Or add a new counter?
+                # For now, just log it.
+              }
+            } else {
+              message(sprintf("    WARNING: Could not find newly reprocessed file %s for final validation.", basename(new_parquet_file_path)))
+            }
+            # --- ADD VALIDATION FOR THE NEWLY REPROCESSED FILE --- END ---
           } else {
             error_count <- error_count + 1
             message(sprintf("      ERROR reprocessing %s: %s", tiff_filename, process_result$message))

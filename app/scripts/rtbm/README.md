@@ -19,20 +19,24 @@ Run the script from the main project root directory:
 # Process data for yesterday (default behavior)
 Rscript app/scripts/rtbm/update_rtbm_parquet_data.R
 
-# Process a specific date range
-Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -d YYYY-MM-DD -e YYYY-MM-DD
+# Process data for a specific single date
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -d YYYY-MM-DD
 
-# Force reprocessing for a date range (ignores cache and existing Parquet)
-Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -f -d YYYY-MM-DD -e YYYY-MM-DD
+# Process data for a specific date range
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -s YYYY-MM-DD -e YYYY-MM-DD
+
+# Force reprocessing for a specific single date (ignores cache and existing Parquet)
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -f -d YYYY-MM-DD
 
 # Validate existing Parquet files for a date range, reprocessing only if necessary and source exists
-Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -v -d YYYY-MM-DD -e YYYY-MM-DD
+Rscript app/scripts/rtbm/update_rtbm_parquet_data.R -v -s YYYY-MM-DD -e YYYY-MM-DD
 ```
 
 **Arguments:**
 
-*   `-d`, `--start-date`: Start date (YYYY-MM-DD). Defaults to yesterday if omitted.
-*   `-e`, `--end-date`: End date (YYYY-MM-DD). Defaults to `--start-date` if omitted.
+*   `-d`, `--date`: Specific date to process (YYYY-MM-DD). Cannot be used with `--start-date` or `--end-date`.
+*   `-s`, `--start-date`: Start date for processing range (YYYY-MM-DD). Must be used *together* with `--end-date`.
+*   `-e`, `--end-date`: End date for processing range (YYYY-MM-DD). Must be used *together* with `--start-date`.
 *   `-f`, `--force`: Force reprocessing, ignoring cache and existing files.
 *   `-v`, `--validate`: Run in validation mode. Checks local files against S3 and reprocesses only missing/invalid ones *if* the source TIFF exists on S3.
 
