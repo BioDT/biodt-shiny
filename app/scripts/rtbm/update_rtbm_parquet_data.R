@@ -34,8 +34,9 @@ RTBM_PARQUET_PATH <- fs::path(PROJECT_ROOT, "app", "data", "rtbm", "parquet")
 BIRD_INFO_JSON_PATH <- fs::path(PROJECT_ROOT, "app", "data", "rtbm", "bird_info.json")
 BIRD_INFO_URL <- "https://bird-photos.a3s.fi/bird_info.json" # Added URL for download
 
-# !!! IMPORTANT: Replace this placeholder with the actual base URL for the TIFF files !!!
-RTBM_TIFF_BUCKET_URL_BASE <- "https://2007581-webportal.a3s.fi/daily/"
+# !!! Base endpoint for S3-compatible storage (without /daily/) !!!
+S3_ENDPOINT_BASE <- "https://2007581-webportal.a3s.fi"
+
 # --- End Standalone Configuration ---
 
 # --- Configuration & Setup ---
@@ -70,6 +71,10 @@ option_list <- list(
     type = "character", default = NULL,
     help = "End date for processing range (YYYY-MM-DD). Defaults to yesterday if omitted.",
     metavar = "YYYY-MM-DD"
+  ),
+  make_option(c("-v", "--validate-parquet"),
+    action = "store_true", default = FALSE,
+    help = "Skip S3 listing/downloading. Validate existing Parquet files in date range and force re-process only invalid/missing ones."
   )
 )
 
@@ -92,6 +97,15 @@ if (!is.null(opts$date)) {
   # No specific date, determine range
   start_date_input <- opts$`start-date`
   end_date_input <- opts$`end-date`
+
+  # --- Default to yesterday if NO date arguments are given --- START ---
+  if (is.null(start_date_input) && is.null(end_date_input)) {
+    yesterday_str <- format(Sys.Date() - 1, "%Y-%m-%d")
+    start_date_input <- yesterday_str
+    end_date_input <- yesterday_str
+    message(sprintf("No date arguments provided. Defaulting to processing yesterday: %s", yesterday_str))
+  }
+  # --- Default to yesterday if NO date arguments are given --- END ---
 
   # Determine start date
   if (!is.null(start_date_input)) {
@@ -131,6 +145,7 @@ if (!is.null(opts$date)) {
     length(date_sequence)
   ))
 }
+
 # --- Argument Parsing --- END ---
 
 # --- Function Definitions ---
@@ -198,6 +213,126 @@ load_scientific_names <- function() {
       return(NULL)
     }
   )
+}
+
+#' Parse S3 XML List Bucket Result for keys, truncation status, and markers.
+#' @param xml_content Parsed XML object from httr2::resp_body_xml().
+#' @return A list containing: keys (character vector), is_truncated (logical),
+#'         next_marker (character or NULL), continuation_token (character or NULL).
+parse_s3_response_xml <- function(xml_content) {
+  # Use namespace-agnostic search where possible
+  find_text <- function(pattern) {
+    node <- xml2::xml_find_first(xml_content, paste0(".//*[local-name()='", pattern, "']"))
+    if (!is.na(node)) xml2::xml_text(node) else NA_character_
+  }
+  find_all_text <- function(pattern) {
+    nodes <- xml2::xml_find_all(xml_content, paste0(".//*[local-name()='", pattern, "']"))
+    if (length(nodes) > 0) xml2::xml_text(nodes) else character(0)
+  }
+
+  keys <- find_all_text("Key")
+  is_truncated_text <- find_text("IsTruncated")
+  is_truncated <- !is.na(is_truncated_text) && tolower(is_truncated_text) == "true"
+
+  # Get both potential markers/tokens
+  next_marker <- find_text("NextMarker")
+  continuation_token <- find_text("NextContinuationToken")
+
+  # Prefer continuation token if available (indicates V2 listing)
+  # If only NextMarker is present, use that (indicates V1 listing)
+  # If both are somehow present, prioritize V2 token.
+
+  return(list(
+    keys = keys,
+    is_truncated = is_truncated,
+    next_marker = if (is.na(continuation_token)) next_marker else NA_character_, # Return next_marker only if no token
+    continuation_token = continuation_token
+  ))
+}
+
+#' List S3 objects for a specific date prefix, handling pagination.
+#' @param date_prefix The date prefix (e.g., "2023-10-26") to filter keys.
+#' @param xml_list_url The base URL for the bucket listing.
+#' @param retries Number of times to retry on failure.
+#' @param delay Delay between retries in seconds.
+#' @return A character vector of keys matching the prefix, or NULL on persistent error.
+list_s3_objects_paginated <- function(date_prefix, xml_list_url = "https://2007581-webportal.a3s.fi", retries = 3, delay = 2) {
+  message(sprintf("    Listing keys for prefix: %s", date_prefix))
+  attempt <- 1
+  all_date_keys <- character(0)
+  is_truncated <- TRUE
+  marker <- NULL
+  continuation_token <- NULL
+
+  while (attempt <= retries) {
+    tryCatch(
+      {
+        page_keys <- character(0)
+        while (is_truncated) {
+          req <- httr2::request(xml_list_url)
+          query_params <- list(prefix = paste0("daily/", date_prefix, "/")) # Add 'daily/' prefix and trailing slash
+          if (!is.null(marker)) {
+            query_params$marker <- marker
+          }
+          # Use v2 listing if continuation token is present
+          if (!is.null(continuation_token)) {
+            query_params$continuation_token <- continuation_token
+            query_params$list_type <- 2
+          } else if (is.null(marker) && length(page_keys) > 0) {
+            # Fallback marker for v1 if no continuation token
+            marker <- page_keys[length(page_keys)]
+            query_params$marker <- marker
+          }
+
+          resp <- httr2::req_perform(httr2::req_url_query(req, !!!query_params), verbosity = 0)
+
+          # --- Add verbose logging ---
+          req_url <- tryCatch(httr2::last_request()$url, error = function(e) "Error getting last request URL")
+          resp_status <- httr2::resp_status(resp)
+          message(sprintf("      Request URL: %s", req_url))
+          message(sprintf("      Response Status: %d", resp_status))
+          # --- End verbose logging ---
+
+          if (httr2::resp_status(resp) != 200) {
+            stop(paste("Failed to fetch XML listing page. Status:", httr2::resp_status(resp)))
+          }
+
+          parsed_response <- parse_s3_response_xml(httr2::resp_body_xml(resp))
+          # --- Add verbose logging ---
+          message(sprintf("      Keys found this page: %d", length(parsed_response$keys)))
+          message(sprintf("      Response IsTruncated: %s", parsed_response$is_truncated))
+          # --- End verbose logging ---
+          page_keys <- parsed_response$keys
+          all_date_keys <- c(all_date_keys, page_keys)
+          is_truncated <- parsed_response$is_truncated
+          marker <- parsed_response$next_marker # Might be NULL
+          continuation_token <- parsed_response$continuation_token # Might be NULL
+
+          # If not truncated, break the inner while loop
+          if (!is_truncated) break
+
+          # If truncated but no marker/token, something's wrong (avoid infinite loop)
+          if (is.null(marker) && is.null(continuation_token)) {
+            warning("S3 listing truncated but no marker or continuation token found. Stopping pagination.")
+            break
+          }
+        }
+        # If inner loop completed successfully, break the retry loop
+        return(unique(all_date_keys))
+      },
+      error = function(e) {
+        message(sprintf("    Attempt %d/%d failed for %s: %s", attempt, retries, date_prefix, e$message))
+        if (attempt == retries) {
+          message(sprintf("    Giving up on listing keys for %s after %d attempts.", date_prefix, retries))
+          stop(e) # Re-throw the error to be caught by the outer tryCatch in main loop
+        }
+        Sys.sleep(delay) # Wait before retrying
+      }
+    )
+    attempt <- attempt + 1
+  }
+  # Should not be reached if successful, only if all retries failed and stop() wasn't called
+  return(NULL)
 }
 
 #' Fetches the complete list of keys from the S3 bucket using pagination.
@@ -446,10 +581,9 @@ fetch_and_cache_tiffs <- function(target_date, all_keys, force_download = FALSE)
       next # Skip download, already cached
     }
 
-    # Construct full URL for download
-    # Assuming RTBM_TIFF_BUCKET_URL_BASE is the base endpoint, and key is the path
-    key_suffix <- sub("^daily/", "", key) # Remove leading 'daily/' from the key
-    target_url <- paste0(RTBM_TIFF_BUCKET_URL_BASE, key_suffix) # Use correct base URL for download
+    # Construct full URL for download using the base endpoint and the full key
+    # key should already include 'daily/' if listing was done correctly
+    target_url <- paste0(S3_ENDPOINT_BASE, "/", key)
 
     # Attempt download
     tryCatch(
@@ -490,6 +624,48 @@ fetch_and_cache_tiffs <- function(target_date, all_keys, force_download = FALSE)
   # --- End Summarization Logic ---
 
   invisible(NULL)
+}
+
+#' Helper function to download a single TIFF file
+fetch_single_tiff <- function(s3_key, target_tiff_path) {
+  # Construct the full URL using the base endpoint and the full S3 key
+  # s3_key is expected to be like 'daily/YYYY-MM-DD/filename.tif'
+  download_url <- paste0(S3_ENDPOINT_BASE, "/", s3_key)
+
+  file_name <- basename(s3_key)
+
+  # Ensure parent directory exists
+  target_dir <- dirname(target_tiff_path)
+  if (!fs::dir_exists(target_dir)) {
+    fs::dir_create(target_dir, recurse = TRUE)
+  }
+
+  message(sprintf("  Fetching single TIFF: %s -> %s", file_name, target_tiff_path))
+
+  tryCatch(
+    {
+      req <- httr2::request(download_url)
+      message(sprintf("      Fetching URL: %s", download_url)) # Log the URL being requested
+      resp <- req |>
+        httr2::req_perform(path = target_tiff_path) # Download
+
+      # Check status implicitly - req_perform throws error on failure
+      # httr2::resp_check_status(resp) # If needed explicitly after req_perform
+      # No need for resp_is_success check
+
+      return(TRUE) # Return TRUE if download succeeds without error
+    },
+    httr2_http_404 = function(cnd) {
+      message(sprintf("    Error downloading %s: HTTP 404 Not Found.", file_name))
+      # Optionally log cnd$message or cnd$resp$url
+      return(FALSE)
+    },
+    error = function(cnd) {
+      # General error handler for other download issues
+      message(sprintf("    Error downloading %s: %s", file_name, conditionMessage(cnd)))
+      return(FALSE)
+    }
+  )
 }
 
 #' Convert raster to points dataframe (Internal Version)
@@ -903,6 +1079,193 @@ convert_tiffs_to_parquet <- function(target_date, force_update = FALSE) {
   return(invisible(NULL))
 }
 
+#' Function to validate Parquet files for a specific date and reprocess failures
+validate_and_reprocess_parquet <- function(date_str) {
+  message(sprintf("--- Validating Parquet files for %s ---", date_str))
+  validated_count <- 0
+  reprocessed_count <- 0
+  error_count <- 0
+  skipped_missing_source_count <- 0
+  date_had_s3_list_error <- FALSE
+
+  # Step V1: List actual S3 keys for this date first
+  message("  Step V1: Listing existing S3 keys for ", date_str, "...")
+  date_s3_keys <- tryCatch(
+    {
+      list_s3_objects_paginated(date_str)
+    },
+    error = function(e) {
+      message(sprintf("    ERROR listing S3 keys for %s: %s", date_str, e$message))
+      message("    Skipping S3 checks; will only validate local files.")
+      assign("date_had_s3_list_error", TRUE, envir = parent.env(environment()))
+      return(NULL) # Return NULL on error
+    }
+  )
+
+  if (!is.null(date_s3_keys)) {
+    message(sprintf("    Found %d keys on S3 for this date.", length(date_s3_keys)))
+  }
+
+  # Step V2: Check local Parquet files
+  message("  Step V2: Checking local Parquet files...")
+  # List existing species partition directories
+  species_dirs <- fs::dir_ls(RTBM_PARQUET_PATH, type = "directory", regexp = "species=.*")
+  if (length(species_dirs) == 0) {
+    message("    No local species partition directories found. Nothing to validate.")
+    return(invisible(NULL))
+  }
+
+  message(sprintf("    Found %d local species partitions to check.", length(species_dirs)))
+
+  for (species_dir in species_dirs) {
+    species_partition_name <- fs::path_file(species_dir)
+    species_name_with_underscore <- stringr::str_remove(species_partition_name, "^species=")
+
+    # Construct the expected Parquet file path for this date
+    date_partition <- paste0("date=", date_str)
+    parquet_file_path <- fs::path(species_dir, paste0(date_partition, ".parquet"))
+
+    is_valid <- FALSE
+    # Check if file exists and try to read it
+    if (fs::file_exists(parquet_file_path)) {
+      tryCatch(
+        {
+          arrow::read_parquet(parquet_file_path, as_data_frame = FALSE)
+          is_valid <- TRUE
+          validated_count <- validated_count + 1
+        },
+        error = function(e) {
+          message(sprintf("    INVALID Parquet: %s. Error: %s", parquet_file_path, e$message))
+        }
+      )
+    } else {
+      message(sprintf("    MISSING Parquet: %s", parquet_file_path))
+    }
+
+    # If file is missing or invalid, attempt reprocessing *only if source exists*
+    if (!is_valid) {
+      # Construct the potential S3 key
+      tiff_filename <- paste0(species_name_with_underscore, "_occurrences.tif")
+      s3_key_to_fetch <- sprintf("daily/%s/%s", date_str, tiff_filename)
+
+      # Check if we could list S3 keys and if this key actually exists
+      if (!is.null(date_s3_keys) && s3_key_to_fetch %in% date_s3_keys) {
+        message(sprintf("    -> Triggering reprocessing for %s on %s (Source key found)...", species_name_with_underscore, date_str))
+
+        local_tiff_cache_path <- fs::path(RTBM_CACHE_PATH, date_str, tiff_filename)
+
+        # Fetch the specific TIFF file (force overwrite)
+        fetch_success <- fetch_single_tiff(s3_key_to_fetch, local_tiff_cache_path)
+
+        if (fetch_success) {
+          # Reprocess the single TIFF file (force overwrite of Parquet)
+          process_result <- process_single_tiff(
+            tiff_file_path = local_tiff_cache_path,
+            date_str = date_str,
+            force_update = TRUE
+          )
+          if (process_result$success) {
+            reprocessed_count <- reprocessed_count + 1
+          } else {
+            error_count <- error_count + 1
+            message(sprintf("      ERROR reprocessing %s: %s", tiff_filename, process_result$message))
+          }
+        } else {
+          error_count <- error_count + 1
+          message(sprintf("      ERROR fetching source TIFF %s. Cannot reprocess.", s3_key_to_fetch))
+        }
+      } else if (date_had_s3_list_error) {
+        message(sprintf("    -> Skipping reprocessing check for %s on %s (Could not list S3 keys for date).", species_name_with_underscore, date_str))
+        skipped_missing_source_count <- skipped_missing_source_count + 1 # Count as skipped maybe?
+      } else {
+        # Construct S3 key for checking existence
+        s3_key <- sprintf("daily/%s/%s_occurrences.tif", date_str, species_name_with_underscore)
+        message(sprintf("    -> Skipping reprocessing for %s on %s (Source key '%s' not found on S3 for this date).", species_name_with_underscore, date_str, s3_key))
+        skipped_missing_source_count <- skipped_missing_source_count + 1
+      }
+    } else {
+      message(sprintf("    OK: %s", parquet_file_path))
+    }
+  } # End loop through species directories
+
+  message(sprintf(
+    "--- Validation for %s finished. Valid: %d, Reprocessed: %d, Skipped (missing S3 source): %d, Errors: %d ---",
+    date_str, validated_count, reprocessed_count, skipped_missing_source_count, error_count
+  ))
+
+  # Return TRUE if NO errors occurred during S3 listing or reprocessing attempts
+  return(!date_had_s3_list_error && error_count == 0)
+}
+
+#' Function to process a single TIFF file into a Parquet file
+process_single_tiff <- function(tiff_file_path, date_str, force_update) {
+  # Load raster data
+  r <- terra::rast(tiff_file_path)
+
+  # This is a performance bottleneck according to benchmarks
+  # Apply optimizations: use parallel processing for raster transformations if available
+  if (!is.null(parallel_cluster)) {
+    # When using parallel processing, we need to ensure the terra package is loaded in each worker
+    message("  Using parallel processing for raster transformation")
+    terra::terraOptions(progress = 0, memfrac = 0.5) # Reduce memory usage, turn off progress bar
+
+    # Set threads for terra operations
+    # Warning: on some systems using too many threads can cause issues
+    # We'll use a modest number tied to our cluster size
+    terra::terraOptions(threads = no_cores)
+
+    # Convert raster using the local helper function with parallel processing
+    points_df <- raster_to_points_df(r, date = date_str)
+  } else {
+    # Standard single-threaded processing
+    points_df <- raster_to_points_df(r, date = date_str)
+  }
+
+  # Only write if data exists (handles empty rasters / cleaning)
+  if (nrow(points_df) > 0) {
+    # Extract scientific name from filename
+    # Expected format is 'Genus_species_occurrences.tif'
+    file_name <- basename(tiff_file_path)
+    if (grepl("_occurrences.tif$", file_name)) {
+      # Remove '_occurrences.tif' to get 'Genus_species'
+      name_part <- gsub("_occurrences.tif$", "", file_name)
+      # Replace underscores with spaces for the scientific name
+      scientific_name_with_space <- stringr::str_replace_all(name_part, "_", " ")
+      message("  Extracted scientific name: ", scientific_name_with_space)
+    } else {
+      # Fallback if filename doesn't match expected pattern
+      message("  Warning: Unexpected filename format: ", file_name)
+      # Just use the file name without extension as species
+      scientific_name_with_space <- tools::file_path_sans_ext(file_name)
+    }
+
+    # --- Hive Partitioning --- START ---
+    # Create species directory
+    species_partition <- paste0("species=", stringr::str_replace_all(scientific_name_with_space, " ", "_"))
+    species_dir <- fs::path(RTBM_PARQUET_PATH, species_partition)
+    fs::dir_create(species_dir, recurse = TRUE)
+
+    # Define final parquet file path with date partition
+    date_partition <- paste0("date=", date_str)
+    parquet_file_path <- fs::path(species_dir, paste0(date_partition, ".parquet"))
+    # --- End Hive Partitioning ---
+
+    # Add species column before writing
+    points_df$species <- stringr::str_replace_all(scientific_name_with_space, " ", "_") # Use underscores
+
+    # Write to Parquet file (Overwrite if force_update or if skipped check above passed)
+    arrow::write_parquet(points_df, parquet_file_path)
+    conversion_successful <- TRUE
+    # message(sprintf("Successfully converted %s to %s", file_name, basename(parquet_file_path)))
+  } else {
+    message(sprintf("Skipping write for %s on %s (No data points after raster_to_points_df)", scientific_name_with_space, date_str))
+    conversion_successful <- FALSE
+  }
+
+  # Return status
+  list(success = conversion_successful, message = if (conversion_successful) "OK" else "Error")
+}
+
 # --- Main Execution Loop ---
 
 total_dates <- length(date_sequence)
@@ -943,14 +1306,45 @@ for (i in seq_along(date_sequence)) {
   date_str <- format(current_target_date, "%Y-%m-%d")
   message(sprintf("\n=== Processing Date %d/%d: %s ===\n", i, total_dates, date_str))
   date_start_time <- Sys.time()
+  date_had_errors <- FALSE # Track errors for this specific date
 
-  # Step 1: Fetch and cache TIFFs using the pre-fetched key list
-  message("Step 1: Fetching and Caching TIFF files...")
-  fetch_and_cache_tiffs(current_target_date, all_s3_keys, force_download = opts$force)
+  # --- Choose Workflow based on --validate-parquet ---
+  if (opts$`validate-parquet`) {
+    # --- Validation Workflow ---
+    message("--> Running in Validation Mode <--")
+    message("Step 1: Skipping S3 List/Fetch")
+    message("Step 2: Skipping Bulk Conversion")
+    message("Step 3: Validating existing Parquet & re-processing failures...")
+    validate_and_reprocess_parquet(date_str)
+  } else {
+    # --- Normal Processing Workflow ---
+    message("--> Running in Normal Processing Mode <--")
 
-  # Step 2: Convert downloaded TIFFs to Parquet
-  message("\nStep 2: Converting TIFFs to Parquet...")
-  convert_tiffs_to_parquet(current_target_date, force_update = opts$force)
+    # Step 0: List S3 objects for the current date
+    message("\nStep 0: Listing S3 objects for ", date_str, "...")
+    date_s3_keys <- tryCatch(
+      {
+        list_s3_objects_paginated(date_str)
+      },
+      error = function(e) {
+        message(sprintf("  ERROR listing S3 objects for %s: %s", date_str, e$message))
+        assign("date_had_errors", TRUE, envir = parent.env(environment()))
+        return(list()) # Return empty list on error
+      }
+    )
+
+    if (length(date_s3_keys) == 0 && !date_had_errors) {
+      message("  No S3 objects found for ", date_str, ". Skipping fetch and convert.")
+    } else if (!date_had_errors) {
+      # Step 1: Fetch and cache TIFFs using the keys for this date
+      message("\nStep 1: Fetching and Caching TIFF files...")
+      fetch_and_cache_tiffs(current_target_date, date_s3_keys, force_download = opts$force)
+
+      # Step 2: Convert downloaded TIFFs to Parquet
+      message("\nStep 2: Converting TIFFs to Parquet...")
+      convert_tiffs_to_parquet(current_target_date, force_update = opts$force)
+    }
+  }
 
   date_end_time <- Sys.time()
   date_duration <- round(as.numeric(difftime(date_end_time, date_start_time, units = "secs")), 2)
