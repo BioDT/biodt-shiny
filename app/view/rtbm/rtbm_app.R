@@ -178,8 +178,8 @@ rtbm_app_ui <- function(id, i18n) {
             pickerInput(
               inputId = ns("speciesPicker"),
               label = "Select Species",
-              choices = "", #bird_spp_info$common_name,
-              selected = "", #bird_spp_info$common_name[1],
+              choices = "", # bird_spp_info$common_name,
+              selected = "", # bird_spp_info$common_name[1],
               multiple = FALSE,
               options = list(
                 `live-search` = TRUE,
@@ -277,8 +277,8 @@ rtbm_app_server <- function(id, tab_selected) {
       return(bbox_sf)
     }
 
-    # Load Finland border
-    finland_border <- get_finland_border()
+    # Initialize Finland border variable (but don't load data yet)
+    finland_border <- NULL
 
     # Reactive values for data storage
     available_dates <- reactiveVal(NULL)
@@ -296,8 +296,15 @@ rtbm_app_server <- function(id, tab_selected) {
     # Sidebar state management
     sidebar_expanded <- reactiveVal(TRUE) # Start expanded
 
-    # Initialize bird species data
+    # Initialize Finland border and bird species data only when tab is selected
     observeEvent(tab_selected(), ignoreInit = TRUE, {
+      # Load Finland border (only on first tab selection)
+      if (is.null(finland_border)) {
+        print("Loading Finland border on tab selection...")
+        finland_border <<- get_finland_border()
+      }
+
+      # Load bird species data
       bird_spp_info(load_bird_species_info())
       species_choices(bird_spp_info()$common_name)
 
@@ -534,27 +541,27 @@ rtbm_app_server <- function(id, tab_selected) {
             return(FALSE)
           }
           species_parquet_dir <- file.path(
-              data_base_path,
-              "rtbm",
-              "parquet",
-              paste0("species=", scientific_name)
+            data_base_path,
+            "rtbm",
+            "parquet",
+            paste0("species=", scientific_name)
           )
 
           if (!fs::dir_exists(species_parquet_dir)) {
-              output$statusMsg <- renderUI({
-                div(
-                  class = "alert alert-warning",
-                  role = "alert",
-                  paste0(
-                    "Data for '", species, "' is currently unavailable or has not been processed yet.",
-                    " Please check back later or select a different species."
-                  )
+            output$statusMsg <- renderUI({
+              div(
+                class = "alert alert-warning",
+                role = "alert",
+                paste0(
+                  "Data for '", species, "' is currently unavailable or has not been processed yet.",
+                  " Please check back later or select a different species."
                 )
-              })
-              # Clear potentially outdated data/dates
-              available_dates(NULL)
-              species_data(NULL)
-              return(FALSE)
+              )
+            })
+            # Clear potentially outdated data/dates
+            available_dates(NULL)
+            species_data(NULL)
+            return(FALSE)
           }
 
           # Store dates and data paths
