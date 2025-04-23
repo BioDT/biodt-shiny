@@ -100,7 +100,13 @@ forest_app_ui <- function(id, i18n) {
         height = "400px"
       ),
       # leaflet$leafletOutput(ns("map")),
-      shiny$plotOutput(ns("plot"), height = "800px")
+      # shiny$plotOutput(ns("plot"), height = "800px")
+      # shiny$uiOutput(ns("plot"))
+      echarty$ecs.output(
+        ns("plot"),
+        # width = "100%",
+        height = "600px"
+      )
     )
   )
 }
@@ -121,20 +127,20 @@ forest_app_server <- function(id, app_selected) {
         "Output Type:",
         input$output
       )
-
+      
       if (input$output %in% c("Above-ground biomass", "Max-age of selected species")) {
         text <- paste(text, "\nSpecies Type:", input$species)
       }
-
+      
       text
     })
-
+    
     res_working_folder <- shiny$reactiveVal(NULL)
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
-
+    
     output$map <- NULL
-
+    
     shiny$observeEvent(
       app_selected(),
       ignoreInit = TRUE,
@@ -291,7 +297,7 @@ forest_app_server <- function(id, app_selected) {
       {
         shiny$req(res_file())
         # shiny$req(experiment_data_file())
-
+        
         raster_data <- terra$rast(
           file.path(data_folder, res_file())
         )
@@ -304,7 +310,7 @@ forest_app_server <- function(id, app_selected) {
           reverse = TRUE
         )
         # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
-
+        
         leaflet$leafletProxy("map") |>
           leaflet$clearImages() |>
           leaflet$clearControls() |>
@@ -326,7 +332,7 @@ forest_app_server <- function(id, app_selected) {
           )
       }
     )
-
+    
     # graph update
     shiny$observeEvent(
       c(
@@ -350,63 +356,30 @@ forest_app_server <- function(id, app_selected) {
         plots <- list()
         
         if(input$show_results){
+          
           climate_scenarios <- c("current", "4.5", "8.5")
           management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
           years <- seq(0, 100, by = 10)
-          
-          combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
 
-          plots[[1]] <- get_figure(
-            combined_data,
-            column = "AverageB.g.m2.",
-            unit = expression(paste("AGBiomass (g/m"^2, ")")),
-            title = "Average above-ground biomass over time"
-          )
-          
-          plots[[2]] <- get_figure(
-            combined_data,
-            column = "AverageBelowGround.g.m2.",
-            unit = expression(paste("BGBiomass (g/m"^2, ")")),
-            title = "Average below-ground biomass over time"
-          )
-          
-          plots[[3]] <- get_figure(
-            combined_data,
-            column = "AverageAge",
-            unit = expression(paste("Age (years)")),
-            title = "Average age over time"
-          )
-          
-          plots[[4]] <- get_figure(
-            combined_data,
-            column = "WoodyDebris.kgDW.m2.",
-            unit = expression(paste("Woody Debris (kgDW/m"^2, ")")),
-            title = "Woody debris over time"
-          )
+          combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
+          plots <- get_figure(combined_data)
         }
         
         output_plot(plots)
       }
     )
     
-    output$plot <- shiny$renderPlot({
-      plots <- output_plot()
-      if (length(plots) == 0) {
-        return(NULL)  # clear the existing plot in the UI
-      }
-      do.call(gridExtra$grid.arrange, c(plots, nrow = 4))
-      # output_plot()
-      })
-  
+    output$plot <- echarty$ecs.render(
+      output_plot()
+    )
+    
     experiment_chart <- shiny$reactiveVal(NULL)
     
     shiny$observeEvent(
       app_selected(),
       {
-        
         # Create a basic bar chart
         chart <- echarty$ec.init()
-        
         experiment_chart(chart)
         
       }

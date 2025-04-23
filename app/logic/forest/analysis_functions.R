@@ -1,8 +1,8 @@
 # Load the libraries
 box::use(
-  ggplot2,
+  # ggplot2,
   dplyr,
-  tidyr,
+  # tidyr,
   terra[rast, `values<-`, values, project, flip],
   stringr,
   utils,
@@ -48,12 +48,12 @@ get_data <- function(
     for (management in management_scenarios) {
       # zip_file <- paste0(data_folder, "/run_landis_", paste0(climate, "_", management), "_7141504")
       file_inside_zip <- file.path(data_folder, paste0("run_landis_", paste0(climate, "_", management), "_7141504/output/", "TotalCohorts.txt"))
-      
+
       # get simulation start year
       lines <- readLines(file.path(data_folder, paste0("run_landis_", paste0(climate, "_", management), "_7141504"), "PnET-succession.txt"))
       start_year_line <- grep("^StartYear", lines, value = TRUE)
       start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
-      
+
       # Read the data if the file exists
       if (file.exists(file_inside_zip)) {
         data <- utils$read.csv(file_inside_zip)
@@ -64,7 +64,7 @@ get_data <- function(
       }
     }
   }
-
+  
   # Combine all data into a single data frame
   combined_data <- dplyr$bind_rows(all_data)
   return(combined_data)
@@ -72,35 +72,1106 @@ get_data <- function(
 
 #' @export
 get_figure <- function(
-  combined_data,
-  column,
-  unit = "",
-  title = ""
+    combined_data
 ) {
+  
+  combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageB.g.m2."] |> print()
 
-  plot_data <- combined_data |>
-    dplyr$select(
-      Time,
-      all_of(column),
-      Climate,
-      Management
-    ) |>
-    tidyr$pivot_longer(
-      cols = all_of(column),
-      names_to = "Variable",
-      values_to = "Value"
+  chart <- echarty$ec.init()
+  chart$x$opts <- list(
+    # legend = list(
+    #   data = c('4.5', '8.5', 'current')
+    # ),
+    title = list(
+      list(left = '6%',
+           text = 'BAU',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '20%',
+           text = 'EXT10',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '34%',
+           text = 'EXT30',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '48%',
+           text = 'GTR30',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '62%',
+           text = 'NTLR',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '76%',
+           text = 'NTSR',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '90%',
+           text = 'SA',
+           textStyle = list(
+             fontSize = 14
+           ))
+    ),
+    xAxis = list(
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 0
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 1
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 2
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 3
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 4
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 5
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 6
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 7
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 8
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 9
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 10
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 11
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 12
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 13
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 14
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 15
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 16
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 17
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 18
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 19
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 20
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 21
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 22
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 23
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 24
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 25
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 26
+      ),
+      list(
+        type = "category",
+        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        gridIndex = 27
+      )
+    ),
+    yAxis = list(
+      list(
+        type = "value",
+        gridIndex = 0
+      ),
+      list(
+        type = "value",
+        gridIndex = 1
+      ),
+      list(
+        type = "value",
+        gridIndex = 2
+      ),
+      list(
+        type = "value",
+        gridIndex = 3
+      ),
+      list(
+        type = "value",
+        gridIndex = 4
+      ),
+      list(
+        type = "value",
+        gridIndex = 5
+      ),
+      list(
+        type = "value",
+        gridIndex = 6
+      ),
+      list(
+        type = "value",
+        gridIndex = 7
+      ),
+      list(
+        type = "value",
+        gridIndex = 8
+      ),
+      list(
+        type = "value",
+        gridIndex = 9
+      ),
+      list(
+        type = "value",
+        gridIndex = 10
+      ),
+      list(
+        type = "value",
+        gridIndex = 11
+      ),
+      list(
+        type = "value",
+        gridIndex = 12
+      ),
+      list(
+        type = "value",
+        gridIndex = 13
+      ),
+      list(
+        type = "value",
+        gridIndex = 14
+      ),
+      list(
+        type = "value",
+        gridIndex = 15
+      ),
+      list(
+        type = "value",
+        gridIndex = 16
+      ),
+      list(
+        type = "value",
+        gridIndex = 17
+      ),
+      list(
+        type = "value",
+        gridIndex = 18
+      ),
+      list(
+        type = "value",
+        gridIndex = 19
+      ),
+      list(
+        type = "value",
+        gridIndex = 20
+      ),
+      list(
+        type = "value",
+        gridIndex = 21
+      ),
+      list(
+        type = "value",
+        gridIndex = 22
+      ),
+      list(
+        type = "value",
+        gridIndex = 23
+      ),
+      list(
+        type = "value",
+        gridIndex = 24
+      ),
+      list(
+        type = "value",
+        gridIndex = 25
+      ),
+      list(
+        type = "value",
+        gridIndex = 26
+      ),
+      list(
+        type = "value",
+        gridIndex = 27
+      )
+    ),
+    grid = list(
+      list(left = '4%', top = '5%', width = '10%', height= '12%'),
+      list(left = '18%', top = '5%', width = '10%', height= '12%'),
+      list(left = '32%', top = '5%', width = '10%', height= '12%'),
+      list(left = '46%', top = '5%', width = '10%', height= '12%'),
+      list(left = '60%', top = '5%', width = '10%', height= '12%'),
+      list(left = '74%', top = '5%', width = '10%', height= '12%'),
+      list(left = '88%', top = '5%', width = '10%', height= '12%'),
+      
+      list(left = '4%', top = '26%', width = '10%', height= '12%'),
+      list(left = '18%', top = '26%', width = '10%', height= '12%'),
+      list(left = '32%', top = '26%', width = '10%', height= '12%'),
+      list(left = '46%', top = '26%', width = '10%', height= '12%'),
+      list(left = '60%', top = '26%', width = '10%', height= '12%'),
+      list(left = '74%', top = '26%', width = '10%', height= '12%'),
+      list(left = '88%', top = '26%', width = '10%', height= '12%'),
+      
+      list(left = '4%', top = '51%', width = '10%', height= '12%'),
+      list(left = '18%', top = '51%', width = '10%', height= '12%'),
+      list(left = '32%', top = '51%', width = '10%', height= '12%'),
+      list(left = '46%', top = '51%', width = '10%', height= '12%'),
+      list(left = '60%', top = '51%', width = '10%', height= '12%'),
+      list(left = '74%', top = '51%', width = '10%', height= '12%'),
+      list(left = '88%', top = '51%', width = '10%', height= '12%'),
+      
+      list(left = '4%', top = '76%', width = '10%', height= '12%'),
+      list(left = '18%', top = '76%', width = '10%', height= '12%'),
+      list(left = '32%', top = '76%', width = '10%', height= '12%'),
+      list(left = '46%', top = '76%', width = '10%', height= '12%'),
+      list(left = '60%', top = '76%', width = '10%', height= '12%'),
+      list(left = '74%', top = '76%', width = '10%', height= '12%'),
+      list(left = '88%', top = '76%', width = '13%', height= '12%')
+      
+    ),
+    series = list(
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 0,
+        yAxisIndex = 0,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 1,
+        yAxisIndex = 1,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 2,
+        yAxisIndex = 2,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 3,
+        yAxisIndex = 3,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 4,
+        yAxisIndex = 4,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 5,
+        yAxisIndex = 5,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 6,
+        yAxisIndex = 6,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 7,
+        yAxisIndex = 7,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 8,
+        yAxisIndex = 8,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 9,
+        yAxisIndex = 9,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 10,
+        yAxisIndex = 10,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 11,
+        yAxisIndex = 11,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 12,
+        yAxisIndex = 12,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 13,
+        yAxisIndex = 13,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 14,
+        yAxisIndex = 14,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 15,
+        yAxisIndex = 15,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 16,
+        yAxisIndex = 16,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 17,
+        yAxisIndex = 17,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 18,
+        yAxisIndex = 18,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 19,
+        yAxisIndex = 19,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 20,
+        yAxisIndex = 20,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 21,
+        yAxisIndex = 21,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 22,
+        yAxisIndex = 22,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 23,
+        yAxisIndex = 23,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 24,
+        yAxisIndex = 24,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 25,
+        yAxisIndex = 25,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 26,
+        yAxisIndex = 26,
+        smooth = TRUE,
+        color = "red"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 27,
+        yAxisIndex = 27,
+        smooth = TRUE,
+        color = "red"
+      ),
+      ####
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 0,
+        yAxisIndex = 0,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 1,
+        yAxisIndex = 1,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 2,
+        yAxisIndex = 2,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 3,
+        yAxisIndex = 3,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 4,
+        yAxisIndex = 4,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 5,
+        yAxisIndex = 5,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 6,
+        yAxisIndex = 6,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 7,
+        yAxisIndex = 7,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 8,
+        yAxisIndex = 8,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 9,
+        yAxisIndex = 9,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 10,
+        yAxisIndex = 10,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 11,
+        yAxisIndex = 11,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 12,
+        yAxisIndex = 12,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 13,
+        yAxisIndex = 13,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 14,
+        yAxisIndex = 14,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 15,
+        yAxisIndex = 15,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 16,
+        yAxisIndex = 16,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 17,
+        yAxisIndex = 17,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 18,
+        yAxisIndex = 18,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 19,
+        yAxisIndex = 19,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "AverageAge"],
+        type = "line",
+        xAxisIndex = 20,
+        yAxisIndex = 20,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 21,
+        yAxisIndex = 21,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 22,
+        yAxisIndex = 22,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 23,
+        yAxisIndex = 23,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 24,
+        yAxisIndex = 24,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 25,
+        yAxisIndex = 25,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 26,
+        yAxisIndex = 26,
+        smooth = TRUE,
+        color = "green"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 27,
+        yAxisIndex = 27,
+        smooth = TRUE,
+        color = "green"
+      ),
+      ###
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 0,
+        yAxisIndex = 0,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 1,
+        yAxisIndex = 1,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 2,
+        yAxisIndex = 2,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 3,
+        yAxisIndex = 3,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 4,
+        yAxisIndex = 4,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 5,
+        yAxisIndex = 5,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "AverageB.g.m2."],
+        type = "line",
+        xAxisIndex = 6,
+        yAxisIndex = 6,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 7,
+        yAxisIndex = 7,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 8,
+        yAxisIndex = 8,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 9,
+        yAxisIndex = 9,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 10,
+        yAxisIndex = 10,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 11,
+        yAxisIndex = 11,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 12,
+        yAxisIndex = 12,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
+        type = "line",
+        xAxisIndex = 13,
+        yAxisIndex = 13,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 14,
+        yAxisIndex = 14,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 15,
+        yAxisIndex = 15,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 16,
+        yAxisIndex = 16,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 17,
+        yAxisIndex = 17,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 18,
+        yAxisIndex = 18,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 19,
+        yAxisIndex = 19,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "AverageAge"],
+        type = "line",
+        xAxisIndex = 20,
+        yAxisIndex = 20,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "BAU",
+        data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 21,
+        yAxisIndex = 21,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT10",
+        data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 22,
+        yAxisIndex = 22,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "EXT30",
+        data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 23,
+        yAxisIndex = 23,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "GTR30",
+        data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 24,
+        yAxisIndex = 24,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTLR",
+        data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 25,
+        yAxisIndex = 25,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "NTSR",
+        data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 26,
+        yAxisIndex = 26,
+        smooth = TRUE,
+        color = "blue"
+      ),
+      list(
+        name = "SA",
+        data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
+        type = "line",
+        xAxisIndex = 27,
+        yAxisIndex = 27,
+        smooth = TRUE,
+        color = "blue"
+      )
     )
+  )
 
-  p <- ggplot2$ggplot(plot_data, ggplot2$aes(x = Time, y = Value, color = Climate)) +
-    ggplot2$geom_point(position = ggplot2$position_dodge(width = 0.5), alpha = 1, size = 2) +
-    ggplot2$geom_line(linewidth = 1) +
-    ggplot2$facet_wrap(~Management, ncol = 7, scales = "free_x") +
-    ggplot2$ylab(unit) +
-    ggplot2$xlab("Year") +
-    # ggplot2$scale_x_continuous(breaks = seq(0, 100, 25)) +
-    ggplot2$theme_minimal(base_size = 14) +
-    ggplot2$labs(title = title) # +
-  return(p)
+  return(chart)
 }
 
 ######################
@@ -324,70 +1395,37 @@ get_multichart <- function(
       tooltip = list(
         trigger = 'axis'
       ),
+      legend = list(
+        data = c('Average age over time', 'Average above-ground biomass over time', 'Woody debris over time', 'Average below-ground biomass over time')
+      ),
       series = list(
-        # list(
-        #   data = data$X.Cohorts,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
         list(
+          name = "Average age over time",
           data = data$AverageAge,
           type = "line",
           smooth = TRUE
         ),
         list(
+          name = "Average above-ground biomass over time",
           data = data$AverageB.g.m2.,
           type = "line",
           smooth = TRUE
         ),
-        # list(
-        #   data = data$AverageLAI.m2.,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
-        # list(
-        #   data = data$AverageWater.mm.,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
-        # list(
-        #   data = data$SubCanopyPAR.W.m2.,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
-        # list(
-        #   data = data$Litter.kgDW.m2.,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
         list(
+          name = "Woody debris over time",
           data = data$WoodyDebris.kgDW.m2.,
           type = "line",
           smooth = TRUE
         ),
         list(
+          name = "Average below-ground biomass over time",
           data = data$AverageBelowGround.g.m2.,
           type = "line",
           smooth = TRUE
         )
-        # list(
-        #   data = data$AverageFoliage.g.m2.,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
-        # list(
-        #   data = data$AverageNSC.gC.m2.,
-        #   type = "line",
-        #   smooth = TRUE
-        # ),
-        # list(
-        #   data = data$AverageAET.mm.,
-        #   type = "line",
-        #   smooth = TRUE
-        # )
+
       )
     )
-    # }
 
   return(chart)
   
