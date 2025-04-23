@@ -79,41 +79,49 @@ get_figure <- function(
 
   chart <- echarty$ec.init()
   chart$x$opts <- list(
-    # legend = list(
-    #   data = c('4.5', '8.5', 'current')
-    # ),
+    legend = list(
+      data = c('4.5', '8.5', 'current'),
+      top = '1%'
+    ),
     title = list(
-      list(left = '6%',
+      list(left = '8%',
+           top = '5%',
            text = 'BAU',
            textStyle = list(
              fontSize = 14
            )),
-      list(left = '20%',
+      list(left = '22%',
+           top = '5%',
            text = 'EXT10',
            textStyle = list(
              fontSize = 14
            )),
-      list(left = '34%',
+      list(left = '36%',
+           top = '5%',
            text = 'EXT30',
            textStyle = list(
              fontSize = 14
            )),
-      list(left = '48%',
+      list(left = '50%',
+           top = '5%',
            text = 'GTR30',
            textStyle = list(
              fontSize = 14
            )),
-      list(left = '62%',
+      list(left = '64%',
+           top = '5%',
            text = 'NTLR',
            textStyle = list(
              fontSize = 14
            )),
-      list(left = '76%',
+      list(left = '78%',
+           top = '5%',
            text = 'NTSR',
            textStyle = list(
              fontSize = 14
            )),
-      list(left = '90%',
+      list(left = '92%',
+           top = '5%',
            text = 'SA',
            textStyle = list(
              fontSize = 14
@@ -226,36 +234,92 @@ get_figure <- function(
         gridIndex = 20
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 21
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 22
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 23
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 24
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 25
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 26
       ),
       list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
         type = "category",
         data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
         gridIndex = 27
@@ -263,6 +327,14 @@ get_figure <- function(
     ),
     yAxis = list(
       list(
+        name = "AGBiomass (g/m^2)",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 12,
+          align = 'center',
+          color = "black"
+        ),
         type = "value",
         gridIndex = 0
       ),
@@ -291,6 +363,14 @@ get_figure <- function(
         gridIndex = 6
       ),
       list(
+        name = "BGBiomass (g/m^2)",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 12,
+          align = 'center',
+          color = "black"
+        ),
         type = "value",
         gridIndex = 7
       ),
@@ -319,6 +399,14 @@ get_figure <- function(
         gridIndex = 13
       ),
       list(
+        name = "Age (years)",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 12,
+          align = 'center',
+          color = "black"
+        ),
         type = "value",
         gridIndex = 14
       ),
@@ -347,6 +435,14 @@ get_figure <- function(
         gridIndex = 20
       ),
       list(
+        name = "Woody Debris (kgDW/m^2)",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 12,
+          align = 'center',
+          color = "black"
+        ),
         type = "value",
         gridIndex = 21
       ),
@@ -376,42 +472,42 @@ get_figure <- function(
       )
     ),
     grid = list(
-      list(left = '4%', top = '5%', width = '10%', height= '12%'),
-      list(left = '18%', top = '5%', width = '10%', height= '12%'),
-      list(left = '32%', top = '5%', width = '10%', height= '12%'),
-      list(left = '46%', top = '5%', width = '10%', height= '12%'),
-      list(left = '60%', top = '5%', width = '10%', height= '12%'),
-      list(left = '74%', top = '5%', width = '10%', height= '12%'),
-      list(left = '88%', top = '5%', width = '10%', height= '12%'),
+      list(left = '4%', top = '10%', width = '10%', height= '12%'),
+      list(left = '18%', top = '10%', width = '10%', height= '12%'),
+      list(left = '32%', top = '10%', width = '10%', height= '12%'),
+      list(left = '46%', top = '10%', width = '10%', height= '12%'),
+      list(left = '60%', top = '10%', width = '10%', height= '12%'),
+      list(left = '74%', top = '10%', width = '10%', height= '12%'),
+      list(left = '88%', top = '10%', width = '10%', height= '12%'),
       
-      list(left = '4%', top = '26%', width = '10%', height= '12%'),
-      list(left = '18%', top = '26%', width = '10%', height= '12%'),
-      list(left = '32%', top = '26%', width = '10%', height= '12%'),
-      list(left = '46%', top = '26%', width = '10%', height= '12%'),
-      list(left = '60%', top = '26%', width = '10%', height= '12%'),
-      list(left = '74%', top = '26%', width = '10%', height= '12%'),
-      list(left = '88%', top = '26%', width = '10%', height= '12%'),
+      list(left = '4%', top = '31%', width = '10%', height= '12%'),
+      list(left = '18%', top = '31%', width = '10%', height= '12%'),
+      list(left = '32%', top = '31%', width = '10%', height= '12%'),
+      list(left = '46%', top = '31%', width = '10%', height= '12%'),
+      list(left = '60%', top = '31%', width = '10%', height= '12%'),
+      list(left = '74%', top = '31%', width = '10%', height= '12%'),
+      list(left = '88%', top = '31%', width = '10%', height= '12%'),
       
-      list(left = '4%', top = '51%', width = '10%', height= '12%'),
-      list(left = '18%', top = '51%', width = '10%', height= '12%'),
-      list(left = '32%', top = '51%', width = '10%', height= '12%'),
-      list(left = '46%', top = '51%', width = '10%', height= '12%'),
-      list(left = '60%', top = '51%', width = '10%', height= '12%'),
-      list(left = '74%', top = '51%', width = '10%', height= '12%'),
-      list(left = '88%', top = '51%', width = '10%', height= '12%'),
+      list(left = '4%', top = '56%', width = '10%', height= '12%'),
+      list(left = '18%', top = '56%', width = '10%', height= '12%'),
+      list(left = '32%', top = '56%', width = '10%', height= '12%'),
+      list(left = '46%', top = '56%', width = '10%', height= '12%'),
+      list(left = '60%', top = '56%', width = '10%', height= '12%'),
+      list(left = '74%', top = '56%', width = '10%', height= '12%'),
+      list(left = '88%', top = '56%', width = '10%', height= '12%'),
       
-      list(left = '4%', top = '76%', width = '10%', height= '12%'),
-      list(left = '18%', top = '76%', width = '10%', height= '12%'),
-      list(left = '32%', top = '76%', width = '10%', height= '12%'),
-      list(left = '46%', top = '76%', width = '10%', height= '12%'),
-      list(left = '60%', top = '76%', width = '10%', height= '12%'),
-      list(left = '74%', top = '76%', width = '10%', height= '12%'),
-      list(left = '88%', top = '76%', width = '13%', height= '12%')
+      list(left = '4%', top = '81%', width = '10%', height= '12%'),
+      list(left = '18%', top = '81%', width = '10%', height= '12%'),
+      list(left = '32%', top = '81%', width = '10%', height= '12%'),
+      list(left = '46%', top = '81%', width = '10%', height= '12%'),
+      list(left = '60%', top = '81%', width = '10%', height= '12%'),
+      list(left = '74%', top = '81%', width = '10%', height= '12%'),
+      list(left = '88%', top = '81%', width = '10%', height= '12%')
       
     ),
     series = list(
       list(
-        name = "BAU",
+        name = "4.5",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 0,
@@ -420,7 +516,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 1,
@@ -429,7 +525,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 2,
@@ -438,7 +534,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 3,
@@ -447,7 +543,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 4,
@@ -456,7 +552,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 5,
@@ -465,7 +561,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 6,
@@ -474,7 +570,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 7,
@@ -483,7 +579,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 8,
@@ -492,7 +588,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 9,
@@ -501,7 +597,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 10,
@@ -510,7 +606,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 11,
@@ -519,7 +615,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 12,
@@ -528,7 +624,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 13,
@@ -537,7 +633,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 14,
@@ -546,7 +642,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 15,
@@ -555,7 +651,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 16,
@@ -564,7 +660,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 17,
@@ -573,7 +669,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 18,
@@ -582,7 +678,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 19,
@@ -591,7 +687,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "AverageAge"],
         type = "line",
         xAxisIndex = 20,
@@ -600,7 +696,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 21,
@@ -609,7 +705,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 22,
@@ -618,7 +714,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 23,
@@ -627,7 +723,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 24,
@@ -636,7 +732,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 25,
@@ -645,7 +741,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 26,
@@ -654,7 +750,7 @@ get_figure <- function(
         color = "red"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "4.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 27,
@@ -664,7 +760,7 @@ get_figure <- function(
       ),
       ####
       list(
-        name = "BAU",
+        name = "8.5",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 0,
@@ -673,7 +769,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 1,
@@ -682,7 +778,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 2,
@@ -691,7 +787,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 3,
@@ -700,7 +796,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 4,
@@ -709,7 +805,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 5,
@@ -718,7 +814,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 6,
@@ -727,7 +823,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 7,
@@ -736,7 +832,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 8,
@@ -745,7 +841,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 9,
@@ -754,7 +850,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 10,
@@ -763,7 +859,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 11,
@@ -772,7 +868,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 12,
@@ -781,7 +877,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 13,
@@ -790,7 +886,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 14,
@@ -799,7 +895,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 15,
@@ -808,7 +904,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 16,
@@ -817,7 +913,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 17,
@@ -826,7 +922,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 18,
@@ -835,7 +931,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 19,
@@ -844,7 +940,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "AverageAge"],
         type = "line",
         xAxisIndex = 20,
@@ -853,7 +949,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 21,
@@ -862,7 +958,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 22,
@@ -871,7 +967,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 23,
@@ -880,7 +976,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 24,
@@ -889,7 +985,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 25,
@@ -898,7 +994,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 26,
@@ -907,7 +1003,7 @@ get_figure <- function(
         color = "green"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "8.5", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 27,
@@ -917,7 +1013,7 @@ get_figure <- function(
       ),
       ###
       list(
-        name = "BAU",
+        name = "current",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 0,
@@ -926,7 +1022,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 1,
@@ -935,7 +1031,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 2,
@@ -944,7 +1040,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 3,
@@ -953,7 +1049,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 4,
@@ -962,7 +1058,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 5,
@@ -971,7 +1067,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "AverageB.g.m2."],
         type = "line",
         xAxisIndex = 6,
@@ -980,7 +1076,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 7,
@@ -989,7 +1085,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 8,
@@ -998,7 +1094,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 9,
@@ -1007,7 +1103,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 10,
@@ -1016,7 +1112,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 11,
@@ -1025,7 +1121,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 12,
@@ -1034,7 +1130,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "AverageBelowGround.g.m2."],
         type = "line",
         xAxisIndex = 13,
@@ -1043,7 +1139,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 14,
@@ -1052,7 +1148,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 15,
@@ -1061,7 +1157,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 16,
@@ -1070,7 +1166,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 17,
@@ -1079,7 +1175,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 18,
@@ -1088,7 +1184,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 19,
@@ -1097,7 +1193,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "AverageAge"],
         type = "line",
         xAxisIndex = 20,
@@ -1106,7 +1202,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "BAU",
+        # name = "BAU",
         data = combined_data[combined_data$Management == "BAU" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 21,
@@ -1115,7 +1211,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT10",
+        # name = "EXT10",
         data = combined_data[combined_data$Management == "EXT10" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 22,
@@ -1124,7 +1220,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "EXT30",
+        # name = "EXT30",
         data = combined_data[combined_data$Management == "EXT30" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 23,
@@ -1133,7 +1229,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "GTR30",
+        # name = "GTR30",
         data = combined_data[combined_data$Management == "GTR30" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 24,
@@ -1142,7 +1238,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTLR",
+        # name = "NTLR",
         data = combined_data[combined_data$Management == "NTLR" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 25,
@@ -1151,7 +1247,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "NTSR",
+        # name = "NTSR",
         data = combined_data[combined_data$Management == "NTSR" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 26,
@@ -1160,7 +1256,7 @@ get_figure <- function(
         color = "blue"
       ),
       list(
-        name = "SA",
+        # name = "SA",
         data = combined_data[combined_data$Management == "SA" & combined_data$Climate == "current", "WoodyDebris.kgDW.m2."],
         type = "line",
         xAxisIndex = 27,
