@@ -74,8 +74,6 @@ get_data <- function(
 get_figure <- function(
     combined_data
 ) {
-  
-  combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "AverageB.g.m2."] |> print()
 
   chart <- echarty$ec.init()
   chart$x$opts <- list(
@@ -1457,74 +1455,290 @@ get_file_name <- function(input, res_folder, tick) {
   return(res_file)
 }
 
+
 #' @export
 get_multichart <- function(
     experiment_data_file
-    ) 
-  {
+) 
+{
   
   # get data to plot
   
   all_data <- list()
-
+  
   file_inside_zip <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
-
+  
   # get simulation start year
   lines <- readLines(file.path(experiment_data_file, "PnET-succession.txt"))
   start_year_line <- grep("^StartYear", lines, value = TRUE)
   start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
-
+  
   # Read the data if the file exists
   # if (file.exists(file_inside_zip)) {
-    data <- utils$read.csv(file_inside_zip)
-
-    data$Time <- data$Time + start_year
-    chart <- echarty$ec.init()
-    chart$x$opts <- list(
-      xAxis = list(
-        type = "category",
-        data = as.character(data$Time)
-      ),
-      yAxis = list(
-        type = "value"
-      ),
-      tooltip = list(
-        trigger = 'axis'
-      ),
-      legend = list(
-        data = c('Average age over time', 'Average above-ground biomass over time', 'Woody debris over time', 'Average below-ground biomass over time')
-      ),
-      series = list(
-        list(
-          name = "Average age over time",
-          data = data$AverageAge,
-          type = "line",
-          smooth = TRUE
-        ),
-        list(
-          name = "Average above-ground biomass over time",
-          data = data$AverageB.g.m2.,
-          type = "line",
-          smooth = TRUE
-        ),
-        list(
-          name = "Woody debris over time",
-          data = data$WoodyDebris.kgDW.m2.,
-          type = "line",
-          smooth = TRUE
-        ),
-        list(
-          name = "Average below-ground biomass over time",
-          data = data$AverageBelowGround.g.m2.,
-          type = "line",
-          smooth = TRUE
+  data <- utils$read.csv(file_inside_zip)
+  
+  data$Time <- data$Time + start_year
+  chart <- echarty$ec.init()
+  chart$x$opts <- list(
+    title = list(
+      list(
+        left = '8%',
+        top = '1%',
+        text = 'Average age over time',
+        textStyle = list(
+          fontSize = 14
         )
-
+      ),
+      list(
+        left = '30%',
+        top = '1%',
+        text = 'Average above-ground biomass over time',
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = '56%',
+        top = '1%',
+        text = 'Woody debris over time',
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = '78%',
+        top = '1%',
+        text = 'Average below-ground biomass over time',
+        textStyle = list(
+          fontSize = 14
+        )
       )
+    ),
+    grid = list(
+      list(left = '4%', top = '10%', width = '20%'),
+      list(left = '28%', top = '10%', width = '20%'),
+      list(left = '52%', top = '10%', width = '20%'),
+      list(left = '76%', top = '10%', width = '20%')
+    ),
+    xAxis = list(
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 0
+        ),
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 1
+      ),
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 2
+      ),
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 3
+      )
+    ),
+    yAxis = list(
+      list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 0
+        ),
+      list(
+        name = "g/m2",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 1
+      ),
+      list(
+        name = "kgDW/m2",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 2
+      ),
+      list(
+        name = "g/m2",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 3
+      )
+    ),
+    tooltip = list(
+      trigger = 'axis'
+    ),
+    # legend = list(
+    #   data = c('Average age over time', 'Average above-ground biomass over time', 'Woody debris over time', 'Average below-ground biomass over time')
+    # ),
+    series = list(
+      list(
+        name = "Average age over time",
+        data = data$AverageAge,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 0,
+        yAxisIndex = 0
+      ),
+      list(
+        name = "Average above-ground biomass over time",
+        data = data$AverageB.g.m2.,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 1,
+        yAxisIndex = 1
+      ),
+      list(
+        name = "Woody debris over time",
+        data = data$WoodyDebris.kgDW.m2.,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 2,
+        yAxisIndex = 2
+      ),
+      list(
+        name = "Average below-ground biomass over time",
+        data = data$AverageBelowGround.g.m2.,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 3,
+        yAxisIndex = 3
+      )
+      
     )
-
+  )
+  
   return(chart)
   
 }
+
+# #' @export
+# get_multichart <- function(
+#     experiment_data_file
+#     ) 
+#   {
+#   
+#   # get data to plot
+#   
+#   all_data <- list()
+# 
+#   file_inside_zip <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
+# 
+#   # get simulation start year
+#   lines <- readLines(file.path(experiment_data_file, "PnET-succession.txt"))
+#   start_year_line <- grep("^StartYear", lines, value = TRUE)
+#   start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
+# 
+#   # Read the data if the file exists
+#   # if (file.exists(file_inside_zip)) {
+#     data <- utils$read.csv(file_inside_zip)
+# 
+#     data$Time <- data$Time + start_year
+#     chart <- echarty$ec.init()
+#     chart$x$opts <- list(
+#       xAxis = list(
+#         type = "category",
+#         data = as.character(data$Time)
+#       ),
+#       yAxis = list(
+#         type = "value"
+#       ),
+#       tooltip = list(
+#         trigger = 'axis'
+#       ),
+#       legend = list(
+#         data = c('Average age over time', 'Average above-ground biomass over time', 'Woody debris over time', 'Average below-ground biomass over time')
+#       ),
+#       series = list(
+#         list(
+#           name = "Average age over time",
+#           data = data$AverageAge,
+#           type = "line",
+#           smooth = TRUE
+#         ),
+#         list(
+#           name = "Average above-ground biomass over time",
+#           data = data$AverageB.g.m2.,
+#           type = "line",
+#           smooth = TRUE
+#         ),
+#         list(
+#           name = "Woody debris over time",
+#           data = data$WoodyDebris.kgDW.m2.,
+#           type = "line",
+#           smooth = TRUE
+#         ),
+#         list(
+#           name = "Average below-ground biomass over time",
+#           data = data$AverageBelowGround.g.m2.,
+#           type = "line",
+#           smooth = TRUE
+#         )
+# 
+#       )
+#     )
+# 
+#   return(chart)
+#   
+# }
 
 
