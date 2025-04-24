@@ -302,10 +302,18 @@ forest_app_server <- function(id, app_selected) {
           file.path(data_folder, res_file())
         )
         # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+        
         ext <- terra$ext(raster_data)
+        
+        terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() |> print()
+        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() ) {
+          shiny$showNotification("Warning: Raster contains infinite values!", type = "error")
+        }
+        
         pal <- leaflet$colorNumeric(
           palette = "YlOrBr",
-          domain = terra$values(raster_data),
+          # domain = terra$values(raster_data),
+          domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
           na.color = "transparent",
           reverse = TRUE
         )
@@ -324,7 +332,8 @@ forest_app_server <- function(id, app_selected) {
             position = "bottomright",
             pal = leaflet$colorNumeric(
               palette = "YlOrBr",
-              domain = terra$values(raster_data),
+              # domain = terra$values(raster_data),
+              domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
               na.color = "transparent"
             ),
             values = terra$values(raster_data),
