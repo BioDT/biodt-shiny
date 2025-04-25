@@ -110,8 +110,8 @@ box::use(
 
 # Local modules
 box::use(
-  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data],
-  app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
+  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border],
+  app / view / rtbm / rtbm_map[map_module_ui, map_module_server]
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -244,38 +244,6 @@ rtbm_app_ui <- function(id, i18n) {
 rtbm_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
-    # Load Finland border for the map
-    get_finland_border <- function() {
-      # Try to load Finland border shapefile
-      finland_file <- "app/data/rtbm/finland_border.geojson"
-
-      if (file.exists(finland_file)) {
-        tryCatch(
-          {
-            # Read border file
-            finland <- st_read(finland_file, quiet = TRUE)
-            return(finland)
-          },
-          error = function(e) {
-            # If reading fails, create a bounding box
-            print("Error reading Finland border file, using a bounding box instead")
-            create_finland_bbox()
-          }
-        )
-      } else {
-        print("Finland border file not found, using a bounding box instead")
-        create_finland_bbox()
-      }
-    }
-
-    # Create a simple bounding box for Finland as fallback
-    create_finland_bbox <- function() {
-      # Create a bounding box for Finland as a fallback
-      bbox <- st_bbox(c(xmin = 19, xmax = 32, ymin = 59, ymax = 71), crs = st_crs(4326))
-      bbox_sf <- st_as_sfc(bbox)
-      return(bbox_sf)
-    }
 
     # Initialize Finland border variable (but don't load data yet)
     finland_border <- NULL

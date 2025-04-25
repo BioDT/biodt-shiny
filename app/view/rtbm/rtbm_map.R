@@ -34,7 +34,8 @@ box::use(
 
 # Local modules
 box::use(
-  app/logic/rtbm/rtbm_data_handlers[load_bird_species_info],
+  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info],
+  app / logic / rtbm / utils[format_date_for_display]
 )
 
 #' Map Module UI
@@ -276,7 +277,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
               safe_print("Reading parquet file")
               points_data <- read_parquet(parquet_path)
 
-              # --- Enhanced Data Validation --- 
+              # --- Enhanced Data Validation ---
               if (is.null(points_data)) {
                 safe_print("ERROR: read_parquet returned NULL")
                 return(FALSE) # Stop processing if data is NULL
@@ -296,21 +297,26 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                 # Update date display, clear map layers, but don't stop with error
                 proxy <- leafletProxy(ns("rasterMap")) |>
                   clearImages() |>
-                  clearShapes() |> 
+                  clearShapes() |>
                   clearGroup("Heat Map") |>
                   clearGroup("Finland Border") |>
                   removeControl(layerId = "intensity-legend") |>
                   removeControl(layerId = "layer-control") |>
-                  removeControl(layerId = "date-display-control") |> 
+                  removeControl(layerId = "date-display-control") |>
                   removeControl(layerId = "error-message-control")
-                  
+
                 # Add Finland border back if available
                 if (!is.null(finland_border)) {
-                  tryCatch({
-                    proxy |> addPolylines(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 0.8, group = "Finland Border")
-                  }, error = function(e) { safe_print("Error adding Finland border: ", e$message) })
+                  tryCatch(
+                    {
+                      proxy |> addPolylines(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 0.8, group = "Finland Border")
+                    },
+                    error = function(e) {
+                      safe_print("Error adding Finland border: ", e$message)
+                    }
+                  )
                 }
-                
+
                 # Add date display
                 date_to_display <- format_date_for_display(date)
                 proxy |>
@@ -319,10 +325,12 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                     position = "bottomleft",
                     layerId = "date-display-control"
                   )
-                
+
                 # Re-add info card if needed
-                if (info_card_visible()) { update_bird_info_card() }
-                
+                if (info_card_visible()) {
+                  update_bird_info_card()
+                }
+
                 return(TRUE) # Indicate success, even though no heatmap was added
               }
 
@@ -356,8 +364,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
 
                 # Check if required columns exist
                 if (all(coord_cols %in% colnames(points_data))) {
-
-                  # --- Log Coordinate Range --- 
+                  # --- Log Coordinate Range ---
                   lon_range <- range(points_data$longitude, na.rm = TRUE)
                   lat_range <- range(points_data$latitude, na.rm = TRUE)
                   safe_print(
@@ -433,7 +440,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                     }
                   }
                   # --- End Intensity Validation ---
-                  
+
                   # Add layer controls using proxy (always add controls)
                   proxy |>
                     addLayersControl(
@@ -441,10 +448,9 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                       overlayGroups = c("Finland Border", "Heat Map"), # Keep Heat Map group even if empty
                       options = layersControlOptions(collapsed = FALSE)
                     )
-                    
+
                   # Log success
                   safe_print("Successfully processed data for the map.")
-                  
                 } else { # This else corresponds to `if (all(coord_cols %in% colnames(points_data)))`
                   safe_print("WARNING: Expected columns (longitude, latitude, intensity) not found in parquet file")
                   safe_print("Available columns: ", paste(colnames(points_data), collapse = ", "))
@@ -487,36 +493,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           # Handle any unexpected errors
           cat("Error in update_map_with_frame: ", e$message, "\n")
           return(FALSE)
-        }
-      )
-    }
-
-    # Format date for display
-    format_date_for_display <- function(date) {
-      if (is.null(date)) {
-        return("")
-      }
-
-      # Handle various date formats
-      tryCatch(
-        {
-          # First check if it's already a Date object
-          if (inherits(date, "Date")) {
-            return(format(date, "%b %d, %Y"))
-          }
-
-          # Try to parse as ISO date
-          parsed_date <- try(as.Date(date), silent = TRUE)
-          if (!inherits(parsed_date, "try-error") && !is.na(parsed_date)) {
-            return(format(parsed_date, "%b %d, %Y"))
-          }
-
-          # If all else fails, return as is
-          return(as.character(date))
-        },
-        error = function(e) {
-          # Fallback for any errors
-          return(as.character(date))
         }
       )
     }

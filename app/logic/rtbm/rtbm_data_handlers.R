@@ -11,6 +11,7 @@ box::use(
   stringr[str_replace, str_extract],
   arrow[read_parquet],
   tibble[as_tibble, tibble],
+  sf[st_read, st_bbox, st_crs, st_as_sfc] # Added sf functions
 )
 
 # --- Configuration & Setup ---
@@ -284,4 +285,44 @@ load_parquet_data <- function(scientific_name, start_date, end_date) {
   )
 
   return(list(data = combined_data, dates = successful_dates))
+}
+
+# Create a simple bounding box for Finland as fallback (Internal helper)
+create_finland_bbox <- function() {
+  # Create a bounding box for Finland as a fallback
+  bbox <- st_bbox(c(xmin = 19, xmax = 32, ymin = 59, ymax = 71), crs = st_crs(4326))
+  bbox_sf <- st_as_sfc(bbox)
+  return(bbox_sf)
+}
+
+#' Load Finland Border GeoJSON Data
+#'
+#' Reads the GeoJSON file containing the border of Finland.
+#' Handles potential errors if the file is missing or invalid, returning a bounding box as fallback.
+#'
+#' @param base_path The base path for data files, defaults to constant.
+#' @return An sf object representing the Finland border or a fallback bounding box.
+#' @export
+get_finland_border <- function(base_path = base_data_path) { # Use snake_case constant
+  # Construct the full path to the GeoJSON file
+  finland_file <- file.path(base_path, "rtbm", "finland_border.geojson")
+
+  if (file_exists(finland_file)) {
+    tryCatch(
+      {
+        # Read border file
+        finland <- st_read(finland_file, quiet = TRUE)
+        message("Finland border data loaded successfully from: ", finland_file)
+        return(finland)
+      },
+      error = function(e) {
+        # If reading fails, create a bounding box
+        warning("Error reading Finland border file ('", finland_file, "'): ", e$message, ". Using a bounding box instead.")
+        create_finland_bbox()
+      }
+    )
+  } else {
+    warning("Finland border file not found ('", finland_file, "'), using a bounding box instead.")
+    create_finland_bbox()
+  }
 }
