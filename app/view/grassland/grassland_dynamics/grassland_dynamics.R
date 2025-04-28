@@ -48,13 +48,15 @@ box::use(
   app /
     logic /
     grassland /
-    grassland_soil_datatable_modular[
+    grassland_soil_management_data_load[
       read_project_config,
       get_soil_file_name,
+      get_management_file_name,
       get_lat_lon_name,
-      get_soil_file_path,
-      read_data_table,
-      read_main_three_values
+      get_file_path,
+      read_soil_data_table,
+      read_soil_main_three_values,
+      read_management_data_table
     ],
   app /
     view /
@@ -84,7 +86,6 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_double_chart_ui(ns("double_chart"), i18n),
       grassland_dynamics_double_chart_controls_ui(ns("controls"), i18n)
     ),
-
     grassland_dynamics_soil_main_values_ui(ns("main_soil_values"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
@@ -100,13 +101,15 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     # LOCATION settings ----
     coordinates <- grassland_dynamics_location_server("location")
 
-    # Soil data table
+    # MANAGEMENT data table
+
+    # SOIL data table ----
     soil_config <- read_project_config("project1")
     soil_filename <- get_soil_file_name(soil_config)
-    soil_lat_lon_path <- get_lat_lon_name(soil_filename)
-    soil_file_path <- get_soil_file_path(soil_lat_lon_path)
+    soil_lat_lon_path <- get_lat_lon_name("soil", soil_filename)
+    soil_file_path <- get_file_path("soil", soil_lat_lon_path)
 
-    soil_data_table <- read_data_table(soil_file_path)
+    soil_data_table <- read_soil_data_table(soil_file_path)
 
     # Soil - main three values from above table
     main_soil_values <- read_main_three_values(soil_file_path)
