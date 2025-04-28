@@ -207,10 +207,6 @@ rtbm_app_server <- function(id, tab_selected) {
     finland_border <- reactiveVal(NULL)
     available_dates <- reactiveVal(NULL)
     bird_spp_info <- reactiveVal(NULL)
-    photo_url <- reactiveVal(NULL)
-    wiki_link <- reactiveVal(NULL)
-    scientific_name <- reactiveVal(NULL)
-    song_url <- reactiveVal(NULL)
     species_data <- reactiveVal(NULL) # Data per species for the map
 
     # --- Initial Data Loading ---
@@ -226,11 +222,18 @@ rtbm_app_server <- function(id, tab_selected) {
       bird_spp_info(load_bird_species_info())
     })
 
-    # Expand sidebar button (Remains in App Server)
+    # --- Sidebar Collapse/Expand Logic ---
+    observeEvent(input$collapseSidebar, {
+      removeClass(id = "sidebarCol", class = "d-md-block") # Hide on medium+ screens
+      addClass(id = "sidebarCol", class = "d-none") # Ensure it's hidden
+      removeClass(id = "collapsedSidebar", class = "d-none") # Show the collapsed icon bar
+      removeClass(id = "mapCol", class = "col-md-9")
+      addClass(id = "mapCol", class = "col-md-11") # Expand map column
+    })
+
     observeEvent(input$expandSidebar, {
-      removeClass(id = "sidebarCol", class = "d-none")
-      addClass(id = "collapsedSidebar", class = "d-none")
-      removeClass(id = "mapCol", class = "col-md-11")
+      addClass(id = "sidebarCol", class = "d-md-block") # Show on medium+ screens
+      removeClass(id = "sidebarCol", class = "d-none") # Ensure it's visible
       addClass(id = "mapCol", class = "col-md-9")
     })
 
@@ -297,48 +300,28 @@ rtbm_app_server <- function(id, tab_selected) {
       ignoreNULL = FALSE
     ) # Trigger on initial load
 
-    # Update photo/wiki/song based on sidebar's selected species
-    observeEvent(sidebar_returns$selected_species(),
-      {
-        req(bird_spp_info(), sidebar_returns$selected_species())
-        selected_common_name <- sidebar_returns$selected_species()
+    # --- Data Loading Triggered by Button --- 
+    # Observe the button click from the sidebar
+    observeEvent(sidebar_returns$load_button_clicked(), {
+      # Ensure the trigger isn't firing on initial load (value > 0)
+      req(sidebar_returns$load_button_clicked() > 0)
 
-        species_details <- bird_spp_info() |>
-          filter(common_name == selected_common_name) |>
-          slice(1)
+      # Use isolate() to get the current values when the button is clicked
+      species <- isolate(sidebar_returns$selected_species())
+      date_range <- isolate(sidebar_returns$date_range())
+      spp_info <- isolate(bird_spp_info())
 
-        if (nrow(species_details) > 0) {
-          photo_url(species_details$photo_url)
-          wiki_link(species_details$wiki_url)
-          scientific_name(species_details$scientific_name)
-          song_url(species_details$song_url)
-                    } else {
-          # Reset if not found (should be rare with picker)
-          photo_url(NULL)
-          wiki_link(NULL)
-          scientific_name(NULL)
-          song_url(NULL)
-        }
-      },
-      ignoreNULL = TRUE
-    )
+      # Basic validation
+      req(species, date_range, spp_info)
+      start_date <- date_range[1]
+      end_date <- date_range[2]
 
-    # --- Data Loading Triggered by Sidebar Play Button ---
-    observeEvent(sidebar_returns$load_data_trigger(), {
-      # Only load if available_dates is NULL or empty (first play)
-      if (is.null(available_dates()) || length(available_dates()) == 0) {
-        # Use the same logic as process_all_dates()
-        req(sidebar_returns$date_range(), sidebar_returns$selected_species(), bird_spp_info())
-        start_date <- as_date(sidebar_returns$date_range()[1])
-        end_date <- as_date(sidebar_returns$date_range()[2])
-        species <- sidebar_returns$selected_species()
-
-      # Find scientific name for the selected species
-        scientific_name_val <- bird_spp_info() |>
+      # Fetch scientific name
+      scientific_name_val <- spp_info |>
         filter(common_name == species) |>
         pull(scientific_name)
 
-        if (length(scientific_name_val) == 0) {
+      if (length(scientific_name_val) == 0) {
         output$statusMsg <- renderUI({
           div(
             class = "alert alert-danger",
@@ -444,11 +427,11 @@ rtbm_app_server <- function(id, tab_selected) {
           })
 
           # Update map with the first frame (now that current_date is set)
-          map_functions$update_map_with_frame(1)
+          map_functions$update_map_with_frame()
           }
         )
       }
-    })
+    )
 
     # --- Map Module Call ---
     map_functions <- map_module_server(
@@ -457,10 +440,7 @@ rtbm_app_server <- function(id, tab_selected) {
       current_date = sidebar_returns$current_date, # Use reactive from sidebar
       species_data = species_data, # Pass the processed species data
       selected_species = sidebar_returns$selected_species, # Use reactive from sidebar
-      photo_url = photo_url,
-      scientific_name = scientific_name,
-      wiki_link = wiki_link,
-      song_url = song_url
+      bird_spp_info = bird_spp_info # Pass all species info
     )
   })
 }

@@ -24,7 +24,7 @@ box::use(
   ],
 
   # HTML tools for structured UI building
-  htmltools[div, span, hr, tags, p],
+  htmltools[div, span, hr, tags, p, strong],
 
   # Modern Shiny components
   shinyWidgets[pickerInput, updatePickerInput],
@@ -84,6 +84,13 @@ rtbm_sidebar_ui <- function(id) {
           options = list(`live-search` = TRUE)
         )
       ),
+      # Add Load Data button here
+      actionButton(
+          inputId = ns("loadDataButton"),
+          label = "Load Data",
+          icon = icon("sync"),
+          class = "btn btn-primary w-100 mt-3 mb-3" # Changed btn-success to btn-primary
+      ),
       # Conditional UI for map controls (except species picker)
       uiOutput(ns("conditionalMapControls"))
     )
@@ -105,7 +112,7 @@ rtbm_sidebar_ui <- function(id) {
 #'   - animation_speed: The animation speed in milliseconds.
 #'   - sidebar_collapsed: Boolean indicating if the sidebar is collapsed.
 #'   - selected_view: The selected view.
-#'   - load_data_trigger: Counter to trigger data load.
+#'   - load_button_clicked: Reactive trigger for the load data button.
 #' @export
 rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
   moduleServer(id, function(input, output, session) {
@@ -117,19 +124,28 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
     animation_speed_rv <- reactiveVal(1000) # Default speed
     sidebar_collapsed_rv <- reactiveVal(FALSE) # Track collapsed state
     animation_last_step <- reactiveVal(Sys.time()) # Track when the last step occurred
-    status_msg <- reactiveVal("Select date range and species.")
-    load_data_trigger <- reactiveVal(0) # Counter to trigger data load
+    status_msg <- reactiveVal("Select date range and species, then click Load Data.")
 
     # --- Observers and Logic ---
 
     # Always update species picker choices when bird_spp_info is available
     observeEvent(bird_spp_info(), {
       req(bird_spp_info())
+      choices <- bird_spp_info()$common_name
+      # Determine the default selection
+      default_selection <- if ("Arctic Loon" %in% choices) {
+        "Arctic Loon"
+      } else if (length(choices) > 0) {
+        choices[1]
+      } else {
+        NULL
+      }
+
       updatePickerInput(
         session = session,
         inputId = "speciesPicker",
-        choices = bird_spp_info()$common_name,
-        selected = bird_spp_info()$common_name[1]
+        choices = choices,
+        selected = default_selection
       )
     })
 
@@ -185,9 +201,9 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
       animation_running_rv(new_state)
       if (new_state) {
         animation_last_step(Sys.time() - (animation_speed_rv() / 1000))
-        # If data is not loaded (e.g., available_dates is NULL or empty), trigger load
-        if (is.null(available_dates()) || length(available_dates()) == 0) {
-          load_data_trigger(isolate(load_data_trigger()) + 1)
+        # Ensure slider is set to the first frame if starting fresh
+        if (is.null(input$date_slider_index) || input$date_slider_index == 0) {
+          updateSliderInput(session, "date_slider_index", value = 1)
         }
       }
       output$playPauseButton <- renderUI({
@@ -223,16 +239,19 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
       animation_step()
     })
 
-    # --- Dynamic UI Rendering ---
-
-    # Display current date
-    output$currentDateDisplay <- renderUI({
-      req(current_date_rv())
-      span(
-        class = "current-date",
-        format_date_for_display(current_date_rv())
-      )
+    # --- Reactive for Selected Date Display ---
+    selected_date_formatted <- reactive({
+      req(input$date_slider_index, available_dates())
+      dates <- available_dates()
+      idx <- input$date_slider_index
+      if (idx > 0 && idx <= length(dates)) {
+        format_date_for_display(dates[idx])
+      } else {
+        NULL
+      }
     })
+
+    # --- Dynamic UI Rendering ---
 
     # Dynamic UI for date slider
     update_date_slider <- function(dates) {
@@ -240,7 +259,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
         output$dateSlider <- renderUI({
           sliderInput(
             ns("date_slider_index"),
-            label = "Select Observation Date:",
+            label = NULL, # Removed label "Select Observation Date:"
             min = 1,
             max = length(dates),
             value = 1,
@@ -274,28 +293,51 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
       tags$p(class = "text-muted", status_msg())
     })
 
+    # Render the selected date text
+    output$selectedDateText <- renderUI({
+      date_str <- selected_date_formatted()
+      if (!is.null(date_str)) {
+        # Center the text and add some margin
+        tags$p(class = "text-center mt-2 mb-2", strong(date_str))
+      } else {
+        NULL
+      }
+    })
+
     # --- Conditional UI for map controls ---
     output$conditionalMapControls <- renderUI({
       if (is.null(input$viewSelector) || input$viewSelector == "map") {
-        tagList(
-          uiOutput(ns("currentDateDisplay")),
-          hr(),
-          uiOutput(ns("playPauseButton")),
-          sliderInput(
-            inputId = ns("speedControl"),
-            label = "Animation Speed (ms)",
-            min = 100,
-            max = 2000,
-            value = 1000,
-            step = 100,
-            ticks = FALSE
-          ),
-          uiOutput(ns("statusMsg")),
-          hr(),
-          uiOutput(ns("dateSlider"))
-        )
+        # Show controls only if dates are loaded
+        if (!is.null(available_dates()) && length(available_dates()) > 0) {
+          tagList(
+            # Status Message (e.g., "X observation dates found.")
+            uiOutput(ns("statusMsg")),
+            # Date slider immediately after status
+            uiOutput(ns("dateSlider")),
+            # Display selected date below slider
+            uiOutput(ns("selectedDateText")),
+            # Animation Delay Slider
+            sliderInput(
+              inputId = ns("speedControl"),
+              label = "Animation Delay (ms)",
+              min = 100,
+              max = 2000,
+              value = animation_speed_rv(), # Use reactive value for persistence
+              step = 100,
+              ticks = FALSE,
+              width = "100%"
+            ),
+            # Play/Pause Button
+            uiOutput(ns("playPauseButton"))
+          )
+        } else {
+          # Show only the status message if no dates are loaded yet
+          tagList(
+            uiOutput(ns("statusMsg"))
+          )
+        }
       } else {
-        NULL
+        NULL # Hide controls for non-map views
       }
     })
 
@@ -310,7 +352,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
         animation_running = reactive(animation_running_rv()),
         sidebar_collapsed = reactive(sidebar_collapsed_rv()),
         selected_view = reactive(input$viewSelector),
-        load_data_trigger = load_data_trigger
+        load_button_clicked = reactive(input$loadDataButton)
       )
     )
   })

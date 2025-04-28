@@ -22,7 +22,7 @@ box::use(
   arrow[read_parquet, write_parquet, Schema, schema],
 
   # Data manipulation with tidyverse
-  dplyr[filter, pull],
+  dplyr[filter, pull, slice],
 
   # Color palettes
   RColorBrewer[brewer.pal],
@@ -55,19 +55,20 @@ map_module_ui <- function(id) {
 #' @param current_date A reactive expression for the current date being displayed
 #' @param species_data A reactive expression for the species data
 #' @param selected_species A reactive expression for the selected species name
-#' @param photo_url A reactive expression for the photo URL
-#' @param scientific_name A reactive expression for the scientific name
-#' @param wiki_link A reactive expression for the wiki link
-#' @param song_url A reactive expression for the song URL
+#' @param bird_spp_info A reactive expression containing info for all bird species
 #' @return A list containing the update_map_with_frame function
 #' @export
 map_module_server <- function(id, finland_border, current_date, species_data,
-                              selected_species, photo_url, scientific_name, wiki_link, song_url) {
+                              selected_species, bird_spp_info) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Internal state for the map module
     info_card_visible <- reactiveVal(FALSE)
+    photo_url <- reactiveVal(NULL)
+    wiki_link <- reactiveVal(NULL)
+    scientific_name <- reactiveVal(NULL)
+    song_url <- reactiveVal(NULL)
 
     # Function to create bird info card HTML using htmltools
     create_bird_info_card <- function(species_name, scientific_name_val, wiki_url_val, photo_url_val, song_url_val) {
@@ -136,11 +137,11 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       wiki_link_val <- wiki_link()
       song_url_val <- song_url()
 
-      # Only proceed if we have all the required data
+      # Check if all required info is available
       req(species_name_val, photo_url_val, scientific_name_val, wiki_link_val, song_url_val)
 
-      # Create bird info card using our reusable function
-      bird_info_html <- create_bird_info_card(
+      # Create the HTML content for the card
+      card_html <- create_bird_info_card(
         species_name = species_name_val,
         scientific_name_val = scientific_name_val,
         wiki_url_val = wiki_link_val,
@@ -148,13 +149,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
         song_url_val = song_url_val
       )
 
-      if (!is.null(bird_info_html)) {
+      if (!is.null(card_html)) {
         # Add/update the card to the map
         leafletProxy(ns("rasterMap")) |>
           # Remove existing card first to prevent duplicates if ID changes somehow
           removeControl(layerId = "bird-info-card") |>
           addControl(
-            html = bird_info_html,
+            html = card_html,
             position = "topleft",
             layerId = "bird-info-card"
           )
@@ -167,14 +168,43 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       }
     }
 
-    # Observer to update the bird info card when relevant inputs change
-    observeEvent(list(selected_species(), photo_url(), scientific_name(), wiki_link(), song_url()), {
-      update_bird_info_card()
-    })
+    # Update photo/wiki/song based on the selected species from the sidebar
+    observeEvent(selected_species(),
+      {
+        # Ensure bird species info and selection are available
+        req(bird_spp_info(), selected_species())
+
+        # Get the selected common name
+        selected_common_name <- selected_species()
+
+        # Find the details for the selected species
+        species_details <- bird_spp_info() |>
+          filter(common_name == selected_common_name) |>
+          slice(1) # Take the first row if multiple matches (shouldn't happen with common_name)
+
+        # Update reactive values if details are found
+        if (nrow(species_details) > 0) {
+          photo_url(species_details$photo_url)
+          wiki_link(species_details$wiki_link) # Corrected column name
+          scientific_name(species_details$scientific_name)
+          song_url(species_details$song_url)
+        } else {
+          # Reset reactive values if details not found
+          photo_url(NULL)
+          wiki_link(NULL)
+          scientific_name(NULL)
+          song_url(NULL)
+        }
+        
+        # Call update_bird_info_card AFTER details are potentially updated
+        update_bird_info_card()
+      },
+      ignoreNULL = TRUE # Don't run when selection is initially NULL
+    )
 
     # Automatically update the map when current_date changes
     observeEvent(current_date(), {
-      update_map_with_frame(1)
+      update_map_with_frame()
     })
 
     # Base leaflet map
@@ -190,17 +220,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           layerId = "hover-info-control"
         )
 
-      # Initial check to add bird info card if data is already available
-      # Note: This relies on the reactives being ready when the map is first rendered
-      if (!is.null(selected_species()) && !is.null(photo_url()) && !is.null(scientific_name()) && !is.null(wiki_link()) && !is.null(song_url())) {
-        update_bird_info_card()
-      }
+      # Removed initial check for bird info card - observeEvent handles this
 
       return(m)
     })
 
-    # Function to update map with a specific frame
-    update_map_with_frame <- function(frame_index) {
+    # Function to update map for the current date
+    update_map_with_frame <- function() {
       # Make sure we have required data
       if (is.null(species_data()) || is.null(current_date())) {
         print("No species data or current date available")
@@ -210,9 +236,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       # Use tryCatch around the entire function to prevent any unexpected errors
       tryCatch(
         {
-          # Convert frame_index to integer if needed
-          frame_index <- as.integer(frame_index)
-
           # Safe print function to avoid formatting issues
           safe_print <- function(...) {
             args <- list(...)
@@ -220,12 +243,12 @@ map_module_server <- function(id, finland_border, current_date, species_data,
             cat(msg, "\n")
           }
 
-          safe_print("Updating map with frame index: ", frame_index)
+          safe_print("Updating map for current date")
 
           # Get the current date and data path (with validation)
           date <- current_date()
           if (is.null(date)) {
-            safe_print("Date is NULL for index: ", frame_index)
+            safe_print("Date is NULL")
             return(FALSE)
           }
 
