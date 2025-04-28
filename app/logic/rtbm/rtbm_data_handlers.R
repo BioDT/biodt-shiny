@@ -284,7 +284,11 @@ load_parquet_data <- function(scientific_name, start_date, end_date) {
     scientific_name, "' between ", start_date, " and ", end_date
   )
 
-  return(list(data = combined_data, dates = successful_dates))
+  # Create a named vector of data paths for each date (without setNames)
+  data_paths <- as.character(file_info$path[successful_indices])
+  names(data_paths) <- as.character(successful_dates)
+
+  return(list(data = combined_data, dates = successful_dates, data_paths = data_paths))
 }
 
 # Create a simple bounding box for Finland as fallback (Internal helper)

@@ -23,7 +23,6 @@ box::use(
     column,
     fluidRow,
     selectInput,
-    sliderInput,
     insertUI,
     uiOutput,
     renderText,
@@ -35,7 +34,6 @@ box::use(
     showNotification,
     verbatimTextOutput,
     renderPrint,
-    dateRangeInput,
     textOutput
   ],
 
@@ -86,11 +84,12 @@ box::use(
   ],
 
   # Modern Shiny components
-  shinyWidgets[pickerInput, progressBar, updateProgressBar, updatePickerInput],
   shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass, delay],
 
   # Data manipulation with tidyverse
-  dplyr[filter, mutate, select, pull, arrange, group_by, summarize, n, between, row_number],
+  dplyr[filter, mutate, select, pull, arrange, group_by, summarize, n, between, row_number, slice],
+
+  # Date and time handling
   lubridate[as_date, ymd, interval, `%within%`],
   tibble[tibble, as_tibble],
   stringr[str_replace],
@@ -105,13 +104,14 @@ box::use(
   # Basic utilities
   utils[head, tail],
   jsonlite[fromJSON, toJSON],
-  fs[dir_exists]
+  fs[dir_exists],
 )
 
 # Local modules
 box::use(
   app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border],
-  app / view / rtbm / rtbm_map[map_module_ui, map_module_server]
+  app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
+  app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server]
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -145,69 +145,27 @@ rtbm_app_ui <- function(id, i18n) {
         class = "col-md-3 sidebar-column",
         div(
           class = "control-panel card h-100",
+          # Card Header now includes collapse button directly
           div(
             class = "card-header d-flex justify-content-between align-items-center",
             span("Bird Observation Controls"),
-            # Desktop toggle button (smaller version)
             actionButton(
-              inputId = ns("collapseSidebar"),
+              inputId = ns("collapseSidebar"), # Keep collapse button here
               label = NULL,
               icon = icon("chevron-left"),
               class = "btn btn-sm btn-outline-secondary collapse-sidebar-btn"
             )
           ),
-          div(
-            class = "card-body overflow-auto",
-            # Current date display
-            uiOutput(ns("currentDateDisplay")),
-            # Date range picker
-            dateRangeInput(
-              inputId = ns("dateRange"),
-              label = "Select Date Range",
-              start = Sys.Date() - 30,
-              end = Sys.Date(),
-              min = "2010-01-01",
-              max = Sys.Date(),
-              format = "yyyy-mm-dd",
-              startview = "month",
-              weekstart = 1,
-              separator = " to ",
-              language = "en"
-            ),
-            # Species picker
-            pickerInput(
-              inputId = ns("speciesPicker"),
-              label = "Select Species",
-              choices = "", # bird_spp_info$common_name,
-              selected = "", # bird_spp_info$common_name[1],
-              multiple = FALSE,
-              options = list(
-                `live-search` = TRUE,
-                size = 10,
-                `actions-box` = TRUE
-              )
-            ),
-            # Actions
-            actionButton(
-              inputId = ns("loadData"),
-              label = "Load Data",
-              icon = icon("refresh"),
-              class = "btn btn-primary btn-block mt-3 mb-3 w-100"
-            ),
-            # Status message
-            uiOutput(ns("statusMsg")),
-            hr(),
-            # Date slider with more height for better display
-            uiOutput(ns("dateSlider"))
-          )
+          # Call Sidebar Module UI (contains card body)
+          rtbm_sidebar_ui(ns("sidebar"))
         )
       ),
       # Collapsed sidebar state - only shows expand button
       div(
-        id = ns("collapsedSidebar"),
+        id = ns("collapsedSidebar"), # Keep collapsed state div here
         class = "col-auto sidebar-collapsed d-none",
         actionButton(
-          inputId = ns("expandSidebar"),
+          inputId = ns("expandSidebar"), # Keep expand button here
           label = NULL,
           icon = icon("chevron-right"),
           class = "btn btn-secondary expand-sidebar-btn"
@@ -245,26 +203,18 @@ rtbm_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Initialize Finland border variable (but don't load data yet)
-    finland_border <- NULL
-
-    # Reactive values for data storage
+    # --- Main App Reactives ---
+    finland_border <- reactiveVal(NULL)
     available_dates <- reactiveVal(NULL)
-    current_date <- reactiveVal(NULL)
-    current_frame_index <- reactiveVal(1)
-    species_data <- reactiveVal(NULL)
     bird_spp_info <- reactiveVal(NULL)
-    species_choices <- reactiveVal(NULL)
+    photo_url <- reactiveVal(NULL)
+    wiki_link <- reactiveVal(NULL)
+    scientific_name <- reactiveVal(NULL)
+    song_url <- reactiveVal(NULL)
+    species_data <- reactiveVal(NULL) # Data per species for the map
 
-    # Animation controls
-    animation_speed <- reactiveVal(1000) # 1 second between frames
-    animation_running <- reactiveVal(FALSE)
-    animation_last_step <- reactiveVal(Sys.time()) # Track when the last step occurred
-
-    # Sidebar state management
-    sidebar_expanded <- reactiveVal(TRUE) # Start expanded
-
-    # Initialize Finland border and bird species data only when tab is selected
+    # --- Initial Data Loading ---
+    # Load Finland border and bird species info only when tab is selected
     observeEvent(tab_selected(), ignoreInit = TRUE, {
       # Load Finland border (only on first tab selection)
       if (is.null(finland_border)) {
@@ -274,32 +224,9 @@ rtbm_app_server <- function(id, tab_selected) {
 
       # Load bird species data
       bird_spp_info(load_bird_species_info())
-      species_choices(bird_spp_info()$common_name)
-
-      req(bird_spp_info())
-      updatePickerInput(
-        inputId = "speciesPicker",
-        session = session,
-        choices = bird_spp_info()$common_name,
-        selected = bird_spp_info()$common_name[1]
-      )
     })
 
-    # Toggle sidebar collapse/expand
-    observeEvent(input$toggleSidebar, {
-      # Toggle the sidebar visibility
-      toggleClass(id = "sidebarCol", class = "d-none")
-    })
-
-    # Collapse sidebar button
-    observeEvent(input$collapseSidebar, {
-      addClass(id = "sidebarCol", class = "d-none")
-      removeClass(id = "collapsedSidebar", class = "d-none")
-      removeClass(id = "mapCol", class = "col-md-9")
-      addClass(id = "mapCol", class = "col-md-11")
-    })
-
-    # Expand sidebar button
+    # Expand sidebar button (Remains in App Server)
     observeEvent(input$expandSidebar, {
       removeClass(id = "sidebarCol", class = "d-none")
       addClass(id = "collapsedSidebar", class = "d-none")
@@ -307,153 +234,111 @@ rtbm_app_server <- function(id, tab_selected) {
       addClass(id = "mapCol", class = "col-md-9")
     })
 
-    # Create flags to track if legend and info card are already added
-    legend_added <- reactiveVal(FALSE)
-    info_card_added <- reactiveVal(FALSE)
+    # --- Sidebar Module Call ---
+    sidebar_returns <- rtbm_sidebar_server(
+      id = "sidebar",
+      bird_spp_info = bird_spp_info, # Pass bird info IN
+      available_dates = available_dates # Pass available dates IN
+    )
 
-    # Generate date sequence based on selected range
-    date_sequence <- reactive({
-      req(input$dateRange)
-      start_date <- as_date(input$dateRange[1])
-      end_date <- as_date(input$dateRange[2])
+    # --- Connect Sidebar Outputs to App Logic ---
 
-      # Create date sequence
-      seq.Date(
-        from = start_date,
-        to = end_date,
-        by = "day"
-      )
-    })
+    # React to date range changes from sidebar to update available_dates
+    observeEvent(sidebar_returns$date_range(),
+      {
+        req(sidebar_returns$date_range())
+        start_date <- sidebar_returns$date_range()[1]
+        end_date <- sidebar_returns$date_range()[2]
 
-    # Display current date in header
-    output$currentDateDisplay <- renderUI({
-      if (!is.null(current_date())) {
-        span(
-          class = "current-date",
-          format_date_for_display(current_date())
-        )
-      }
-    })
-
-    # Format date for display
-    format_date_for_display <- function(date) {
-      if (is.null(date)) {
-        return("")
-      }
-
-      # Handle various date formats
-      tryCatch(
-        {
-          # First check if it's already a Date object
-          if (inherits(date, "Date")) {
-            return(format(date, "%b %d, %Y"))
-          }
-
-          # Try to parse as ISO date
-          parsed_date <- try(as.Date(date), silent = TRUE)
-          if (!inherits(parsed_date, "try-error") && !is.na(parsed_date)) {
-            return(format(parsed_date, "%b %d, %Y"))
-          }
-
-          # If all else fails, return as is
-          return(as.character(date))
-        },
-        error = function(e) {
-          # Fallback for any errors
-          return(as.character(date))
+        # Find parquet files within the date range (Uses config)
+        data_path <- config::get("data_path") # Get data path from config
+        if (is.null(data_path) || !dir_exists(data_path)) {
+          warning("Data path not configured or does not exist.")
+          available_dates(NULL)
+          return()
         }
-      )
-    }
 
-    # Format multiple dates for display
-    format_dates_for_display <- function(dates) {
-      if (is.null(dates) || length(dates) == 0) {
-        return(character(0))
-      }
-      vapply(dates, format_date_for_display, FUN.VALUE = character(1))
-    }
+        parquet_dir <- file.path(data_path, "rtbm", "parquet")
+        if (!dir_exists(parquet_dir)) {
+          warning(paste("Parquet directory not found:", parquet_dir))
+          available_dates(NULL)
+          return()
+        }
 
-    # Get Finnish name for URL construction
-    finnish_name <- reactive({
-      req(input$speciesPicker, bird_spp_info())
-      fn <- bird_spp_info() |>
-        filter(common_name == input$speciesPicker) |>
-        pull(finnish_name)
-      print(fn)
-      if (length(fn) == 0) {
-        return(NULL)
-      }
-      fn
-    })
+        parquet_files <- list.files(
+          path = parquet_dir,
+          pattern = "\\.parquet$",
+          full.names = TRUE
+        )
 
-    # Get photo URL for display
-    photo_url <- reactive({
-      req(input$speciesPicker, bird_spp_info())
-      url <- bird_spp_info() |>
-        filter(common_name == input$speciesPicker) |>
-        pull(photo_url)
-      if (length(url) == 0 || url == "") {
-        return(NULL)
-      }
-      url
-    })
+        if (length(parquet_files) > 0) {
+          # Extract dates robustly, handle potential NA
+          file_dates_str <- stringr::str_extract(basename(parquet_files), "\\d{8}")
+          file_dates <- ymd(file_dates_str, quiet = TRUE)
+          valid_file_indices <- !is.na(file_dates)
 
-    # 3) Common name (English) - directly from input
-    common_name <- reactive({
-      req(input$speciesPicker)
-      input$speciesPicker
-    })
+          file_dates <- file_dates[valid_file_indices]
 
-    # 4) Scientific name
-    scientific_name <- reactive({
-      req(input$speciesPicker, bird_spp_info())
-      sn <- bird_spp_info() |>
-        filter(common_name == input$speciesPicker) |>
-        pull(scientific_name)
-      if (length(sn) == 0) {
-        return(NULL)
-      }
-      sn
-    })
+          if (length(file_dates) > 0) {
+            valid_indices <- which(file_dates >= start_date & file_dates <= end_date)
+            if (length(valid_indices) > 0) {
+              dates_in_range <- sort(unique(file_dates[valid_indices]))
+              available_dates(dates_in_range) # Update the main app's reactive
+                    } else {
+              available_dates(NULL)
+            }
+                  } else {
+            available_dates(NULL)
+                  }
+                } else {
+          available_dates(NULL)
+        }
+      },
+      ignoreNULL = FALSE
+    ) # Trigger on initial load
 
-    # 4b) Wiki link (for the hyperlink on the scientific name)
-    wiki_link <- reactive({
-      req(input$speciesPicker, bird_spp_info())
-      wl <- bird_spp_info() |>
-        filter(common_name == input$speciesPicker) |>
-        pull(wiki_link)
-      if (length(wl) == 0 || wl == "") {
-        return(NULL)
-      }
-      wl
-    })
+    # Update photo/wiki/song based on sidebar's selected species
+    observeEvent(sidebar_returns$selected_species(),
+      {
+        req(bird_spp_info(), sidebar_returns$selected_species())
+        selected_common_name <- sidebar_returns$selected_species()
 
-    # 5) Song URL
-    song_url <- reactive({
-      req(input$speciesPicker, bird_spp_info())
-      s_url <- bird_spp_info() |>
-        filter(common_name == input$speciesPicker) |>
-        pull(song_url)
-      if (length(s_url) == 0 || s_url == "") {
-        return(NULL)
-      }
-      s_url
-    })
+        species_details <- bird_spp_info() |>
+          filter(common_name == selected_common_name) |>
+          slice(1)
 
-    # Process data for all dates in the selected range
-    process_all_dates <- function() {
-      req(input$dateRange, input$speciesPicker, bird_spp_info())
+        if (nrow(species_details) > 0) {
+          photo_url(species_details$photo_url)
+          wiki_link(species_details$wiki_url)
+          scientific_name(species_details$scientific_name)
+          song_url(species_details$song_url)
+                    } else {
+          # Reset if not found (should be rare with picker)
+          photo_url(NULL)
+          wiki_link(NULL)
+          scientific_name(NULL)
+          song_url(NULL)
+        }
+      },
+      ignoreNULL = TRUE
+    )
 
-      start_date <- as_date(input$dateRange[1])
-      end_date <- as_date(input$dateRange[2])
-      species <- input$speciesPicker
+    # --- Data Loading Triggered by Sidebar Play Button ---
+    observeEvent(sidebar_returns$load_data_trigger(), {
+      # Only load if available_dates is NULL or empty (first play)
+      if (is.null(available_dates()) || length(available_dates()) == 0) {
+        # Use the same logic as process_all_dates()
+        req(sidebar_returns$date_range(), sidebar_returns$selected_species(), bird_spp_info())
+        start_date <- as_date(sidebar_returns$date_range()[1])
+        end_date <- as_date(sidebar_returns$date_range()[2])
+        species <- sidebar_returns$selected_species()
 
       # Find scientific name for the selected species
-      scientific_name <- bird_spp_info() |>
+        scientific_name_val <- bird_spp_info() |>
         filter(common_name == species) |>
         pull(scientific_name)
 
-      if (length(scientific_name) == 0) {
+        if (length(scientific_name_val) == 0) {
         output$statusMsg <- renderUI({
           div(
             class = "alert alert-danger",
@@ -461,7 +346,7 @@ rtbm_app_server <- function(id, tab_selected) {
             "Error: Could not find scientific name for the selected species."
           )
         })
-        return(FALSE)
+          return()
       }
 
       # Update status message
@@ -479,14 +364,12 @@ rtbm_app_server <- function(id, tab_selected) {
         message = "Processing data",
         value = 0,
         {
-          # Load data using the parquet-based approach
           incProgress(0.2, detail = "Fetching observation data")
           result <- load_parquet_data(
-            scientific_name = scientific_name,
+              scientific_name = scientific_name_val,
             start_date = start_date,
             end_date = end_date
           )
-
           incProgress(0.3, detail = "Processing observations")
 
           if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
@@ -497,60 +380,54 @@ rtbm_app_server <- function(id, tab_selected) {
                 "No data available for the selected species and date range. Try a different date range or species."
               )
             })
-            return(FALSE)
-          }
+              available_dates(NULL)
+              species_data(NULL)
+              return()
+            }
 
-          # Check if the base directory for the species exists before trying to load
-          data_base_path <- config::get("data_path")
-          if (is.null(data_base_path)) {
-            output$statusMsg <- renderUI({
-              div(class = "alert alert-danger", role = "alert", "Configuration Error: 'data_path' not set.")
-            })
-            return(FALSE)
-          }
-          species_parquet_dir <- file.path(
-            data_base_path,
-            "rtbm",
-            "parquet",
-            paste0("species=", scientific_name)
-          )
-
-          if (!fs::dir_exists(species_parquet_dir)) {
-            output$statusMsg <- renderUI({
-              div(
-                class = "alert alert-warning",
-                role = "alert",
-                paste0(
-                  "Data for '", species, "' is currently unavailable or has not been processed yet.",
-                  " Please check back later or select a different species."
+            # Check if the base directory for the species exists before trying to load
+            data_base_path <- config::get("data_path")
+            if (is.null(data_base_path)) {
+              output$statusMsg <- renderUI({
+                div(class = "alert alert-danger", role = "alert", "Configuration Error: 'data_path' not set.")
+              })
+              available_dates(NULL)
+              species_data(NULL)
+              return()
+            }
+            species_parquet_dir <- file.path(
+              data_base_path,
+              "rtbm",
+              "parquet",
+              paste0("species=", scientific_name_val)
+            )
+            if (!fs::dir_exists(species_parquet_dir)) {
+              output$statusMsg <- renderUI({
+                div(
+                  class = "alert alert-warning",
+                  role = "alert",
+                  paste0(
+                    "Data for '", species, "' is currently unavailable or has not been processed yet.",
+                    " Please check back later or select a different species."
+                  )
                 )
-              )
-            })
-            # Clear potentially outdated data/dates
-            available_dates(NULL)
-            species_data(NULL)
-            return(FALSE)
+              })
+              available_dates(NULL)
+              species_data(NULL)
+              return()
           }
 
           # Store dates and data paths
           available_dates(result$dates)
           species_data(list(
-            scientific_name = scientific_name,
+              scientific_name = scientific_name_val,
             data_paths = result$data_paths
           ))
 
-          # Initialize with the first date
+          # Set the current date in the sidebar so the map module has it
           if (length(result$dates) > 0) {
-            current_date(result$dates[1])
-            current_frame_index(1)
+            sidebar_returns$set_current_date(result$dates[1])
           }
-
-          # Update slider with new date range
-          dates <- available_dates()
-          date_strings <- sapply(dates, format_date_for_display)
-          date_mapping <- setNames(seq_along(dates), date_strings)
-          session$userData$date_mapping <- date_mapping
-          session$userData$dates <- dates
 
           # Update status message
           output$statusMsg <- renderUI({
@@ -558,233 +435,28 @@ rtbm_app_server <- function(id, tab_selected) {
               class = "alert alert-success",
               role = "alert",
               paste0(
-                "Loaded data for ",
-                length(result$dates),
-                " dates. ",
+                  "Loaded data for ",
+                  length(result$dates),
+                  " dates. ",
                 "Use the timeline slider or animation controls to view changes over time."
               )
             )
           })
 
-          # Update map with the first frame
+          # Update map with the first frame (now that current_date is set)
           map_functions$update_map_with_frame(1)
-        }
-      )
-
-      return(TRUE)
-    }
-
-    # Create a custom date slider UI using bslib components
-    output$dateSlider <- renderUI({
-      dates <- available_dates()
-      if (is.null(dates) || length(dates) == 0) {
-        return(NULL)
-      }
-
-      # Get the date strings for display
-      date_strings <- sapply(dates, format_date_for_display)
-
-      # Create a mapping from index to date for the slider
-      date_mapping <- setNames(seq_along(dates), date_strings)
-
-      # Store the mapping in session data for server access
-      session$userData$date_mapping <- date_mapping
-      session$userData$dates <- dates
-
-      tagList(
-        div(
-          class = "date-slider-container",
-
-          # Use sliderInput with custom labeling
-          sliderInput(
-            inputId = ns("date_slider_index"),
-            label = "Select Date:",
-            min = 1,
-            max = length(dates),
-            value = 1,
-            step = 1,
-            width = "100%",
-            ticks = FALSE
-          ),
-
-          # Add text display for the currently selected date
-          div(
-            class = "date-display text-center my-2",
-            textOutput(ns("selected_date_display"))
-          ),
-
-          # Animation controls - only shown after data is loaded
-          div(
-            class = "animation-controls mt-3",
-            # Play/Pause Button (centered)
-            div(
-              class = "d-flex justify-content-center",
-              uiOutput(ns("playPauseButton"))
-            )
-          )
+          }
         )
-      )
-    })
-
-    # Display the selected date based on the slider index
-    output$selected_date_display <- renderText({
-      req(input$date_slider_index, session$userData$dates)
-
-      # Get the selected date using the index
-      selected_date <- session$userData$dates[input$date_slider_index]
-      format_date_for_display(selected_date)
-    })
-
-    # Handle date slider changes
-    observeEvent(input$date_slider_index, {
-      req(session$userData$dates)
-
-      # Get the actual date from the index
-      selected_date <- session$userData$dates[input$date_slider_index]
-      selected_date_str <- format_date_for_display(selected_date)
-
-      # Update current date when slider changes
-      current_date(selected_date)
-
-      # Check if we have species data
-      if (!is.null(species_data()) && !is.null(input$date_slider_index)) {
-        # Update map with the selected date's frame
-        map_functions$update_map_with_frame(input$date_slider_index)
       }
     })
 
-    # Play/Pause button UI
-    output$playPauseButton <- renderUI({
-      actionButton(
-        inputId = ns("animateControl"),
-        label = if (animation_running()) "Pause" else "Play",
-        icon = if (animation_running()) icon("pause") else icon("play"),
-        class = "btn-primary btn-lg",
-        width = "100%"
-      )
-    })
-
-    # Handle play button
-    observeEvent(input$play_animation, {
-      animation_running(TRUE)
-      # Start the animation immediately
-      animation_step()
-    })
-
-    # Handle pause button
-    observeEvent(input$pause_animation, {
-      animation_running(FALSE)
-    })
-
-    # Handle animation control button
-    observeEvent(input$animateControl, {
-      # Toggle animation state
-      animation_running(!animation_running())
-
-      # Reset the last step time when starting animation
-      if (animation_running()) {
-        # Set to a time in the past to ensure first step happens immediately
-        animation_last_step(Sys.time() - 3)
-      }
-
-      # Force UI update for button
-      output$playPauseButton <- renderUI({
-        actionButton(
-          inputId = ns("animateControl"),
-          label = if (animation_running()) "Pause" else "Play",
-          icon = if (animation_running()) icon("pause") else icon("play"),
-          class = "btn-primary btn-lg",
-          width = "100%"
-        )
-      })
-
-      # Start animation if now playing
-      if (animation_running()) {
-        animation_step()
-      }
-    })
-
-    # Function to handle a single animation step
-    animation_step <- function() {
-      req(animation_running())
-
-      # Get dates and current index
-      dates <- available_dates()
-      if (is.null(dates) || length(dates) == 0) {
-        return(NULL)
-      }
-
-      # Get the current slider index
-      current_idx <- isolate(input$date_slider_index)
-
-      # Calculate next index (with loop back to beginning)
-      next_idx <- if (current_idx >= length(dates)) 1 else current_idx + 1
-
-      # Update the slider
-      updateSliderInput(session, "date_slider_index", value = next_idx)
-
-      # Schedule next step if animation is still running
-      if (isolate(animation_running())) {
-        invalidateLater(animation_speed())
-      }
-    }
-
-    # Observer to handle animation steps
-    observe({
-      req(animation_running())
-
-      # Only proceed if enough time has passed since last step
-      current_time <- Sys.time()
-      last_step_time <- animation_last_step()
-      time_diff <- as.numeric(difftime(current_time, last_step_time, units = "secs"))
-
-      if (time_diff >= (animation_speed() / 1000)) {
-        # Update the last step time
-        animation_last_step(current_time)
-
-        # Execute animation step
-        animation_step()
-      } else {
-        # Schedule check again after a short delay
-        invalidateLater(100)
-      }
-    })
-
-    # Changed from reactive to eventReactive to only load data when the button is clicked
-    raster_data <- eventReactive(input$loadData, {
-      # Reset legend flag when loading new data, but keep info card flag
-      legend_added(FALSE)
-      # Do NOT reset info_card_added flag here - important for persistence
-
-      # Process all dates and prepare data
-      success <- process_all_dates()
-      print(paste0("Data processing complete. Success: ", success))
-
-      if (success) {
-        # Show the first frame
-        print("Displaying first frame")
-        map_functions$update_map_with_frame(1)
-      } else {
-        # Clear the map if no data
-        print("No data available - clearing the map")
-        leafletProxy(ns("map-rasterMap")) |>
-          clearImages() |>
-          clearControls()
-      }
-    })
-
-    # Observe button click to trigger initial data load
-    observeEvent(input$loadData, {
-      raster_data()
-    })
-
-    # Initialize map module
+    # --- Map Module Call ---
     map_functions <- map_module_server(
       "map",
       finland_border = finland_border,
-      current_date = current_date,
-      species_data = species_data,
-      selected_species = reactive(input$speciesPicker),
+      current_date = sidebar_returns$current_date, # Use reactive from sidebar
+      species_data = species_data, # Pass the processed species data
+      selected_species = sidebar_returns$selected_species, # Use reactive from sidebar
       photo_url = photo_url,
       scientific_name = scientific_name,
       wiki_link = wiki_link,

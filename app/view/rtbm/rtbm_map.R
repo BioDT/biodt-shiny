@@ -35,7 +35,7 @@ box::use(
 # Local modules
 box::use(
   app / logic / rtbm / rtbm_data_handlers[load_bird_species_info],
-  app / logic / rtbm / utils[format_date_for_display]
+  app / logic / rtbm / utils[format_date_for_display],
 )
 
 #' Map Module UI
@@ -172,6 +172,11 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       update_bird_info_card()
     })
 
+    # Automatically update the map when current_date changes
+    observeEvent(current_date(), {
+      update_map_with_frame(1)
+    })
+
     # Base leaflet map
     output$rasterMap <- renderLeaflet({
       # Create the base map
@@ -238,26 +243,25 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           # Format the date for file path
           date_str <- format(date, "%Y-%m-%d")
 
-          # Construct path to parquet file
-          parquet_path <- file.path(
-            "app/data/rtbm/parquet",
-            paste0("species=", scientific_name),
-            paste0("date=", date_str, ".parquet")
-          )
+          # Use data_paths to get the parquet file for the current date
+          data_paths <- species_data()$data_paths
+          date_key <- as.character(date)
+          parquet_path <- NULL
+          if (!is.null(data_paths) && date_key %in% names(data_paths)) {
+            parquet_path <- data_paths[[date_key]]
+          }
 
-          safe_print("Looking for parquet file: ", parquet_path)
-
-          # Check if file exists
-          if (!file.exists(parquet_path)) {
-            safe_print("Parquet file not found: ", parquet_path)
+          if (is.null(parquet_path) || !file.exists(parquet_path)) {
+            safe_print("No parquet file found for date: ", date_key)
             # Clear map layers but keep controls (like info card)
             leafletProxy(ns("rasterMap")) |>
               clearImages() |>
               clearShapes() |>
               clearGroup("Heat Map")
-            # Potentially show a status message here in a map control
             return(FALSE)
           }
+
+          safe_print("Reading parquet file: ", parquet_path)
 
           # Update map using leafletProxy for better performance
           proxy <- leafletProxy(ns("rasterMap")) |>
@@ -449,6 +453,24 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                       options = layersControlOptions(collapsed = FALSE)
                     )
 
+                  # Add debug message to the map UI
+                  debug_msg <- paste0(
+                    "Points: ", nrow(points_data),
+                    " | Intensity: ",
+                    if (length(valid_intensities) > 0) paste0(min(valid_intensities, na.rm=TRUE), " to ", max(valid_intensities, na.rm=TRUE)) else "NA",
+                    " | Lon: ", lon_range[1], " to ", lon_range[2],
+                    " | Lat: ", lat_range[1], " to ", lat_range[2]
+                  )
+                  proxy |>
+                    addControl(
+                      html = div(
+                        style = "background: rgba(255,255,255,0.8); padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc;", 
+                        debug_msg
+                      ),
+                      position = "topleft",
+                      layerId = "debug-info-control"
+                    )
+
                   # Log success
                   safe_print("Successfully processed data for the map.")
                 } else { # This else corresponds to `if (all(coord_cols %in% colnames(points_data)))`
@@ -473,6 +495,10 @@ map_module_server <- function(id, finland_border, current_date, species_data,
               if (info_card_visible()) {
                 update_bird_info_card()
               }
+
+              # Remove debug message if no data
+              proxy |>
+                removeControl(layerId = "debug-info-control")
 
               return(TRUE)
             },
