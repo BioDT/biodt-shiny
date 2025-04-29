@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, moduleServer, tags, reactiveVal, observeEvent, checkboxInput, uiOutput, renderUI, req],
+  shiny[NS, moduleServer, tags, reactiveVal, observeEvent, checkboxInput, uiOutput, renderUI, req, actionButton, HTML],
   bslib[card, card_header, card_body],
   waiter[Waiter],
   DT[DTOutput, renderDT, datatable],
@@ -20,16 +20,19 @@ grassland_dynamics_soil_datatable_ui <- function(
     id = ns("datatable"),
     class = "mx-md-3 card-shadow mb-2",
     card_header(
-      tags$h2(
-        class = "card_title",
-        i18n$translate("Soil Data")
+        tags$div(
+          class = "d-flex justify-content-between align-items-center",
+        tags$h2(
+          class = "card_title",
+          i18n$translate("Soil Data")
+        ),
+        uiOutput(ns("show_soildata_btn")),
       ),
-      checkboxInput(ns("show_soildata"), "Show Soil Data Table", value = FALSE, width = "200px")
     ),
     card_body(
       uiOutput(ns("soil_data_table_wrap"))
     )
-  )
+   )
 }
 
 #' @export
@@ -52,12 +55,20 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
       )
     )
 
+    output$show_soildata_btn <- renderUI({
+      icon_dir <- if (show_soiltable()) "up" else "down"
+      icon_html <- sprintf('<i class="fa-solid fa-arrow-%s"></i>', icon_dir)
+      actionButton(
+        ns("show_soildata"),
+        HTML(icon_html),
+        class = "primary-button",
+        `aria-expanded` = tolower(as.character(show_soiltable())),
+        title = if (show_soiltable()) "Collapse soil data table" else "Expand soil data table",
+      )
+    })
+    
     observeEvent(input$show_soildata, {
-      if (input$show_soildata == TRUE) {
-        show_soiltable(TRUE)
-      } else {
-        show_soiltable(FALSE)
-      }
+      show_soiltable(!show_soiltable())
     })
 
     observeEvent(show_soiltable(), ignoreInit = TRUE, {
