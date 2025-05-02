@@ -111,7 +111,7 @@ box::use(
 box::use(
   app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border, preload_summary_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
-  app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server]
+  app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -213,40 +213,13 @@ rtbm_app_server <- function(id, tab_selected) {
     # --- Initial Data Loading ---
     # Load Finland border and bird species info only when tab is selected
     observeEvent(tab_selected(), ignoreInit = TRUE, {
-      # Load Finland border (only on first tab selection)
-      if (is.null(finland_border())) { # Ensure reactive getter is used
-        print("Loading Finland border on tab selection...")
-        finland_border(get_finland_border())
+      # Load bird species data immediately so the dropdown is populated
+      if (is.null(bird_spp_info())) {
+         print("Loading bird species info on tab selection...")
+         bird_spp_info(load_bird_species_info())
       }
-
-      # Load bird species data
-      bird_spp_info(load_bird_species_info())
-
-      # Preload summary data
-      print("Preloading summary data...")
-      summary_data(preload_summary_data()) # Call the new function
-
-      # Placeholder: Log if summary data loaded (or failed)
-      if (!is.null(summary_data())) {
-        print(paste("Summary data loaded successfully. Rows:", nrow(summary_data())))
-      } else {
-        print("Failed to preload summary data.")
-      }
-    })
-
-    # --- Sidebar Collapse/Expand Logic ---
-    observeEvent(input$collapseSidebar, {
-      removeClass(id = "sidebarCol", class = "d-md-block") # Hide on medium+ screens
-      addClass(id = "sidebarCol", class = "d-none") # Ensure it's hidden
-      removeClass(id = "collapsedSidebar", class = "d-none") # Show the collapsed icon bar
-      removeClass(id = "mapCol", class = "col-md-9")
-      addClass(id = "mapCol", class = "col-md-11") # Expand map column
-    })
-
-    observeEvent(input$expandSidebar, {
-      addClass(id = "sidebarCol", class = "d-md-block") # Show on medium+ screens
-      removeClass(id = "sidebarCol", class = "d-none") # Ensure it's visible
-      addClass(id = "mapCol", class = "col-md-9")
+      # Other initial loads (border, summary) are deferred to button click
+      print("RTBM Tab selected.")
     })
 
     # --- Sidebar Module Call ---
@@ -315,21 +288,51 @@ rtbm_app_server <- function(id, tab_selected) {
     # --- Data Loading Triggered by Button ---
     # Observe the button click from the sidebar
     observeEvent(sidebar_returns$load_button_clicked(), {
-      # Ensure the trigger isn't firing on initial load (value > 0)
-      req(sidebar_returns$load_button_clicked() > 0)
+      # --- Load deferred initial data if not already loaded ---
+      # Use isolate to prevent these from re-triggering the observer
+      isolate({
+        # Load Finland border (only on first button click)
+        if (is.null(finland_border())) { 
+          print("Loading Finland border on button click...")
+          finland_border(get_finland_border())
+        }
+        # Preload summary data (only on first button click)
+        if (is.null(summary_data())) {
+          print("Preloading summary data on button click...")
+          summary_data(preload_summary_data())
+          # Optional: Check if summary data loaded successfully
+          if (!is.null(summary_data())) {
+            print(paste("Summary data preloaded successfully. Rows:", nrow(summary_data())))
+          } else {
+            print("Failed to preload summary data.")
+          }
+        }
+      })
+      # --- End Deferred Initial Data Loading ---
 
-      # Use isolate() to get the current values when the button is clicked
+      # Use isolate to get the latest values ONLY when the button is clicked
       species <- isolate(sidebar_returns$selected_species())
-      date_range <- isolate(sidebar_returns$date_range())
-      spp_info <- isolate(bird_spp_info())
+      date_range_val <- isolate(sidebar_returns$date_range())
 
-      # Basic validation
-      req(species, date_range, spp_info)
-      start_date <- date_range[1]
-      end_date <- date_range[2]
+      req(species, date_range_val)
 
-      # Fetch scientific name
-      scientific_name_val <- spp_info |>
+      start_date <- date_range_val[1]
+      end_date <- date_range_val[2]
+
+      # Validate inputs
+      if (is.null(species) || species == "" || is.na(species)) {
+        output$statusMsg <- renderUI({
+          div(
+            class = "alert alert-danger",
+            role = "alert",
+            "Error: Please select a species."
+          )
+        })
+        return()
+      }
+
+      # Find scientific name
+      scientific_name_val <- isolate(bird_spp_info()) |>
         filter(common_name == species) |>
         pull(scientific_name)
 
