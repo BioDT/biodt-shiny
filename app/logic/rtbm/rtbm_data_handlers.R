@@ -1,16 +1,18 @@
 # /app/logic/rtbm/rtbm_data_handlers.R
 
 box::use(
-  httr2[request, req_perform, resp_body_json, req_retry, resp_status, resp_body_string],
+  httr2[request, req_perform, resp_body_json, req_retry, resp_status, resp_body_string, is_error, resp_status_desc],
   jsonlite[read_json, write_json, fromJSON],
-  dplyr[arrange, mutate, filter, bind_rows, rename],
-  lubridate[as_date],
+  dplyr[arrange, mutate, filter, bind_rows, rename, group_by, summarise, across, everything, left_join],
+  lubridate[as_date, today, days, ymd],
   fs[dir_create, dir_exists, dir_ls, file_exists, path_file],
   config[get],
-  purrr[safely, map, discard],
+  purrr[safely, map, discard, map_dfr, possibly, list_rbind],
   stringr[str_replace, str_extract],
   arrow[read_parquet],
   tibble[as_tibble, tibble],
+  tidyr[pivot_wider, unnest],
+  glue[glue],
   sf[st_read, st_bbox, st_crs, st_as_sfc] # Added sf functions
 )
 
@@ -25,6 +27,7 @@ local_bird_info_path <- file.path(rtbm_data_path, "bird_info.json")
 if (!dir_exists(rtbm_parquet_path)) dir_create(rtbm_parquet_path, recurse = TRUE)
 
 bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
+s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
 
 # --- Data Loading Functions ---
 
@@ -329,4 +332,135 @@ get_finland_border <- function(base_path = base_data_path) { # Use snake_case co
     warning("Finland border file not found ('", finland_file, "'), using a bounding box instead.")
     create_finland_bbox()
   }
+}
+
+# --- Web Portal Summary Data ---
+
+#' Preload Bird Summary Data from Web Portal
+#'
+#' Fetches daily bird observation summary data from the A3S web portal for a
+#' given date range, aggregates counts per species per day, and returns a
+#' summarized data frame.
+#'
+#' @param start_date Date object or string (YYYY-MM-DD). The start date for fetching data.
+#'                   Defaults to "2025-01-16".
+#' @param end_date Date object or string (YYYY-MM-DD). The end date for fetching data.
+#'                 Defaults to yesterday's date.
+#' @return A tibble where the first column is `date` and subsequent columns
+#'         represent bird species, containing the total daily observation count.
+#'         Returns NULL if no data can be fetched or processed.
+#'         Example format:
+#'         | date       | Bird A | Bird B | ... |
+#'         |------------|-------|-------|-----|
+#'         | 2025-05-01 | 100   | 200   | ... |
+#'         | 2025-05-02 | 120   | 180   | ... |
+#' @export
+preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
+  # --- Input Validation and Date Setup ---
+  start_date <- tryCatch(ymd(start_date), error = function(e) stop("Invalid start_date format. Use YYYY-MM-DD."))
+
+  if (is.null(end_date)) {
+    end_date <- today() - days(1)
+  } else {
+    end_date <- tryCatch(ymd(end_date), error = function(e) stop("Invalid end_date format. Use YYYY-MM-DD."))
+  }
+
+  if (start_date > end_date) {
+    stop("start_date cannot be after end_date.")
+  }
+
+  date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
+  base_url <- "https://2007581-webportal.a3s.fi/daily/"
+
+  # --- Helper function to fetch and process data for a single date ---
+  fetch_and_process_date <- function(current_date) {
+    date_str <- format(current_date, "%Y-%m-%d")
+    url <- glue(base_url, "{date_str}/web_portal_summary_data.json")
+    message("Fetching data for: ", date_str, " from ", url)
+
+    # Safely perform request and parse JSON
+    safe_req_perform <- possibly(req_perform, otherwise = NULL)
+    safe_from_json <- possibly(fromJSON, otherwise = NULL)
+
+    resp <- request(url) |>
+      req_retry(max_tries = 2, is_transient = \(resp) resp_status(resp) %in% c(429, 500, 503)) |>
+      safe_req_perform()
+
+    if (is.null(resp) || is_error(resp) || resp_status(resp) != 200) {
+      status_msg <- if (!is.null(resp)) resp_status_desc(resp) else "Connection error"
+      warning(glue("Failed to fetch data for {date_str}: {status_msg}"))
+      return(NULL)
+    }
+
+    json_data <- resp |>
+      resp_body_string() |>
+      safe_from_json(simplifyVector = FALSE) # Keep structure for processing
+
+    if (is.null(json_data) || length(json_data) == 0) {
+      warning(glue("No valid JSON data found or failed to parse for {date_str}"))
+      return(NULL)
+    }
+
+    # Process the potentially nested list structure to sum counts by species
+    # Assuming json_data is a list of sites, each with an 'observations' list
+    daily_summary <- tryCatch(
+      {
+        list_rbind(lapply(json_data, function(site) {
+          if (is.null(site$observations) || length(site$observations) == 0) {
+            return(NULL)
+          }
+          # Ensure observations is a list of lists/dataframes
+          obs_list <- site$observations
+          if (!is.list(obs_list[[1]])) { # Handle cases where it might be flat already
+            # Assuming a structure like list(list(species="A", count=1), list(species="B", count=2))
+            obs_df <- list_rbind(obs_list, names_to = NULL)
+          } else {
+            obs_df <- list_rbind(obs_list, names_to = NULL)
+          }
+          if (!all(c("species", "count") %in% names(obs_df))) {
+            warning(glue("Missing 'species' or 'count' in observations for a site on {date_str}"))
+            return(NULL)
+          }
+          # Ensure count is numeric
+          obs_df$count <- as.numeric(obs_df$count)
+          return(obs_df[, c("species", "count"), drop = FALSE])
+        })) |>
+          filter(!is.na(species), !is.na(count)) |>
+          group_by(species) |>
+          summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop")
+      },
+      error = function(e) {
+        warning(glue("Error processing JSON structure for {date_str}: {e$message}"))
+        return(NULL)
+      }
+    )
+
+    if (is.null(daily_summary) || nrow(daily_summary) == 0) {
+      return(NULL)
+    }
+
+    # Add date column
+    daily_summary$date <- current_date
+    return(daily_summary)
+  }
+
+  # --- Fetch data for all dates and combine ---
+  all_data_long <- map_dfr(date_sequence, fetch_and_process_date)
+
+  if (nrow(all_data_long) == 0) {
+    warning("No summary data could be fetched or processed for the specified date range.")
+    return(NULL)
+  }
+
+  # --- Pivot to wide format ---
+  summary_data_wide <- all_data_long |>
+    pivot_wider(
+      names_from = species,
+      values_from = total_count,
+      values_fill = 0 # Replace missing counts (NA) with 0
+    ) |>
+    arrange(date) # Ensure chronological order
+
+  message("Successfully preloaded summary data from ", start_date, " to ", end_date)
+  return(summary_data_wide)
 }
