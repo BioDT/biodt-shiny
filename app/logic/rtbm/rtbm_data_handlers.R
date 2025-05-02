@@ -1,7 +1,7 @@
 # /app/logic/rtbm/rtbm_data_handlers.R
 
 box::use(
-  httr2[request, req_perform, resp_body_json, req_retry, resp_status, resp_body_string, is_error, resp_status_desc],
+  httr2[request, req_perform, resp_body_json, req_retry, resp_status, resp_body_string, resp_status_desc],
   jsonlite[read_json, write_json, fromJSON],
   dplyr[arrange, mutate, filter, bind_rows, rename, group_by, summarise, across, everything, left_join],
   lubridate[as_date, today, days, ymd],
@@ -386,7 +386,8 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
       req_retry(max_tries = 2, is_transient = \(resp) resp_status(resp) %in% c(429, 500, 503)) |>
       safe_req_perform()
 
-    if (is.null(resp) || is_error(resp) || resp_status(resp) != 200) {
+    # Check if request failed (possibly returned NULL) or status is not 200 OK
+    if (is.null(resp) || resp_status(resp) != 200) { 
       status_msg <- if (!is.null(resp)) resp_status_desc(resp) else "Connection error"
       warning(glue("Failed to fetch data for {date_str}: {status_msg}"))
       return(NULL)
@@ -394,40 +395,35 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
 
     json_data <- resp |>
       resp_body_string() |>
-      safe_from_json(simplifyVector = FALSE) # Keep structure for processing
+      # Parse directly, assuming top-level object has species names as keys
+      safe_from_json(simplifyVector = TRUE) # simplifyVector can help if counts are vectors
 
     if (is.null(json_data) || length(json_data) == 0) {
       warning(glue("No valid JSON data found or failed to parse for {date_str}"))
       return(NULL)
     }
 
-    # Process the potentially nested list structure to sum counts by species
-    # Assuming json_data is a list of sites, each with an 'observations' list
+    # Process the named list structure: { "SpeciesA": [counts], "SpeciesB": [counts], ... }
     daily_summary <- tryCatch(
       {
-        list_rbind(lapply(json_data, function(site) {
-          if (is.null(site$observations) || length(site$observations) == 0) {
-            return(NULL)
-          }
-          # Ensure observations is a list of lists/dataframes
-          obs_list <- site$observations
-          if (!is.list(obs_list[[1]])) { # Handle cases where it might be flat already
-            # Assuming a structure like list(list(species="A", count=1), list(species="B", count=2))
-            obs_df <- list_rbind(obs_list, names_to = NULL)
+        species_names <- names(json_data)
+        if (is.null(species_names) || length(species_names) == 0) {
+           warning(glue("JSON for {date_str} is not a named list or is empty after parsing."))
+           return(NULL)
+        }
+        
+        # Iterate through species names, sum counts, create tibble
+        map_dfr(species_names, function(spp_name) {
+          counts <- json_data[[spp_name]]
+          # Ensure counts is numeric and handle potential NULLs/errors
+          if (is.null(counts) || !is.numeric(counts)) {
+              warning(glue("Invalid or non-numeric counts for species '{spp_name}' on {date_str}"))
+              total_count <- 0 # Or NA depending on desired handling
           } else {
-            obs_df <- list_rbind(obs_list, names_to = NULL)
+              total_count <- sum(counts, na.rm = TRUE)
           }
-          if (!all(c("species", "count") %in% names(obs_df))) {
-            warning(glue("Missing 'species' or 'count' in observations for a site on {date_str}"))
-            return(NULL)
-          }
-          # Ensure count is numeric
-          obs_df$count <- as.numeric(obs_df$count)
-          return(obs_df[, c("species", "count"), drop = FALSE])
-        })) |>
-          filter(!is.na(species), !is.na(count)) |>
-          group_by(species) |>
-          summarise(total_count = sum(count, na.rm = TRUE), .groups = "drop")
+          tibble(species = spp_name, total_count = total_count)
+        })
       },
       error = function(e) {
         warning(glue("Error processing JSON structure for {date_str}: {e$message}"))

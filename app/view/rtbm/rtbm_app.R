@@ -109,7 +109,7 @@ box::use(
 
 # Local modules
 box::use(
-  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border],
+  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border, preload_summary_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server]
 )
@@ -208,18 +208,30 @@ rtbm_app_server <- function(id, tab_selected) {
     available_dates <- reactiveVal(NULL)
     bird_spp_info <- reactiveVal(NULL)
     species_data <- reactiveVal(NULL) # Data per species for the map
+    summary_data <- reactiveVal(NULL) # Preloaded summary data
 
     # --- Initial Data Loading ---
     # Load Finland border and bird species info only when tab is selected
     observeEvent(tab_selected(), ignoreInit = TRUE, {
       # Load Finland border (only on first tab selection)
-      if (is.null(finland_border)) {
+      if (is.null(finland_border())) { # Ensure reactive getter is used
         print("Loading Finland border on tab selection...")
-        finland_border <<- get_finland_border()
+        finland_border(get_finland_border())
       }
 
       # Load bird species data
       bird_spp_info(load_bird_species_info())
+
+      # Preload summary data
+      print("Preloading summary data...")
+      summary_data(preload_summary_data()) # Call the new function
+
+      # Placeholder: Log if summary data loaded (or failed)
+      if (!is.null(summary_data())) {
+        print(paste("Summary data loaded successfully. Rows:", nrow(summary_data())))
+      } else {
+        print("Failed to preload summary data.")
+      }
     })
 
     # --- Sidebar Collapse/Expand Logic ---
@@ -287,20 +299,20 @@ rtbm_app_server <- function(id, tab_selected) {
             if (length(valid_indices) > 0) {
               dates_in_range <- sort(unique(file_dates[valid_indices]))
               available_dates(dates_in_range) # Update the main app's reactive
-                    } else {
+            } else {
               available_dates(NULL)
             }
-                  } else {
+          } else {
             available_dates(NULL)
-                  }
-                } else {
+          }
+        } else {
           available_dates(NULL)
         }
       },
       ignoreNULL = FALSE
     ) # Trigger on initial load
 
-    # --- Data Loading Triggered by Button --- 
+    # --- Data Loading Triggered by Button ---
     # Observe the button click from the sidebar
     observeEvent(sidebar_returns$load_button_clicked(), {
       # Ensure the trigger isn't firing on initial load (value > 0)
@@ -329,7 +341,7 @@ rtbm_app_server <- function(id, tab_selected) {
             "Error: Could not find scientific name for the selected species."
           )
         })
-          return()
+        return()
       }
 
       # Update status message
@@ -349,7 +361,7 @@ rtbm_app_server <- function(id, tab_selected) {
         {
           incProgress(0.2, detail = "Fetching observation data")
           result <- load_parquet_data(
-              scientific_name = scientific_name_val,
+            scientific_name = scientific_name_val,
             start_date = start_date,
             end_date = end_date
           )
@@ -363,47 +375,47 @@ rtbm_app_server <- function(id, tab_selected) {
                 "No data available for the selected species and date range. Try a different date range or species."
               )
             })
-              available_dates(NULL)
-              species_data(NULL)
-              return()
-            }
+            available_dates(NULL)
+            species_data(NULL)
+            return()
+          }
 
-            # Check if the base directory for the species exists before trying to load
-            data_base_path <- config::get("data_path")
-            if (is.null(data_base_path)) {
-              output$statusMsg <- renderUI({
-                div(class = "alert alert-danger", role = "alert", "Configuration Error: 'data_path' not set.")
-              })
-              available_dates(NULL)
-              species_data(NULL)
-              return()
-            }
-            species_parquet_dir <- file.path(
-              data_base_path,
-              "rtbm",
-              "parquet",
-              paste0("species=", scientific_name_val)
-            )
-            if (!fs::dir_exists(species_parquet_dir)) {
-              output$statusMsg <- renderUI({
-                div(
-                  class = "alert alert-warning",
-                  role = "alert",
-                  paste0(
-                    "Data for '", species, "' is currently unavailable or has not been processed yet.",
-                    " Please check back later or select a different species."
-                  )
+          # Check if the base directory for the species exists before trying to load
+          data_base_path <- config::get("data_path")
+          if (is.null(data_base_path)) {
+            output$statusMsg <- renderUI({
+              div(class = "alert alert-danger", role = "alert", "Configuration Error: 'data_path' not set.")
+            })
+            available_dates(NULL)
+            species_data(NULL)
+            return()
+          }
+          species_parquet_dir <- file.path(
+            data_base_path,
+            "rtbm",
+            "parquet",
+            paste0("species=", scientific_name_val)
+          )
+          if (!fs::dir_exists(species_parquet_dir)) {
+            output$statusMsg <- renderUI({
+              div(
+                class = "alert alert-warning",
+                role = "alert",
+                paste0(
+                  "Data for '", species, "' is currently unavailable or has not been processed yet.",
+                  " Please check back later or select a different species."
                 )
-              })
-              available_dates(NULL)
-              species_data(NULL)
-              return()
+              )
+            })
+            available_dates(NULL)
+            species_data(NULL)
+            return()
           }
 
           # Store dates and data paths
           available_dates(result$dates)
           species_data(list(
-              scientific_name = scientific_name_val,
+            scientific_name = scientific_name_val,
             data_paths = result$data_paths
           ))
 
@@ -418,9 +430,9 @@ rtbm_app_server <- function(id, tab_selected) {
               class = "alert alert-success",
               role = "alert",
               paste0(
-                  "Loaded data for ",
-                  length(result$dates),
-                  " dates. ",
+                "Loaded data for ",
+                length(result$dates),
+                " dates. ",
                 "Use the timeline slider or animation controls to view changes over time."
               )
             )
@@ -428,10 +440,9 @@ rtbm_app_server <- function(id, tab_selected) {
 
           # Update map with the first frame (now that current_date is set)
           map_functions$update_map_with_frame()
-          }
-        )
-      }
-    )
+        }
+      )
+    })
 
     # --- Map Module Call ---
     map_functions <- map_module_server(
