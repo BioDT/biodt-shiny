@@ -86,10 +86,10 @@ rtbm_sidebar_ui <- function(id) {
       ),
       # Add Load Data button here
       actionButton(
-          inputId = ns("loadDataButton"),
-          label = "Load Data",
-          icon = icon("sync"),
-          class = "btn btn-primary w-100 mt-3 mb-3" # Changed btn-success to btn-primary
+        inputId = ns("loadDataButton"),
+        label = "Load Data",
+        icon = icon("sync"),
+        class = "btn btn-primary w-100 mt-3 mb-3" # Changed btn-success to btn-primary
       ),
       # Conditional UI for map controls (except species picker)
       uiOutput(ns("conditionalMapControls"))

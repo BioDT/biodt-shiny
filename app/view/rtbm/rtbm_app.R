@@ -215,8 +215,8 @@ rtbm_app_server <- function(id, tab_selected) {
     observeEvent(tab_selected(), ignoreInit = TRUE, {
       # Load bird species data immediately so the dropdown is populated
       if (is.null(bird_spp_info())) {
-         print("Loading bird species info on tab selection...")
-         bird_spp_info(load_bird_species_info())
+        print("Loading bird species info on tab selection...")
+        bird_spp_info(load_bird_species_info())
       }
       # Other initial loads (border, summary) are deferred to button click
       print("RTBM Tab selected.")
@@ -288,163 +288,187 @@ rtbm_app_server <- function(id, tab_selected) {
     # --- Data Loading Triggered by Button ---
     # Observe the button click from the sidebar
     observeEvent(sidebar_returns$load_button_clicked(), {
-      # --- Load deferred initial data if not already loaded ---
-      # Use isolate to prevent these from re-triggering the observer
-      isolate({
-        # Load Finland border (only on first button click)
-        if (is.null(finland_border())) { 
-          print("Loading Finland border on button click...")
-          finland_border(get_finland_border())
-        }
-        # Preload summary data (only on first button click)
-        if (is.null(summary_data())) {
-          print("Preloading summary data on button click...")
-          summary_data(preload_summary_data())
-          # Optional: Check if summary data loaded successfully
-          if (!is.null(summary_data())) {
-            print(paste("Summary data preloaded successfully. Rows:", nrow(summary_data())))
-          } else {
-            print("Failed to preload summary data.")
-          }
-        }
-      })
-      # --- End Deferred Initial Data Loading ---
-
-      # Use isolate to get the latest values ONLY when the button is clicked
+      # Get essential inputs using isolate
+      selected_view <- isolate(sidebar_returns$selected_view())
       species <- isolate(sidebar_returns$selected_species())
       date_range_val <- isolate(sidebar_returns$date_range())
 
-      req(species, date_range_val)
-
-      start_date <- date_range_val[1]
-      end_date <- date_range_val[2]
-
-      # Validate inputs
-      if (is.null(species) || species == "" || is.na(species)) {
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-danger",
-            role = "alert",
-            "Error: Please select a species."
-          )
+      # --- Conditional Data Loading based on View ---
+      if (selected_view == "map") {
+        print("Load Data clicked for Map view")
+        # --- Load Map-Specific Data ---
+        # Load Finland border (only on first button click for map)
+        isolate({
+          if (is.null(finland_border())) {
+            print("Loading Finland border on button click...")
+            finland_border(get_finland_border())
+          }
         })
-        return()
-      }
 
-      # Find scientific name
-      scientific_name_val <- isolate(bird_spp_info()) |>
-        filter(common_name == species) |>
-        pull(scientific_name)
-
-      if (length(scientific_name_val) == 0) {
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-danger",
-            role = "alert",
-            "Error: Could not find scientific name for the selected species."
-          )
-        })
-        return()
-      }
-
-      # Update status message
-      output$statusMsg <- renderUI({
-        div(
-          class = "alert alert-info",
-          role = "alert",
-          "Loading data... This may take a few moments, especially if new data needs to be downloaded."
-        )
-      })
-
-      # Use withProgress to show progress
-      result <- NULL
-      withProgress(
-        message = "Processing data",
-        value = 0,
-        {
-          incProgress(0.2, detail = "Fetching observation data")
-          result <- load_parquet_data(
-            scientific_name = scientific_name_val,
-            start_date = start_date,
-            end_date = end_date
-          )
-          incProgress(0.3, detail = "Processing observations")
-
-          if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
-            output$statusMsg <- renderUI({
-              div(
-                class = "alert alert-warning",
-                role = "alert",
-                "No data available for the selected species and date range. Try a different date range or species."
-              )
-            })
-            available_dates(NULL)
-            species_data(NULL)
-            return()
-          }
-
-          # Check if the base directory for the species exists before trying to load
-          data_base_path <- config::get("data_path")
-          if (is.null(data_base_path)) {
-            output$statusMsg <- renderUI({
-              div(class = "alert alert-danger", role = "alert", "Configuration Error: 'data_path' not set.")
-            })
-            available_dates(NULL)
-            species_data(NULL)
-            return()
-          }
-          species_parquet_dir <- file.path(
-            data_base_path,
-            "rtbm",
-            "parquet",
-            paste0("species=", scientific_name_val)
-          )
-          if (!fs::dir_exists(species_parquet_dir)) {
-            output$statusMsg <- renderUI({
-              div(
-                class = "alert alert-warning",
-                role = "alert",
-                paste0(
-                  "Data for '", species, "' is currently unavailable or has not been processed yet.",
-                  " Please check back later or select a different species."
-                )
-              )
-            })
-            available_dates(NULL)
-            species_data(NULL)
-            return()
-          }
-
-          # Store dates and data paths
-          available_dates(result$dates)
-          species_data(list(
-            scientific_name = scientific_name_val,
-            data_paths = result$data_paths
-          ))
-
-          # Set the current date in the sidebar so the map module has it
-          if (length(result$dates) > 0) {
-            sidebar_returns$set_current_date(result$dates[1])
-          }
-
-          # Update status message
+        # Validate species and date range inputs for map view
+        req(species, date_range_val)
+        start_date <- date_range_val[1]
+        end_date <- date_range_val[2]
+        if (is.null(species) || species == "" || is.na(species)) {
           output$statusMsg <- renderUI({
             div(
-              class = "alert alert-success",
+              class = "alert alert-danger",
               role = "alert",
-              paste0(
-                "Loaded data for ",
-                length(result$dates),
-                " dates. ",
-                "Use the timeline slider or animation controls to view changes over time."
-              )
+              "Error: Please select a species for the map view."
             )
           })
-
-          # Update map with the first frame (now that current_date is set)
-          map_functions$update_map_with_frame()
+          return()
         }
-      )
+
+        # Find scientific name
+        scientific_name_val <- isolate(bird_spp_info()) |>
+          filter(common_name == species) |>
+          pull(scientific_name)
+
+        if (length(scientific_name_val) == 0) {
+          output$statusMsg <- renderUI({
+            div(
+              class = "alert alert-danger",
+              role = "alert",
+              "Error: Could not find scientific name for the selected species."
+            )
+          })
+          return()
+        }
+
+        # Update status message for loading
+        output$statusMsg <- renderUI({
+          div(
+            class = "alert alert-info",
+            role = "alert",
+            "Loading map data... This may take a few moments."
+          )
+        })
+
+        # Load species observation data (parquet files)
+        result <- NULL
+        withProgress(
+          message = "Processing map data",
+          value = 0,
+          {
+            incProgress(0.2, detail = "Fetching observation data")
+            result <- load_parquet_data(
+              scientific_name = scientific_name_val,
+              start_date = start_date,
+              end_date = end_date
+            )
+            incProgress(0.3, detail = "Processing observations")
+
+            # Handle no data scenario
+            if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
+              output$statusMsg <- renderUI({
+                div(
+                  class = "alert alert-warning",
+                  role = "alert",
+                  "No map data available for the selected species and date range."
+                )
+              })
+              available_dates(NULL)
+              species_data(NULL)
+              return()
+            }
+
+            # Check if species directory exists (redundant check, load_parquet_data should handle)
+            # ... (Consider removing if load_parquet_data is robust)
+
+            # Store dates and data paths
+            available_dates(result$dates)
+            species_data(list(
+              scientific_name = scientific_name_val,
+              data_paths = result$data_paths
+            ))
+
+            # Set the current date in the sidebar
+            if (length(result$dates) > 0) {
+              sidebar_returns$set_current_date(result$dates[1])
+            }
+
+            # Update status message on success
+            output$statusMsg <- renderUI({
+              div(
+                class = "alert alert-success",
+                role = "alert",
+                paste0("Loaded map data for ", length(result$dates), " dates.")
+              )
+            })
+
+            # Update map with the first frame
+            map_functions$update_map_with_frame()
+          }
+        )
+      } else if (selected_view %in% c("fig3", "fig4", "fig5")) {
+        print(paste("Load Data clicked for Summary view:", selected_view))
+        # --- Load Summary-Specific Data ---
+        req(date_range_val) # Assuming summary might need date range
+        start_date <- date_range_val[1]
+        end_date <- date_range_val[2]
+
+        # Update status message for loading
+        output$statusMsg <- renderUI({
+          div(
+            class = "alert alert-info",
+            role = "alert",
+            "Loading summary data..."
+          )
+        })
+
+        # Load summary data if not already loaded
+        # Pass date range if preload_summary_data uses it (modify function if needed)
+        isolate({
+          if (is.null(summary_data())) {
+            print("Preloading summary data on button click...")
+            summary_data(preload_summary_data(start_date = start_date, end_date = end_date))
+
+            if (!is.null(summary_data())) {
+              print(paste("Summary data preloaded successfully. Rows:", nrow(summary_data())))
+              output$statusMsg <- renderUI({
+                div(
+                  class = "alert alert-success",
+                  role = "alert",
+                  "Summary data loaded successfully."
+                )
+              })
+            } else {
+              print("Failed to preload summary data.")
+              output$statusMsg <- renderUI({
+                div(
+                  class = "alert alert-danger",
+                  role = "alert",
+                  "Failed to load summary data."
+                )
+              })
+            }
+          } else {
+            # Data already loaded, update status
+            print("Summary data already loaded.")
+            output$statusMsg <- renderUI({
+              div(
+                class = "alert alert-success",
+                role = "alert",
+                "Summary data already loaded."
+              )
+            })
+          }
+        })
+        # TODO: Add logic here to render the specific summary plot (fig3/4/5) based on selected_view
+        # This might involve calling another module or rendering logic within this module.
+      } else {
+        # Handle unknown view selection
+        print(paste("Load Data clicked for unknown view:", selected_view))
+        output$statusMsg <- renderUI({
+          div(
+            class = "alert alert-warning",
+            role = "alert",
+            paste("Unknown view selected:", selected_view)
+          )
+        })
+      }
+      # --- End Conditional Data Loading ---
     })
 
     # --- Map Module Call ---

@@ -195,7 +195,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           scientific_name(NULL)
           song_url(NULL)
         }
-        
+
         # Call update_bird_info_card AFTER details are potentially updated
         update_bird_info_card()
       },
@@ -480,14 +480,14 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                   debug_msg <- paste0(
                     "Points: ", nrow(points_data),
                     " | Intensity: ",
-                    if (length(valid_intensities) > 0) paste0(min(valid_intensities, na.rm=TRUE), " to ", max(valid_intensities, na.rm=TRUE)) else "NA",
+                    if (length(valid_intensities) > 0) paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE)) else "NA",
                     " | Lon: ", lon_range[1], " to ", lon_range[2],
                     " | Lat: ", lat_range[1], " to ", lat_range[2]
                   )
                   proxy |>
                     addControl(
                       html = div(
-                        style = "background: rgba(255,255,255,0.8); padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc;", 
+                        style = "background: rgba(255,255,255,0.8); padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc;",
                         debug_msg
                       ),
                       position = "topleft",
