@@ -36,6 +36,7 @@ box::use(
     renderPrint,
     textOutput,
     plotOutput,
+    conditionalPanel # Add conditionalPanel
   ],
 
   # Base R functions needed
@@ -103,12 +104,12 @@ box::use(
   sf[st_read, st_drop_geometry, st_as_sf, st_bbox, st_coordinates, st_as_sfc, st_crs],
 
   # Basic utilities
-  utils[head, tail],
+  utils[head, tail, str],
   jsonlite[fromJSON, toJSON],
   fs[dir_exists],
   glue[glue],
   config[get],
-  . / rtbm_summary_plots[create_summary_plots],
+  DT[datatable, renderDT, DTOutput],
 )
 
 # Local modules
@@ -116,6 +117,7 @@ box::use(
   app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border, preload_summary_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
+  app / view / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -197,7 +199,27 @@ rtbm_app_ui <- function(id, i18n) {
     card(
       card_header("Summary Statistics"),
       card_body(
-        plotOutput(ns("summary_plot")) # Placeholder for the new plot
+        # Add input to choose plot type
+        selectInput(
+          ns("summary_plot_choice"),
+          label = "Select View:", # Changed label
+          choices = c(
+            "Overall Summary" = "overall",
+            "Top 5 Species Rank Plot" = "rank", # Clarified label
+            "Top 5 Species Table" = "table" # Added table option
+          ),
+          selected = "overall"
+        ),
+        # Conditional UI for Plot
+        conditionalPanel(
+          condition = glue::glue("input['{ns('summary_plot_choice')}'] != 'table'"),
+          plotOutput(ns("summary_plot"))
+        ),
+        # Conditional UI for Table
+        conditionalPanel(
+          condition = glue::glue("input['{ns('summary_plot_choice')}'] == 'table'"),
+          DTOutput(ns("summary_table")) # Placeholder for the table
+        )
       )
     )
   )
@@ -230,7 +252,7 @@ rtbm_app_server <- function(id, tab_selected) {
         bird_spp_info(load_bird_species_info())
       }
       # Other initial loads (border, summary) are deferred to button click
-      print("RTBM Tab selected.")
+      # print("RTBM Tab selected.")
     })
 
     # --- Sidebar Module Call ---
@@ -428,42 +450,23 @@ rtbm_app_server <- function(id, tab_selected) {
           )
         })
 
-        # Load summary data if not already loaded
-        # Pass date range if preload_summary_data uses it (modify function if needed)
+        # Use isolate to prevent re-triggering when summary_data itself updates
         isolate({
-          if (is.null(summary_data())) {
-            print("Preloading summary data on button click...")
-            summary_data(preload_summary_data(start_date = start_date, end_date = end_date))
+          print(paste("Attempting to load summary data for range:", start_date, "to", end_date))
+          loaded_data <- preload_summary_data(start_date = start_date, end_date = end_date)
 
-            if (!is.null(summary_data())) {
-              print(paste("Summary data preloaded successfully. Rows:", nrow(summary_data())))
-              output$statusMsg <- renderUI({
-                div(
-                  class = "alert alert-success",
-                  role = "alert",
-                  "Summary data loaded successfully."
-                )
-              })
-            } else {
-              print("Failed to preload summary data.")
-              output$statusMsg <- renderUI({
-                div(
-                  class = "alert alert-danger",
-                  role = "alert",
-                  "Failed to load summary data."
-                )
-              })
-            }
+          # --- Debugging: Check loaded data dimensions --- #
+          print(paste("Loaded data dimensions:", paste(dim(loaded_data), collapse = " x ")))
+          # --- End Debugging --- #
+
+          summary_data(loaded_data)
+
+          if (!is.null(loaded_data)) {
+            print(paste("Summary data loaded successfully on button click. Rows:", nrow(loaded_data)))
+            # No need for success message, plot will render
           } else {
-            # Data already loaded, update status
-            print("Summary data already loaded.")
-            output$statusMsg <- renderUI({
-              div(
-                class = "alert alert-success",
-                role = "alert",
-                "Summary data already loaded."
-              )
-            })
+            print("Failed to load summary data on button click.")
+            # No need for error message, plot will show 'no data'
           }
         })
         # TODO: Add logic here to render the specific summary plot (fig3/4/5) based on selected_view
@@ -484,9 +487,36 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # --- Output: Render Summary Plot ---
     output$summary_plot <- renderPlot({
-      req(summary_data()) # Require summary_data to be available
-      print("Rendering summary plot...")
-      create_summary_plots(summary_data())
+      req(summary_data(), input$summary_plot_choice %in% c("overall", "rank"))
+
+      print(paste("Rendering summary plot:", input$summary_plot_choice))
+
+      # Conditionally call the correct plotting function
+      if (input$summary_plot_choice == "overall") {
+        create_summary_plots(summary_data())
+      } else if (input$summary_plot_choice == "rank") {
+        create_top_species_rank_plot(summary_data())
+      }
+    })
+
+    # --- Output: Render Summary Table ---
+    output$summary_table <- renderDT({
+      req(summary_data(), bird_spp_info(), input$summary_plot_choice == "table")
+
+      print("Rendering summary table...")
+
+      # --- Debug: Check bird_spp_info structure --- #
+      print("Structure of bird_spp_info() before table creation:")
+      print(str(bird_spp_info()))
+      # --- End Debug --- #
+
+      table_data <- create_top_species_table_data(summary_data(), bird_spp_info())
+
+      datatable(table_data,
+        options = list(pageLength = 10),
+        rownames = FALSE,
+        colnames = c("Date", "Vernacular name", "Scientific name", "Count") # Ensure correct display names
+      )
     })
 
     # --- Map Module Call ---
