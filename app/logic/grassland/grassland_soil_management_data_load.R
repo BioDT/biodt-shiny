@@ -121,4 +121,11 @@ read_soil_data_table <- function(file_path) {
 
 #'@export
 read_management_data_table <- function(file_path) {
+  dt <- read_delim(
+    file = file_path,
+    delim = "\t",
+    col_names = TRUE,
+    # show_col_types = FALSE,
+  )
+  return(dt)
 }
