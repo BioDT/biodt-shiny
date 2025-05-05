@@ -34,7 +34,8 @@ box::use(
     showNotification,
     verbatimTextOutput,
     renderPrint,
-    textOutput
+    textOutput,
+    plotOutput,
   ],
 
   # Base R functions needed
@@ -92,7 +93,7 @@ box::use(
   # Date and time handling
   lubridate[as_date, ymd, interval, `%within%`],
   tibble[tibble, as_tibble],
-  stringr[str_replace],
+  stringr[str_extract],
   tidyr[unnest, pivot_longer],
 
   # File handling with arrow (Apache Arrow)
@@ -105,6 +106,9 @@ box::use(
   utils[head, tail],
   jsonlite[fromJSON, toJSON],
   fs[dir_exists],
+  glue[glue],
+  config[get],
+  . / rtbm_summary_plots[create_summary_plots],
 )
 
 # Local modules
@@ -188,7 +192,14 @@ rtbm_app_ui <- function(id, i18n) {
       tags$link(rel = "stylesheet", type = "text/css", href = "styles/main.css")
     ),
     useShinyjs(), # Initialize shinyjs
-    base_layout
+    base_layout,
+    # Add plot output for summary statistics
+    card(
+      card_header("Summary Statistics"),
+      card_body(
+        plotOutput(ns("summary_plot")) # Placeholder for the new plot
+      )
+    )
   )
 }
 
@@ -239,7 +250,7 @@ rtbm_app_server <- function(id, tab_selected) {
         end_date <- sidebar_returns$date_range()[2]
 
         # Find parquet files within the date range (Uses config)
-        data_path <- config::get("data_path") # Get data path from config
+        data_path <- get("data_path") # Get data path from config
         if (is.null(data_path) || !dir_exists(data_path)) {
           warning("Data path not configured or does not exist.")
           available_dates(NULL)
@@ -261,7 +272,7 @@ rtbm_app_server <- function(id, tab_selected) {
 
         if (length(parquet_files) > 0) {
           # Extract dates robustly, handle potential NA
-          file_dates_str <- stringr::str_extract(basename(parquet_files), "\\d{8}")
+          file_dates_str <- str_extract(basename(parquet_files), "\\d{8}")
           file_dates <- ymd(file_dates_str, quiet = TRUE)
           valid_file_indices <- !is.na(file_dates)
 
@@ -469,6 +480,13 @@ rtbm_app_server <- function(id, tab_selected) {
         })
       }
       # --- End Conditional Data Loading ---
+    })
+
+    # --- Output: Render Summary Plot ---
+    output$summary_plot <- renderPlot({
+      req(summary_data()) # Require summary_data to be available
+      print("Rendering summary plot...")
+      create_summary_plots(summary_data())
     })
 
     # --- Map Module Call ---
