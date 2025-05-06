@@ -387,7 +387,7 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
       safe_req_perform()
 
     # Check if request failed (possibly returned NULL) or status is not 200 OK
-    if (is.null(resp) || resp_status(resp) != 200) { 
+    if (is.null(resp) || resp_status(resp) != 200) {
       status_msg <- if (!is.null(resp)) resp_status_desc(resp) else "Connection error"
       warning(glue("Failed to fetch data for {date_str}: {status_msg}"))
       return(NULL)
@@ -408,19 +408,19 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
       {
         species_names <- names(json_data)
         if (is.null(species_names) || length(species_names) == 0) {
-           warning(glue("JSON for {date_str} is not a named list or is empty after parsing."))
-           return(NULL)
+          warning(glue("JSON for {date_str} is not a named list or is empty after parsing."))
+          return(NULL)
         }
-        
+
         # Iterate through species names, sum counts, create tibble
         map_dfr(species_names, function(spp_name) {
           counts <- json_data[[spp_name]]
           # Ensure counts is numeric and handle potential NULLs/errors
           if (is.null(counts) || !is.numeric(counts)) {
-              warning(glue("Invalid or non-numeric counts for species '{spp_name}' on {date_str}"))
-              total_count <- 0 # Or NA depending on desired handling
+            warning(glue("Invalid or non-numeric counts for species '{spp_name}' on {date_str}"))
+            total_count <- 0 # Or NA depending on desired handling
           } else {
-              total_count <- sum(counts, na.rm = TRUE)
+            total_count <- sum(counts, na.rm = TRUE)
           }
           tibble(species = spp_name, total_count = total_count)
         })

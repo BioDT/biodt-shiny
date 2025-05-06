@@ -23,6 +23,7 @@ box::use(
     column,
     fluidRow,
     selectInput,
+    radioButtons,
     insertUI,
     uiOutput,
     renderText,
@@ -117,7 +118,7 @@ box::use(
   app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border, preload_summary_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
-  app / view / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
+  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data]
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -186,6 +187,39 @@ rtbm_app_ui <- function(id, i18n) {
     )
   )
 
+  # UI for Summary Views
+  summary_section <- conditionalPanel(
+    condition = glue::glue("input['{NS(id)('sidebar')}-viewSelector'] == 'summary'"), # Condition on sidebar's viewSelector
+    div(
+      class = "row mt-3",
+      div(
+        class = "col-12",
+        # Radio buttons to choose between summary types
+        radioButtons(
+          inputId = ns("summary_plot_choice"),
+          label = "Choose Summary Type:",
+          choices = c(
+            "Overall Trends" = "overall", # Simplified label
+            "Top 5 Species Rank" = "rank", # Simplified label
+            "Top 5 Species Table" = "table" # Simplified label
+          ),
+          selected = "overall",
+          inline = TRUE
+        ),
+        # Conditional UI for Plot
+        conditionalPanel(
+          condition = glue::glue("input['{ns('summary_plot_choice')}'] == 'overall' || input['{ns('summary_plot_choice')}'] == 'rank'"),
+          plotOutput(ns("summary_plot"))
+        ),
+        # Conditional UI for Table
+        conditionalPanel(
+          condition = glue::glue("input['{ns('summary_plot_choice')}'] == 'table'"),
+          DTOutput(ns("summary_table"))
+        )
+      )
+    )
+  )
+
   # Wrap everything in tagList with styles
   tagList(
     # Include CSS resources
@@ -195,6 +229,7 @@ rtbm_app_ui <- function(id, i18n) {
     ),
     useShinyjs(), # Initialize shinyjs
     base_layout,
+    summary_section,
     # Add plot output for summary statistics
     card(
       card_header("Summary Statistics"),
@@ -326,7 +361,7 @@ rtbm_app_server <- function(id, tab_selected) {
       species <- isolate(sidebar_returns$selected_species())
       date_range_val <- isolate(sidebar_returns$date_range())
 
-      # --- Conditional Data Loading based on View ---
+      # --- Conditional Data Loading based on View Selected ---
       if (selected_view == "map") {
         print("Load Data clicked for Map view")
         # --- Load Map-Specific Data ---
@@ -434,12 +469,12 @@ rtbm_app_server <- function(id, tab_selected) {
             map_functions$update_map_with_frame()
           }
         )
-      } else if (selected_view %in% c("fig3", "fig4", "fig5")) {
-        print(paste("Load Data clicked for Summary view:", selected_view))
+      } else if (selected_view == "summary") { # UPDATED CONDITION
+        print(paste("Load Data clicked for Summary view"))
         # --- Load Summary-Specific Data ---
-        req(date_range_val) # Assuming summary might need date range
-        start_date <- date_range_val[1]
-        end_date <- date_range_val[2]
+        req(date_range_val)
+        start_date_summary <- date_range_val[1]
+        end_date_summary <- date_range_val[2]
 
         # Update status message for loading
         output$statusMsg <- renderUI({
@@ -452,25 +487,24 @@ rtbm_app_server <- function(id, tab_selected) {
 
         # Use isolate to prevent re-triggering when summary_data itself updates
         isolate({
-          print(paste("Attempting to load summary data for range:", start_date, "to", end_date))
-          loaded_data <- preload_summary_data(start_date = start_date, end_date = end_date)
-
-          # --- Debugging: Check loaded data dimensions --- #
-          print(paste("Loaded data dimensions:", paste(dim(loaded_data), collapse = " x ")))
-          # --- End Debugging --- #
+          print(paste("Attempting to load summary data for range:", start_date_summary, "to", end_date_summary))
+          loaded_data <- preload_summary_data(start_date = start_date_summary, end_date = end_date_summary)
 
           summary_data(loaded_data)
 
           if (!is.null(loaded_data)) {
-            print(paste("Summary data loaded successfully on button click. Rows:", nrow(loaded_data)))
-            # No need for success message, plot will render
+            print(paste("Summary data loaded successfully. Rows:", nrow(loaded_data)))
+            # Clear status message or set a success message for summary
+            output$statusMsg <- renderUI({
+              NULL
+            }) # Or a success message
           } else {
-            print("Failed to load summary data on button click.")
-            # No need for error message, plot will show 'no data'
+            print("Failed to load summary data.")
+            output$statusMsg <- renderUI({
+              div(class = "alert alert-danger", role = "alert", "Failed to load summary data.")
+            })
           }
         })
-        # TODO: Add logic here to render the specific summary plot (fig3/4/5) based on selected_view
-        # This might involve calling another module or rendering logic within this module.
       } else {
         # Handle unknown view selection
         print(paste("Load Data clicked for unknown view:", selected_view))

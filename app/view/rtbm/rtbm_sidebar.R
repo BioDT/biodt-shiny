@@ -55,9 +55,7 @@ rtbm_sidebar_ui <- function(id) {
         label = "Select View",
         choices = c(
           "Map" = "map",
-          "Summary: Figure 3" = "fig3",
-          "Summary: Figure 4" = "fig4",
-          "Summary: Figure 5" = "fig5"
+          "Summary" = "summary"
         ),
         selected = "map"
       ),
