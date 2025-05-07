@@ -1,6 +1,5 @@
 # External packages
 box::use(
-  # Shiny fundamentals and UI
   shiny[
     moduleServer,
     NS,
@@ -29,15 +28,22 @@ box::use(
     renderText,
     updateDateRangeInput,
     updateSelectInput,
-    eventReactive,
+    dateRangeInput,
     icon,
-    textInput,
-    showNotification,
-    verbatimTextOutput,
-    renderPrint,
-    textOutput,
+    tagList,
+    tags,
+    div,
+    conditionalPanel,
     plotOutput,
-    conditionalPanel # Add conditionalPanel
+    textOutput,
+    p,
+    br,
+    hr,
+    HTML,
+    wellPanel,
+    checkboxInput,
+    numericInput,
+    helpText
   ],
 
   # Base R functions needed
@@ -71,38 +77,29 @@ box::use(
     card,
     card_header,
     card_body,
-    card_footer,
-    tooltip,
-    value_box,
-    layout_column_wrap,
-    page_fluid,
-    nav_panel,
-    nav_spacer,
-    nav_menu,
-    nav_item,
-    nav,
-    navset_bar,
-    as_fill_carrier,
-    as_fill_item
+    layout_sidebar,
+    sidebar
   ],
 
   # Modern Shiny components
-  shinyjs[useShinyjs, runjs, hide, show, toggle, addClass, removeClass, toggleClass, delay],
+  shinyjs[useShinyjs, runjs, extendShinyjs, disable, enable, toggleState, hidden],
 
   # Data manipulation with tidyverse
-  dplyr[filter, mutate, select, pull, arrange, group_by, summarize, n, between, row_number, slice],
+  dplyr[
+    bind_rows, mutate, across, all_of, distinct, arrange, filter, select,
+    summarise, group_by, pull, n, slice_max, rename, left_join
+  ],
 
-  # Date and time handling
-  lubridate[as_date, ymd, interval, `%within%`],
-  tibble[tibble, as_tibble],
-  stringr[str_extract],
-  tidyr[unnest, pivot_longer],
+  # Data tidying
+  tidyr[
+    replace_na
+  ],
 
   # File handling with arrow (Apache Arrow)
   arrow[read_parquet, write_parquet, Schema, schema],
 
   # Spatial data handling
-  sf[st_read, st_drop_geometry, st_as_sf, st_bbox, st_coordinates, st_as_sfc, st_crs],
+  sf[st_read, st_as_sfc, st_bbox, st_transform, st_crs],
 
   # Basic utilities
   utils[head, tail, str],
@@ -110,15 +107,24 @@ box::use(
   fs[dir_exists],
   glue[glue],
   config[get],
-  DT[datatable, renderDT, DTOutput],
+  DT[DTOutput, renderDT, datatable],
+  leaflet[
+    leaflet, leafletOutput, renderLeaflet, addTiles, fitBounds, clearBounds,
+    addMarkers, markerClusterOptions, clearMarkers, addPolygons, addLegend,
+    addLayersControl, layersControlOptions, addScaleBar, flyTo, awesomeIcons,
+    makeAwesomeIcon
+  ],
+  tibble[tibble, is_tibble],
+  lubridate[as_date, ymd, today, days],
+  purrr[discard, map, map_dfr, map_chr, safely, possibly],
 )
 
 # Local modules
 box::use(
   app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border, preload_summary_data],
+  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
-  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data]
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -187,39 +193,6 @@ rtbm_app_ui <- function(id, i18n) {
     )
   )
 
-  # UI for Summary Views
-  summary_section <- conditionalPanel(
-    condition = glue::glue("input['{NS(id)('sidebar')}-viewSelector'] == 'summary'"), # Condition on sidebar's viewSelector
-    div(
-      class = "row mt-3",
-      div(
-        class = "col-12",
-        # Radio buttons to choose between summary types
-        radioButtons(
-          inputId = ns("summary_plot_choice"),
-          label = "Choose Summary Type:",
-          choices = c(
-            "Overall Trends" = "overall", # Simplified label
-            "Top 5 Species Rank" = "rank", # Simplified label
-            "Top 5 Species Table" = "table" # Simplified label
-          ),
-          selected = "overall",
-          inline = TRUE
-        ),
-        # Conditional UI for Plot
-        conditionalPanel(
-          condition = glue::glue("input['{ns('summary_plot_choice')}'] == 'overall' || input['{ns('summary_plot_choice')}'] == 'rank'"),
-          plotOutput(ns("summary_plot"))
-        ),
-        # Conditional UI for Table
-        conditionalPanel(
-          condition = glue::glue("input['{ns('summary_plot_choice')}'] == 'table'"),
-          DTOutput(ns("summary_table"))
-        )
-      )
-    )
-  )
-
   # Wrap everything in tagList with styles
   tagList(
     # Include CSS resources
@@ -229,32 +202,12 @@ rtbm_app_ui <- function(id, i18n) {
     ),
     useShinyjs(), # Initialize shinyjs
     base_layout,
-    summary_section,
+    # summary_section, # Removed summary_section usage
     # Add plot output for summary statistics
     card(
       card_header("Summary Statistics"),
       card_body(
-        # Add input to choose plot type
-        selectInput(
-          ns("summary_plot_choice"),
-          label = "Select View:", # Changed label
-          choices = c(
-            "Overall Summary" = "overall",
-            "Top 5 Species Rank Plot" = "rank", # Clarified label
-            "Top 5 Species Table" = "table" # Added table option
-          ),
-          selected = "overall"
-        ),
-        # Conditional UI for Plot
-        conditionalPanel(
-          condition = glue::glue("input['{ns('summary_plot_choice')}'] != 'table'"),
-          plotOutput(ns("summary_plot"))
-        ),
-        # Conditional UI for Table
-        conditionalPanel(
-          condition = glue::glue("input['{ns('summary_plot_choice')}'] == 'table'"),
-          DTOutput(ns("summary_table")) # Placeholder for the table
-        )
+        plotOutput(ns("summary_plot")) # Directly output the summary plot
       )
     )
   )
@@ -277,6 +230,9 @@ rtbm_app_server <- function(id, tab_selected) {
     bird_spp_info <- reactiveVal(NULL)
     species_data <- reactiveVal(NULL) # Data per species for the map
     summary_data <- reactiveVal(NULL) # Preloaded summary data
+    loaded_earliest_date <- reactiveVal(NULL)
+    loaded_latest_date <- reactiveVal(NULL)
+    all_summary_data_store <- reactiveVal(tibble(date = as.Date(character(0)))) # Initialize with empty tibble with date column
 
     # --- Initial Data Loading ---
     # Load Finland border and bird species info only when tab is selected
@@ -286,15 +242,13 @@ rtbm_app_server <- function(id, tab_selected) {
         print("Loading bird species info on tab selection...")
         bird_spp_info(load_bird_species_info())
       }
-      # Other initial loads (border, summary) are deferred to button click
-      # print("RTBM Tab selected.")
     })
 
     # --- Sidebar Module Call ---
     sidebar_returns <- rtbm_sidebar_server(
       id = "sidebar",
-      bird_spp_info = bird_spp_info, # Pass bird info IN
-      available_dates = available_dates # Pass available dates IN
+      bird_spp_info = bird_spp_info,
+      available_dates = available_dates
     )
 
     # --- Connect Sidebar Outputs to App Logic ---
@@ -485,26 +439,100 @@ rtbm_app_server <- function(id, tab_selected) {
           )
         })
 
-        # Use isolate to prevent re-triggering when summary_data itself updates
+        # Isolate to prevent re-triggering from dependent reactives changing inside
         isolate({
-          print(paste("Attempting to load summary data for range:", start_date_summary, "to", end_date_summary))
-          loaded_data <- preload_summary_data(start_date = start_date_summary, end_date = end_date_summary)
+          current_earliest <- loaded_earliest_date()
+          current_latest <- loaded_latest_date()
+          current_store <- all_summary_data_store()
 
-          summary_data(loaded_data)
+          # --- Determine date ranges to fetch --- #
+          dates_to_fetch_before <- NULL
+          if (is.null(current_earliest) || start_date_summary < current_earliest) {
+            fetch_end_before <- if (is.null(current_earliest)) end_date_summary else min(end_date_summary, current_earliest - days(1))
+            if (start_date_summary <= fetch_end_before) {
+              dates_to_fetch_before <- list(start = start_date_summary, end = fetch_end_before)
+            }
+          }
 
-          if (!is.null(loaded_data)) {
-            print(paste("Summary data loaded successfully. Rows:", nrow(loaded_data)))
-            # Clear status message or set a success message for summary
-            output$statusMsg <- renderUI({
-              NULL
-            }) # Or a success message
+          dates_to_fetch_after <- NULL
+          if (is.null(current_latest) || end_date_summary > current_latest) {
+            fetch_start_after <- if (is.null(current_latest)) start_date_summary else max(start_date_summary, current_latest + days(1))
+            if (fetch_start_after <= end_date_summary) {
+              dates_to_fetch_after <- list(start = fetch_start_after, end = end_date_summary)
+            }
+          }
+
+          data_before <- NULL
+          if (!is.null(dates_to_fetch_before)) {
+            message(paste("Fetching summary data for range (before):", dates_to_fetch_before$start, "to", dates_to_fetch_before$end))
+            data_before <- preload_summary_data(start_date = dates_to_fetch_before$start, end_date = dates_to_fetch_before$end)
+          }
+
+          data_after <- NULL
+          if (!is.null(dates_to_fetch_after)) {
+            message(paste("Fetching summary data for range (after):", dates_to_fetch_after$start, "to", dates_to_fetch_after$end))
+            data_after <- preload_summary_data(start_date = dates_to_fetch_after$start, end_date = dates_to_fetch_after$end)
+          }
+
+          # --- Combine data --- #
+          # Ensure current_store is a tibble, even if it was NULL or not yet set properly.
+          if (is.null(current_store) || !is_tibble(current_store)) {
+            current_store <- tibble(date = as.Date(character(0)))
+          }
+
+          # Prepare list of data frames to bind, removing NULLs
+          updated_store_list <- list(current_store, data_before, data_after)
+          updated_store_list <- discard(updated_store_list, is.null)
+          updated_store_list <- discard(updated_store_list, ~ nrow(.) == 0) # Remove empty tibbles
+
+          if (length(updated_store_list) > 0) {
+            updated_store <- bind_rows(updated_store_list)
+
+            # Replace NAs (from new species columns) with 0 for count columns
+            cols_to_fill_na <- setdiff(names(updated_store), "date")
+            if (length(cols_to_fill_na) > 0) {
+              updated_store <- updated_store |>
+                mutate(across(all_of(cols_to_fill_na), ~ replace_na(.x, 0)))
+            }
+
+            updated_store <- updated_store |>
+              distinct(date, .keep_all = TRUE) |>
+              arrange(date)
           } else {
-            print("Failed to load summary data.")
-            output$statusMsg <- renderUI({
-              div(class = "alert alert-danger", role = "alert", "Failed to load summary data.")
-            })
+            # Fallback if all parts are NULL or empty
+            updated_store <- tibble(date = as.Date(character(0)))
+          }
+          all_summary_data_store(updated_store)
+
+          # --- Update loaded date range tracker --- #
+          if (nrow(updated_store) > 0) {
+            new_loaded_earliest <- min(updated_store$date, na.rm = TRUE)
+            new_loaded_latest <- max(updated_store$date, na.rm = TRUE)
+            loaded_earliest_date(new_loaded_earliest)
+            loaded_latest_date(new_loaded_latest)
+            message(paste("Updated summary store. New loaded range:", new_loaded_earliest, "to", new_loaded_latest, ". Rows:", nrow(updated_store)))
+          } else {
+            loaded_earliest_date(NULL)
+            loaded_latest_date(NULL)
+            message("Updated summary store is empty. Resetting loaded range.")
+          }
+
+          # --- Filter data for display --- #
+          if (nrow(updated_store) > 0) {
+            filtered_display_data <- updated_store |>
+              filter(date >= start_date_summary & date <= end_date_summary)
+            summary_data(filtered_display_data)
+            message(paste("Summary data updated for display. Range:", start_date_summary, "to", end_date_summary, ". Rows:", nrow(filtered_display_data)))
+          } else {
+            summary_data(tibble(date = as.Date(character(0)))) # Ensure consistent empty structure
+            message("No summary data to display for the selected range.")
           }
         })
+
+        # Clear status message or set a success message for summary
+        output$statusMsg <- renderUI({
+          NULL
+        }) # Or a success message
       } else {
         # Handle unknown view selection
         print(paste("Load Data clicked for unknown view:", selected_view))
@@ -521,36 +549,12 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # --- Output: Render Summary Plot ---
     output$summary_plot <- renderPlot({
-      req(summary_data(), input$summary_plot_choice %in% c("overall", "rank"))
+      req(summary_data())
 
-      print(paste("Rendering summary plot:", input$summary_plot_choice))
+      print(paste("Rendering summary plot"))
 
       # Conditionally call the correct plotting function
-      if (input$summary_plot_choice == "overall") {
-        create_summary_plots(summary_data())
-      } else if (input$summary_plot_choice == "rank") {
-        create_top_species_rank_plot(summary_data())
-      }
-    })
-
-    # --- Output: Render Summary Table ---
-    output$summary_table <- renderDT({
-      req(summary_data(), bird_spp_info(), input$summary_plot_choice == "table")
-
-      print("Rendering summary table...")
-
-      # --- Debug: Check bird_spp_info structure --- #
-      print("Structure of bird_spp_info() before table creation:")
-      print(str(bird_spp_info()))
-      # --- End Debug --- #
-
-      table_data <- create_top_species_table_data(summary_data(), bird_spp_info())
-
-      datatable(table_data,
-        options = list(pageLength = 10),
-        rownames = FALSE,
-        colnames = c("Date", "Vernacular name", "Scientific name", "Count") # Ensure correct display names
-      )
+      create_summary_plots(summary_data())
     })
 
     # --- Map Module Call ---
