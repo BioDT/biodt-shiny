@@ -13,7 +13,7 @@ box::use(
   tibble[as_tibble, tibble],
   tidyr[pivot_wider, unnest],
   glue[glue],
-  sf[st_bbox, st_crs, st_as_sfc],
+  sf[st_bbox, st_crs, st_as_sfc, st_read],
 )
 
 # --- Configuration & Setup ---
@@ -35,6 +35,36 @@ s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
 
 # --- Data Loading Functions ---
 
+#' Load Finland Border GeoJSON Data
+#'
+#' Loads the Finland border GeoJSON file from the configured data path.
+#'
+#' @return An sf object representing the Finland border, or NULL if an error occurs or the file is not found.
+#' @export
+load_finland_border_geojson <- function() {
+  tryCatch(
+    {
+      # Construct the full path to the GeoJSON file
+      border_path <- file.path(get("data_path"), "rtbm", "finland_border.geojson")
+
+      # Check if the file exists
+      if (!file.exists(border_path)) {
+        message("Finland border GeoJSON not found at: ", border_path)
+        return(NULL)
+      }
+
+      # Read the GeoJSON file
+      sf_object <- st_read(border_path, quiet = TRUE)
+      message("Successfully loaded Finland border GeoJSON from: ", border_path)
+      return(sf_object)
+    },
+    error = function(e) {
+      message("Error loading Finland border GeoJSON: ", e$message)
+      return(NULL)
+    }
+  )
+}
+
 #' Load bird species information from URL
 #'
 #' Fetches bird info from a predefined URL.
@@ -45,25 +75,13 @@ s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
 load_bird_species_info <- function() {
   `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
 
-  # Fetch directly from URL
-  message("Attempting to fetch bird species info from URL: ", bird_info_url)
-
-  safe_fetch <- safely(\(url) {
-    req <- request(url) |> req_retry(max_tries = 3)
-    resp <- req_perform(req)
-
-    if (resp_status(resp) >= 300) {
-      stop(paste("Failed to fetch bird info from URL. Status:", resp_status(resp)))
+  # --- Helper function to process raw JSON data into a tibble ---
+  process_bird_info_json <- function(bird_info_raw) {
+    if (is.null(bird_info_raw) || length(bird_info_raw) == 0) {
+      stop("Raw bird info JSON is empty or NULL.")
     }
 
-    bird_info_raw <- resp_body_json(resp)
-    if (length(bird_info_raw) == 0) {
-      stop("Empty JSON response from URL")
-    }
-
-    # Process JSON data into a list of data frames
     bird_df <- imap(bird_info_raw, \(info, name_key) {
-      # Basic validation for essential fields
       if (is.null(info$scientific_name) || info$scientific_name == "") {
         return(NULL)
       }
@@ -78,13 +96,13 @@ load_bird_species_info <- function() {
         speciesUrl = info$species_url %||% NA_character_,
         stringsAsFactors = FALSE
       )
-    }) |> discard(\(x) is.na(x$displayScientificName))
+    }) |> discard(\(x) is.null(x) || is.na(x$displayScientificName))
 
     if (length(bird_df) == 0) {
-      stop("No valid bird entries found after processing JSON from URL")
+      stop("No valid bird entries found after processing JSON.")
     }
 
-    result <- bind_rows(bird_df) |> 
+    result <- bind_rows(bird_df) |>
       rename(
         join_key_scientific_name = joinKeyScientificName,
         display_scientific_name = displayScientificName,
@@ -93,8 +111,8 @@ load_bird_species_info <- function() {
         wiki_link = wikiLink,
         song_url = songUrl,
         species_url = speciesUrl
-      ) |> 
-      arrange(common_name) |> 
+      ) |>
+      arrange(common_name) |>
       mutate(
         join_key_scientific_name = str_replace_all(
           join_key_scientific_name,
@@ -108,19 +126,69 @@ load_bird_species_info <- function() {
         )
       )
     return(result)
+  }
+
+  # 1. Try loading from local file first
+  local_file_path <- file.path(rtbm_data_path, "bird_info.json")
+
+  if (file.exists(local_file_path)) {
+    message("Attempting to load bird species info from local file: ", local_file_path)
+    safe_read_local <- safely(\(path) {
+      raw_data <- read_json(path, simplifyVector = FALSE)
+      process_bird_info_json(raw_data)
+    })
+    local_result <- safe_read_local(local_file_path)
+
+    if (is.null(local_result$error) && !is.null(local_result$result)) {
+      message("Successfully loaded bird species info from local file.")
+      return(local_result$result)
+    } else {
+      warning(
+        "Failed to load or parse local bird_info.json: ",
+        local_result$error$message,
+        ". Falling back to URL."
+      )
+    }
+  } else {
+    message("Local bird_info.json not found at: ", local_file_path, ". Attempting to fetch from URL.")
+  }
+
+  # 2. Fetch from URL if local loading failed or file not found
+  message("Attempting to fetch bird species info from URL: ", bird_info_url)
+  safe_fetch_url <- safely(\(url) {
+    req <- request(url) |> req_retry(max_tries = 3)
+    resp <- req_perform(req)
+
+    if (resp_status(resp) >= 300) {
+      stop(paste("Failed to fetch bird info from URL. Status:", resp_status(resp), resp_status_desc(resp)))
+    }
+    bird_info_raw <- resp_body_json(resp) # httr2 default is simplifyVector = FALSE
+    process_bird_info_json(bird_info_raw)
   })
 
-  url_result <- safe_fetch(bird_info_url)
+  url_result <- safe_fetch_url(bird_info_url)
+
   if (!is.null(url_result$error)) {
-    warning("Error loading bird species info from URL: ", url_result$error)
-    return(NULL)
+    final_error_msg <- paste("Failed to load bird species info from both local file and URL. URL error: ", url_result$error$message)
+    warning(final_error_msg)
+    stop(final_error_msg)
   } else if (!is.null(url_result$result)) {
     message("Successfully loaded bird species info from URL.")
+    # Optionally, save the fetched data to the local file for future use
+    tryCatch(
+      {
+        write_json(resp_body_json(safe_fetch_url(bird_info_url)$result), local_file_path, auto_unbox = TRUE, pretty = TRUE)
+        message("Saved fetched bird_info.json to local cache: ", local_file_path)
+      },
+      error = function(e_save) {
+        warning("Could not save bird_info.json to local cache: ", e_save$message)
+      }
+    )
     return(url_result$result)
   }
 
-  # If fetching fails
-  stop("Failed to load bird information from URL.")
+  # Fallback stop, though one of the above should have returned or raised a more specific error
+  stop("Failed to load bird information after attempting all sources.")
 }
 
 #' Load Parquet data for a specific species and date range
