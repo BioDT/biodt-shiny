@@ -46,6 +46,14 @@ box::use(
       grassland_dynamics_soil_datatable_server
     ],
   app /
+    view /
+    grassland /
+    grassland_dynamics /
+    grassland_dynamics_manage_datatable[
+      grassland_dynamics_manage_datatable_ui,
+      grassland_dynamics_manage_datatable_server
+    ],
+  app /
     logic /
     grassland /
     grassland_soil_management_data_load[
@@ -86,6 +94,7 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_double_chart_ui(ns("double_chart"), i18n),
       grassland_dynamics_double_chart_controls_ui(ns("controls"), i18n)
     ),
+    grassland_dynamics_manage_datatable_ui(ns("mngmnt_data_table"), i18n),
     grassland_dynamics_three_soil_types_ui(ns("three_soil_types"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
@@ -104,13 +113,13 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     # the additional data are displayed as DATA TABLES below the main chart ----
     project_conf <- read_project_config(project_name = "project1")
 
-    # MANAGEMENT data table ----
+    # MANAGEMENT table - data load ----
     mng_filename <- get_management_file_name(project_conf)
     mng_lat_lon_path <- get_lat_lon_name(mng_filename)
     mng_file_path <- get_file_path(type_of_input_file = "management", mng_lat_lon_path)
     mng_data_table <- read_management_data_table(mng_file_path)
-    print("mng_data_table:::")
-    print(n = 23, mng_data_table) # TODO - remove later
+    # print("mng_data_table:::")
+    # print(n = 23, mng_data_table) # TODO - remove later
 
     # SOIL data table (optional - controled by checkbox) ----
     soil_filename <- get_soil_file_name(project_conf)
@@ -131,6 +140,13 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     )
 
     grassland_dynamics_double_chart_controls_server("controls", plot_type)
+
+    # Management Actions Table - server module call ----
+    grassland_dynamics_manage_datatable_server(
+      "mngmnt_data_table",
+      mng_data_table,
+      tab_grassland_selected
+    )
 
     # shares of 3 soil "types" (clay, sand and silt) above soil data table
     # to make it easier for users only 2 digits are retained in the UI

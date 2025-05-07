@@ -20,7 +20,7 @@ grassland_dynamics_three_soil_types_ui <- function(
     card_header(
       tags$h2(
         class = "card_title",
-        i18n$translate('shares of 3 soil "Types"')
+        i18n$translate("Shares of 3 Soil Types")
       )
     ),
     card_body(
