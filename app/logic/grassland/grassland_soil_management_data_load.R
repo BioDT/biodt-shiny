@@ -1,9 +1,10 @@
 box::use(
   readr[read_lines, read_delim],
-  stringr[str_detect, str_remove],
+  stringr[str_detect, regex, str_extract, str_remove],
   config,
 )
 
+# this file contains functions for loading ADDITIONAL DATA (management, soil) ----
 #' @export
 read_project_config <- function(
   project_name = "project1"
@@ -17,8 +18,6 @@ read_project_config <- function(
   return(project_config_file)
 }
 
-# file name of daily weather data, retreived from configuration txt file
-# only the name of file without path, the path is constructed w/ get_lat_lon_name(), get__file_path(), etc
 #' @export
 get_soil_file_name <- function(
   project_config_file,
@@ -58,12 +57,20 @@ get_management_file_name <- function(
 
 #' @export
 get_lat_lon_name <- function(
-  type_of_input_file = c("management", "soil"),
   file_name
 ) {
-  type = ifelse(type_of_input_file == "management", "management", "soil")
+  regex_pattern <- '(lat)(\\d{2}\\.\\d{6})(_lon)(\\d{2}\\.\\d{6})'
+
   file_lat_lon <- file_name |>
-    str_remove(paste0("__[0-9]+__", type, "\\.txt"))
+    str_extract(
+      regex(
+        regex_pattern,
+        ignore_case = FALSE,
+        multiline = FALSE,
+        comments = FALSE,
+        dotall = FALSE
+      )
+    )
   return(file_lat_lon)
 }
 
@@ -84,12 +91,14 @@ get_file_path <- function(
     list.files(data_path) |>
       str_detect(filename_regexp_ending)
   ]
+
   file_path <- file.path(data_path, file_name)
   return(file_path)
 }
 
+# 1st line of soil data file involves four-digit fraction shares of 3 soil "types"
 #' @export
-read_main_three_values <- function(file_path) {
+read_soil_shares <- function(file_path) {
   silt_clay_sand <- read_delim(
     file = file_path,
     delim = "\t",
@@ -125,7 +134,7 @@ read_management_data_table <- function(file_path) {
     file = file_path,
     delim = "\t",
     col_names = TRUE,
-    # show_col_types = FALSE,
+    show_col_types = FALSE,
   )
   return(dt)
 }
