@@ -22,7 +22,7 @@ box::use(
   arrow[read_parquet, write_parquet, Schema, schema],
 
   # Data manipulation with tidyverse
-  dplyr[filter, pull],
+  dplyr[filter, pull, slice],
 
   # Color palettes
   RColorBrewer[brewer.pal],
@@ -34,7 +34,8 @@ box::use(
 
 # Local modules
 box::use(
-  app/logic/rtbm/rtbm_data_handlers[load_bird_species_info],
+  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info],
+  app / logic / rtbm / utils[format_date_for_display],
 )
 
 #' Map Module UI
@@ -50,23 +51,23 @@ map_module_ui <- function(id) {
 #' Map Module Server
 #'
 #' @param id The module ID
-#' @param finland_border The Finland border data
 #' @param current_date A reactive expression for the current date being displayed
 #' @param species_data A reactive expression for the species data
 #' @param selected_species A reactive expression for the selected species name
-#' @param photo_url A reactive expression for the photo URL
-#' @param scientific_name A reactive expression for the scientific name
-#' @param wiki_link A reactive expression for the wiki link
-#' @param song_url A reactive expression for the song URL
+#' @param bird_spp_info A reactive expression containing info for all bird species
 #' @return A list containing the update_map_with_frame function
 #' @export
-map_module_server <- function(id, finland_border, current_date, species_data,
-                              selected_species, photo_url, scientific_name, wiki_link, song_url) {
+map_module_server <- function(id, current_date, species_data,
+                              selected_species, bird_spp_info) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     # Internal state for the map module
     info_card_visible <- reactiveVal(FALSE)
+    photo_url <- reactiveVal(NULL)
+    wiki_link <- reactiveVal(NULL)
+    scientific_name <- reactiveVal(NULL)
+    song_url <- reactiveVal(NULL)
 
     # Function to create bird info card HTML using htmltools
     create_bird_info_card <- function(species_name, scientific_name_val, wiki_url_val, photo_url_val, song_url_val) {
@@ -135,11 +136,11 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       wiki_link_val <- wiki_link()
       song_url_val <- song_url()
 
-      # Only proceed if we have all the required data
+      # Check if all required info is available
       req(species_name_val, photo_url_val, scientific_name_val, wiki_link_val, song_url_val)
 
-      # Create bird info card using our reusable function
-      bird_info_html <- create_bird_info_card(
+      # Create the HTML content for the card
+      card_html <- create_bird_info_card(
         species_name = species_name_val,
         scientific_name_val = scientific_name_val,
         wiki_url_val = wiki_link_val,
@@ -147,13 +148,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
         song_url_val = song_url_val
       )
 
-      if (!is.null(bird_info_html)) {
+      if (!is.null(card_html)) {
         # Add/update the card to the map
         leafletProxy(ns("rasterMap")) |>
           # Remove existing card first to prevent duplicates if ID changes somehow
           removeControl(layerId = "bird-info-card") |>
           addControl(
-            html = bird_info_html,
+            html = card_html,
             position = "topleft",
             layerId = "bird-info-card"
           )
@@ -166,9 +167,43 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       }
     }
 
-    # Observer to update the bird info card when relevant inputs change
-    observeEvent(list(selected_species(), photo_url(), scientific_name(), wiki_link(), song_url()), {
-      update_bird_info_card()
+    # Update photo/wiki/song based on the selected species from the sidebar
+    observeEvent(selected_species(),
+      {
+        # Ensure bird species info and selection are available
+        req(bird_spp_info(), selected_species())
+
+        # Get the selected common name
+        selected_common_name <- selected_species()
+
+        # Find the details for the selected species
+        species_details <- bird_spp_info() |>
+          filter(common_name == selected_common_name) |>
+          slice(1) # Take the first row if multiple matches (shouldn't happen with common_name)
+
+        # Update reactive values if details are found
+        if (nrow(species_details) > 0) {
+          photo_url(species_details$photo_url)
+          wiki_link(species_details$wiki_link) # Corrected column name
+          scientific_name(species_details$scientific_name)
+          song_url(species_details$song_url)
+        } else {
+          # Reset reactive values if details not found
+          photo_url(NULL)
+          wiki_link(NULL)
+          scientific_name(NULL)
+          song_url(NULL)
+        }
+
+        # Call update_bird_info_card AFTER details are potentially updated
+        update_bird_info_card()
+      },
+      ignoreNULL = TRUE # Don't run when selection is initially NULL
+    )
+
+    # Automatically update the map when current_date changes
+    observeEvent(current_date(), {
+      update_map_with_frame()
     })
 
     # Base leaflet map
@@ -184,17 +219,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           layerId = "hover-info-control"
         )
 
-      # Initial check to add bird info card if data is already available
-      # Note: This relies on the reactives being ready when the map is first rendered
-      if (!is.null(selected_species()) && !is.null(photo_url()) && !is.null(scientific_name()) && !is.null(wiki_link()) && !is.null(song_url())) {
-        update_bird_info_card()
-      }
+      # Removed initial check for bird info card - observeEvent handles this
 
       return(m)
     })
 
-    # Function to update map with a specific frame
-    update_map_with_frame <- function(frame_index) {
+    # Function to update map for the current date
+    update_map_with_frame <- function() {
       # Make sure we have required data
       if (is.null(species_data()) || is.null(current_date())) {
         print("No species data or current date available")
@@ -204,9 +235,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       # Use tryCatch around the entire function to prevent any unexpected errors
       tryCatch(
         {
-          # Convert frame_index to integer if needed
-          frame_index <- as.integer(frame_index)
-
           # Safe print function to avoid formatting issues
           safe_print <- function(...) {
             args <- list(...)
@@ -214,12 +242,12 @@ map_module_server <- function(id, finland_border, current_date, species_data,
             cat(msg, "\n")
           }
 
-          safe_print("Updating map with frame index: ", frame_index)
+          safe_print("Updating map for current date")
 
           # Get the current date and data path (with validation)
           date <- current_date()
           if (is.null(date)) {
-            safe_print("Date is NULL for index: ", frame_index)
+            safe_print("Date is NULL")
             return(FALSE)
           }
 
@@ -237,33 +265,31 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           # Format the date for file path
           date_str <- format(date, "%Y-%m-%d")
 
-          # Construct path to parquet file
-          parquet_path <- file.path(
-            "app/data/rtbm/parquet",
-            paste0("species=", scientific_name),
-            paste0("date=", date_str, ".parquet")
-          )
+          # Use data_paths to get the parquet file for the current date
+          data_paths <- species_data()$data_paths
+          date_key <- as.character(date)
+          parquet_path <- NULL
+          if (!is.null(data_paths) && date_key %in% names(data_paths)) {
+            parquet_path <- data_paths[[date_key]]
+          }
 
-          safe_print("Looking for parquet file: ", parquet_path)
-
-          # Check if file exists
-          if (!file.exists(parquet_path)) {
-            safe_print("Parquet file not found: ", parquet_path)
+          if (is.null(parquet_path) || !file.exists(parquet_path)) {
+            safe_print("No parquet file found for date: ", date_key)
             # Clear map layers but keep controls (like info card)
             leafletProxy(ns("rasterMap")) |>
               clearImages() |>
               clearShapes() |>
               clearGroup("Heat Map")
-            # Potentially show a status message here in a map control
             return(FALSE)
           }
+
+          safe_print("Reading parquet file: ", parquet_path)
 
           # Update map using leafletProxy for better performance
           proxy <- leafletProxy(ns("rasterMap")) |>
             clearImages() |>
             clearShapes() |>
             clearGroup("Heat Map") |>
-            clearGroup("Finland Border") |>
             # Always clear legend and other controls before adding new ones
             removeControl(layerId = "intensity-legend") |>
             removeControl(layerId = "layer-control") |>
@@ -276,7 +302,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
               safe_print("Reading parquet file")
               points_data <- read_parquet(parquet_path)
 
-              # --- Enhanced Data Validation --- 
+              # --- Enhanced Data Validation ---
               if (is.null(points_data)) {
                 safe_print("ERROR: read_parquet returned NULL")
                 return(FALSE) # Stop processing if data is NULL
@@ -296,21 +322,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                 # Update date display, clear map layers, but don't stop with error
                 proxy <- leafletProxy(ns("rasterMap")) |>
                   clearImages() |>
-                  clearShapes() |> 
+                  clearShapes() |>
                   clearGroup("Heat Map") |>
-                  clearGroup("Finland Border") |>
                   removeControl(layerId = "intensity-legend") |>
                   removeControl(layerId = "layer-control") |>
-                  removeControl(layerId = "date-display-control") |> 
+                  removeControl(layerId = "date-display-control") |>
                   removeControl(layerId = "error-message-control")
-                  
-                # Add Finland border back if available
-                if (!is.null(finland_border)) {
-                  tryCatch({
-                    proxy |> addPolylines(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 0.8, group = "Finland Border")
-                  }, error = function(e) { safe_print("Error adding Finland border: ", e$message) })
-                }
-                
+
                 # Add date display
                 date_to_display <- format_date_for_display(date)
                 proxy |>
@@ -319,35 +337,17 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                     position = "bottomleft",
                     layerId = "date-display-control"
                   )
-                
+
                 # Re-add info card if needed
-                if (info_card_visible()) { update_bird_info_card() }
-                
+                if (info_card_visible()) {
+                  update_bird_info_card()
+                }
+
                 return(TRUE) # Indicate success, even though no heatmap was added
               }
 
               # Base map setup is done in renderLeaflet, proxy modifies it.
               # No need for: m <- leaflet() |> addProviderTiles(...) |> setView(...)
-
-              # Add Finland border if available using proxy
-              if (!is.null(finland_border)) {
-                tryCatch(
-                  {
-                    proxy |>
-                      addPolylines(
-                        data = finland_border,
-                        color = "#FF6B6B",
-                        weight = 2,
-                        opacity = 0.8,
-                        group = "Finland Border"
-                      )
-                  },
-                  error = function(e) {
-                    safe_print("Error adding Finland border: ", e$message)
-                    # Continue without the border
-                  }
-                )
-              }
 
               # Only add bird data if we have points
               if (nrow(points_data) > 0) {
@@ -356,8 +356,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
 
                 # Check if required columns exist
                 if (all(coord_cols %in% colnames(points_data))) {
-
-                  # --- Log Coordinate Range --- 
+                  # --- Log Coordinate Range ---
                   lon_range <- range(points_data$longitude, na.rm = TRUE)
                   lat_range <- range(points_data$latitude, na.rm = TRUE)
                   safe_print(
@@ -433,18 +432,35 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                     }
                   }
                   # --- End Intensity Validation ---
-                  
+
                   # Add layer controls using proxy (always add controls)
                   proxy |>
                     addLayersControl(
                       baseGroups = c("Base Map"),
-                      overlayGroups = c("Finland Border", "Heat Map"), # Keep Heat Map group even if empty
+                      overlayGroups = c("Heat Map"), # Keep Heat Map group even if empty
                       options = layersControlOptions(collapsed = FALSE)
                     )
-                    
+
+                  # Add debug message to the map UI
+                  debug_msg <- paste0(
+                    "Points: ", nrow(points_data),
+                    " | Intensity: ",
+                    if (length(valid_intensities) > 0) paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE)) else "NA",
+                    " | Lon: ", lon_range[1], " to ", lon_range[2],
+                    " | Lat: ", lat_range[1], " to ", lat_range[2]
+                  )
+                  proxy |>
+                    addControl(
+                      html = div(
+                        style = "background: rgba(255,255,255,0.8); padding: 4px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc;",
+                        debug_msg
+                      ),
+                      position = "topleft",
+                      layerId = "debug-info-control"
+                    )
+
                   # Log success
                   safe_print("Successfully processed data for the map.")
-                  
                 } else { # This else corresponds to `if (all(coord_cols %in% colnames(points_data)))`
                   safe_print("WARNING: Expected columns (longitude, latitude, intensity) not found in parquet file")
                   safe_print("Available columns: ", paste(colnames(points_data), collapse = ", "))
@@ -468,6 +484,10 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                 update_bird_info_card()
               }
 
+              # Remove debug message if no data
+              proxy |>
+                removeControl(layerId = "debug-info-control")
+
               return(TRUE)
             },
             error = function(e) {
@@ -487,36 +507,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
           # Handle any unexpected errors
           cat("Error in update_map_with_frame: ", e$message, "\n")
           return(FALSE)
-        }
-      )
-    }
-
-    # Format date for display
-    format_date_for_display <- function(date) {
-      if (is.null(date)) {
-        return("")
-      }
-
-      # Handle various date formats
-      tryCatch(
-        {
-          # First check if it's already a Date object
-          if (inherits(date, "Date")) {
-            return(format(date, "%b %d, %Y"))
-          }
-
-          # Try to parse as ISO date
-          parsed_date <- try(as.Date(date), silent = TRUE)
-          if (!inherits(parsed_date, "try-error") && !is.na(parsed_date)) {
-            return(format(parsed_date, "%b %d, %Y"))
-          }
-
-          # If all else fails, return as is
-          return(as.character(date))
-        },
-        error = function(e) {
-          # Fallback for any errors
-          return(as.character(date))
         }
       )
     }
