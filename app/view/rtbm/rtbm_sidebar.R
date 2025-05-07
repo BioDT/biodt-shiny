@@ -108,7 +108,6 @@ rtbm_sidebar_ui <- function(id) {
 #'   - date_range: The selected date range.
 #'   - animation_running: Boolean indicating if animation is playing.
 #'   - animation_speed: The animation speed in milliseconds.
-#'   - sidebar_collapsed: Boolean indicating if the sidebar is collapsed.
 #'   - selected_view: The selected view.
 #'   - load_button_clicked: Reactive trigger for the load data button.
 #' @export
@@ -120,7 +119,6 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
     current_date_rv <- reactiveVal(NULL)
     animation_running_rv <- reactiveVal(FALSE)
     animation_speed_rv <- reactiveVal(1000) # Default speed
-    sidebar_collapsed_rv <- reactiveVal(FALSE) # Track collapsed state
     animation_last_step <- reactiveVal(Sys.time()) # Track when the last step occurred
     status_msg <- reactiveVal("Select date range and species, then click Load Data.")
 
@@ -348,7 +346,6 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
         selected_species = reactive(input$speciesPicker),
         date_range = reactive(input$dateRange),
         animation_running = reactive(animation_running_rv()),
-        sidebar_collapsed = reactive(sidebar_collapsed_rv()),
         selected_view = reactive(input$viewSelector),
         load_button_clicked = reactive(input$loadDataButton)
       )

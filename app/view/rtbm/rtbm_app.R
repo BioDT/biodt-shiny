@@ -142,16 +142,6 @@ rtbm_app_ui <- function(id, i18n) {
     class = "rtbm-container container-fluid p-3",
     div(
       class = "row g-3",
-      # Sidebar Toggle Button (visible on mobile)
-      div(
-        class = "col-12 d-md-none mb-2",
-        actionButton(
-          inputId = ns("toggleSidebar"),
-          label = "Toggle Controls",
-          icon = icon("bars"),
-          class = "btn btn-secondary w-100"
-        )
-      ),
       # Control Panel Sidebar
       div(
         id = ns("sidebarCol"),
@@ -161,27 +151,10 @@ rtbm_app_ui <- function(id, i18n) {
           # Card Header now includes collapse button directly
           div(
             class = "card-header d-flex justify-content-between align-items-center",
-            span("Bird Observation Controls"),
-            actionButton(
-              inputId = ns("collapseSidebar"), # Keep collapse button here
-              label = NULL,
-              icon = icon("chevron-left"),
-              class = "btn btn-sm btn-outline-secondary collapse-sidebar-btn"
-            )
+            span("Bird Observation Controls")
           ),
           # Call Sidebar Module UI (contains card body)
           rtbm_sidebar_ui(ns("sidebar"))
-        )
-      ),
-      # Collapsed sidebar state - only shows expand button
-      div(
-        id = ns("collapsedSidebar"), # Keep collapsed state div here
-        class = "col-auto sidebar-collapsed d-none",
-        actionButton(
-          inputId = ns("expandSidebar"), # Keep expand button here
-          label = NULL,
-          icon = icon("chevron-right"),
-          class = "btn btn-secondary expand-sidebar-btn"
         )
       ),
       # Map Column - will expand when sidebar collapses
@@ -353,7 +326,7 @@ rtbm_app_server <- function(id, tab_selected) {
         # Find scientific name
         scientific_name_val <- isolate(bird_spp_info()) |>
           filter(common_name == species) |>
-          pull(scientific_name)
+          pull(join_key_scientific_name)
 
         if (length(scientific_name_val) == 0) {
           output$statusMsg <- renderUI({

@@ -378,10 +378,6 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .sidebar-collapsed {
-    transition: all 0.3s ease-in-out;
-  }
-  
   .map-column {
     transition: all 0.3s ease-in-out;
   }
@@ -394,25 +390,6 @@
     border-radius: var(--bs-border-radius);
     height: 100%;
     overflow-y: auto;
-  }
-  
-  // Sidebar buttons
-  .collapse-sidebar-btn {
-    border: none;
-    background: transparent;
-    padding: 4px 8px;
-    transition: all 0.2s ease;
-    
-    &:hover {
-      background-color: var(--bs-gray-200);
-    }
-  }
-  
-  .expand-sidebar-btn {
-    height: 40px;
-    width: 40px;
-    margin-top: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   }
   
   // Control Panel
