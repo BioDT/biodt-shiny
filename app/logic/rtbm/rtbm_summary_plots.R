@@ -6,7 +6,8 @@ box::use(
   scales[label_number, cut_short_scale],
   rlang[sym],
   tidyr[pivot_longer],
-  utils[head]
+  utils[head],
+  stringr[str_replace_all, str_to_title] # Added stringr for str_replace_all and str_to_title
 )
 
 #' Create Summary Statistics Plots
@@ -165,7 +166,7 @@ create_top_species_rank_plot <- function(summary_data) {
 #' @param summary_data A data frame containing summary statistics in wide format:
 #'   'date' column and subsequent columns for each species count (using scientific names).
 #' @param bird_spp_info A dataframe mapping scientific names to vernacular names.
-#'   Expected columns: 'scientific_name', 'vernacular_name'.
+#'   Expected columns: 'join_key_scientific_name', 'display_scientific_name', 'common_name'.
 #' @return A dataframe suitable for DT::datatable.
 #' @export
 create_top_species_table_data <- function(summary_data, bird_spp_info) {
@@ -173,16 +174,16 @@ create_top_species_table_data <- function(summary_data, bird_spp_info) {
   if (is.null(summary_data) || nrow(summary_data) == 0 || ncol(summary_data) < 2) {
     return(data.frame(Message = "No summary data available or data format incorrect"))
   }
-  # Check for 'scientific_name' and 'common_name'
-  if (is.null(bird_spp_info) || !all(c("scientific_name", "common_name") %in% names(bird_spp_info))) {
-    return(data.frame(Message = "Bird species information is missing required columns (scientific_name, common_name)"))
+  # Check for 'join_key_scientific_name', 'display_scientific_name', and 'common_name'
+  if (is.null(bird_spp_info) || !all(c("join_key_scientific_name", "display_scientific_name", "common_name") %in% names(bird_spp_info))) {
+    return(data.frame(Message = "Bird species information is missing required columns (join_key_scientific_name, display_scientific_name, common_name)"))
   }
 
   # --- Data Transformation for Table --- #
   top5_data_before_join <- summary_data |>
     mutate(date = as_date(date)) |>
-    # Pivot to long format: date, scientific_name_col, count
-    pivot_longer(cols = -date, names_to = "scientific_name_col", values_to = "count") |>
+    # Pivot to long format: date, name_col, count
+    pivot_longer(cols = -date, names_to = "name_col", values_to = "count") |>
     # Remove rows where count is 0 or NA, as they can't be ranked
     filter(count > 0 & !is.na(count)) |>
     group_by(date) |>
@@ -198,8 +199,8 @@ create_top_species_table_data <- function(summary_data, bird_spp_info) {
   # --- End Debug --- #
 
   top5_data_after_join <- top5_data_before_join |>
-    # Join with species info to get vernacular name
-    left_join(bird_spp_info, by = c("scientific_name_col" = "scientific_name"))
+    mutate(name_col = str_replace_all(name_col, " ", "_")) |>
+    left_join(bird_spp_info, by = c("name_col" = "join_key_scientific_name"))
 
   # --- Debug: After Join --- #
   print("Data after join (head):")
@@ -207,11 +208,15 @@ create_top_species_table_data <- function(summary_data, bird_spp_info) {
   # --- End Debug --- #
 
   top5_data <- top5_data_after_join |>
+    # Format the name_col for display
+    mutate(name_col = str_replace_all(name_col, "_", " ")) |> 
+    mutate(name_col = str_to_title(name_col)) |>
     # Select and rename columns
     select(
       Date = date,
-      `Vernacular name` = common_name, # Use common_name, rename column
-      `Scientific name` = scientific_name_col, # Use backticks for space
+      Name = name_col,
+      `Vernacular name` = common_name,
+      `Scientific name` = display_scientific_name, 
       Count = count,
       rank # Keep rank for sorting
     ) |>

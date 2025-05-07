@@ -592,7 +592,7 @@ rtbm_app_server <- function(id, tab_selected) {
       datatable(table_data,
         options = list(pageLength = 10),
         rownames = FALSE,
-        colnames = c("Date", "Vernacular name", "Scientific name", "Count")
+        colnames = c("Date", "Name", "Vernacular name", "Scientific name", "Count")
       )
     })
 

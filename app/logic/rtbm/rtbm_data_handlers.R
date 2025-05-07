@@ -7,8 +7,8 @@ box::use(
   lubridate[as_date, today, days, ymd],
   fs[dir_create, dir_exists, dir_ls, file_exists, path_file],
   config[get],
-  purrr[safely, map, discard, map_dfr, possibly, list_rbind],
-  stringr[str_replace, str_extract],
+  purrr[safely, map, discard, map_dfr, possibly, list_rbind, imap],
+  stringr[str_replace, str_extract, str_replace_all],
   arrow[read_parquet],
   tibble[as_tibble, tibble],
   tidyr[pivot_wider, unnest],
@@ -62,13 +62,14 @@ load_bird_species_info <- function() {
     }
 
     # Process JSON data into a list of data frames
-    bird_df <- map(bird_info_raw, \(info) {
+    bird_df <- imap(bird_info_raw, \(info, name_key) {
       # Basic validation for essential fields
       if (is.null(info$scientific_name) || info$scientific_name == "") {
         return(NULL)
       }
       data.frame(
-        scientificName = info$scientific_name %||% NA_character_,
+        joinKeyScientificName = name_key %||% NA_character_,
+        displayScientificName = info$scientific_name %||% NA_character_,
         commonName = info$common_name %||% NA_character_,
         finnishName = info$finnish_name %||% NA_character_,
         photoUrl = info$photo_url %||% NA_character_,
@@ -77,25 +78,31 @@ load_bird_species_info <- function() {
         speciesUrl = info$species_url %||% NA_character_,
         stringsAsFactors = FALSE
       )
-    }) |> discard(\(x) is.na(x$scientificName)) # Filter out entries with missing scientificName
+    }) |> discard(\(x) is.na(x$displayScientificName))
 
     if (length(bird_df) == 0) {
       stop("No valid bird entries found after processing JSON from URL")
     }
 
-    result <- bind_rows(bird_df) |> # Combine list of tibbles into one
-      rename( # Rename columns to snake_case
-        scientific_name = scientificName,
+    result <- bind_rows(bird_df) |> 
+      rename(
+        join_key_scientific_name = joinKeyScientificName,
+        display_scientific_name = displayScientificName,
         common_name = commonName,
         photo_url = photoUrl,
         wiki_link = wikiLink,
         song_url = songUrl,
         species_url = speciesUrl
-      ) |>
-      arrange(common_name) |>
+      ) |> 
+      arrange(common_name) |> 
       mutate(
-        scientific_name = str_replace(
-          scientific_name,
+        join_key_scientific_name = str_replace_all(
+          join_key_scientific_name,
+          pattern = " ",
+          replacement = "_"
+        ),
+        display_scientific_name = str_replace_all(
+          display_scientific_name,
           pattern = " ",
           replacement = "_"
         )
