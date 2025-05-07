@@ -13,7 +13,7 @@ box::use(
   tibble[as_tibble, tibble],
   tidyr[pivot_wider, unnest],
   glue[glue],
-  sf[st_read, st_bbox, st_crs, st_as_sfc] # Added sf functions
+  sf[st_bbox, st_crs, st_as_sfc],
 )
 
 # --- Configuration & Setup ---
@@ -21,91 +21,33 @@ box::use(
 base_data_path <- get("data_path")
 rtbm_data_path <- file.path(base_data_path, "rtbm")
 rtbm_parquet_path <- file.path(rtbm_data_path, "parquet")
-local_bird_info_path <- file.path(rtbm_data_path, "bird_info.json")
 
-# Create directories if they don't exist
-if (!dir_exists(rtbm_parquet_path)) dir_create(rtbm_parquet_path, recurse = TRUE)
+# Ensure directories exist
+if (!dir_exists(rtbm_parquet_path)) {
+  stop(
+    "RTBM Parquet directory not found. Please configure the data_path in your config file.",
+    call. = FALSE
+  )
+}
 
 bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
 s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
 
 # --- Data Loading Functions ---
 
-#' Load bird species information from local file or URL
+#' Load bird species information from URL
 #'
-#' Tries to load bird info from a local JSON file first. If the file doesn't exist
-#' or fails to load, it attempts to fetch the data from a predefined URL and
-#' saves it locally upon success.
+#' Fetches bird info from a predefined URL.
 #'
 #' @return A tibble containing bird species information (common name, scientific name, photo URL, etc.)
-#'         sorted by common name, or NULL if loading fails from both sources.
+#'         sorted by common name, or NULL if loading fails.
 #' @export
 load_bird_species_info <- function() {
   `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
 
-  # Try to load from local file first
-  if (file_exists(local_bird_info_path)) {
-    safe_read_local <- safely(\(file_path) {
-      bird_info <- read_json(file_path)
+  # Fetch directly from URL
+  message("Attempting to fetch bird species info from URL: ", bird_info_url)
 
-      if (length(bird_info) == 0) {
-        stop("Empty JSON from local file")
-      }
-
-      # Process JSON data into a list of data frames
-      bird_df <- map(bird_info, \(info) {
-        # Basic validation for essential fields
-        if (is.null(info$scientific_name) || info$scientific_name == "") {
-          return(NULL)
-        }
-        data.frame(
-          scientificName = info$scientific_name %||% NA_character_,
-          commonName = info$common_name %||% NA_character_,
-          finnishName = info$finnish_name %||% NA_character_,
-          photoUrl = info$photo_url %||% NA_character_,
-          wikiLink = info$wiki_link %||% NA_character_,
-          songUrl = info$song_url %||% NA_character_,
-          speciesUrl = info$species_url %||% NA_character_,
-          stringsAsFactors = FALSE
-        )
-      }) |> discard(\(x) is.na(x$scientificName)) # Filter out entries with missing scientificName
-
-      if (length(bird_df) == 0) {
-        stop("No valid bird entries found after processing local JSON")
-      }
-
-      result <- bind_rows(bird_df) |> # Combine list of tibbles into one
-        rename( # Rename columns to snake_case
-          scientific_name = scientificName,
-          common_name = commonName,
-          photo_url = photoUrl,
-          wiki_link = wikiLink,
-          song_url = songUrl,
-          species_url = speciesUrl
-        ) |>
-        arrange(common_name) |>
-        mutate(
-          scientific_name = str_replace(
-            scientific_name,
-            pattern = " ",
-            replacement = "_"
-          )
-        )
-      return(result)
-    })
-
-    local_result <- safe_read_local(local_bird_info_path)
-    if (is.null(local_result$error)) {
-      message("Loaded bird species info from local file: ", local_bird_info_path)
-      return(local_result$result)
-    } else {
-      warning("Error loading bird info from local file: ", local_result$error, ". Falling back to URL.")
-    }
-  } else {
-    message("Local bird info file not found: ", local_bird_info_path, ". Attempting to fetch from URL.")
-  }
-
-  # Fallback to URL
   safe_fetch <- safely(\(url) {
     req <- request(url) |> req_retry(max_tries = 3)
     resp <- req_perform(req)
@@ -114,15 +56,14 @@ load_bird_species_info <- function() {
       stop(paste("Failed to fetch bird info from URL. Status:", resp_status(resp)))
     }
 
-    raw_content <- resp_body_string(resp)
-    bird_info <- fromJSON(raw_content)
-
-    if (length(bird_info) == 0) {
-      stop("Empty JSON response received from URL")
+    bird_info_raw <- resp_body_json(resp)
+    if (length(bird_info_raw) == 0) {
+      stop("Empty JSON response from URL")
     }
 
-    # Process JSON data (same logic as local file processing)
-    bird_df <- map(bird_info, \(info) {
+    # Process JSON data into a list of data frames
+    bird_df <- map(bird_info_raw, \(info) {
+      # Basic validation for essential fields
       if (is.null(info$scientific_name) || info$scientific_name == "") {
         return(NULL)
       }
@@ -150,8 +91,8 @@ load_bird_species_info <- function() {
         wiki_link = wikiLink,
         song_url = songUrl,
         species_url = speciesUrl
-      ) |
-      arrange(common_name) |
+      ) |>
+      arrange(common_name) |>
       mutate(
         scientific_name = str_replace(
           scientific_name,
@@ -159,18 +100,6 @@ load_bird_species_info <- function() {
           replacement = "_"
         )
       )
-
-    # Attempt to save the fetched JSON data locally
-    tryCatch(
-      {
-        write_json(bird_info, local_bird_info_path, auto_unbox = TRUE, pretty = TRUE)
-        message("Successfully fetched bird info from URL and saved locally to: ", local_bird_info_path)
-      },
-      error = function(e) {
-        warning("Fetched bird info from URL but failed to save locally: ", e$message)
-      }
-    )
-
     return(result)
   })
 
@@ -179,11 +108,12 @@ load_bird_species_info <- function() {
     warning("Error loading bird species info from URL: ", url_result$error)
     return(NULL)
   } else if (!is.null(url_result$result)) {
+    message("Successfully loaded bird species info from URL.")
     return(url_result$result)
   }
 
-  # If both methods fail
-  stop("Failed to load bird information from both local file and URL.")
+  # If fetching fails
+  stop("Failed to load bird information from URL.")
 }
 
 #' Load Parquet data for a specific species and date range
@@ -301,40 +231,6 @@ create_finland_bbox <- function() {
   bbox_sf <- st_as_sfc(bbox)
   return(bbox_sf)
 }
-
-#' Load Finland Border GeoJSON Data
-#'
-#' Reads the GeoJSON file containing the border of Finland.
-#' Handles potential errors if the file is missing or invalid, returning a bounding box as fallback.
-#'
-#' @param base_path The base path for data files, defaults to constant.
-#' @return An sf object representing the Finland border or a fallback bounding box.
-#' @export
-get_finland_border <- function(base_path = base_data_path) { # Use snake_case constant
-  # Construct the full path to the GeoJSON file
-  finland_file <- file.path(base_path, "rtbm", "finland_border.geojson")
-
-  if (file_exists(finland_file)) {
-    tryCatch(
-      {
-        # Read border file
-        finland <- st_read(finland_file, quiet = TRUE)
-        message("Finland border data loaded successfully from: ", finland_file)
-        return(finland)
-      },
-      error = function(e) {
-        # If reading fails, create a bounding box
-        warning("Error reading Finland border file ('", finland_file, "'): ", e$message, ". Using a bounding box instead.")
-        create_finland_bbox()
-      }
-    )
-  } else {
-    warning("Finland border file not found ('", finland_file, "'), using a bounding box instead.")
-    create_finland_bbox()
-  }
-}
-
-# --- Web Portal Summary Data ---
 
 #' Preload Bird Summary Data from Web Portal
 #'

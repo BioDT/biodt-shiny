@@ -121,10 +121,10 @@ box::use(
 
 # Local modules
 box::use(
-  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, get_finland_border, preload_summary_data],
-  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
-  app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
-  app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
+  app/logic/rtbm/rtbm_data_handlers[load_bird_species_info, load_parquet_data, preload_summary_data],
+  app/logic/rtbm/rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
+  app/view/rtbm/rtbm_map[map_module_ui, map_module_server],
+  app/view/rtbm/rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -202,12 +202,29 @@ rtbm_app_ui <- function(id, i18n) {
     ),
     useShinyjs(), # Initialize shinyjs
     base_layout,
-    # summary_section, # Removed summary_section usage
     # Add plot output for summary statistics
     card(
       card_header("Summary Statistics"),
       card_body(
-        plotOutput(ns("summary_plot")) # Directly output the summary plot
+        radioButtons(
+          inputId = ns("summary_plot_choice"),
+          label = "Choose Summary View:",
+          choices = c(
+            "Overall Activity" = "overall",
+            "Species Ranking" = "rank",
+            "Data Table" = "table"
+          ),
+          selected = "overall",
+          inline = TRUE
+        ),
+        conditionalPanel(
+          condition = paste0("input['", ns("summary_plot_choice"), "'] != 'table'"),
+          plotOutput(ns("summary_plot"), height = "600px")
+        ),
+        conditionalPanel(
+          condition = paste0("input['", ns("summary_plot_choice"), "'] == 'table'"),
+          DTOutput(ns("summary_table"))
+        )
       )
     )
   )
@@ -225,7 +242,6 @@ rtbm_app_server <- function(id, tab_selected) {
     ns <- session$ns
 
     # --- Main App Reactives ---
-    finland_border <- reactiveVal(NULL)
     available_dates <- reactiveVal(NULL)
     bird_spp_info <- reactiveVal(NULL)
     species_data <- reactiveVal(NULL) # Data per species for the map
@@ -319,14 +335,6 @@ rtbm_app_server <- function(id, tab_selected) {
       if (selected_view == "map") {
         print("Load Data clicked for Map view")
         # --- Load Map-Specific Data ---
-        # Load Finland border (only on first button click for map)
-        isolate({
-          if (is.null(finland_border())) {
-            print("Loading Finland border on button click...")
-            finland_border(get_finland_border())
-          }
-        })
-
         # Validate species and date range inputs for map view
         req(species, date_range_val)
         start_date <- date_range_val[1]
@@ -395,9 +403,6 @@ rtbm_app_server <- function(id, tab_selected) {
               return()
             }
 
-            # Check if species directory exists (redundant check, load_parquet_data should handle)
-            # ... (Consider removing if load_parquet_data is robust)
-
             # Store dates and data paths
             available_dates(result$dates)
             species_data(list(
@@ -447,18 +452,33 @@ rtbm_app_server <- function(id, tab_selected) {
 
           # --- Determine date ranges to fetch --- #
           dates_to_fetch_before <- NULL
-          if (is.null(current_earliest) || start_date_summary < current_earliest) {
-            fetch_end_before <- if (is.null(current_earliest)) end_date_summary else min(end_date_summary, current_earliest - days(1))
-            if (start_date_summary <= fetch_end_before) {
-              dates_to_fetch_before <- list(start = start_date_summary, end = fetch_end_before)
-            }
-          }
+          dates_to_fetch_after <- NULL # Ensure this is initialized to NULL
 
-          dates_to_fetch_after <- NULL
-          if (is.null(current_latest) || end_date_summary > current_latest) {
-            fetch_start_after <- if (is.null(current_latest)) start_date_summary else max(start_date_summary, current_latest + days(1))
-            if (fetch_start_after <= end_date_summary) {
-              dates_to_fetch_after <- list(start = fetch_start_after, end = end_date_summary)
+          if (is.null(current_earliest)) { # Cache is empty, or first load
+            # Fetch the entire requested range if valid
+            if (start_date_summary <= end_date_summary) {
+              dates_to_fetch_before <- list(start = start_date_summary, end = end_date_summary)
+            }
+            # dates_to_fetch_after remains NULL, ensuring only one fetch operation
+          } else {
+            # Cache exists, determine segments to fetch before the current earliest
+            if (start_date_summary < current_earliest) {
+              # Fetch from selected start_date up to one day before current_earliest,
+              # but not exceeding selected end_date.
+              fetch_end_b <- min(end_date_summary, current_earliest - days(1))
+              if (start_date_summary <= fetch_end_b) {
+                dates_to_fetch_before <- list(start = start_date_summary, end = fetch_end_b)
+              }
+            }
+
+            # Determine segments to fetch after the current latest
+            if (end_date_summary > current_latest) {
+              # Fetch from one day after current_latest up to selected end_date,
+              # but not before selected start_date.
+              fetch_start_a <- max(start_date_summary, current_latest + days(1))
+              if (fetch_start_a <= end_date_summary) {
+                dates_to_fetch_after <- list(start = fetch_start_a, end = end_date_summary)
+              }
             }
           }
 
@@ -549,18 +569,36 @@ rtbm_app_server <- function(id, tab_selected) {
 
     # --- Output: Render Summary Plot ---
     output$summary_plot <- renderPlot({
-      req(summary_data())
+      req(summary_data(), input$summary_plot_choice %in% c("overall", "rank"))
 
-      print(paste("Rendering summary plot"))
+      print(paste("Rendering summary plot:", input$summary_plot_choice))
 
       # Conditionally call the correct plotting function
-      create_summary_plots(summary_data())
+      if (input$summary_plot_choice == "overall") {
+        create_summary_plots(summary_data())
+      } else if (input$summary_plot_choice == "rank") {
+        create_top_species_rank_plot(summary_data())
+      }
+    })
+
+    # --- Output: Render Summary Table ---
+    output$summary_table <- renderDT({
+      req(summary_data(), bird_spp_info(), input$summary_plot_choice == "table")
+
+      print("Rendering summary table...")
+
+      table_data <- create_top_species_table_data(summary_data(), bird_spp_info())
+
+      datatable(table_data,
+        options = list(pageLength = 10),
+        rownames = FALSE,
+        colnames = c("Date", "Vernacular name", "Scientific name", "Count")
+      )
     })
 
     # --- Map Module Call ---
     map_functions <- map_module_server(
       "map",
-      finland_border = finland_border,
       current_date = sidebar_returns$current_date, # Use reactive from sidebar
       species_data = species_data, # Pass the processed species data
       selected_species = sidebar_returns$selected_species, # Use reactive from sidebar

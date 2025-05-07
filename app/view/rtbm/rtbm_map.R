@@ -51,14 +51,13 @@ map_module_ui <- function(id) {
 #' Map Module Server
 #'
 #' @param id The module ID
-#' @param finland_border The Finland border data
 #' @param current_date A reactive expression for the current date being displayed
 #' @param species_data A reactive expression for the species data
 #' @param selected_species A reactive expression for the selected species name
 #' @param bird_spp_info A reactive expression containing info for all bird species
 #' @return A list containing the update_map_with_frame function
 #' @export
-map_module_server <- function(id, finland_border, current_date, species_data,
+map_module_server <- function(id, current_date, species_data,
                               selected_species, bird_spp_info) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -291,7 +290,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
             clearImages() |>
             clearShapes() |>
             clearGroup("Heat Map") |>
-            clearGroup("Finland Border") |>
             # Always clear legend and other controls before adding new ones
             removeControl(layerId = "intensity-legend") |>
             removeControl(layerId = "layer-control") |>
@@ -326,23 +324,10 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                   clearImages() |>
                   clearShapes() |>
                   clearGroup("Heat Map") |>
-                  clearGroup("Finland Border") |>
                   removeControl(layerId = "intensity-legend") |>
                   removeControl(layerId = "layer-control") |>
                   removeControl(layerId = "date-display-control") |>
                   removeControl(layerId = "error-message-control")
-
-                # Add Finland border back if available
-                if (!is.null(finland_border)) {
-                  tryCatch(
-                    {
-                      proxy |> addPolylines(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 0.8, group = "Finland Border")
-                    },
-                    error = function(e) {
-                      safe_print("Error adding Finland border: ", e$message)
-                    }
-                  )
-                }
 
                 # Add date display
                 date_to_display <- format_date_for_display(date)
@@ -363,26 +348,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
 
               # Base map setup is done in renderLeaflet, proxy modifies it.
               # No need for: m <- leaflet() |> addProviderTiles(...) |> setView(...)
-
-              # Add Finland border if available using proxy
-              if (!is.null(finland_border)) {
-                tryCatch(
-                  {
-                    proxy |>
-                      addPolylines(
-                        data = finland_border,
-                        color = "#FF6B6B",
-                        weight = 2,
-                        opacity = 0.8,
-                        group = "Finland Border"
-                      )
-                  },
-                  error = function(e) {
-                    safe_print("Error adding Finland border: ", e$message)
-                    # Continue without the border
-                  }
-                )
-              }
 
               # Only add bird data if we have points
               if (nrow(points_data) > 0) {
@@ -472,7 +437,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                   proxy |>
                     addLayersControl(
                       baseGroups = c("Base Map"),
-                      overlayGroups = c("Finland Border", "Heat Map"), # Keep Heat Map group even if empty
+                      overlayGroups = c("Heat Map"), # Keep Heat Map group even if empty
                       options = layersControlOptions(collapsed = FALSE)
                     )
 
