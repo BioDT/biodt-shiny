@@ -209,14 +209,14 @@ create_top_species_table_data <- function(summary_data, bird_spp_info) {
 
   top5_data <- top5_data_after_join |>
     # Format the name_col for display
-    mutate(name_col = str_replace_all(name_col, "_", " ")) |> 
+    mutate(name_col = str_replace_all(name_col, "_", " ")) |>
     mutate(name_col = str_to_title(name_col)) |>
     # Select and rename columns
     select(
       Date = date,
       Name = name_col,
       `Vernacular name` = common_name,
-      `Scientific name` = display_scientific_name, 
+      `Scientific name` = display_scientific_name,
       Count = count,
       rank # Keep rank for sorting
     ) |>

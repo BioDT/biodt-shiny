@@ -11,7 +11,7 @@ box::use(
   # Interactive map
   leaflet[
     leaflet, addTiles, setView, addProviderTiles, clearShapes, addCircles,
-    addCircleMarkers, clearControls, addLegend, addPolylines,
+    addCircleMarkers, clearControls, addLegend, addPolylines, addPolygons,
     layersControlOptions, addLayersControl, clearImages, colorNumeric, addMarkers,
     clearGroup, makeIcon, addRectangles, removeTiles, hideGroup, showGroup, labelFormat,
     renderLeaflet, leafletOutput, leafletProxy, removeControl, addControl
@@ -51,13 +51,14 @@ map_module_ui <- function(id) {
 #' Map Module Server
 #'
 #' @param id The module ID
+#' @param finland_border The Finland border data
 #' @param current_date A reactive expression for the current date being displayed
 #' @param species_data A reactive expression for the species data
 #' @param selected_species A reactive expression for the selected species name
 #' @param bird_spp_info A reactive expression containing info for all bird species
 #' @return A list containing the update_map_with_frame function
 #' @export
-map_module_server <- function(id, current_date, species_data,
+map_module_server <- function(id, finland_border, current_date, species_data,
                               selected_species, bird_spp_info) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -212,14 +213,27 @@ map_module_server <- function(id, current_date, species_data,
       m <- leaflet() |>
         addProviderTiles("CartoDB.Positron") |>
         # Set view to focus on southern Finland where most observations are
-        setView(lng = 25.0, lat = 62.0, zoom = 6) |>
+        setView(lng = 25.0, lat = 61.5, zoom = 6) |>
+        # Add hover info display (initially hidden)
         addControl(
           html = create_hover_info_display(),
-          position = "topright",
+          position = "bottomright",
           layerId = "hover-info-control"
         )
 
-      # Removed initial check for bird info card - observeEvent handles this
+      # Add Finland border if available
+      if (!is.null(finland_border)) {
+        tryCatch(
+          {
+            m <- m |>
+              addPolygons(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 1, fillOpacity = 0, group = "Finland Border", smoothFactor = 0.5) |>
+              hideGroup("Finland Border") # Hide by default
+          },
+          error = function(e) {
+            cat("Error adding Finland border: ", e$message, "\n")
+          }
+        )
+      }
 
       return(m)
     })
@@ -279,7 +293,8 @@ map_module_server <- function(id, current_date, species_data,
             leafletProxy(ns("rasterMap")) |>
               clearImages() |>
               clearShapes() |>
-              clearGroup("Heat Map")
+              clearGroup("Heat Map") |>
+              clearGroup("Finland Border")
             return(FALSE)
           }
 
@@ -290,6 +305,7 @@ map_module_server <- function(id, current_date, species_data,
             clearImages() |>
             clearShapes() |>
             clearGroup("Heat Map") |>
+            clearGroup("Finland Border") |>
             # Always clear legend and other controls before adding new ones
             removeControl(layerId = "intensity-legend") |>
             removeControl(layerId = "layer-control") |>
@@ -324,10 +340,25 @@ map_module_server <- function(id, current_date, species_data,
                   clearImages() |>
                   clearShapes() |>
                   clearGroup("Heat Map") |>
+                  clearGroup("Finland Border") |>
                   removeControl(layerId = "intensity-legend") |>
                   removeControl(layerId = "layer-control") |>
                   removeControl(layerId = "date-display-control") |>
                   removeControl(layerId = "error-message-control")
+
+                # Add Finland border back if available
+                if (!is.null(finland_border)) {
+                  tryCatch(
+                    {
+                      proxy |>
+                        addPolygons(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 1, fillOpacity = 0, group = "Finland Border", smoothFactor = 0.5) |>
+                        hideGroup("Finland Border") # Hide by default
+                    },
+                    error = function(e) {
+                      safe_print("Error adding Finland border: ", e$message)
+                    }
+                  )
+                }
 
                 # Add date display
                 date_to_display <- format_date_for_display(date)
@@ -348,6 +379,21 @@ map_module_server <- function(id, current_date, species_data,
 
               # Base map setup is done in renderLeaflet, proxy modifies it.
               # No need for: m <- leaflet() |> addProviderTiles(...) |> setView(...)
+
+              # Add Finland border if available using proxy
+              if (!is.null(finland_border)) {
+                tryCatch(
+                  {
+                    proxy |>
+                      addPolygons(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 1, fillOpacity = 0, group = "Finland Border", smoothFactor = 0.5) |>
+                      hideGroup("Finland Border") # Hide by default
+                  },
+                  error = function(e) {
+                    safe_print("Error adding Finland border: ", e$message)
+                    # Continue without the border
+                  }
+                )
+              }
 
               # Only add bird data if we have points
               if (nrow(points_data) > 0) {
@@ -434,12 +480,16 @@ map_module_server <- function(id, current_date, species_data,
                   # --- End Intensity Validation ---
 
                   # Add layer controls using proxy (always add controls)
-                  proxy |>
-                    addLayersControl(
-                      baseGroups = c("Base Map"),
-                      overlayGroups = c("Heat Map"), # Keep Heat Map group even if empty
-                      options = layersControlOptions(collapsed = FALSE)
-                    )
+                  controls_already_added <- FALSE
+                  if (!controls_already_added) {
+                    proxy |>
+                      addLayersControl(
+                        baseGroups = c("Base Map"),
+                        overlayGroups = c("Finland Border", "Heat Map"), # Keep Heat Map group even if empty
+                        options = layersControlOptions(collapsed = FALSE)
+                      )
+                    controls_already_added <<- TRUE # Mark controls as added
+                  }
 
                   # Add debug message to the map UI
                   debug_msg <- paste0(

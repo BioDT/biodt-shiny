@@ -121,10 +121,10 @@ box::use(
 
 # Local modules
 box::use(
-  app/logic/rtbm/rtbm_data_handlers[load_bird_species_info, load_parquet_data, preload_summary_data],
-  app/logic/rtbm/rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
-  app/view/rtbm/rtbm_map[map_module_ui, map_module_server],
-  app/view/rtbm/rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
+  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, preload_summary_data, load_finland_border_geojson],
+  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
+  app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
+  app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -214,11 +214,14 @@ rtbm_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # --- Make finland_border a reactiveVal, initialized to NULL ---
+    finland_border <- reactiveVal(NULL)
+
     # --- Main App Reactives ---
     available_dates <- reactiveVal(NULL)
     bird_spp_info <- reactiveVal(NULL)
-    species_data <- reactiveVal(NULL) # Data per species for the map
-    summary_data <- reactiveVal(NULL) # Preloaded summary data
+    species_data <- reactiveVal(NULL)
+    summary_data <- reactiveVal(NULL)
     loaded_earliest_date <- reactiveVal(NULL)
     loaded_latest_date <- reactiveVal(NULL)
     all_summary_data_store <- reactiveVal(tibble(date = as.Date(character(0)))) # Initialize with empty tibble with date column
@@ -230,6 +233,19 @@ rtbm_app_server <- function(id, tab_selected) {
       if (is.null(bird_spp_info())) {
         print("Loading bird species info on tab selection...")
         bird_spp_info(load_bird_species_info())
+      }
+      # Load Finland border data
+      if (is.null(finland_border())) {
+        print("Loading Finland border geojson on tab selection...")
+        loaded_border <- load_finland_border_geojson()
+        if (is.null(loaded_border)) {
+          showNotification(
+            "Warning: Finland border data could not be loaded. Map boundary features may be affected.",
+            type = "warning",
+            duration = 10 # Show for 10 seconds
+          )
+        }
+        finland_border(loaded_border)
       }
     })
 
@@ -572,6 +588,7 @@ rtbm_app_server <- function(id, tab_selected) {
     # --- Map Module Call ---
     map_functions <- map_module_server(
       "map",
+      finland_border = finland_border, # Pass the reactive finland_border
       current_date = sidebar_returns$current_date, # Use reactive from sidebar
       species_data = species_data, # Pass the processed species data
       selected_species = sidebar_returns$selected_species, # Use reactive from sidebar
