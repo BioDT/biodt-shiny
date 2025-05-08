@@ -23,12 +23,12 @@ rtbm_data_path <- file.path(base_data_path, "rtbm")
 rtbm_parquet_path <- file.path(rtbm_data_path, "parquet")
 
 # Ensure directories exist
-if (!dir_exists(rtbm_parquet_path)) {
-  stop(
-    "RTBM Parquet directory not found. Please configure the data_path in your config file.",
-    call. = FALSE
-  )
-}
+# if (!dir_exists(rtbm_parquet_path)) {
+#   stop(
+#     "RTBM Parquet directory not found. Please configure the data_path in your config file.",
+#     call. = FALSE
+#   )
+# }
 
 bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
 s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
@@ -96,7 +96,8 @@ load_bird_species_info <- function() {
         speciesUrl = info$species_url %||% NA_character_,
         stringsAsFactors = FALSE
       )
-    }) |> discard(\(x) is.null(x) || is.na(x$displayScientificName))
+    }) |>
+      discard(\(x) is.null(x) || is.na(x$displayScientificName))
 
     if (length(bird_df) == 0) {
       stop("No valid bird entries found after processing JSON.")
@@ -169,7 +170,10 @@ load_bird_species_info <- function() {
   url_result <- safe_fetch_url(bird_info_url)
 
   if (!is.null(url_result$error)) {
-    final_error_msg <- paste("Failed to load bird species info from both local file and URL. URL error: ", url_result$error$message)
+    final_error_msg <- paste(
+      "Failed to load bird species info from both local file and URL. URL error: ",
+      url_result$error$message
+    )
     warning(final_error_msg)
     stop(final_error_msg)
   } else if (!is.null(url_result$result)) {
@@ -177,7 +181,12 @@ load_bird_species_info <- function() {
     # Optionally, save the fetched data to the local file for future use
     tryCatch(
       {
-        write_json(resp_body_json(safe_fetch_url(bird_info_url)$result), local_file_path, auto_unbox = TRUE, pretty = TRUE)
+        write_json(
+          resp_body_json(safe_fetch_url(bird_info_url)$result),
+          local_file_path,
+          auto_unbox = TRUE,
+          pretty = TRUE
+        )
         message("Saved fetched bird_info.json to local cache: ", local_file_path)
       },
       error = function(e_save) {
@@ -252,8 +261,12 @@ load_parquet_data <- function(scientific_name, start_date, end_date) {
 
   if (nrow(file_info) == 0) {
     message(
-      "No Parquet files found for species '", scientific_name, "' between ",
-      start_date, " and ", end_date
+      "No Parquet files found for species '",
+      scientific_name,
+      "' between ",
+      start_date,
+      " and ",
+      end_date
     )
     return(list(data = NULL, dates = as.Date(character(0))))
   }
@@ -288,8 +301,14 @@ load_parquet_data <- function(scientific_name, start_date, end_date) {
   combined_data <- bind_rows(valid_data)
 
   message(
-    "Successfully loaded data for ", length(successful_dates), " dates for species '",
-    scientific_name, "' between ", start_date, " and ", end_date
+    "Successfully loaded data for ",
+    length(successful_dates),
+    " dates for species '",
+    scientific_name,
+    "' between ",
+    start_date,
+    " and ",
+    end_date
   )
 
   # Create a named vector of data paths for each date (without setNames)
