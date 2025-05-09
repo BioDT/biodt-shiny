@@ -186,7 +186,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
         if (nrow(species_details) > 0) {
           photo_url(species_details$photo_url)
           wiki_link(species_details$wiki_link) # Corrected column name
-          scientific_name(species_details$scientific_name)
+          scientific_name(species_details$display_scientific_name) # Use display_scientific_name
           song_url(species_details$song_url)
         } else {
           # Reset reactive values if details not found
@@ -213,27 +213,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
       m <- leaflet() |>
         addProviderTiles("CartoDB.Positron") |>
         # Set view to focus on southern Finland where most observations are
-        setView(lng = 25.0, lat = 61.5, zoom = 6) |>
+        setView(lng = 25.0, lat = 62.0, zoom = 6) |>
         # Add hover info display (initially hidden)
         addControl(
           html = create_hover_info_display(),
           position = "bottomright",
           layerId = "hover-info-control"
         )
-
-      # Add Finland border if available
-      if (!is.null(finland_border)) {
-        tryCatch(
-          {
-            m <- m |>
-              addPolygons(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 1, fillOpacity = 0, group = "Finland Border", smoothFactor = 0.5) |>
-              hideGroup("Finland Border") # Hide by default
-          },
-          error = function(e) {
-            cat("Error adding Finland border: ", e$message, "\n")
-          }
-        )
-      }
 
       return(m)
     })
@@ -293,8 +279,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
             leafletProxy(ns("rasterMap")) |>
               clearImages() |>
               clearShapes() |>
-              clearGroup("Heat Map") |>
-              clearGroup("Finland Border")
+              clearGroup("Heat Map")
             return(FALSE)
           }
 
@@ -306,7 +291,6 @@ map_module_server <- function(id, finland_border, current_date, species_data,
             clearShapes() |>
             clearGroup("Heat Map") |>
             clearGroup("Finland Border") |>
-            # Always clear legend and other controls before adding new ones
             removeControl(layerId = "intensity-legend") |>
             removeControl(layerId = "layer-control") |>
             removeControl(layerId = "date-display-control") |>
@@ -351,8 +335,7 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                   tryCatch(
                     {
                       proxy |>
-                        addPolygons(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 1, fillOpacity = 0, group = "Finland Border", smoothFactor = 0.5) |>
-                        hideGroup("Finland Border") # Hide by default
+                        addPolylines(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 0.8, group = "Finland Border")
                     },
                     error = function(e) {
                       safe_print("Error adding Finland border: ", e$message)
@@ -385,8 +368,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                 tryCatch(
                   {
                     proxy |>
-                      addPolygons(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 1, fillOpacity = 0, group = "Finland Border", smoothFactor = 0.5) |>
-                      hideGroup("Finland Border") # Hide by default
+                      addPolylines(
+                        data = finland_border,
+                        color = "#FF6B6B",
+                        weight = 2,
+                        opacity = 0.8,
+                        group = "Finland Border"
+                      )
                   },
                   error = function(e) {
                     safe_print("Error adding Finland border: ", e$message)
@@ -467,14 +455,14 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                       heatmap_added <- TRUE # Set flag
 
                       # Add legend
-                      proxy |> addLegend(
-                        layerId = "intensity-legend",
-                        position = "bottomright",
-                        pal = base_pal,
-                        values = domain,
-                        title = "Observation intensity",
-                        opacity = 1.0
-                      )
+                      # proxy |> addLegend(
+                      #   layerId = "intensity-legend",
+                      #   position = "bottomright",
+                      #   pal = base_pal,
+                      #   values = domain,
+                      #   title = "Observation intensity",
+                      #   opacity = 1.0
+                      # )
                     }
                   }
                   # --- End Intensity Validation ---
