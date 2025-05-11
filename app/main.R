@@ -149,19 +149,17 @@ ui <- function(id) {
             i18n
           )
         ),
-        if (env_active == "dev") {
-          nav_panel(
-            class = "p-0",
-            title = i18n$translate(
-              "Real-time Bird Monitoring with Citizen Science Data"
-            ),
-            value = "rtbm",
-            rtbm_ui(
-              ns("rtbm_main"),
-              i18n
-            )
+        nav_panel(
+          class = "p-0",
+          title = i18n$translate(
+            "Real-time Bird Monitoring with Citizen Science Data"
+          ),
+          value = "rtbm",
+          rtbm_ui(
+            ns("rtbm_main"),
+            i18n
           )
-        },
+        ),
         nav_panel(
           class = "p-0",
           title = i18n$translate("Cultural Ecosystem Services"),
