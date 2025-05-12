@@ -4657,7 +4657,7 @@
       "URL": "https://stringi.gagolewski.com/, https://github.com/gagolews/stringi, https://icu.unicode.org/",
       "BugReports": "https://github.com/gagolews/stringi/issues",
       "SystemRequirements": "ICU4C (>= 61, optional)",
-      "Type": "Package",x
+      "Type": "Package",
       "Depends": [
         "R (>= 3.4)"
       ],
