@@ -4,6 +4,7 @@ box::use(
     nav_select,
     bs_theme,
     page_navbar,
+    navbar_options,
     nav_menu,
     nav_spacer,
     nav_item,
@@ -101,12 +102,14 @@ ui <- function(id) {
           alt = "Biodiversity Digital Twin",
         ),
       ),
-      id = ns("navbar"),
+      navbar_options = navbar_options(
+        bg = "#fff",
+        collapsible = TRUE
+      ),
       theme = biodt_theme,
-      bg = "#fff",
+      id = ns("navbar"),
       fillable = TRUE,
       # must be true
-      collapsible = TRUE,
       fluid = TRUE,
       ## Info - main menu item ----
       nav_panel(
