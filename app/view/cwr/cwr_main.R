@@ -293,7 +293,7 @@ mod_cwr_server <- function(id, i18n) {
           list_genus <- list_genus |>
             setdiff("climate")
 
-          list_genus_options <- crop_table[list_genus %in% crop_table]
+          list_genus_options <- crop_table[crop_table %in% list_genus]
 
           updatePickerInput(
             inputId = "genus",
