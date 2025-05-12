@@ -4,7 +4,6 @@ box::use(
     nav_select,
     bs_theme,
     page_navbar,
-    navbar_options,
     nav_menu,
     nav_spacer,
     nav_item,
