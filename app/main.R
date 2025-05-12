@@ -102,14 +102,12 @@ ui <- function(id) {
           alt = "Biodiversity Digital Twin",
         ),
       ),
-      navbar_options = navbar_options(
-        bg = "#fff",
-        collapsible = TRUE
-      ),
-      theme = biodt_theme,
       id = ns("navbar"),
+      theme = biodt_theme,
+      bg = "#fff",
       fillable = TRUE,
       # must be true
+      collapsible = TRUE,
       fluid = TRUE,
       ## Info - main menu item ----
       nav_panel(
