@@ -149,7 +149,7 @@ mod_cwr_ui <- function(id, i18n) {
             card_header(
               tags$h2(
                 class = "card_title",
-                "Genus and Species"
+                "Crop and Crop Wild Relatives"
               )
             ),
             card_body(
