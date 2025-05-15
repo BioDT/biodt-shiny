@@ -236,42 +236,50 @@ mod_info_server <- function(id, r, main_session) {
 
     observeEvent(input$honeybee_selector, {
       print("actionlink 'Honeybee' selected")
-      nav_select("navbar", selected = "Honeybee", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "Honeybee")
     })
 
     observeEvent(input$grassland_selector, {
       print("actionlink 'Grassland' selected")
-      nav_select("navbar", selected = "Grassland", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "Grassland")
     })
 
     observeEvent(input$ces_selector, {
       print("actionlink 'CES' selected")
-      nav_select("navbar", selected = "CES", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "CES")
     })
 
     observeEvent(input$forest_selector, {
       print("actionlink 'Forest Dynamics' selected")
-      nav_select("navbar", selected = "Forest", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "Forest")
     })
 
     observeEvent(input$rtbm_selector, {
       print("actionlink 'RTBM' selected")
-      nav_select("navbar", selected = "rtbm", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "rtbm")
     })
 
     observeEvent(input$cwr_selector, {
       print("actionlink 'CWR' selected")
-      nav_select("navbar", selected = "cwr", session = main_session)
+      # Use custom JavaScript method instead of nav_select to avoid opening the navbar menu
+      main_session$sendCustomMessage("switchToTab", "cwr")
     })
 
     observeEvent(input$ias_selector, {
       print("actionlink 'IAS' selected")
-      nav_select("navbar", selected = "ias", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "ias")
     })
 
     observeEvent(input$disease_selector, {
       print("actionlink 'disease outbreaks' selected")
-      nav_select("navbar", selected = "disease", session = main_session)
+      # Use custom JavaScript method instead of nav_select
+      main_session$sendCustomMessage("switchToTab", "disease")
     })
   })
 }
