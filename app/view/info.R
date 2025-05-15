@@ -14,13 +14,8 @@ mod_info_ui <- function(id, i18n) {
     tags$div(
       class = "col mx-auto col-lg-8",
       tags$h1(
-        tags$span(i18n$translate("Prototype"),
-          class = "text-primary",
-          id = ns("heading-first-part")
-        ),
-        tags$span(i18n$translate("Digital Twins"),
-          id = ns("heading-second-part")
-        ),
+        tags$span(i18n$translate("Prototype"), class = "text-primary", id = ns("heading-first-part")),
+        tags$span(i18n$translate("Digital Twins"), id = ns("heading-second-part")),
         class = "justify-content-center",
       ),
       # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
@@ -70,24 +65,24 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                    actionLink(
-                      class = "w-100",
-                      inputId = ns("grassland_selector"),
-                      i18n$translate("Grassland Biodiversity Dynamics")
-                    )
-                ),
-                tags$li(
                   actionLink(
-                  class = "w-100",
-                  inputId = ns("forest_selector"),
-                  i18n$translate("Forest Biodiversity Dynamics")
+                    class = "w-100",
+                    inputId = ns("grassland_selector"),
+                    i18n$translate("Grassland Biodiversity Dynamics")
                   )
                 ),
                 tags$li(
                   actionLink(
-                  class = "w-100",
-                  inputId = ns("rtbm_selector"),
-                  i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
+                    class = "w-100",
+                    inputId = ns("forest_selector"),
+                    i18n$translate("Forest Biodiversity Dynamics")
+                  )
+                ),
+                tags$li(
+                  actionLink(
+                    class = "w-100",
+                    inputId = ns("rtbm_selector"),
+                    i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
                   )
                 ),
                 tags$li(
@@ -127,18 +122,26 @@ mod_info_ui <- function(id, i18n) {
               tags$ul(
                 tags$li(
                   actionLink(
-                  class = "w-100",
-                  inputId = ns("cwr_selector"),
-                  i18n$translate("Crop Wild Relatives")
+                    class = "w-100",
+                    inputId = ns("cwr_selector"),
+                    i18n$translate("Crop Wild Relatives")
                   )
                 ),
                 tags$li(
-                  class = "w-100 not-active",
-                  i18n$translate("Prioritisation of DNA metabarcoding sampling locations")
+                  class = "w-100",
+                  tags$a(
+                    target = "_blank",
+                    href = "https://riojournal.com/article/124978/",
+                    i18n$translate("Prioritisation of DNA metabarcoding sampling locations (conceptual article)")
+                  )
                 ),
                 tags$li(
-                  class = "w-100 not-active",
-                  i18n$translate("Phylogenetic Diversity")
+                  class = "w-100",
+                  tags$a(
+                    target = "_blank",
+                    href = "https://phylonext.gbif.org/",
+                    i18n$translate("Phylogenetic Diversity (external link)")
+                  )
                 ),
               )
             )
@@ -170,9 +173,9 @@ mod_info_ui <- function(id, i18n) {
               tags$ul(
                 tags$li(
                   actionLink(
-                  class = "w-100",
-                  inputId = ns("ias_selector"),
-                  i18n$translate("Invasive Alien Species")
+                    class = "w-100",
+                    inputId = ns("ias_selector"),
+                    i18n$translate("Invasive Alien Species")
                   )
                 )
               )
@@ -212,9 +215,9 @@ mod_info_ui <- function(id, i18n) {
                 ),
                 tags$li(
                   actionLink(
-                  class = "w-100",
-                  inputId = ns("disease_selector"),
-                  i18n$translate("Disease Outbreaks")
+                    class = "w-100",
+                    inputId = ns("disease_selector"),
+                    i18n$translate("Disease Outbreaks")
                   )
                 )
               )
@@ -233,69 +236,42 @@ mod_info_server <- function(id, r, main_session) {
 
     observeEvent(input$honeybee_selector, {
       print("actionlink 'Honeybee' selected")
-      nav_select("navbar",
-        selected = "Honeybee",
-        session = main_session
-      )
+      nav_select("navbar", selected = "Honeybee", session = main_session)
     })
 
     observeEvent(input$grassland_selector, {
       print("actionlink 'Grassland' selected")
-      nav_select("navbar",
-        selected = "Grassland",
-        session = main_session
-      )
+      nav_select("navbar", selected = "Grassland", session = main_session)
     })
 
     observeEvent(input$ces_selector, {
       print("actionlink 'CES' selected")
-      nav_select("navbar",
-        selected = "CES",
-        session = main_session
-      )
+      nav_select("navbar", selected = "CES", session = main_session)
     })
-    
+
     observeEvent(input$forest_selector, {
       print("actionlink 'Forest Dynamics' selected")
-      nav_select("navbar",
-                 selected = "Forest",
-                 session = main_session
-      )
+      nav_select("navbar", selected = "Forest", session = main_session)
     })
-    
+
     observeEvent(input$rtbm_selector, {
       print("actionlink 'RTBM' selected")
-      nav_select("navbar",
-                 selected = "rtbm",
-                 session = main_session
-      )
+      nav_select("navbar", selected = "rtbm", session = main_session)
     })
-    
+
     observeEvent(input$cwr_selector, {
       print("actionlink 'CWR' selected")
-      nav_select("navbar",
-                 selected = "cwr",
-                 session = main_session
-      )
+      nav_select("navbar", selected = "cwr", session = main_session)
     })
-    
+
     observeEvent(input$ias_selector, {
       print("actionlink 'IAS' selected")
-      nav_select("navbar",
-                 selected = "ias",
-                 session = main_session
-      )
+      nav_select("navbar", selected = "ias", session = main_session)
     })
-    
+
     observeEvent(input$disease_selector, {
       print("actionlink 'disease outbreaks' selected")
-      nav_select("navbar",
-                 selected = "disease",
-                 session = main_session
-      )
+      nav_select("navbar", selected = "disease", session = main_session)
     })
-    
-    
-    
   })
 }
