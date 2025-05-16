@@ -3,7 +3,8 @@ box::use(
 )
 
 #' @export
-disease_contributors_ui <- function(id, i18n) { # nolint
+disease_contributors_ui <- function(id, i18n) {
+  # nolint
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
@@ -14,10 +15,11 @@ disease_contributors_ui <- function(id, i18n) { # nolint
       style = "height: 100vh;",
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
-        tags$h2(i18n$translate("CONTRIBUTORS"),
-          style = "greeting display-4 font-weight-bold"
+        tags$h2(i18n$translate("CONTRIBUTORS"), style = "greeting display-4 font-weight-bold"),
+        tags$p("Kate Ingenloff, GBIF"),
+        tags$p(
+          "Radek Halfar and Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava, 17. listopadu 2172/15, 708 00 Ostrava-Poruba, Czech Republic"
         ),
-        tags$p("TO BE ADDED"),
       )
     ),
     column(
@@ -36,7 +38,8 @@ disease_contributors_ui <- function(id, i18n) { # nolint
 }
 
 #' @export
-disease_contributors_server <- function(id, r) { # nolint
+disease_contributors_server <- function(id, r) {
+  # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
   })

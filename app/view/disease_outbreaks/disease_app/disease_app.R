@@ -377,6 +377,8 @@ disease_app_server <- function(
           r_disease$run_dir
         )
 
+        print(wsl_command)
+
         # Run the command and capture output
         tryCatch(
           {

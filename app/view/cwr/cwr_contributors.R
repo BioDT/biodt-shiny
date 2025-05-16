@@ -19,7 +19,16 @@ cwr_contributors_ui <- function(id, i18n = NULL) {
           if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
           style = "greeting display-4 font-weight-bold"
         ),
-        tags$p("Name and affiliation"),
+        tags$p(
+          "Desalegn Chala, Dag Endresen and Erik Kusch – Natural History Museum, University of Oslo, Oslo, Norway "
+        ),
+        tags$p(
+          "Tomas Martinovic - IT4Innovations, VSB - Technical University of Ostrava, Ostrava-Poruba, Czech Republic"
+        ),
+        tags$p("Tuomas Rossi - CSC – IT Center for Science Ltd., Espoo, Finland"),
+        tags$p(
+          "Claus Weiland, Jonas Grieb, Daniel Bauer - Senckenberg – Leibniz Institution for Biodiversity and Earth System Research, Science IT, Frankfurt am Main, Germany"
+        ),
       )
     ),
     column(
@@ -27,8 +36,7 @@ cwr_contributors_ui <- function(id, i18n = NULL) {
       style = "height: 100vh;",
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        tags$img(
-        )
+        tags$img()
       )
     )
   )

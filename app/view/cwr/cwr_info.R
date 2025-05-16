@@ -20,11 +20,23 @@ cwr_info_ui <- function(id) {
           "Crop Wild Relatives pDT"
         ),
         tags$p(
-          class = "pt-3",
-          "The CWR prototype Digital Twin (pDT) in EARLY ACCESS"
+          "The Crop Wild Relatives Digital Twin (CWR DT) aims to support crop breeding programs by broadening the genetic base of cultivated crops—ultimately enhancing their resilience to climate change–induced environmental stresses."
         ),
-        tags$h2("This prototype digital twin is in early access and intended for research purposes only; do not use for decision-making or operational purposes."),
-        tags$p("Pariatur ut maiores qui. Aut sint quia quis minus natus temporibus modi deleniti. Eum excepturi maiores repudiandae neque. Quidem perspiciatis et laudantium similique illo eaque. Excepturi eius atque aspernatur excepturi dolore modi adipisci maxime")
+        tags$p(
+          "Using environmental profiling techniques and species distribution modeling (SDM), the CWR DT identifies, and maps populations of wild relatives adapted to extreme conditions such as high or low temperatures, soil acidity, salinity, drought, and more."
+        ),
+        tags$p(
+          "By highlighting these marginally thriving CWR populations, the digital twin enables breeders to tap into valuable traits for widening the genetic bases of crops and strengthening crops' resilience and adaptability."
+        ),
+        tags$p(
+          "Read more: ",
+          tags$a("https://doi.org/10.3897/rio.10.e125192", href = "https://doi.org/10.3897/rio.10.e125192")
+        ),
+        tags$p(
+          "Source code and scripts of the pDT can be found at ",
+          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"),
+          "."
+        ),
       )
     ),
     column(
@@ -40,8 +52,6 @@ cwr_info_ui <- function(id) {
     )
   )
 }
-
-
 
 
 #' @export
