@@ -94,8 +94,8 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_double_chart_ui(ns("double_chart"), i18n),
       grassland_dynamics_double_chart_controls_ui(ns("controls"), i18n)
     ),
-    grassland_dynamics_manage_datatable_ui(ns("mngmnt_data_table"), i18n),
     grassland_dynamics_three_soil_types_ui(ns("three_soil_types"), i18n),
+    grassland_dynamics_manage_datatable_ui(ns("mngmnt_data_table"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
 }
