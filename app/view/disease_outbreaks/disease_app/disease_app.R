@@ -123,7 +123,7 @@ disease_app_server <- function(
         )
       }
     )
-    
+
     output$statusMsg <- shiny$renderUI({
       shiny$div(
         class = "alert alert-info",
@@ -316,21 +316,19 @@ disease_app_server <- function(
         }
       }
     )
-    
+
     shiny$observe({
       # Check if bounds, release_point, and fences are set
       all_set <- !is.null(r_disease$bounds) &&
         !is.null(r_disease$release_point) &&
         !is.null(r_disease$fences)
-      
+
       if (all_set) {
         enable("run_command")
       } else {
         disable("run_command")
       }
     })
-    
-    
 
     # Run WSL Command
     shiny$observeEvent(
@@ -351,7 +349,7 @@ disease_app_server <- function(
 
         # Show a notification
         shiny$showNotification("Modelling started.", type = "message")
-        
+
         output$statusMsg <- shiny$renderUI({
           shiny$div(
             class = "alert alert-info",
@@ -359,7 +357,6 @@ disease_app_server <- function(
             "Please wait, modelling started"
           )
         })
-        
 
         shiny$req(input$file) # Ensure a file is uploaded
 
@@ -421,11 +418,12 @@ disease_app_server <- function(
       ignoreInit = TRUE,
       {
         shiny$req(r_disease$run_dir)
+
         load_simulated_data(
           r_disease$run_dir,
-          r_disease,
+          r_disease
         )
-        
+
         output$statusMsg <- shiny$renderUI({
           shiny$div(
             class = "alert alert-info",

@@ -136,5 +136,5 @@ load_simulated_data <- function(
     )
   }
 
-  # return(r_disease)
+  return(r_disease)
 }

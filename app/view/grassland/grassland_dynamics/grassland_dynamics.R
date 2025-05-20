@@ -46,23 +46,33 @@ box::use(
       grassland_dynamics_soil_datatable_server
     ],
   app /
+    view /
+    grassland /
+    grassland_dynamics /
+    grassland_dynamics_manage_datatable[
+      grassland_dynamics_manage_datatable_ui,
+      grassland_dynamics_manage_datatable_server
+    ],
+  app /
     logic /
     grassland /
-    grassland_soil_datatable_modular[
+    grassland_soil_management_data_load[
       read_project_config,
       get_soil_file_name,
+      get_management_file_name,
       get_lat_lon_name,
-      get_soil_file_path,
-      read_data_table,
-      read_main_three_values
+      get_file_path,
+      read_soil_data_table,
+      read_soil_shares,
+      read_management_data_table
     ],
   app /
     view /
     grassland /
     grassland_dynamics /
-    grassland_dynamics_soil_main_values[
-      grassland_dynamics_soil_main_values_ui,
-      grassland_dynamics_soil_main_values_server
+    grassland_dynamics_three_soil_types[
+      grassland_dynamics_three_soil_types_ui,
+      grassland_dynamics_three_soil_types_server
     ],
 )
 
@@ -84,8 +94,8 @@ grassland_dynamics_ui <- function(id, i18n) {
       grassland_dynamics_double_chart_ui(ns("double_chart"), i18n),
       grassland_dynamics_double_chart_controls_ui(ns("controls"), i18n)
     ),
-
-    grassland_dynamics_soil_main_values_ui(ns("main_soil_values"), i18n),
+    grassland_dynamics_three_soil_types_ui(ns("three_soil_types"), i18n),
+    grassland_dynamics_manage_datatable_ui(ns("mngmnt_data_table"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
 }
@@ -100,16 +110,24 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     # LOCATION settings ----
     coordinates <- grassland_dynamics_location_server("location")
 
-    # Soil data table
-    soil_config <- read_project_config("project1")
-    soil_filename <- get_soil_file_name(soil_config)
+    # the additional data are displayed as DATA TABLES below the main chart ----
+    project_conf <- read_project_config(project_name = "project1")
+
+    # MANAGEMENT table - data load ----
+    mng_filename <- get_management_file_name(project_conf)
+    mng_lat_lon_path <- get_lat_lon_name(mng_filename)
+    mng_file_path <- get_file_path(type_of_input_file = "management", mng_lat_lon_path)
+    mng_data_table <- read_management_data_table(mng_file_path)
+    # print("mng_data_table:::")
+    # print(n = 23, mng_data_table) # TODO - remove later
+
+    # SOIL data table (optional - controled by checkbox) ----
+    soil_filename <- get_soil_file_name(project_conf)
     soil_lat_lon_path <- get_lat_lon_name(soil_filename)
-    soil_file_path <- get_soil_file_path(soil_lat_lon_path)
+    soil_file_path <- get_file_path("soil", soil_lat_lon_path)
+    soil_data_table <- read_soil_data_table(soil_file_path)
 
-    soil_data_table <- read_data_table(soil_file_path)
-
-    # Soil - main three values from above table
-    main_soil_values <- read_main_three_values(soil_file_path)
+    soil_type_shares <- read_soil_shares(soil_file_path)
 
     # MAP itself ----
     grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected)
@@ -123,17 +141,25 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
 
     grassland_dynamics_double_chart_controls_server("controls", plot_type)
 
+    # Management Actions Table - server module call ----
+    grassland_dynamics_manage_datatable_server(
+      "mngmnt_data_table",
+      mng_data_table,
+      tab_grassland_selected
+    )
+
+    # shares of 3 soil "types" (clay, sand and silt) above soil data table
+    # to make it easier for users only 2 digits are retained in the UI
+    grassland_dynamics_three_soil_types_server(
+      "three_soil_types",
+      soil_type_shares,
+      tab_grassland_selected
+    )
+
     # Soil data table
     grassland_dynamics_soil_datatable_server(
       "soil_data_table",
       soil_data_table,
-      tab_grassland_selected
-    )
-
-    # Soil main 3 values from above soil data table
-    grassland_dynamics_soil_main_values_server(
-      "main_soil_values",
-      main_soil_values,
       tab_grassland_selected
     )
   })
