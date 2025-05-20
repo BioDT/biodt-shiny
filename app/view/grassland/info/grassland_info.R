@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, column, tags, fluidRow, icon],
+  shiny[NS, column, tags, fluidRow],
 )
 
 #' @export
@@ -30,12 +30,7 @@ grassland_info_ui <- function(id, i18n) {
         )),
         tags$p(i18n$translate(
           "Once a specific site location has been selected, the pDT will simulate productivity (aboveground biomass and yield) and plant functional composition (grasses, forbs and legumes) over a selected time span in the past and, optionally, projected into the short-term future. Users may define and test the effects of different management scenarios. "
-        )),
-        tags$p(
-          i18n$translate("Source code and scripts of the pDT can be found at "),
-          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"),
-          "."
-        ),
+        ))
       )
     ),
     column(

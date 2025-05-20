@@ -14,8 +14,13 @@ mod_info_ui <- function(id, i18n) {
     tags$div(
       class = "col mx-auto col-lg-8",
       tags$h1(
-        tags$span(i18n$translate("Prototype"), class = "text-primary", id = ns("heading-first-part")),
-        tags$span(i18n$translate("Digital Twins"), id = ns("heading-second-part")),
+        tags$span(i18n$translate("Prototype"),
+          class = "text-primary",
+          id = ns("heading-first-part")
+        ),
+        tags$span(i18n$translate("Digital Twins"),
+          id = ns("heading-second-part")
+        ),
         class = "justify-content-center",
       ),
       # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
@@ -65,25 +70,19 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  actionLink(
-                    class = "w-100",
-                    inputId = ns("grassland_selector"),
-                    i18n$translate("Grassland Biodiversity Dynamics")
-                  )
+                    actionLink(
+                      class = "w-100",
+                      inputId = ns("grassland_selector"),
+                      i18n$translate("Grassland Biodiversity Dynamics")
+                    )
                 ),
                 tags$li(
-                  actionLink(
-                    class = "w-100",
-                    inputId = ns("forest_selector"),
-                    i18n$translate("Forest Biodiversity Dynamics")
-                  )
+                  class = "w-100",
+                  i18n$translate("Forest Biodiversity Dynamics")
                 ),
                 tags$li(
-                  actionLink(
-                    class = "w-100",
-                    inputId = ns("rtbm_selector"),
-                    i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
-                  )
+                  class = "w-100",
+                  i18n$translate("Real-time Bird Monitoring with Citizen Science Data")
                 ),
                 tags$li(
                   actionLink(
@@ -121,27 +120,16 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  actionLink(
-                    class = "w-100",
-                    inputId = ns("cwr_selector"),
-                    i18n$translate("Crop Wild Relatives")
-                  )
+                  class = "w-100",
+                  i18n$translate("Crop Wild Relatives")
                 ),
                 tags$li(
                   class = "w-100",
-                  tags$a(
-                    target = "_blank",
-                    href = "https://riojournal.com/article/124978/",
-                    i18n$translate("Prioritisation of DNA metabarcoding sampling locations (conceptual article)")
-                  )
+                  i18n$translate("Prioritisation of DNA metabarcoding sampling locations")
                 ),
                 tags$li(
                   class = "w-100",
-                  tags$a(
-                    target = "_blank",
-                    href = "https://phylonext.gbif.org/",
-                    i18n$translate("Phylogenetic Diversity (external link)")
-                  )
+                  i18n$translate("Phylogenetic Diversity")
                 ),
               )
             )
@@ -172,11 +160,8 @@ mod_info_ui <- function(id, i18n) {
               class = "views-element-container",
               tags$ul(
                 tags$li(
-                  actionLink(
-                    class = "w-100",
-                    inputId = ns("ias_selector"),
-                    i18n$translate("Invasive Alien Species")
-                  )
+                  class = "w-100",
+                  i18n$translate("Invasive Species")
                 )
               )
             )
@@ -214,11 +199,8 @@ mod_info_ui <- function(id, i18n) {
                   )
                 ),
                 tags$li(
-                  actionLink(
-                    class = "w-100",
-                    inputId = ns("disease_selector"),
-                    i18n$translate("Disease Outbreaks")
-                  )
+                  class = "w-100",
+                  i18n$translate("Disease Outbreaks")
                 )
               )
             )
@@ -235,51 +217,35 @@ mod_info_server <- function(id, r, main_session) {
     ns <- session$ns
 
     observeEvent(input$honeybee_selector, {
-      print("actionlink 'Honeybee' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "Honeybee")
+      print("actionlink selected")
+      nav_select("navbar",
+        selected = "Honeybee",
+        session = main_session
+      )
+      nav_select("honeybee_main-tab",
+        selected = "Beekeeper",
+        session = main_session
+      )
     })
 
     observeEvent(input$grassland_selector, {
       print("actionlink 'Grassland' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "Grassland")
+      nav_select("navbar",
+        selected = "Grassland",
+        session = main_session
+      )
     })
 
     observeEvent(input$ces_selector, {
-      print("actionlink 'CES' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "CES")
-    })
-
-    observeEvent(input$forest_selector, {
-      print("actionlink 'Forest Dynamics' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "Forest")
-    })
-
-    observeEvent(input$rtbm_selector, {
-      print("actionlink 'RTBM' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "rtbm")
-    })
-
-    observeEvent(input$cwr_selector, {
-      print("actionlink 'CWR' selected")
-      # Use custom JavaScript method instead of nav_select to avoid opening the navbar menu
-      main_session$sendCustomMessage("switchToTab", "cwr")
-    })
-
-    observeEvent(input$ias_selector, {
-      print("actionlink 'IAS' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "ias")
-    })
-
-    observeEvent(input$disease_selector, {
-      print("actionlink 'disease outbreaks' selected")
-      # Use custom JavaScript method instead of nav_select
-      main_session$sendCustomMessage("switchToTab", "disease")
+      print("actionlink selected")
+      nav_select("navbar",
+        selected = "CES",
+        session = main_session
+      )
+      nav_select("ces_main-tab",
+        selected = "Info",
+        session = main_session
+      )
     })
   })
 }

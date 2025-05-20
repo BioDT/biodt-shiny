@@ -149,7 +149,7 @@ mod_cwr_ui <- function(id, i18n) {
             card_header(
               tags$h2(
                 class = "card_title",
-                "Crop and Crop Wild Relatives"
+                "Genus and Species"
               )
             ),
             card_body(
@@ -293,7 +293,7 @@ mod_cwr_server <- function(id, i18n) {
           list_genus <- list_genus |>
             setdiff("climate")
 
-          list_genus_options <- crop_table[crop_table %in% list_genus]
+          list_genus_options <- crop_table[list_genus == crop_table]
 
           updatePickerInput(
             inputId = "genus",
@@ -315,7 +315,7 @@ mod_cwr_server <- function(id, i18n) {
       input$genus,
       ignoreInit = TRUE,
       {
-        # print(input$genus)
+        print(input$genus)
         # print("Change species")
         species_list <- list.files(file.path(cwr_path, input$genus))
         names(species_list) <- paste(input$genus, species_list)
@@ -345,23 +345,20 @@ mod_cwr_server <- function(id, i18n) {
         w$show()
 
         for (species in input$species) {
-          if (is.null(r_cwr$map_list[[paste(input$genus, species)]])) {
+          if (is.null(r_cwr$map_list[[species]])) {
             species_path <- file.path(
               cwr_path,
               input$genus,
               species
             )
 
-            # print(species_path)
             # Load input data ---
-            r_cwr$map_list[[paste(input$genus, species)]] <- terra$rast(
+            r_cwr$map_list[[species]] <- terra$rast(
               file.path(
                 species_path,
                 "MODELS-Binarised.tif"
               )
             )
-
-            # print(r_cwr$map_list[[paste(input$genus, species)]])
           }
         }
 
@@ -375,12 +372,11 @@ mod_cwr_server <- function(id, i18n) {
           stress_map[stress_map < input$stress_range[1]] <- NA
           stress_map[stress_map > input$stress_range[2]] <- NA
         }
-        print(input$species)
+
         # Update the map
         r_cwr$base_groups <- update_leaflet_map(
           r_cwr$map_list,
           input$species,
-          input$genus,
           session = session,
           stressor = input$stress_var,
           stress_map = stress_map,
@@ -391,7 +387,6 @@ mod_cwr_server <- function(id, i18n) {
         # Create tolerance plot
         r_cwr$tolerance_plot <- create_tolerance_plot(
           input$species,
-          input$genus,
           input$stress_var,
           r_cwr$stress_maps,
           r_cwr$map_list,

@@ -6,7 +6,6 @@ box::use(
 #' Update leaflet map with species distribution data
 #' @param map_list List of raster data for each species
 #' @param species Vector of selected species names
-#' @param genus Selected genus of the species
 #' @param session Shiny session object
 #' @param stressor Selected stress variable
 #' @param stress_map Stress variable raster data
@@ -15,7 +14,6 @@ box::use(
 update_leaflet_map <- function(
   map_list,
   species,
-  genus,
   session,
   stressor = NULL,
   stress_map = NULL,
@@ -30,9 +28,7 @@ update_leaflet_map <- function(
   # Create a list to hold the base groups for the layers control
   baseGroups <- list()
 
-  full_species <- paste(genus, species)
-
-  for (species_name in full_species) {
+  for (species_name in species) {
     if (subset_suitability_map) {
       map_list[[species_name]][map_list[[species_name]] == 0] <- NA
 

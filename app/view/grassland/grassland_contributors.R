@@ -19,13 +19,7 @@ grassland_contributors_ui <- function(id, i18n = NULL) {
           if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
           style = "greeting display-4 font-weight-bold"
         ),
-        tags$p(
-          "Thomas Banitz and Franziska Taubert, Department of Ecological Modelling, Helmholtz Centre for Environmental Research - UFZ, Permoserstr. 15, 04318 Leipzig, Germany"
-        ),
-        tags$p(
-          "Tomas Martinovic and Ondrej Salamon, IT4Innovations, VSB – Technical University of Ostrava, 17. listopadu 2172/15, 708 00 Ostrava-Poruba, Czech Republic"
-        ),
-        tags$p("Tuomas Rossi, CSC – IT Center for Science Ltd., P.O. Box 405, 02101 Espoo, Finland.")
+        tags$p("Name and affiliation"),
       )
     ),
     column(

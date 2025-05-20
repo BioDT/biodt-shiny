@@ -6,7 +6,6 @@ box::use(
 
 #' Create tolerance plot for selected species and stress variable
 #' @param species Vector of selected species names
-#' @param genus Selected genus of the species
 #' @param stress_var Selected stress variable
 #' @param stress_maps List of stress variable raster data
 #' @param map_list List of species distribution raster data
@@ -14,7 +13,6 @@ box::use(
 #' @export
 create_tolerance_plot <- function(
   species,
-  genus,
   stress_var,
   stress_maps,
   map_list,
@@ -24,7 +22,7 @@ create_tolerance_plot <- function(
     return(NULL)
   }
 
-  stress_data <- lapply(paste(genus, species), function(species_name) {
+  stress_data <- lapply(species, function(species_name) {
     suitable_pixels <- which(terra$values(map_list[[species_name]]) == 1)
     stress_values <- terra$values(stress_maps[[stress_var]])[suitable_pixels] |>
       terra$na.omit() |>
@@ -41,7 +39,7 @@ create_tolerance_plot <- function(
       name = species_name,
       type = "line",
       color = c("#00aa00", "#ff0000", "#0000aa")[which(
-        species_name == paste(genus, species)
+        species_name == species
       )],
       symbol = "none",
       showSymbol = FALSE,

@@ -33,7 +33,6 @@ grassland_dynamics_double_chart_ui <- function(
       )
     ),
     card_body(
-      style = "min-width: 900px !important; overflow-x: scroll;",
       layout_column_wrap(
         width = 1 / 2,
         selectInput(
@@ -92,7 +91,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
 
         colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
         colors_for_grass_lighter <- c("#73eb9b", "#e28bb7", "#998be2")
-        colors_for_weather <- c("#0072B2", "#ae4d18", "#956618", "#108039", "#56B4E9")
+        colors_for_weather <- c("#0072B2", "#D55E00", "#E69F00", "#F0E442", "#009E73", "#56B4E9")
         end_date <- "2015-12-31"
 
         chart_reactive <- reactive({

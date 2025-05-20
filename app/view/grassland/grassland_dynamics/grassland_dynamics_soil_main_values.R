@@ -5,22 +5,22 @@ box::use(
 )
 
 box::use(
-  app / logic / waiter[waiter_text],
+  app/logic/waiter[waiter_text],
 )
 
 #' @export
-grassland_dynamics_three_soil_types_ui <- function(
+grassland_dynamics_soil_main_values_ui <- function(
   id,
   i18n
 ) {
   ns <- NS(id)
   card(
-    id = ns("three_soil_types"),
+    id = "soil_main_values",
     class = "mx-md-3 card-shadow mb-2",
     card_header(
       tags$h2(
         class = "card_title",
-        i18n$translate("Shares of 3 Soil Types")
+        i18n$translate("Main Values of Soil Data")
       )
     ),
     card_body(
@@ -50,45 +50,41 @@ grassland_dynamics_three_soil_types_ui <- function(
 }
 
 #' @export
-grassland_dynamics_three_soil_types_server <- function(
-  id,
-  soil_type_shares,
-  tab_grassland_selected
-) {
+grassland_dynamics_soil_main_values_server <- function(
+    id,
+    main_values,
+    tab_grassland_selected
+  ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3("Loading...",
+        style = "color: #414f2f;"
+      ))
     w <- Waiter$new(
-      id = ns("three_soil_types"),
+      id = ns("soil_main_values"),
       html = msg,
       color = "rgba(256,256,256,0.9)",
     )
-
+  
     observeEvent(
       tab_grassland_selected(),
       ignoreNULL = TRUE,
       ignoreInit = TRUE,
       {
         w$show()
-        soil_type_shares_reactive <- reactiveVal()
-        soil_type_shares_reactive(soil_type_shares)
+        main_values_reactive <- reactiveVal()
+        main_values_reactive(main_values)
 
-        output$silt <- renderText({
-          names(soil_type_shares_reactive())[1]
-        })
-        output$clay <- renderText({
-          names(soil_type_shares_reactive())[2]
-        })
-        output$sand <- renderText({
-          names(soil_type_shares_reactive())[3]
-        })
+        output$silt <- renderText({ names(main_values_reactive())[1] })
+        output$clay <- renderText({ names(main_values_reactive())[2] })
+        output$sand <- renderText({ names(main_values_reactive())[3] })
 
-        output$silt_val <- renderText(soil_type_shares_reactive()[[1]])
-        output$clay_val <- renderText(soil_type_shares_reactive()[[2]])
-        output$sand_val <- renderText(soil_type_shares_reactive()[[3]])
+        output$silt_val <- renderText(main_values_reactive()[[1]])
+        output$clay_val <- renderText(main_values_reactive()[[2]])
+        output$sand_val <- renderText(main_values_reactive()[[3]])
         w$hide()
       }
-    )
+    )    
   })
 }
