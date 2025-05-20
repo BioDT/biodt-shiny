@@ -10,8 +10,7 @@ box::use(
   terra,
   readr,
   echarty[ecs.render, ecs.output],
-  shinyjs[hide, show, hidden, delay, disabled, disable, enable], 
-  yaml
+  shinyjs[hide, show, hidden, delay, disabled, disable, enable],
 )
 
 box::use(
@@ -371,30 +370,14 @@ disease_app_server <- function(
         release_coord <- paste("[", paste(r_disease$release_point, collapse = ", "), "]", sep = "")
         fence_polygon <- r_disease$fences
 
-        config <- list(
-          INPUT_MAP = map_name,
-          COMPUTED_AREA = area,
-          RELEASE_COORDS = release_coord,
-          FENCE_COORDS = fence_polygon,
-          OUTPUT_DIR = "/code/outputs"
-        )
-
-        yaml$write_yaml(config, file.path(r_disease$run_dir, "config.yaml"))
-
         wsl_command <- sprintf(
-          'docker run -e CONFIG_FILE=%s -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
-          shQuote(file.path(r_disease$run_dir, "config.yaml")),
+          'docker run -e INPUT_MAP=%s -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
+          shQuote(map_name),
+          shQuote(area),
+          shQuote(release_coord),
+          shQuote(fence_polygon),
           r_disease$run_dir
         )
-        
-        # wsl_command <- sprintf(
-        #  'docker run -e INPUT_MAP=%s -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
-        #  shQuote(map_name),
-        #  shQuote(area),
-        #  shQuote(release_coord),
-        #  shQuote(fence_polygon),
-        #  r_disease$run_dir
-        #)
 
         # Run the command and capture output
         tryCatch(
