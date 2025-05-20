@@ -1,580 +1,452 @@
-# /app/view/rtbm/rtbm_data_handlers.R
+# /app/logic/rtbm/rtbm_data_handlers.R
 
 box::use(
-  httr2[
-    request, req_url_path_append, req_perform, resp_body_json,
-    req_retry, resp_status, resp_body_string
-  ],
-  jsonlite[read_json, fromJSON, toJSON],
-  terra[rast, as.data.frame],
-  dplyr[filter, pull, rename, select, distinct, arrange, mutate, bind_rows],
-  lubridate[ymd, Date, as_date],
-  fs[dir_create, dir_exists, dir_ls, file_exists, path_ext_set, path_file],
+  httr2[request, req_perform, resp_body_json, req_retry, resp_status, resp_body_string, resp_status_desc],
+  jsonlite[read_json, write_json, fromJSON],
+  dplyr[arrange, mutate, filter, bind_rows, rename, group_by, summarise, across, everything, left_join],
+  lubridate[as_date, today, days, ymd],
+  fs[dir_create, dir_exists, dir_ls, file_exists, path_file],
   config[get],
-  purrr[map, possibly, safely, discard, keep, map_chr],
-  stringr[str_extract, str_detect, str_replace, str_extract_all],
-  arrow[read_parquet, write_parquet],
-  tibble[as_tibble],
-  logger[log_info, log_debug, log_error],
-  sf
+  purrr[safely, map, discard, map_dfr, possibly, list_rbind, imap],
+  stringr[str_replace, str_extract, str_replace_all],
+  arrow[read_parquet],
+  tibble[as_tibble, tibble],
+  tidyr[pivot_wider, unnest],
+  glue[glue],
+  sf[st_bbox, st_crs, st_as_sfc, st_read],
 )
 
 # --- Configuration & Setup ---
 
-BASE_DATA_PATH <- get("data_path")
-RTBM_DATA_PATH <- file.path(BASE_DATA_PATH, "rtbm")
-RTBM_CACHE_PATH <- file.path(RTBM_DATA_PATH, "cache")
-RTBM_PARQUET_PATH <- file.path(RTBM_DATA_PATH, "parquet")
-RTBM_TEMP_PATH <- file.path(RTBM_DATA_PATH, "temp")
-LOCAL_BIRD_INFO_PATH <- file.path(RTBM_DATA_PATH, "bird_info.json")
+base_data_path <- get("data_path")
+rtbm_data_path <- file.path(base_data_path, "rtbm")
+rtbm_parquet_path <- file.path(rtbm_data_path, "parquet")
 
-# Create directories if they don't exist
-if (!dir_exists(RTBM_CACHE_PATH)) dir_create(RTBM_CACHE_PATH, recurse = TRUE)
-if (!dir_exists(RTBM_PARQUET_PATH)) dir_create(RTBM_PARQUET_PATH, recurse = TRUE)
-if (!dir_exists(RTBM_TEMP_PATH)) dir_create(RTBM_TEMP_PATH, recurse = TRUE)
+# Ensure directories exist
+# if (!dir_exists(rtbm_parquet_path)) {
+#   stop(
+#     "RTBM Parquet directory not found. Please configure the data_path in your config file.",
+#     call. = FALSE
+#   )
+# }
 
-BIRD_INFO_URL <- "https://bird-photos.a3s.fi/bird_info.json"
-TIFF_BUCKET_URL <- "https://2007581-webportal.a3s.fi/"
+bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
+s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
 
-# --- Data Fetching & Caching ---
+# --- Data Loading Functions ---
 
-#' Load Bird Species Information from JSON URL
-#' @return A dataframe with bird species info, or NULL on error.
+#' Load Finland Border GeoJSON Data
+#'
+#' Loads the Finland border GeoJSON file from the configured data path.
+#'
+#' @return An sf object representing the Finland border, or NULL if an error occurs or the file is not found.
 #' @export
-load_bird_species_info <- function() {
-  # Try to load from local file first (more reliable and faster)
-  if (file_exists(LOCAL_BIRD_INFO_PATH)) {
-    safe_read_local <- safely(\(file_path) {
-      # Read the JSON file using appropriate method
-      bird_info <- read_json(file_path)
+load_finland_border_geojson <- function() {
+  tryCatch(
+    {
+      # Construct the full path to the GeoJSON file
+      border_path <- file.path(get("data_path"), "rtbm", "finland_border.geojson")
 
-      if (length(bird_info) == 0) {
-        stop("Empty JSON from local file")
-      }
-
-      # Process the nested JSON structure
-      bird_df <- do.call(rbind, lapply(names(bird_info), function(species_key) {
-        info <- bird_info[[species_key]]
-
-        # Check if this is the expected structure
-        if (!all(c("common_name", "scientific_name") %in% names(info))) {
-          warning("Missing required fields for species: ", species_key)
-          return(NULL)
-        }
-
-        data.frame(
-          common_name = info$common_name,
-          scientific_name = info$scientific_name,
-          finnish_name = info$finnish_name,
-          photo_url = info$photo_url,
-          wiki_link = info$wiki_link,
-          song_url = info$song_url,
-          stringsAsFactors = FALSE
-        )
-      }))
-
-      # Convert to tibble and arrange by common name
-      result <- as_tibble(bird_df) |>
-        arrange(common_name) |>
-        mutate(
-          scientific_name = str_replace(
-            scientific_name,
-            pattern = " ",
-            replacement = "_"
-          )
-        )
-
-      return(result)
-    })
-
-    local_result <- safe_read_local(LOCAL_BIRD_INFO_PATH)
-    if (is.null(local_result$error)) {
-      message("Loaded bird species info from local file")
-      return(local_result$result)
-    } else {
-      message("Error loading from local file: ", local_result$error, ". Falling back to URL.")
-    }
-  }
-
-  # Fallback to URL if local file doesn't exist or has issues
-  safe_fetch <- safely(\(url) {
-    req <- request(url) |> req_retry(max_tries = 3)
-    resp <- req_perform(req)
-    if (resp_status(resp) >= 300) {
-      stop("Failed to fetch bird info. Status: ", resp_status(resp))
-    }
-
-    # Get the JSON data
-    bird_info <- resp_body_json(resp)
-
-    # Check if it's a nested structure
-    if (length(bird_info) == 0) {
-      stop("Empty JSON response")
-    }
-
-    # Process the nested JSON structure as in the original code
-    bird_df <- do.call(rbind, lapply(names(bird_info), function(species_key) {
-      info <- bird_info[[species_key]]
-
-      # Check if this is the expected structure
-      if (!all(c("common_name", "scientific_name") %in% names(info))) {
-        warning("Missing required fields for species: ", species_key)
+      # Check if the file exists
+      if (!file.exists(border_path)) {
+        message("Finland border GeoJSON not found at: ", border_path)
         return(NULL)
       }
 
-      data.frame(
-        common_name = info$common_name,
-        scientific_name = info$scientific_name,
-        finnish_name = info$finnish_name,
-        photo_url = info$photo_url,
-        wiki_link = info$wiki_link,
-        song_url = info$song_url,
-        stringsAsFactors = FALSE
-      )
-    }))
-
-    # Convert to tibble and arrange by common name
-    result <- as_tibble(bird_df) |>
-      arrange(common_name) |>
-      mutate(
-        scientific_name = str_replace(
-          scientific_name,
-          pattern = " ",
-          replacement = "_"
-        )
-      )
-
-    return(result)
-  })
-
-  result <- safe_fetch(BIRD_INFO_URL)
-  if (!is.null(result$error)) {
-    message("Error loading bird species info from URL: ", result$error)
-    return(NULL)
-  }
-  return(result$result)
-}
-
-#' List TIFF files from the data bucket URL
-#' Assumes the URL points to an HTML index page. Adapt if listing mechanism differs.
-#' @param bucket_url The URL of the data bucket index.
-#' @return A character vector of TIFF filenames, or NULL on error.
-list_tiff_files_from_bucket <- function(bucket_url) {
-  safe_list <- safely(\(url) {
-    req <- request(url) |> req_retry(max_tries = 3)
-    resp <- req_perform(req)
-    if (resp_status(resp) >= 300) {
-      stop("Failed to access TIFF bucket index. Status: ", resp_status(resp))
-    }
-    # Scrape links assuming an HTML index page
-    raw_html <- resp_body_string(resp)
-    # Extract filenames with tif/tiff extensions using regex pattern
-    tiff_files <- str_extract_all(
-      raw_html,
-      pattern = "href=['\"]([^'\"]*\\.tiff?)['\"]"
-    )[[1]] |>
-      str_replace("href=['\"]", "") |>
-      str_replace("['\"]$", "") |>
-      unlist() |>
-      unique()
-
-    if (length(tiff_files) == 0) {
-      warning("No TIFF files found linked on the bucket index page.")
-      return(character(0))
-    }
-    return(tiff_files)
-  })
-  result <- safe_list(bucket_url)
-  if (!is.null(result$error)) {
-    message("Error listing TIFF files from bucket: ", result$error)
-    return(NULL)
-  }
-  return(result$result)
-}
-
-#' Fetch and Cache TIFF Files
-#' @param force_update Logical, whether to re-download even if files exist. Defaults to FALSE.
-#' @return Invisible NULL. Messages indicate progress or errors.
-#' @export
-fetch_and_cache_tiffs <- function(force_update = FALSE) {
-  target_files <- list_tiff_files_from_bucket(TIFF_BUCKET_URL)
-  if (is.null(target_files)) {
-    message("Could not retrieve list of TIFF files. Skipping download.")
-    return(invisible(NULL))
-  }
-  if (length(target_files) == 0) {
-    message("No TIFF files listed in the bucket. Nothing to download.")
-    return(invisible(NULL))
-  }
-  message("Found ", length(target_files), " TIFF files to potentially download.")
-  download_results <- map(target_files, \(file_name) {
-    file_url <- paste0(TIFF_BUCKET_URL, file_name)
-    cache_file_path <- file.path(RTBM_CACHE_PATH, file_name)
-    if (file_exists(cache_file_path) && !force_update) {
-      return(list(file = file_name, status = "skipped", path = cache_file_path))
-    }
-    safe_download <- safely(\(url, path_arg) {
-      req <- request(url) |> req_retry(max_tries = 3)
-      req_perform(req, path = path_arg)
-      return(list(file = file_name, status = "downloaded", path = path_arg))
-    })
-    message("Downloading: ", file_name)
-    result <- safe_download(file_url, cache_file_path)
-    if (!is.null(result$error)) {
-      message("Error downloading ", file_name, ": ", result$error)
-      return(list(file = file_name, status = "error", error = result$error))
-    }
-    return(result$result)
-  })
-  status_summary <- table(map_chr(download_results, "status"))
-  message("TIFF Download Summary:")
-  for (status_name in names(status_summary)) {
-    message("- ", status_name, ": ", status_summary[[status_name]])
-  }
-  invisible(NULL)
-}
-
-# --- Data Conversion ---
-
-#' Convert Cached TIFFs to Parquet
-#' @param force_update Logical, whether to reconvert even if Parquet exists. Defaults to FALSE.
-#' @return Invisible NULL. Messages indicate progress or errors.
-#' @export
-convert_tiffs_to_parquet <- function(force_update = FALSE) {
-  tiff_files <- dir_ls(RTBM_CACHE_PATH, regexp = "\\.tiff?$", ignore.case = TRUE)
-  if (length(tiff_files) == 0) {
-    message("No TIFF files found in cache directory: ", RTBM_CACHE_PATH)
-    return(invisible(NULL))
-  }
-  message("Found ", length(tiff_files), " TIFF files to potentially convert.")
-  conversion_results <- map(tiff_files, \(tiff_path) {
-    parquet_file_name <- path_ext_set(path_file(tiff_path), ".parquet")
-    parquet_path <- file.path(RTBM_PARQUET_PATH, parquet_file_name)
-    if (file_exists(parquet_path) && !force_update) {
-      return(list(file = path_file(tiff_path), status = "skipped", path = parquet_path))
-    }
-    safe_convert <- safely(\(tif_in, pq_out) {
-      message("Converting: ", path_file(tif_in), " to Parquet.")
-      rast_data <- rast(tif_in)
-
-      # Get non-NA values and their coordinates
-      vals <- values(rast_data)
-      valid_cells <- which(!is.na(vals))
-
-      if (length(valid_cells) == 0) {
-        message("No valid values found in raster: ", path_file(tif_in))
-        return(list(file = path_file(tif_in), status = "no_data", path = pq_out))
-      }
-
-      # Extract coordinates for valid cells
-      coords <- xyFromCell(rast_data, valid_cells)
-
-      # Create dataframe with valid values
-      df_data <- data.frame(
-        x = coords[, 1],
-        y = coords[, 2],
-        value = vals[valid_cells],
-        stringsAsFactors = FALSE
-      )
-
-      # Add any necessary cleaning or transformation here
-      safe_write <- safely(\(df_data, pq_out) {
-        write_parquet(df_data, sink = pq_out)
-      })
-      result <- safe_write(df_data, pq_out)
-      if (!is.null(result$error)) {
-        stop("Error writing to Parquet: ", result$error)
-      }
-      return(list(file = path_file(tif_in), status = "converted", path = pq_out))
-    })
-    result <- safe_convert(tiff_path, parquet_path)
-    if (!is.null(result$error)) {
-      message("Error converting ", path_file(tiff_path), ": ", result$error)
-      return(list(file = path_file(tiff_path), status = "error", error = result$error))
-    }
-    return(result$result)
-  })
-  status_summary <- table(map_chr(conversion_results, "status"))
-  message("TIFF to Parquet Conversion Summary:")
-  for (status_name in names(status_summary)) {
-    message("- ", status_name, ": ", status_summary[[status_name]])
-  }
-  invisible(NULL)
-}
-
-#' Convert raster to points dataframe
-#'
-#' @param r Raster object
-#' @param date Date for the data
-#' @return Data frame with x, y coordinates, value, and date
-#' @export
-raster_to_points_df <- function(r, date = NULL) {
-  log_debug("Converting raster to points dataframe for storage")
-
-  tryCatch(
-    {
-      # Get values and filter out NAs and zeros
-      vals <- terra::values(r)
-      valid_cells <- which(!is.na(vals) & vals > 0)
-
-      log_debug(paste(
-        "Value analysis:",
-        "\n  Total cells:", length(vals),
-        "\n  Valid cells (non-NA and positive):", length(valid_cells)
-      ))
-
-      if (length(valid_cells) == 0) {
-        log_debug("No valid (positive) values found in raster")
-        return(data.frame())
-      }
-
-      # Extract coordinates for valid cells
-      coords <- terra::xyFromCell(r, valid_cells)
-
-      # Create dataframe with valid points
-      df <- data.frame(
-        x = coords[, 1],
-        y = coords[, 2],
-        value = vals[valid_cells]
-      )
-
-      log_debug(paste("Created dataframe with", nrow(df), "points"))
-      log_debug(paste("Value range:", min(df$value), "to", max(df$value)))
-
-      # Add date column if provided
-      if (!is.null(date)) {
-        df$date <- date
-      }
-
-      return(df)
+      # Read the GeoJSON file
+      sf_object <- st_read(border_path, quiet = TRUE)
+      message("Successfully loaded Finland border GeoJSON from: ", border_path)
+      return(sf_object)
     },
     error = function(e) {
-      log_error(paste("Error in raster_to_points_df:", e$message))
-      return(data.frame())
-    }
-  )
-}
-
-#' Convert points data frame to a raster
-#'
-#' @param points_df Data frame with x, y coordinates and value
-#' @return A raster object
-#' @export
-points_to_raster <- function(points_df) {
-  # Debug information
-  print("=============================================")
-  print("Starting points_to_raster conversion")
-  print(paste("Input data frame has", nrow(points_df), "rows"))
-  print(paste("x range:", min(points_df$x), "to", max(points_df$x)))
-  print(paste("y range:", min(points_df$y), "to", max(points_df$y)))
-  print(paste("Value range:", min(points_df$value, na.rm = TRUE), "to", max(points_df$value, na.rm = TRUE)))
-
-  tryCatch(
-    {
-      # Create an empty raster with appropriate extent
-      ext <- extent(
-        min(points_df$x) - 0.05,
-        max(points_df$x) + 0.05,
-        min(points_df$y) - 0.05,
-        max(points_df$y) + 0.05
-      )
-
-      print(paste(
-        "Creating raster with extent:",
-        paste(
-          min(points_df$x) - 0.05, max(points_df$x) + 0.05,
-          min(points_df$y) - 0.05, max(points_df$y) + 0.05
-        )
-      ))
-
-      # Create raster with 0.05 degree resolution
-      r <- rast(ext, resolution = 0.05)
-      print(paste("Empty raster dimensions:", ncol(r), "x", nrow(r)))
-
-      # Set coordinate reference system to WGS84 (EPSG:4326)
-      crs(r) <- "EPSG:4326"
-
-      # Convert points_df to sf object for rasterization
-      points_sf <- st_as_sf(points_df, coords = c("x", "y"), crs = 4326)
-
-      # Rasterize points
-      print("Rasterizing points...")
-      r <- rasterize(points_sf, r, field = "value", fun = max)
-
-      # Check result
-      vals <- values(r)
-      non_na_count <- sum(!is.na(vals))
-      print(paste("Final raster contains", non_na_count, "non-NA cells"))
-
-      # Validate that we have data in the raster
-      if (non_na_count == 0) {
-        print("WARNING: Raster has no valid values!")
-        return(NULL)
-      }
-
-      return(r)
-    },
-    error = function(e) {
-      print(paste("ERROR in points_to_raster:", e$message))
+      message("Error loading Finland border GeoJSON: ", e$message)
       return(NULL)
     }
   )
 }
 
-# --- Data Access & Processing ---
+#' Load bird species information from URL
+#'
+#' Fetches bird info from a predefined URL.
+#'
+#' @return A tibble containing bird species information (common name, scientific name, photo URL, etc.)
+#'         sorted by common name, or NULL if loading fails.
+#' @export
+load_bird_species_info <- function() {
+  `%||%` <- function(a, b) if (is.null(a) || length(a) == 0) b else a
 
-#' Load Parquet Data for a Specific Date Range and Species
-#' @param scientific_name The scientific name of the bird species
-#' @param start_date Start date of the range (Date object or string in 'YYYY-MM-DD' format)
-#' @param end_date End date of the range (Date object or string in 'YYYY-MM-DD' format)
-#' @return A list with data and dates, or NULL if files missing/error
+  # --- Helper function to process raw JSON data into a tibble ---
+  process_bird_info_json <- function(bird_info_raw) {
+    if (is.null(bird_info_raw) || length(bird_info_raw) == 0) {
+      stop("Raw bird info JSON is empty or NULL.")
+    }
+
+    bird_df <- imap(bird_info_raw, \(info, name_key) {
+      if (is.null(info$scientific_name) || info$scientific_name == "") {
+        return(NULL)
+      }
+      data.frame(
+        joinKeyScientificName = name_key %||% NA_character_,
+        displayScientificName = info$scientific_name %||% NA_character_,
+        commonName = info$common_name %||% NA_character_,
+        finnishName = info$finnish_name %||% NA_character_,
+        photoUrl = info$photo_url %||% NA_character_,
+        wikiLink = info$wiki_link %||% NA_character_,
+        songUrl = info$song_url %||% NA_character_,
+        speciesUrl = info$species_url %||% NA_character_,
+        stringsAsFactors = FALSE
+      )
+    }) |>
+      discard(\(x) is.null(x) || is.na(x$displayScientificName))
+
+    if (length(bird_df) == 0) {
+      stop("No valid bird entries found after processing JSON.")
+    }
+
+    result <- bind_rows(bird_df) |>
+      rename(
+        join_key_scientific_name = joinKeyScientificName,
+        display_scientific_name = displayScientificName,
+        common_name = commonName,
+        photo_url = photoUrl,
+        wiki_link = wikiLink,
+        song_url = songUrl,
+        species_url = speciesUrl
+      ) |>
+      arrange(common_name) |>
+      mutate(
+        join_key_scientific_name = str_replace_all(
+          join_key_scientific_name,
+          pattern = " ",
+          replacement = "_"
+        ),
+        display_scientific_name = str_replace_all(
+          display_scientific_name,
+          pattern = " ",
+          replacement = "_"
+        )
+      )
+    return(result)
+  }
+
+  # 1. Try loading from local file first
+  local_file_path <- file.path(rtbm_data_path, "bird_info.json")
+
+  if (file.exists(local_file_path)) {
+    message("Attempting to load bird species info from local file: ", local_file_path)
+    safe_read_local <- safely(\(path) {
+      raw_data <- read_json(path, simplifyVector = FALSE)
+      process_bird_info_json(raw_data)
+    })
+    local_result <- safe_read_local(local_file_path)
+
+    if (is.null(local_result$error) && !is.null(local_result$result)) {
+      message("Successfully loaded bird species info from local file.")
+      return(local_result$result)
+    } else {
+      warning(
+        "Failed to load or parse local bird_info.json: ",
+        local_result$error$message,
+        ". Falling back to URL."
+      )
+    }
+  } else {
+    message("Local bird_info.json not found at: ", local_file_path, ". Attempting to fetch from URL.")
+  }
+
+  # 2. Fetch from URL if local loading failed or file not found
+  message("Attempting to fetch bird species info from URL: ", bird_info_url)
+  safe_fetch_url <- safely(\(url) {
+    req <- request(url) |> req_retry(max_tries = 3)
+    resp <- req_perform(req)
+
+    if (resp_status(resp) >= 300) {
+      stop(paste("Failed to fetch bird info from URL. Status:", resp_status(resp), resp_status_desc(resp)))
+    }
+    bird_info_raw <- resp_body_json(resp) # httr2 default is simplifyVector = FALSE
+    process_bird_info_json(bird_info_raw)
+  })
+
+  url_result <- safe_fetch_url(bird_info_url)
+
+  if (!is.null(url_result$error)) {
+    final_error_msg <- paste(
+      "Failed to load bird species info from both local file and URL. URL error: ",
+      url_result$error$message
+    )
+    warning(final_error_msg)
+    stop(final_error_msg)
+  } else if (!is.null(url_result$result)) {
+    message("Successfully loaded bird species info from URL.")
+    # Optionally, save the fetched data to the local file for future use
+    tryCatch(
+      {
+        write_json(
+          resp_body_json(safe_fetch_url(bird_info_url)$result),
+          local_file_path,
+          auto_unbox = TRUE,
+          pretty = TRUE
+        )
+        message("Saved fetched bird_info.json to local cache: ", local_file_path)
+      },
+      error = function(e_save) {
+        warning("Could not save bird_info.json to local cache: ", e_save$message)
+      }
+    )
+    return(url_result$result)
+  }
+
+  # Fallback stop, though one of the above should have returned or raised a more specific error
+  stop("Failed to load bird information after attempting all sources.")
+}
+
+#' Load Parquet data for a specific species and date range
+#'
+#' Loads Parquet files for a given bird species corresponding to dates
+#' within the specified start and end dates.
+#'
+#' @param scientific_name The scientific name of the bird species (e.g., "Parus major").
+#' @param start_date The start date for filtering data (YYYY-MM-DD or Date object).
+#' @param end_date The end date for filtering data (YYYY-MM-DD or Date object).
+#'
+#' @return A list containing two elements:
+#'         `data`: A tibble combining data from the relevant Parquet files, or NULL if no data is found.
+#'         `dates`: A vector of Date objects representing the dates for which data was successfully loaded.
 #' @export
 load_parquet_data <- function(scientific_name, start_date, end_date) {
-  start_date <- tryCatch(as_date(start_date), error = function(e) NULL)
-  end_date <- tryCatch(as_date(end_date), error = function(e) NULL)
-
-  if (is.null(start_date) || is.null(end_date)) {
-    message("Invalid date range provided.")
-    return(NULL)
+  # Input validation
+  if (missing(scientific_name) || is.null(scientific_name) || scientific_name == "") {
+    stop("Scientific name must be provided.")
+  }
+  if (missing(start_date) || missing(end_date)) {
+    stop("Both start_date and end_date must be provided.")
   }
 
-  # Format species directory name (matches actual directory structure)
-  # Replace spaces with underscores in the scientific name if needed
-  species_name <- str_replace(scientific_name, " ", "_")
-  species_dir <- file.path(RTBM_PARQUET_PATH, paste0("species=", species_name))
+  # Ensure dates are Date objects
+  start_date <- tryCatch(as_date(start_date), warning = function(w) NA, error = function(e) NA)
+  end_date <- tryCatch(as_date(end_date), warning = function(w) NA, error = function(e) NA)
+
+  if (is.na(start_date) || is.na(end_date)) {
+    stop("Invalid date format provided. Please use YYYY-MM-DD or Date objects.")
+  }
+  if (start_date > end_date) {
+    stop("start_date cannot be after end_date.")
+  }
+
+  # Construct the path
+  species_path_name <- str_replace(scientific_name, " ", "_")
+  species_dir <- file.path(rtbm_parquet_path, paste0("species=", species_path_name))
 
   if (!dir_exists(species_dir)) {
-    message("No data available for species: ", scientific_name)
-    return(NULL)
+    message("Data directory not found for species: ", scientific_name, " at ", species_dir)
+    return(list(data = NULL, dates = as.Date(character(0))))
   }
 
-  # Get all dates within the requested range
-  all_dates <- seq(from = start_date, to = end_date, by = "day")
+  # List files
+  all_files <- dir_ls(species_dir, regexp = "\\.parquet$", ignore.case = TRUE)
 
-  # Load data for each date in the range
-  all_data <- list()
-  available_dates <- c()
-
-  for (date in all_dates) {
-    # Format the date filename according to actual structure (date=YYYY-MM-DD.parquet)
-    date_str <- as.character(as.Date(date))
-    filename <- paste0("date=", date_str, ".parquet")
-    date_file <- file.path(species_dir, filename)
-
-    if (!file_exists(date_file)) {
-      # Skip dates with no data
-      next
-    }
-
-    # Read the parquet file
-    safe_read <- safely(read_parquet)
-    result <- safe_read(date_file)
-
-    if (!is.null(result$error)) {
-      message("Error reading parquet file for ", date_str, ": ", result$error)
-      next
-    }
-
-    # Add to our data collection
-    all_data[[length(all_data) + 1]] <- result$result
-    available_dates <- c(available_dates, date)
+  if (length(all_files) == 0) {
+    message("No Parquet files found in directory: ", species_dir)
+    return(list(data = NULL, dates = as.Date(character(0))))
   }
 
-  if (length(all_data) == 0) {
+  # Extract dates and filter
+  file_dates <- all_files |>
+    path_file() |>
+    str_extract("(?<=date=)\\d{4}-\\d{2}-\\d{2}(?=\\.parquet)") |>
+    as_date()
+
+  file_info <- tibble(path = all_files, date = file_dates) |>
+    filter(!is.na(date), date >= start_date, date <= end_date)
+
+  if (nrow(file_info) == 0) {
     message(
-      "No data found for species ", scientific_name, " in date range ",
-      format(start_date, "%Y-%m-%d"), " to ", format(end_date, "%Y-%m-%d")
+      "No Parquet files found for species '",
+      scientific_name,
+      "' between ",
+      start_date,
+      " and ",
+      end_date
     )
-    return(NULL)
+    return(list(data = NULL, dates = as.Date(character(0))))
   }
 
-  # Combine all data frames
-  combined_data <- bind_rows(all_data)
+  # Read data
+  safe_read_parquet <- safely(read_parquet)
+  data_list <- map(file_info$path, \(p) {
+    res <- safe_read_parquet(p)
+    if (!is.null(res$error)) {
+      warning("Error reading parquet file '", p, "': ", res$error)
+      return(NULL) # Return NULL for failed reads
+    }
+    # Add date column from filename if not present in data
+    if (!"date" %in% names(res$result)) {
+      file_date <- str_extract(path_file(p), "(?<=date=)\\d{4}-\\d{2}-\\d{2}")
+      res$result <- mutate(res$result, date = as_date(file_date))
+    }
+    return(res$result)
+  })
 
-  # Return both the data and the list of dates
-  return(list(
-    data = combined_data,
-    dates = available_dates
-  ))
+  # Filter out NULLs (failed reads) and get successful dates
+  successful_indices <- !sapply(data_list, is.null)
+  valid_data <- data_list[successful_indices]
+  successful_dates <- file_info$date[successful_indices]
+
+  if (length(valid_data) == 0) {
+    message("Failed to read any valid Parquet files for the specified criteria.")
+    return(list(data = NULL, dates = as.Date(character(0))))
+  }
+
+  # Combine data
+  combined_data <- bind_rows(valid_data)
+
+  message(
+    "Successfully loaded data for ",
+    length(successful_dates),
+    " dates for species '",
+    scientific_name,
+    "' between ",
+    start_date,
+    " and ",
+    end_date
+  )
+
+  # Create a named vector of data paths for each date (without setNames)
+  data_paths <- as.character(file_info$path[successful_indices])
+  names(data_paths) <- as.character(successful_dates)
+
+  return(list(data = combined_data, dates = successful_dates, data_paths = data_paths))
 }
 
-#' Get Available Dates from Parquet Files
-#' @param scientific_name Optional scientific name to filter by. If NULL, returns all available dates.
-#' @return A sorted vector of Date objects, or empty vector if none found/parsed.
+# Create a simple bounding box for Finland as fallback (Internal helper)
+create_finland_bbox <- function() {
+  # Create a bounding box for Finland as a fallback
+  bbox <- st_bbox(c(xmin = 19, xmax = 32, ymin = 59, ymax = 71), crs = st_crs(4326))
+  bbox_sf <- st_as_sfc(bbox)
+  return(bbox_sf)
+}
+
+#' Preload Bird Summary Data from Web Portal
+#'
+#' Fetches daily bird observation summary data from the A3S web portal for a
+#' given date range, aggregates counts per species per day, and returns a
+#' summarized data frame.
+#'
+#' @param start_date Date object or string (YYYY-MM-DD). The start date for fetching data.
+#'                   Defaults to "2025-01-16".
+#' @param end_date Date object or string (YYYY-MM-DD). The end date for fetching data.
+#'                 Defaults to yesterday's date.
+#' @return A tibble where the first column is `date` and subsequent columns
+#'         represent bird species, containing the total daily observation count.
+#'         Returns NULL if no data can be fetched or processed.
+#'         Example format:
+#'         | date       | Bird A | Bird B | ... |
+#'         |------------|-------|-------|-----|
+#'         | 2025-05-01 | 100   | 200   | ... |
+#'         | 2025-05-02 | 120   | 180   | ... |
 #' @export
-get_available_parquet_dates <- function(scientific_name = NULL) {
-  dates <- c()
+preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
+  # --- Input Validation and Date Setup ---
+  start_date <- tryCatch(ymd(start_date), error = function(e) stop("Invalid start_date format. Use YYYY-MM-DD."))
 
-  if (!is.null(scientific_name)) {
-    # If scientific name is provided, only look in that species directory
-    species_name <- str_replace(scientific_name, " ", "_")
-    species_dir <- file.path(RTBM_PARQUET_PATH, paste0("species=", species_name))
-
-    if (!dir_exists(species_dir)) {
-      message("No data directory found for species: ", scientific_name)
-      return(as_date(character(0)))
-    }
-
-    # Get all date files in the species directory
-    date_files <- dir_ls(species_dir, regexp = "\\.parquet$", ignore.case = TRUE)
-
-    # Extract dates from filenames (format is "date=YYYY-MM-DD.parquet")
-    dates <- date_files |>
-      path_file() |>
-      str_extract("\\d{4}-\\d{2}-\\d{2}") |>
-      discard(is.na) |>
-      as_date(quiet = TRUE) |>
-      sort() |>
-      unique()
+  if (is.null(end_date)) {
+    end_date <- today() - days(1)
   } else {
-    # If no scientific name is provided, scan all species directories
-    species_dirs <- dir_ls(RTBM_PARQUET_PATH, type = "directory")
+    end_date <- tryCatch(ymd(end_date), error = function(e) stop("Invalid end_date format. Use YYYY-MM-DD."))
+  }
 
-    # For each species directory, extract available dates
-    all_dates <- c()
-    for (species_dir in species_dirs) {
-      date_files <- dir_ls(species_dir, regexp = "\\.parquet$", ignore.case = TRUE)
+  if (start_date > end_date) {
+    stop("start_date cannot be after end_date.")
+  }
 
-      species_dates <- date_files |>
-        path_file() |>
-        str_extract("\\d{4}-\\d{2}-\\d{2}") |>
-        discard(is.na) |>
-        as_date(quiet = TRUE) |>
-        sort()
+  date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
+  base_url <- "https://2007581-webportal.a3s.fi/daily/"
 
-      all_dates <- c(all_dates, species_dates)
+  # --- Helper function to fetch and process data for a single date ---
+  fetch_and_process_date <- function(current_date) {
+    date_str <- format(current_date, "%Y-%m-%d")
+    url <- glue(base_url, "{date_str}/web_portal_summary_data.json")
+    message("Fetching data for: ", date_str, " from ", url)
+
+    # Safely perform request and parse JSON
+    safe_req_perform <- possibly(req_perform, otherwise = NULL)
+    safe_from_json <- possibly(fromJSON, otherwise = NULL)
+
+    resp <- request(url) |>
+      req_retry(max_tries = 2, is_transient = \(resp) resp_status(resp) %in% c(429, 500, 503)) |>
+      safe_req_perform()
+
+    # Check if request failed (possibly returned NULL) or status is not 200 OK
+    if (is.null(resp) || resp_status(resp) != 200) {
+      status_msg <- if (!is.null(resp)) resp_status_desc(resp) else "Connection error"
+      warning(glue("Failed to fetch data for {date_str}: {status_msg}"))
+      return(NULL)
     }
 
-    # Get unique dates across all species
-    dates <- all_dates |>
-      sort() |>
-      unique()
+    json_data <- resp |>
+      resp_body_string() |>
+      # Parse directly, assuming top-level object has species names as keys
+      safe_from_json(simplifyVector = TRUE) # simplifyVector can help if counts are vectors
+
+    if (is.null(json_data) || length(json_data) == 0) {
+      warning(glue("No valid JSON data found or failed to parse for {date_str}"))
+      return(NULL)
+    }
+
+    # Process the named list structure: { "SpeciesA": [counts], "SpeciesB": [counts], ... }
+    daily_summary <- tryCatch(
+      {
+        species_names <- names(json_data)
+        if (is.null(species_names) || length(species_names) == 0) {
+          warning(glue("JSON for {date_str} is not a named list or is empty after parsing."))
+          return(NULL)
+        }
+
+        # Iterate through species names, sum counts, create tibble
+        map_dfr(species_names, function(spp_name) {
+          counts <- json_data[[spp_name]]
+          # Ensure counts is numeric and handle potential NULLs/errors
+          if (is.null(counts) || !is.numeric(counts)) {
+            warning(glue("Invalid or non-numeric counts for species '{spp_name}' on {date_str}"))
+            total_count <- 0 # Or NA depending on desired handling
+          } else {
+            total_count <- sum(counts, na.rm = TRUE)
+          }
+          tibble(species = spp_name, total_count = total_count)
+        })
+      },
+      error = function(e) {
+        warning(glue("Error processing JSON structure for {date_str}: {e$message}"))
+        return(NULL)
+      }
+    )
+
+    if (is.null(daily_summary) || nrow(daily_summary) == 0) {
+      return(NULL)
+    }
+
+    # Add date column
+    daily_summary$date <- current_date
+    return(daily_summary)
   }
 
-  return(dates)
-}
+  # --- Fetch data for all dates and combine ---
+  all_data_long <- map_dfr(date_sequence, fetch_and_process_date)
 
-#' Get Photo URL for a Specific Species
-#' @param species_info_data Dataframe returned by load_bird_species_info.
-#' @param target_common_name The common name of the bird.
-#' @return Character string URL or NULL if not found.
-#' @export
-get_species_photo_url <- function(species_info_data, target_common_name) {
-  if (is.null(species_info_data) || !is.data.frame(species_info_data) ||
-    !"common_name" %in% names(species_info_data) ||
-    !"photo_url" %in% names(species_info_data)) { # Assuming 'photo_url' is the column name
-    warning("Invalid species_info_data provided.")
+  if (nrow(all_data_long) == 0) {
+    warning("No summary data could be fetched or processed for the specified date range.")
     return(NULL)
   }
-  if (is.null(target_common_name) || length(target_common_name) != 1 || !is.character(target_common_name)) {
-    warning("Invalid target_common_name provided.")
-    return(NULL)
-  }
-  url_data <- species_info_data |>
-    filter(common_name == target_common_name) |>
-    pull(photo_url) # Ensure 'photo_url' is correct column name
-  if (length(url_data) == 0 || is.na(url_data[[1]]) || url_data[[1]] == "") {
-    return(NULL)
-  }
-  return(url_data[[1]])
+
+  # --- Pivot to wide format ---
+  summary_data_wide <- all_data_long |>
+    pivot_wider(
+      names_from = species,
+      values_from = total_count,
+      values_fill = 0 # Replace missing counts (NA) with 0
+    ) |>
+    arrange(date) # Ensure chronological order
+
+  message("Successfully preloaded summary data from ", start_date, " to ", end_date)
+  return(summary_data_wide)
 }

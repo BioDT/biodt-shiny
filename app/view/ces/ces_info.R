@@ -17,15 +17,13 @@ ces_info_ui <- function(id) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "Cultural Ecosystem Services pDT"
+          "Cultural Ecosystem Services Prototype Digital Twin"
         ),
-        tags$p(
-          class = "pt-3",
-          "The CES prototype Digital Twin (pDT) in EARLY ACCESS"
-        ),
-        tags$span(tags$h2("This prototype digital twin is in early access and intended for research purposes only; do not use for decision-making or operational purposes."), style="color:red"),
-        tags$p("Explore the Digital Twin for Cultural Ecosystems! Our digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
-  Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect.")
+        tags$p("This digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
+  Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect."),
+        tags$p("The pDT is described in ",tags$a("Rolph S, Andrews C, Carbone D, Lopez Gordillo J, Martinovič T, Oostervink N, Pleiter D, Sara-aho K, Watkins J, Wohner C, Bolton W, Dick J (2024) Prototype Digital Twin: Recreation and biodiversity cultural ecosystem services. Research Ideas and Outcomes 10: e125450. https://doi.org/10.3897/rio.10.e125450", href = "https://doi.org/10.3897/rio.10.e125450"), "."),
+        tags$p("Biodiversity data is accessed from Global Biodiversity Information Facility (GBIF)",tags$a("https://www.gbif.org/", href = "https://www.gbif.org/"), "."),
+        tags$p("Source code and scripts of the pDT can be found at ", tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"), "."),
       )
     ),
     column(
