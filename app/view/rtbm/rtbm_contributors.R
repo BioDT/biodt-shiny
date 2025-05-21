@@ -1,5 +1,6 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon],
+  shiny[moduleServer, NS, column, tags, fluidRow, icon],
+  htmltools[tagList, div, strong],
 )
 
 
@@ -16,10 +17,12 @@ rtbm_contributors_ui <- function(id, i18n = NULL) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(
-          if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
+          if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "CONTRIBUTORS",
           style = "greeting display-4 font-weight-bold"
         ),
-        tags$p("Name and affiliation"),
+        tags$p("Allan Souza, INAR - Institute for Atmospheric and Earth System Research, University of Helsinki, Helsinki, Finland"),
+        tags$p("Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava, Ostrava-Poruba, Czech Republic"),
+        tags$p("Zhenggang Gao, KTH – Royal Institute of Technology, Stockholm, Sweden"),
       )
     ),
     column(
