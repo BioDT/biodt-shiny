@@ -19,7 +19,13 @@ ias_contributors_ui <- function(id, i18n = NULL) {
           if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
           style = "greeting display-4 font-weight-bold"
         ),
-        tags$p("Name and affiliation"),
+        tags$p(
+          "Ahmed El-Gabbas, Taimur Khan, Marina Golivets, and Ingolf Kühn — Department of Community Ecology, Helmholtz Centre for Environmental Research - UFZ; Theodor-Lieser-Str. 4, 06120 Halle, Germany"
+        ),
+        tags$p(
+          "Allan Souza — Institute for Atmospheric and Earth System Research INAR, Forest Sciences, Faculty of Agriculture and Forestry, P.O. Box 27, 00014 University of Helsinki, Helsinki, Finland"
+        ),
+        tags$p("Tuomas Rossi - CSC - IT Center for Science, P.O. Box 405, 02101, Espoo, Finland")
       )
     ),
     column(
@@ -28,6 +34,9 @@ ias_contributors_ui <- function(id, i18n = NULL) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
+          src = "static/img/ias/IAS.png",
+          class = "info-picture",
+          alt = ""
         )
       )
     )
