@@ -11,12 +11,14 @@ box::use(
   readr,
   echarty[ecs.render, ecs.output],
   shinyjs[hide, show, hidden, delay, disabled, disable, enable],
+  config,
 )
 
 box::use(
   app / logic / waiter[waiter_text],
   app / logic / disease_outbreaks / disease_data_load[load_simulated_data],
   app / logic / disease_outbreaks / disease_histogram[disease_histogram],
+  app / logic / disease_outbreaks / k8s[create_and_wait_k8s_job],
 )
 
 #' @export
@@ -103,6 +105,7 @@ disease_app_server <- function(
       sec_inf_files = NULL,
       sec_inf_data = NULL,
       run_success = 0,
+      num_runs = 0,
       run_dir = NULL
     )
 
@@ -369,30 +372,49 @@ disease_app_server <- function(
 
         file.copy(input$file$datapath, file.path(r_disease$run_dir, "map.tif"))
 
-        wsl_command <- sprintf(
-          'docker run -e INPUT_MAP="map.tif" -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
-          shQuote(area),
-          shQuote(release_coord),
-          shQuote(fence_polygon),
-          r_disease$run_dir
-        )
+        if (config$get("executor") == "docker") {
 
-        print(wsl_command)
+          wsl_command <- sprintf(
+            'docker run -e INPUT_MAP="map.tif" -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
+            shQuote(area),
+            shQuote(release_coord),
+            shQuote(fence_polygon),
+            r_disease$run_dir
+          )
 
-        # Run the command and capture output
-        tryCatch(
-          {
-            command_output <- system(wsl_command)
-            output$command_output <- shiny$renderPrint({
-              command_output
-            })
-          },
-          error = function(e) {
-            output$command_output <- shiny$renderPrint({
-              paste("Error executing WSL command:", e$message)
-            })
-          }
-        )
+          print(wsl_command)
+          # Run the command and capture output
+          tryCatch(
+            {
+              command_output <- system(wsl_command)
+              output$command_output <- shiny$renderPrint({
+                command_output
+              })
+            },
+            error = function(e) {
+              output$command_output <- shiny$renderPrint({
+                paste("Error executing WSL command:", e$message)
+              })
+            }
+          )
+        } else if (config$get("executor") == "k8s") {
+
+          data_subpath <- stringr::str_remove(
+            r_disease$run_dir,
+            paste0(config$get("base_path"), "/")
+          )
+
+          create_and_wait_k8s_job(
+            data_subpath,
+            r_disease$num_runs,
+            shQuote(area),
+            shQuote(release_coord),
+            shQuote(fence_polygon)
+          )
+        } else {
+          stop("Invalid executor type: ", config$get("executor"))
+        }
+        r_disease$num_runs <- r_disease$num_runs + 1
         if (dir.exists(file.path(r_disease$run_dir, "epi_stat_outputs"))) {
           r_disease$run_success <- r_disease$run_success + 1
         }
