@@ -1,23 +1,38 @@
 box::use(
-  shiny[moduleServer, NS, strong, em, h2, p, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent, showNotification],
+  shiny[moduleServer, NS, column, tags, fluidRow, icon, actionButton, observeEvent],
   bslib[nav_select],
+  htmltools[tagList, div, strong, em]
 )
 
 #' @export
-rtbm_info_ui <- function(id) {
+rtbm_info_ui <- function(id, i18n = NULL) {
   ns <- NS(id)
   fluidRow(
     class = "fluid-row",
-    style = "overflow-x: hidden",
     column(
       width = 6,
       class = "col-sm-12 col-lg-6",
       style = "height: 100vh;",
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
-        h2("Welcome to the Real-time bird monitoring pDT dashboard."),
-        p("This dashboard provides insights into bird observations and related statistics. \n Use the navigation tabs to explore detailed visualizations and data summaries."),
-        p(strong("v0.1.2:"), em("updated on 2025-02-20"))
+        tags$h2(
+          class = "greeting display-4 font-weight-bold",
+          if (!is.null(i18n)) i18n$translate("Real-Time Bird Monitoring Prototype Digital Twin (DT)") else "Real-Time Bird Monitoring Prototype Digital Twin (DT)"
+        ),
+        tags$p(
+          class = "pt-3",
+          "The Real-Time Bird Monitoring (RTBM) prototype Digital Twin (pDT) provides an interactive platform for visualizing and analyzing bird species distributions across Finland. Leveraging real-time and historical observation data, this dashboard enables researchers, conservationists, and enthusiasts to explore bird migration patterns, population trends, and species diversity with intuitive controls and dynamic visualizations."
+        ),
+        tags$p(
+          strong("Data sources:"),
+          " Bird observation data are provided by national and international monitoring programs, including citizen science initiatives. For more details, see ",
+          tags$a("BioDT RTBM Use Case", href = "https://biodt.eu/use-cases/real-time-bird-monitoring-citizen-science-data", target = "_blank"), ". Data are updated regularly to reflect the latest findings."
+        ),
+        tags$p(
+          strong("Open Science:"),
+          " The RTBM pDT is developed as part of the BioDT project, with source code and documentation available on ",
+          tags$a("GitHub", href = "https://github.com/BioDT/biodt-shiny", target = "_blank"), "."
+        )
       )
     ),
     column(
@@ -28,7 +43,7 @@ rtbm_info_ui <- function(id) {
         tags$img(
           class = "info-picture",
           src = "static/img/rtbm/bird.webp",
-          alt = "",
+          alt = ""
         )
       )
     )
