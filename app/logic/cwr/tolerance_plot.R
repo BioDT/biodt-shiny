@@ -53,6 +53,12 @@ create_tolerance_plot <- function(
   tolerance_plot <- ec.init()
   tolerance_plot$x$opts <- list(
     title = list(text = "Tolerance analysis"),
+    grid = list(
+      bottom = 90
+    ),
+    dataZoom = list(
+      list = (type = "slider")
+    ),
     tooltip = list(trigger = "axis"),
     xAxis = list(
       type = "category",
