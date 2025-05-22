@@ -252,7 +252,6 @@ ias_app_server <- function(id, tab_selected) {
       get_base_url(selected_version())
     })
     
-    
     # Reactive values and states
     predictions_summary <- reactiveVal(NULL)
     species_data <- reactiveVal(NULL)
@@ -318,8 +317,7 @@ ias_app_server <- function(id, tab_selected) {
         showNotification("Error loading prediction summary file.", type = "error")
       })
     })
-        
-        
+    
     # UI: Species Picker
     output$speciesPicker <- renderUI({
       req(species_data())
@@ -369,7 +367,6 @@ ias_app_server <- function(id, tab_selected) {
       )
     })
     
-    
     # Reactive: Filtered summary
     filtered_summary <- eventReactive(input$loadMap, {
       req(predictions_summary())
@@ -410,10 +407,42 @@ ias_app_server <- function(id, tab_selected) {
       df
     })
     
+    # Filtered summary for Distribution mode
+    observed_summary <- eventReactive(input$loadObserved, {
+      req(predictions_summary())
+      df <- predictions_summary()
+      
+      df <- df %>% filter(hab_name == names(habitat_mapping)[habitat_mapping == input$habitatDist])
+      
+      # support species filtering for Distribution
+      if (input$showSpeciesDist && !is.null(input$speciesDistInputUI)) {
+        df <- df %>% filter(species_name == input$speciesDistInputUI)
+      }
+      
+      # Choose data source based on obsType
+      if (input$obsType == "model") {
+        df <- df %>% filter(str_detect(tif_path_mean, "SR_model")) # Adjust this to your naming
+      } else {
+        df <- df %>% filter(str_detect(tif_path_mean, "SR_full")) # Adjust this to your naming
+      }
+      
+      df <- df %>% mutate(tif_path = tif_path_mean)
+      
+      df
+    })
+    
     # Raster loading
     raster_data <- reactive({
       req(filtered_summary())
       row <- filtered_summary()
+      if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
+      process_raster_file(row$tif_path[1])
+    })
+    
+    # added now
+    # Reactive: Load raster for Distribution
+    observed_raster <- reactive({
+      row <- observed_summary()
       if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
       process_raster_file(row$tif_path[1])
     })
@@ -473,6 +502,64 @@ ias_app_server <- function(id, tab_selected) {
         clearControls() |>
         addRasterImage(r, colors = pal, opacity = 0.85, project = TRUE) |>
         addLegend_decreasing(pal = pal, values = raster_data()[], title = "Raster value", position = "bottomright", decreasing = TRUE)
+    })
+   
+    observeEvent(input$opacitySlider, {
+      if (input$dataMode == "Projection" && !is.null(filtered_raster())) {
+        r <- filtered_raster()
+        full_range <- range(raster_data()[], na.rm = TRUE)
+        pal <- leaflet::colorNumeric("plasma", domain = full_range, na.color = "transparent")
+        
+        leafletProxy(ns("rasterMap")) %>%
+          clearImages() %>%
+          clearControls() %>%
+          addRasterImage(
+            r, colors = pal, opacity = input$opacitySlider, project = TRUE
+          ) %>%
+          addLegend_decreasing(
+            pal = pal, values = full_range, 
+            title = "Raster value", position = "bottomright", decreasing = TRUE
+          )
+      } else if (input$dataMode == "Distribution" && !is.null(observed_raster())) {
+        r <- observed_raster()
+        full_range <- range(r[], na.rm = TRUE)
+        
+        leafletProxy(ns("rasterMap")) %>%
+          clearImages() %>%
+          clearControls() %>%
+          addRasterImage(
+            r, colors = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
+            opacity = input$opacitySlider, project = TRUE
+          ) %>%
+          addLegend_decreasing(
+            pal = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
+            values = full_range, title = "Observed values",
+            position = "bottomright", decreasing = TRUE
+          )
+      }
+    })
+    
+    observeEvent(input$loadObserved, {
+      req(observed_raster())
+      r <- observed_raster()
+      full_range <- range(r[], na.rm = TRUE)
+      
+      leafletProxy("rasterMap") %>%
+        clearImages() %>%
+        clearControls() %>%
+        addRasterImage(
+          r,
+          colors = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
+          opacity = input$opacitySlider,
+          project = TRUE
+        ) %>%
+        addLegend_decreasing(
+          pal = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
+          values = full_range,
+          title = "Observed values",
+          position = "bottomright",
+          decreasing = TRUE
+        )
     })
     
     # Download handler
