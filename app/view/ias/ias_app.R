@@ -1,94 +1,196 @@
 box::use(
-  shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler, reactiveVal],
+  shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler, reactiveVal, selectInput, conditionalPanel, actionButton, absolutePanel, eventReactive, observe, updateSelectInput, isolate, showNotification],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
-  shinyWidgets[pickerInput, switchInput],
+  shinyWidgets[actionBttn, pickerInput, switchInput],
   leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula],
-  dplyr[filter, mutate, slice],
+  dplyr[filter, mutate, slice, `%>%`, case_when, if_else],
   stringr[str_detect],
   sf[st_crs],
+  utils[str],
+  terra[mask, ifel],
 )
 
 box::use(
-  app / logic / ias / helper[process_raster_file, addLegend_decreasing],
+  app / logic / ias / helper[process_raster_file, addLegend_decreasing, url.exists, habitat_mapping, get_available_versions, check_valid_version, get_base_url],
 )
 
 #' @export
 ias_app_ui <- function(id) {
   ns <- NS(id)
+  
   tagList(
-    tags$head(
-      tags$style(HTML("
-      .summary-box {
-        border: 1px solid #dee2e6; padding: 10px; text-align: center; margin: 5px; border-radius: 5px; flex: 1 1 200px;
-      }
-      .summary-box .fa { font-size: 24px; margin-bottom: 5px; }
-      .habitat-box { background-color: #FFD700; color: #000; }
-      .data-type-box { background-color: #F4A460; color: #000; }
-      .time-frame-box { background-color: #FF8C00; color: #000; }
-      .time-period-box { background-color: #CD5C5C; color: #fff; }
-      .climate-model-box { background-color: #8B4513; color: #fff; }
-      .climate-scenario-box { background-color: #D2691E; color: #fff; }
-      .species-box { background-color: #DAA520; color: #000; }
-    "))
-    ),
     fluidRow(
-      # layout_sidebar(
-      # sidebar = sidebar(
-      #   open = TRUE,
-      #   width = "400px",
-      #   title = "Select parameters",
       column(
-        class = "my-3",
-        style = "margin-left: 1em !important",
         width = 3,
         card(
-          # Existing inputs ...
-          uiOutput(
-            ns("habPicker")
-          ),
-          radioButtons(
-            ns("dataTypePicker"), "Data Type:",
-            choices = c("Mean" = "mean", "Standard Deviation" = "sd", "Uncertainty" = "cov"),
-            selected = "mean"
-          ),
-          radioButtons(
-            ns("timeFramePicker"), "Time Frame:",
-            choices = c("Present", "Future"),
-            selected = "Present"
-          ),
-          uiOutput(ns("timePeriodUI")),
-          uiOutput(ns("climateModelUI")),
-          uiOutput(ns("climateScenarioUI")),
-          switchInput(
-            width = "100%", size = "normal",
-            inputId = ns("showSpecies"), label = "Species",
-            onLabel = "ON", offLabel = "OFF", value = FALSE
-          ),
-          uiOutput(ns("speciesPicker")),
-
-          # ---------------- NEW: Dynamic slider for threshold --------------
-          sliderInput(
-            ns("valueThreshold"),
-            label = "Display values above:",
-            min   = 0,
-            max   = 1,
-            value = 0, # initial value (will be overridden dynamically)
-            step  = 0.01
-          ),
-          # -----------------------------------------------------------------
-
-          downloadButton(ns("downloadTif"), "Download TIFF File")
+          div(class = "sidebar-content",
+              
+              selectInput(
+                inputId = ns("pdtVersion"),
+                label = "Select pDT version:",
+                choices = NULL
+              ),
+              
+              radioButtons(
+                inputId = ns("dataMode"),
+                label = "Select data mode:",
+                choices = c("Projection", "Distribution"),
+                selected = "Projection"
+              ),
+              
+              conditionalPanel(
+                condition = sprintf("input['%s'] == 'Projection'", ns("dataMode")),
+                tagList(
+                  pickerInput(
+                    ns("habitat"), "Select habitat type:",
+                    choices = habitat_mapping,
+                    selected = NULL
+                  ),
+                  
+                  radioButtons(
+                    ns("timeFramePicker"), "Select time frame:",
+                    choices = c("Present", "Future"),
+                    selected = NULL
+                  ),
+                  
+                  uiOutput(ns("dataTypeUI")),
+                  
+                  conditionalPanel(
+                    condition = sprintf("input['%s'] == 'Future'", ns("timeFramePicker")),
+                    tagList(
+                      radioButtons(ns("timePeriodPicker"), "Select time period:",
+                                   choices = c("2011-2040", "2041-2070", "2071-2100")),
+                      
+                      div(
+                        style = "display: flex; align-items: center;",
+                        pickerInput(
+                          ns("climateModelPicker"), "Select climate model:",
+                          choices = NULL, selected = NULL, multiple = FALSE
+                        ),
+                        actionBttn(
+                          inputId = ns("info_climate_models"),
+                          label = NULL,
+                          icon = icon("info-circle"),
+                          color = "warning",
+                          size = "xs"
+                        )
+                      ),
+                      
+                      div(
+                        style = "display: flex; align-items: center;",
+                        pickerInput(
+                          ns("climateScenarioPicker"), "Select climate scenario:",
+                          choices = NULL, selected = NULL, multiple = FALSE
+                        ),
+                        actionBttn(
+                          inputId = ns("info_climate_scenarios"),
+                          label = NULL,
+                          icon = icon("info-circle"),
+                          color = "warning",
+                          size = "xs"
+                        )
+                      )
+                    )
+                  ),
+                  
+                  switchInput(
+                    ns("showSpecies"),
+                    label = "Species",
+                    onLabel = "ON",
+                    offLabel = "OFF",
+                    value = FALSE
+                  ),
+                  
+                  conditionalPanel(
+                    condition = sprintf("input['%s'] == true", ns("showSpecies")),
+                    uiOutput(ns("speciesInputUI"))
+                  ),
+                  
+                  sliderInput(
+                    ns("valueRange"),
+                    label = "Filter values between:",
+                    min = 0,
+                    max = 10,
+                    value = c(0, 10),
+                    step = 0.1
+                  )
+                )
+              ),
+              
+              conditionalPanel(
+                condition = sprintf("input['%s'] == 'Distribution'", ns("dataMode")),
+                tagList(
+                  pickerInput(
+                    ns("habitatDist"), "Select habitat type:",
+                    choices = habitat_mapping,
+                    selected = NULL
+                  ),
+                  
+                  switchInput(
+                    ns("showSpeciesDist"),
+                    label = "Species",
+                    onLabel = "ON",
+                    offLabel = "OFF",
+                    value = FALSE
+                  ),
+                  
+                  conditionalPanel(
+                    condition = sprintf("input['%s'] == true", ns("showSpeciesDist")),
+                    uiOutput(ns("speciesDistInputUI"))
+                  ),
+                  
+                  radioButtons(
+                    inputId = ns("obsType"),
+                    label = "Observed data type:",
+                    choices = c("Observed values" = "full", "Modeled values" = "model"),
+                    selected = "full"
+                  )
+                )
+              ),
+              
+              conditionalPanel(
+                condition = sprintf("input['%s'] == 'Projection'", ns("dataMode")),
+                actionButton(ns("loadMap"), "Load map", icon = icon("globe-europe"), class = "btn-warning")
+              ),
+              
+              conditionalPanel(
+                condition = sprintf("input['%s'] == 'Distribution'", ns("dataMode")),
+                actionButton(ns("loadObserved"), "Load observed map", icon = icon("map"), class = "btn-warning")
+              ),
+              
+              downloadButton(ns("downloadTif"), "Download TIFF File", class = "btn-danger")
+          )
         )
       ),
       column(
-        8,
-        class = "m-3",
+        width = 9,
         card(
           height = 650,
           full_screen = TRUE,
-          card_header("pDT-IAS"),
-          card_body(leafletOutput(ns("rasterMap"))),
-          card_footer(class = "fs-6", uiOutput(ns("selectedOptions")))
+          card_header("Map Viewer"),
+          card_body(
+            leafletOutput(ns("rasterMap"), height = "100%"),
+            absolutePanel(
+              id = ns("opacityControl"),
+              class = "panel panel-default",
+              fixed = TRUE, draggable = FALSE, top = 120, right = 35,
+              width = 150, height = "auto",
+              style = "
+                z-index: 9999;
+                padding: 10px;
+                background-color: rgba(248, 249, 250, 0.9);
+                border-radius: 8px;
+                box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+                display: none;
+                font-size: 12px;
+              ",
+              sliderInput(ns("opacitySlider"), "Transparency:", min = 0, max = 1, value = 1, step = 0.1)
+            )
+          ),
+          card_footer(
+            class = "fs-6",
+            uiOutput(ns("selectedOptions"))
+          )
         )
       )
     )
@@ -99,429 +201,296 @@ ias_app_ui <- function(id) {
 ias_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
+    
+    # Track available and selected versions from OPeNDAP
+    available_versions <- reactive({
+      get_available_versions()
+    })
+    
+    selected_version <- reactiveVal(NULL)
+    
+    observe({
+      req(available_versions())
+      updateSelectInput(
+        session,
+        "pdtVersion",
+        choices = available_versions(),
+        selected = selected_version()
+      )
+    })
+    
+    # Automatically select the best version
+    observe({
+      req(available_versions())
+      
+      versions <- available_versions()
+      req(length(versions) > 0)
+      
+      try_version <- versions[1]
+      if (check_valid_version(try_version)) {
+        selected_version(try_version)
+      } else if (length(versions) >= 2 && check_valid_version(versions[2])) {
+        selected_version(versions[2])
+        shinyalert::shinyalert(
+          title = "Fallback to Previous Version",
+          text = paste("Version", try_version, "was invalid. Using fallback:", versions[2]),
+          type = "warning"
+        )
+      } else {
+        selected_version(try_version)
+        shinyalert::shinyalert(
+          title = "Warning",
+          text = paste("No valid data found in version", try_version),
+          type = "warning"
+        )
+      }
+    })
+    
+    # Base URL derived from selected version
+    base_url <- reactive({
+      req(selected_version())
+      get_base_url(selected_version())
+    })
+    
+    
+    # Reactive values and states
     predictions_summary <- reactiveVal(NULL)
+    species_data <- reactiveVal(NULL)
+    
+    observeEvent({
+      input$pdtVersion
+      input$habitat
+    }, {
+      req(input$pdtVersion, input$habitat)
+      
+      file_url <- paste0(get_base_url(selected_version()), "outputs/", input$habitat, "/predictions/Prediction_Summary_Shiny.RData")
+      
+      cat("Trying to load prediction summary from URL:\n", file_url, "\n")
+      
+      tmp <- new.env()
+      tryCatch({
+        load(url(file_url), envir = tmp)
+        ps <- tmp$Prediction_Summary_Shiny
+        print(str(ps))
 
-    # UI dependent on predictions_summary ----
-    output$habPicker <- renderUI(
-      if (!is.null(predictions_summary())) {
-        pickerInput(
-          ns("habNamePicker"), "Habitat:",
-          choices = sort(unique(predictions_summary()$hab_name)),
-          selected = NULL, multiple = FALSE
-        )
-      } else {
-        NULL
-      }
-    )
-
-    output$speciesPicker <- renderUI(
-      if (!is.null(predictions_summary()) && isTRUE(input$showSpecies)) {
-        pickerInput(
-          ns("speciesNamePicker"), "Select species:",
-          choices = sort(unique(predictions_summary()$species_name)),
-          selected = NULL, multiple = FALSE
-        )
-      } else {
-        NULL
-      }
-    )
-
-    # Load resources when user access IAS tab ----
-    observeEvent(
-      tab_selected(),
-      {
-        print(tab_selected)
-        req(tab_selected() == "ias_app")
-
-        # Define the base URL for the OPeNDAP server
-        base_url <- "http://opendap.biodt.eu/ias-pdt/predictions"
-
-        # Load the Predictions_Summary.RData from the OPeNDAP server
-        load(url(paste0(base_url, "/Predictions_Summary.RData")))
-        Predictions_Summary |>
-          predictions_summary()
-
-        # Update the paths to point to the remote OPeNDAP files
-        predictions_summary() |>
+       # Normalize paths
+       ps <- ps %>%
           mutate(
-            tif_path_mean = paste0(base_url, "/", tif_path_mean),
-            tif_path_cov  = paste0(base_url, "/", tif_path_cov),
-            tif_path_sd   = paste0(base_url, "/", tif_path_sd)
-          ) |>
-          predictions_summary()
-
-        # Mapping climate model to folder name (unchanged logic)
-        climate_model_mapping <- list(
-          "Current"       = "Current",
-          "Ensemble"      = "Ensemble",
-          "GFDL-ESM4"     = "GFDL_ESM4",
-          "IPSL-CM6A-LR"  = "IPSL_CM6A_LR",
-          "MPI-ESM1-2-HR" = "MPI_ESM1_2_HR",
-          "MRI-ESM2-0"    = "MRI_ESM2_0",
-          "UKESM1-0-LL"   = "UKESM1_0_LL"
-        )
-      }
-    )
-
-
-    # -- 1. Filter predictions based on user input
-    filtered_summary <- reactive({
-      req(input$timeFramePicker, input$habNamePicker, input$dataTypePicker, predictions_summary())
-      if (input$timeFramePicker == "Present") {
-        climate_model_folder <- climate_model_mapping[["Current"]]
-        df <- predictions_summary() |>
-          filter(
-            time_period == "1981-2010",
-            climate_model == "Current",
-            climate_scenario == "Current",
-            hab_name == input$habNamePicker,
-            str_detect(tif_path_mean, climate_model_folder)
+            tif_path_mean = case_when(
+              climate_model == "Ensemble" ~ paste0(gsub("-", "_", time_period), "_", climate_scenario, "_Ensemble/SR_mean.tif"),
+              TRUE ~ .data[["tif_path_mean"]]
+            ),
+            tif_path_sd = case_when(
+              climate_model == "Ensemble" ~ paste0(gsub("-", "_", time_period), "_", climate_scenario, "_Ensemble/SR_sd.tif"),
+              TRUE ~ .data[["tif_path_sd"]]
+            ),
+            tif_path_cov = case_when(
+              climate_model == "Ensemble" ~ paste0(gsub("-", "_", time_period), "_", climate_scenario, "_Ensemble/SR_cov.tif"),
+              TRUE ~ .data[["tif_path_cov"]]
+            ),
+            tif_path_anomaly = case_when(
+              climate_model == "Ensemble" ~ paste0(gsub("-", "_", time_period), "_", climate_scenario, "_Ensemble/SR_anomaly.tif"),
+              TRUE ~ .data[["tif_path_anomaly"]]
+            )
           )
+        
+        habitat_code <- input$habitat
+        
+        ps <- ps %>%
+          mutate(
+            tif_path_mean    = paste0(get_base_url(selected_version()), "outputs/", habitat_code, "/predictions/", tif_path_mean),
+            tif_path_cov     = paste0(get_base_url(selected_version()), "outputs/", habitat_code, "/predictions/", tif_path_cov),
+            tif_path_sd      = paste0(get_base_url(selected_version()), "outputs/", habitat_code, "/predictions/", tif_path_sd),
+            tif_path_anomaly = if_else(
+              is.na(tif_path_anomaly),
+              NA_character_,
+              paste0(get_base_url(selected_version()), "outputs/", habitat_code, "/predictions/", tif_path_anomaly)
+            )
+          )
+        
+        predictions_summary(ps)
+        species_data(ps)
+        
+      }, error = function(e) {
+        predictions_summary(NULL)
+        species_data(NULL)
+        message("Error loading prediction summary: ", e$message)
+        showNotification("Error loading prediction summary file.", type = "error")
+      })
+    })
+        
+        
+    # UI: Species Picker
+    output$speciesPicker <- renderUI({
+      req(species_data())
+      species_list <- unique(species_data()$species_name)
+      pickerInput(
+        ns("speciesNamePicker"), "Select species:",
+        choices = species_list,
+        selected = NULL, multiple = FALSE
+      )
+    })
+    
+    output$speciesInputUI <- renderUI({
+      req(species_data())
+      species_list <- unique(species_data()$species_name)
+      
+      shinyWidgets::pickerInput(
+        inputId = ns("speciesNamePicker"),
+        label = "Select species:",
+        choices = species_list,
+        selected = NULL,
+        multiple = FALSE,
+        options = list(`none-selected-text` = "Select species"),
+        choicesOpt = list(
+          content = lapply(species_list, function(name) {
+            HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
+          })
+        )
+      )
+    })
+    
+    output$dataTypeUI <- renderUI({
+      choices <- c(
+        "Mean" = "mean",
+        "Uncertainty (standard deviation)" = "sd",
+        "Uncertainty (coefficient of variation)" = "cov"
+      )
+      
+      if (input$timeFramePicker == "Future") {
+        choices <- c(choices, "Prediction anomaly" = "anomaly")
+      }
+      
+      radioButtons(
+        inputId = ns("dataTypePicker"),
+        label = "Select model output type:",
+        choices = choices,
+        selected = isolate(input$dataTypePicker %||% "mean")
+      )
+    })
+    
+    
+    # Reactive: Filtered summary
+    filtered_summary <- eventReactive(input$loadMap, {
+      req(predictions_summary())
+      df <- predictions_summary()
+      field <- switch(input$dataTypePicker, mean = "tif_path_mean", sd = "tif_path_sd", cov = "tif_path_cov", anomaly = "tif_path_anomaly")
+      df <- df %>% filter(hab_name == names(habitat_mapping)[habitat_mapping == input$habitat])
+      
+      if (input$timeFramePicker == "Present") {
+        df <- df %>%
+          filter(time_period == "1981-2010", climate_model == "Current", climate_scenario == "Current")
       } else {
-        req(input$timePeriodPicker, input$climateModelPicker, input$climateScenarioPicker)
-        climate_model_folder <- climate_model_mapping[[input$climateModelPicker]]
-        df <- predictions_summary() |>
+        df <- df %>%
           filter(
             time_period == input$timePeriodPicker,
             climate_model == input$climateModelPicker,
-            climate_scenario == input$climateScenarioPicker,
-            hab_name == input$habNamePicker,
-            str_detect(tif_path_mean, climate_model_folder)
+            climate_scenario == input$climateScenarioPicker
           )
       }
+      
+      # Handle species-specific rasters
       if (input$showSpecies && !is.null(input$speciesNamePicker)) {
-        df <- df |> filter(species_name == input$speciesNamePicker)
+        df <- df %>% filter(species_name == input$speciesNamePicker)
+        species_id <- unique(df$ias_id)
+        scenario_folder <- if (input$timeFramePicker == "Future") {
+          paste0(gsub("-", "_", input$timePeriodPicker), "_", input$climateScenarioPicker, "_", input$climateModelPicker)
+        } else {
+          "Current"
+        }
+        file_url <- paste0(get_base_url(selected_version()), "outputs/", input$habitat, "/predictions/", scenario_folder, "/", species_id, "_", input$dataTypePicker, ".tif")
+        
+        df <- df %>% mutate(tif_path = file_url)
       } else {
-        df <- df |> filter(str_detect(tif_path_mean, "SR_mean"))
+        df <- df %>%
+          filter(is.na(species_name), str_detect(.data[[field]], "SR_")) %>%
+          mutate(tif_path = .data[[field]])
       }
-      if (input$dataTypePicker == "mean") {
-        df <- df |> mutate(tif_path = tif_path_mean)
-      } else if (input$dataTypePicker == "cov") {
-        df <- df |> mutate(tif_path = tif_path_cov)
-      } else if (input$dataTypePicker == "sd") {
-        df <- df |> mutate(tif_path = tif_path_sd)
-      } else {
-        stop("Invalid data type selected")
-      }
+      
       df
     })
-
-    # # -- 2. Default raster if none is found
-    default_raster_file <- reactive({
-      req(input$dataTypePicker)
-      if (input$dataTypePicker == "mean") {
-        default_row <- predictions_summary() |>
-          filter(
-            time_period == "1981-2010",
-            climate_model == "Current",
-            climate_scenario == "Current",
-            str_detect(tif_path_mean, "SR_mean")
-          ) |>
-          slice(1)
-        return(default_row$tif_path_mean)
-      } else if (input$dataTypePicker == "cov") {
-        default_row <- predictions_summary() |>
-          filter(
-            time_period == "1981-2010",
-            climate_model == "Current",
-            climate_scenario == "Current",
-            str_detect(tif_path_cov, "SR_cov")
-          ) |>
-          slice(1)
-        return(default_row$tif_path_cov)
-      } else if (input$dataTypePicker == "sd") {
-        default_row <- predictions_summary() |>
-          filter(
-            time_period == "1981-2010",
-            climate_model == "Current",
-            climate_scenario == "Current",
-            str_detect(tif_path_sd, "SR_sd")
-          ) |>
-          slice(1)
-        return(default_row$tif_path_sd)
-      } else {
-        stop("Invalid data type selected")
-      }
-    })
-
-    # -- 3. Load/Process the selected GeoTIFF
+    
+    # Raster loading
     raster_data <- reactive({
       req(filtered_summary())
-      summary_row <- filtered_summary()
-      if (nrow(summary_row) == 0) {
-        default_file <- default_raster_file()
-        return(process_raster_file(default_file))
-      }
-      req(nrow(summary_row) == 1)
-      cat("Loading file:", summary_row$tif_path[1], "\n")
-      process_raster_file(summary_row$tif_path[1])
+      row <- filtered_summary()
+      if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
+      process_raster_file(row$tif_path[1])
     })
-
-    # -- 4. Mask the raster based on the threshold from the slider
+    
+    # # Raster filtering
     filtered_raster <- reactive({
       req(raster_data())
       r <- raster_data()
-
-      # Only show cells where the value is >= user threshold
-      r[r < input$valueThreshold] <- NA
-      r
+      mask <- r >= input$valueRange[1] & r <= input$valueRange[2]
+      terra::ifel(mask, r, NA_real_)
     })
 
-    # -- 5. Render the base Leaflet map only once
+    # Render leaflet base map
     output$rasterMap <- renderLeaflet({
       leaflet(options = leafletOptions(zoomSnap = 0.05, zoomDelta = 0.05)) |>
         addTiles() |>
         setView(lng = 10, lat = 50, zoom = 4) |>
+        addEasyButton(easyButton(icon = "fa-house", 
+                                 title = "Reset Zoom", 
+                                 onClick = JS("function(btn, map){ map.setView([50, 10], 4); }"))) |>
         addEasyButton(
           easyButton(
-            icon = "fa-house",
-            title = "Reset Zoom",
-            onClick = JS("function(btn, map){ map.setView([50, 10], 4); }")
+            icon = "fa-solid fa-fill-drip",
+            title = "Transparency Control",
+            onClick = JS(sprintf("function(btn, map) {
+      var panel = document.getElementById('%s');
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+      } else {
+        panel.style.display = 'none';
+      }
+    }", ns("opacityControl")))
           )
         )
+      
     })
-
-    # -- 6. Dynamic update of slider min/max when a new map loads
+    
+    # Slider update
     observeEvent(raster_data(), {
-      req(raster_data())
       r <- raster_data()
-      rMin <- min(r[], na.rm = TRUE)
-      rMax <- max(r[], na.rm = TRUE)
-
-      # Update the slider to reflect the new raster's range
-      updateSliderInput(session, "valueThreshold",
-        min   = round(rMin, 4),
-        max   = round(rMax, 4),
-        step  = round((rMax - rMin) / 100, 4), # Arbitrary step calculation
-        value = round(rMin, 4) # Start threshold at the min value
+      r_min <- min(r[], na.rm = TRUE)
+      r_max <- max(r[], na.rm = TRUE)
+      updateSliderInput(session, "valueRange",
+                        min = round(r_min, 4),
+                        max = round(r_max, 4),
+                        value = c(round(r_min, 4), round(r_max, 4))
       )
+      
     })
-
-    # -- 7. Plot the thresholded raster
+    
+    # Raster display
     observeEvent(filtered_raster(), {
-      req(filtered_raster())
-      r_thr <- filtered_raster()
-      # We'll color by the entire underlying data range or by the thresholded range
-      # Here, let's do the entire original range for the legend domain:
-      full_range <- range(raster_data()[], na.rm = TRUE)
-
-      pal <- colorNumeric("plasma", domain = full_range, na.color = "transparent")
-
-      # Determine legend title
-      legend_title <- ""
-      if (input$dataTypePicker == "mean") {
-        if (input$showSpecies && !is.null(input$speciesNamePicker)) {
-          legend_title <- "Probability of occurrence"
-        } else {
-          legend_title <- "Level of invasion"
-        }
-      } else if (input$dataTypePicker == "sd") {
-        legend_title <- "Standard Deviation"
-      } else if (input$dataTypePicker == "cov") {
-        legend_title <- "Uncertainty"
-      }
-
+      r <- filtered_raster()
+      pal <- colorNumeric("plasma", domain = range(raster_data()[], na.rm = TRUE), na.color = "transparent")
       leafletProxy("rasterMap") |>
         clearImages() |>
         clearControls() |>
-        addRasterImage(
-          r_thr,
-          colors = pal,
-          opacity = 0.85,
-          project = TRUE
-        ) |>
-        addLegend_decreasing(
-          pal = pal,
-          values = full_range, # or r_thr[] if you prefer
-          title = legend_title,
-          position = "bottomright",
-          decreasing = TRUE
-        )
+        addRasterImage(r, colors = pal, opacity = 0.85, project = TRUE) |>
+        addLegend_decreasing(pal = pal, values = raster_data()[], title = "Raster value", position = "bottomright", decreasing = TRUE)
     })
-
-    # -- 8. UI outputs for time/future scenario
-    output$timePeriodUI <- renderUI({
-      if (input$timeFramePicker == "Present") {
-        NULL
-      } else {
-        radioButtons(ns("timePeriodPicker"), "Time period:",
-          choices = setdiff(sort(unique(predictions_summary()$time_period)), "1981-2010"),
-          selected = "2011-2040"
-        )
-      }
-    })
-    output$climateModelUI <- renderUI({
-      if (input$timeFramePicker == "Present") {
-        NULL
-      } else {
-        pickerInput(
-          ns("climateModelPicker"), "Climate model:",
-          choices = setdiff(sort(unique(predictions_summary()$climate_model)), "Current"),
-          selected = "Ensemble",
-          multiple = FALSE
-        )
-      }
-    })
-    output$climateScenarioUI <- renderUI({
-      if (input$timeFramePicker == "Present") {
-        NULL
-      } else {
-        pickerInput(
-          ns("climateScenarioPicker"), "Climate scenario:",
-          choices = setdiff(sort(unique(predictions_summary()$climate_scenario)), "Current"),
-          selected = "ssp126",
-          multiple = FALSE
-        )
-      }
-    })
-
-    # -- 9. Selected options below the map
-    output$selectedOptions <- renderUI({
-      boxes <- list()
-
-      # Habitat
-      boxes[[length(boxes) + 1]] <- column(
-        width = 4,
-        div(
-          class = "summary-box habitat-box",
-          icon("leaf"), span("Habitat: ", strong(input$habNamePicker))
-        )
-      )
-      # Data Type
-      boxes[[length(boxes) + 1]] <- column(
-        width = 4,
-        div(
-          class = "summary-box data-type-box",
-          icon("chart-bar"),
-          span("Data Type: ", strong(switch(input$dataTypePicker,
-            "mean" = "Mean",
-            "sd" = "Standard Deviation",
-            "cov" = "Uncertainty"
-          )))
-        )
-      )
-      # Time Frame
-      boxes[[length(boxes) + 1]] <- column(
-        width = 4,
-        div(
-          class = "summary-box time-frame-box",
-          icon("calendar"), span("Time Frame: ", strong(input$timeFramePicker))
-        )
-      )
-      # Time Period
-      time_period <- if (input$timeFramePicker == "Future" && !is.null(input$timePeriodPicker)) {
-        input$timePeriodPicker
-      } else {
-        "1981-2010"
-      }
-      boxes[[length(boxes) + 1]] <- column(
-        width = 4,
-        div(
-          class = "summary-box time-period-box",
-          icon("clock"), span("Time Period: ", strong(time_period))
-        )
-      )
-      # Climate Model
-      climate_model <- if (input$timeFramePicker == "Future" && !is.null(input$climateModelPicker)) {
-        input$climateModelPicker
-      } else {
-        "Current"
-      }
-      boxes[[length(boxes) + 1]] <- column(
-        width = 4,
-        div(
-          class = "summary-box climate-model-box",
-          icon("cloud"), span("Climate Model: ", strong(climate_model))
-        )
-      )
-      # Climate Scenario
-      climate_scenario <- if (input$timeFramePicker == "Future" && !is.null(input$climateScenarioPicker)) {
-        input$climateScenarioPicker
-      } else {
-        "Current"
-      }
-      boxes[[length(boxes) + 1]] <- column(
-        width = 4,
-        div(
-          class = "summary-box climate-scenario-box",
-          icon("thermometer-half"), span("Climate Scenario: ", strong(climate_scenario))
-        )
-      )
-      # Species
-      if (input$showSpecies && !is.null(input$speciesNamePicker)) {
-        boxes[[length(boxes) + 1]] <- column(
-          width = 4,
-          div(
-            class = "summary-box species-box",
-            icon("bug"), span("Species: ", strong(input$speciesNamePicker))
-          )
-        )
-      }
-      fluidRow(style = "display: flex; flex-wrap: wrap;", boxes)
-    })
-
-    # -- 10. Download Handler
+    
+    # Download handler
     output$downloadTif <- downloadHandler(
       filename = function() {
-        habitat <- ifelse(!is.null(input$habNamePicker), input$habNamePicker, "All_Habitats")
-        habitat <- gsub(" ", "_", habitat)
-
-        data_type <- switch(input$dataTypePicker,
-          "mean" = "Mean",
-          "sd"   = "SD",
-          "cov"  = "Uncertainty"
-        )
-
-        time_frame <- input$timeFramePicker
-        if (time_frame == "Future") {
-          time_period <- input$timePeriodPicker
-          climate_model <- input$climateModelPicker
-          climate_scenario <- input$climateScenarioPicker
-        } else {
-          time_period <- "1981-2010"
-          climate_model <- "Current"
-          climate_scenario <- "Current"
+        parts <- c("pDT-IAS", gsub(" ", "_", input$habNamePicker), input$dataTypePicker, input$timeFramePicker)
+        if (input$timeFramePicker == "Future") {
+          parts <- c(parts, input$timePeriodPicker, input$climateModelPicker, input$climateScenarioPicker)
         }
-
-        species <- if (input$showSpecies && !is.null(input$speciesNamePicker)) {
-          gsub(" ", "_", input$speciesNamePicker)
-        } else {
-          NULL
+        if (input$showSpecies && !is.null(input$speciesNamePicker)) {
+          parts <- c(parts, gsub(" ", "_", input$speciesNamePicker))
         }
-
-        components <- c(
-          "pDT-IAS",
-          habitat,
-          data_type,
-          time_frame,
-          time_period,
-          climate_model,
-          climate_scenario,
-          species
-        )
-        components <- components[!sapply(components, is.null)]
-        components <- gsub("[^A-Za-z0-9_]", "_", components)
-        filename <- paste(components, collapse = "_")
-        paste0(filename, ".tif")
+        paste0(paste(parts, collapse = "_"), ".tif")
       },
       content = function(file) {
-        # Downloads the *original* file from the server
-        # If you prefer to let the user download the thresholded raster,
-        # you'd do something like:
-        #
-        #   thr_r <- filtered_raster()
-        #   tmpfile <- tempfile(fileext=".tif")
-        #   raster::writeRaster(thr_r, tmpfile)
-        #   file.copy(tmpfile, file)
-        #
-        summary_row <- filtered_summary()
-        if (nrow(summary_row) == 0) {
-          file_to_send <- default_raster_file()
-        } else {
-          file_to_send <- summary_row$tif_path[1]
-        }
-        file.copy(from = file_to_send, to = file)
+        row <- filtered_summary()
+        if (nrow(row) == 0) return(NULL)
+        file.copy(from = row$tif_path[1], to = file)
       },
       contentType = "application/octet-stream"
     )
