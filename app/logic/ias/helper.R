@@ -172,3 +172,21 @@ check_valid_version <- function(version) {
 get_base_url <- function(version) {
   paste0("http://opendap.biodt.eu/ias-pdt/", version, "/")
 }
+
+# function to get the distribution species data 
+#' @export
+get_species_file_from_pa <- function(habitat_code, ias_id, obs_type, base_url) {
+  url <- paste0(base_url, "outputs/", habitat_code, "/observed_distribution/PA.txt")
+  
+  tryCatch({
+    df <- read.delim(url, sep = "\t", header = TRUE)
+    row <- df[df$ias_id == ias_id, ]
+    if (nrow(row) == 0) return(NULL)
+    tif_file <- if (obs_type == "full") row$pa_file else row$pa_model_file
+    tif_file
+  }, error = function(e) {
+    warning("Failed to read PA.txt: ", e$message)
+    NULL
+  })
+}
+

@@ -11,7 +11,7 @@ box::use(
 )
 
 box::use(
-  app / logic / ias / helper[process_raster_file, addLegend_decreasing, url.exists, habitat_mapping, get_available_versions, check_valid_version, get_base_url],
+  app / logic / ias / helper[process_raster_file, addLegend_decreasing, url.exists, habitat_mapping, get_available_versions, check_valid_version, get_base_url, get_species_file_from_pa],
 )
 
 #' @export
@@ -348,6 +348,41 @@ ias_app_server <- function(id, tab_selected) {
       )
     })
     
+    output$speciesDistInputUI <- renderUI({
+      req(input$habitatDist)
+      habitat_code <- input$habitatDist
+      
+      file_url <- paste0(base_url(), "outputs/", habitat_code, "/predictions/Prediction_Summary_Shiny.RData")
+      
+      tmp <- new.env()
+      tryCatch({
+        load(url(file_url), envir = tmp)
+        df <- tmp$Prediction_Summary_Shiny
+        
+        species_list <- unique(df$species_name)
+        
+        pickerInput(
+          inputId = ns("speciesNamePickerDist"),
+          label = "Select species:",
+          choices = species_list,
+          selected = NULL,
+          multiple = FALSE,
+          options = list(`none-selected-text` = "Select species"),
+          choicesOpt = list(
+            content = lapply(species_list, function(name) {
+              HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
+            })
+          )
+        )
+        
+      }, error = function(e) {
+        showNotification("Unable to load species for the selected habitat in distribution mode.", type = "error")
+        NULL
+      })
+    })
+    
+    
+    
     output$dataTypeUI <- renderUI({
       choices <- c(
         "Mean" = "mean",
@@ -408,27 +443,85 @@ ias_app_server <- function(id, tab_selected) {
     })
     
     # Filtered summary for Distribution mode
+    # observed_summary <- eventReactive(input$loadObserved, {
+    #   req(predictions_summary())
+    #   df <- predictions_summary()
+    #   
+    #   df <- df %>% filter(hab_name == names(habitat_mapping)[habitat_mapping == input$habitatDist])
+    #   
+    #   # support species filtering for Distribution
+    #   if (input$showSpeciesDist && !is.null(input$speciesDistInputUI)) {
+    #     df <- df %>% filter(species_name == input$speciesDistInputUI)
+    #   }
+    #   
+    #   # Choose data source based on obsType
+    #   if (input$obsType == "model") {
+    #     df <- df %>% filter(str_detect(tif_path_mean, "SR_model")) # Adjust this to your naming
+    #   } else {
+    #     df <- df %>% filter(str_detect(tif_path_mean, "SR_full")) # Adjust this to your naming
+    #   }
+    #   
+    #   df <- df %>% mutate(tif_path = tif_path_mean)
+    #   
+    #   df
+    # })
+    
+    # adding now more fixes
+    
+    observeEvent(input$showSpeciesDist, {
+      output$speciesDistInputUI <- renderUI({
+        req(input$habitatDist) # Essential requirement
+        habitat_code <- input$habitatDist
+        
+        file_url <- paste0(base_url(), "outputs/", habitat_code, "/predictions/Prediction_Summary_Shiny.RData")
+        
+        tmp <- new.env()
+        tryCatch({
+          load(url(file_url), envir = tmp)
+          df <- tmp$Prediction_Summary_Shiny
+          
+          species_list <- unique(df$species_name)
+          
+          pickerInput(
+            inputId = ns("speciesNamePickerDist"),
+            label = "Select species:",
+            choices = species_list,
+            selected = NULL,
+            multiple = FALSE,
+            options = list(`none-selected-text` = "Select species"),
+            choicesOpt = list(
+              content = lapply(species_list, function(name) {
+                HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
+              })
+            )
+          )
+          
+        }, error = function(e) {
+          showNotification("Unable to load species for the selected habitat in distribution mode.", type = "error")
+          NULL
+        })
+      })
+    })
+    
+    
+    #TODO: not taking the distribution data from each species
+    
+    # Replace your entire existing observed_summary reactive with this:
     observed_summary <- eventReactive(input$loadObserved, {
-      req(predictions_summary())
-      df <- predictions_summary()
+      req(input$habitatDist, input$obsType)
       
-      df <- df %>% filter(hab_name == names(habitat_mapping)[habitat_mapping == input$habitatDist])
+      tif_name <- if (input$obsType == "full") "SR_full.tif" else "SR_model.tif"
+      file_url <- paste0(base_url(), "outputs/", input$habitatDist, "/observed_distribution/", tif_name)
       
-      # support species filtering for Distribution
-      if (input$showSpeciesDist && !is.null(input$speciesDistInputUI)) {
-        df <- df %>% filter(species_name == input$speciesDistInputUI)
+      if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
+        species_id <- input$speciesNamePickerDist
+        tif_name_species <- get_species_file_from_pa(input$habitatDist, species_id, input$obsType, base_url())
+        if (!is.null(tif_name_species)) {
+          file_url <- paste0(base_url(), "outputs/", input$habitatDist, "/observed_distribution/", tif_name_species)
+        }
       }
       
-      # Choose data source based on obsType
-      if (input$obsType == "model") {
-        df <- df %>% filter(str_detect(tif_path_mean, "SR_model")) # Adjust this to your naming
-      } else {
-        df <- df %>% filter(str_detect(tif_path_mean, "SR_full")) # Adjust this to your naming
-      }
-      
-      df <- df %>% mutate(tif_path = tif_path_mean)
-      
-      df
+      tibble::tibble(tif_path = file_url)
     })
     
     # Raster loading
@@ -439,7 +532,6 @@ ias_app_server <- function(id, tab_selected) {
       process_raster_file(row$tif_path[1])
     })
     
-    # added now
     # Reactive: Load raster for Distribution
     observed_raster <- reactive({
       row <- observed_summary()
@@ -447,7 +539,7 @@ ias_app_server <- function(id, tab_selected) {
       process_raster_file(row$tif_path[1])
     })
     
-    # # Raster filtering
+    # Raster filtering
     filtered_raster <- reactive({
       req(raster_data())
       r <- raster_data()
