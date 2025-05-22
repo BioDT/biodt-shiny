@@ -109,22 +109,6 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
 }
 
 # Function to load and process the GeoTIFF file from OPeNDAP
-# process_raster_file <- function(file_path) {
-#   cat("Trying to read file:", file_path, "\n")
-#   tryCatch({
-#     # raster_data <- read_stars(file_path)
-#     # raster_data_regular <- st_warp(raster_data, crs = st_crs(3857))
-#     # # raster_data_raster <- as(raster_data_regular, "Raster")
-#     # raster_data_raster <- terra::rast(raster_data_regular)
-#     raster_data <- terra::rast(file_path)
-#     raster_data_projected <- terra::project(raster_data, "EPSG:3857")
-#     return(raster_data_raster)
-#   }, error = function(e) {
-#     warning(paste("Failed to read raster file:", file_path, "\n", e$message))
-#     return(NULL)
-#   })
-# }
-
 #' @export
 process_raster_file <- function(file_path) {
   cat("Trying to read file:", file_path, "\n")
@@ -139,18 +123,6 @@ process_raster_file <- function(file_path) {
     return(NULL)
   })
 }
-
-# process_raster_file <- function(file_path) {
-#   cat("Trying to read file:", file_path, "\n")
-#   tryCatch({
-#     r <- terra::rast(file_path)
-#     r_proj <- terra::project(r, "EPSG:3857")
-#     return(r_proj)
-#   }, error = function(e) {
-#     warning(paste("Failed to read raster file:", file_path, "\n", e$message))
-#     return(NULL)
-#   })
-# }
 
 # Helper function to check if a URL exists using httr
 #' @export
@@ -198,6 +170,5 @@ check_valid_version <- function(version) {
 # base url for data loading 
 #' @export
 get_base_url <- function(version) {
-  # paste0("http://opendap.biodt.eu/ias-pdt/", version, "/outputs/")
   paste0("http://opendap.biodt.eu/ias-pdt/", version, "/")
 }
