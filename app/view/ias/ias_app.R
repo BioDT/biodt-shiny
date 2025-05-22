@@ -518,7 +518,7 @@ ias_app_server <- function(id, tab_selected) {
     })
 
     # Replace your entire existing observed_summary reactive with this:
-    observed_summary <- eventReactive(input$loadObserved, {
+   observed_summary <- eventReactive(input$loadObserved, {
       req(input$habitatDist, input$obsType)
       
       tif_name <- if (input$obsType == "full") "SR_full.tif" else "SR_model.tif"
@@ -684,5 +684,75 @@ ias_app_server <- function(id, tab_selected) {
       },
       contentType = "application/octet-stream"
     )
-  })
+    
+    output$selectedOptions <- renderUI({
+      req(input$dataMode)
+      
+      if (input$dataMode == "Projection") {
+        req(input$habitat, input$dataTypePicker, input$timeFramePicker)
+        
+        habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
+        model_output <- switch(input$dataTypePicker,
+                               mean = "Mean",
+                               sd = "Standard Deviation",
+                               cov = "Coefficient of Variation",
+                               anomaly = "Prediction Anomaly")
+        
+        details <- tagList(
+          tags$strong("Habitat: "), habitat,
+          tags$span(" | "),
+          tags$strong("Model Output Type: "), model_output,
+          tags$span(" | "),
+          tags$strong("Time Frame: "), input$timeFramePicker
+        )
+        
+        if (input$timeFramePicker == "Future") {
+          req(input$timePeriodPicker, input$climateModelPicker, input$climateScenarioPicker)
+          details <- tagList(
+            details,
+            tags$span(" | "),
+            tags$strong("Time Period: "), input$timePeriodPicker,
+            tags$span(" | "),
+            tags$strong("Climate Model: "), input$climateModelPicker,
+            tags$span(" | "),
+            tags$strong("Climate Scenario: "), input$climateScenarioPicker
+          )
+        }
+        
+        if (input$showSpecies && !is.null(input$speciesNamePicker)) {
+          details <- tagList(
+            details,
+            tags$span(" | "),
+            tags$strong("Species: "), input$speciesNamePicker
+          )
+        }
+        
+        return(details)
+        
+      } else if (input$dataMode == "Distribution") {
+        req(input$habitatDist, input$obsType)
+        
+        habitat <- names(habitat_mapping)[habitat_mapping == input$habitatDist]
+        obs_type <- if (input$obsType == "full") "Observed Values" else "Modeled Values"
+        
+        details <- tagList(
+          tags$strong("Habitat: "), habitat,
+          tags$span(" | "),
+          tags$strong("Observed Data Type: "), obs_type
+        )
+        
+        if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
+          details <- tagList(
+            details,
+            tags$span(" | "),
+            tags$strong("Species: "), input$speciesNamePickerDist
+          )
+        }
+        
+        return(details)
+      }
+      
+      return(NULL)
+    })
+})
 }

@@ -177,7 +177,7 @@ get_base_url <- function(version) {
 #' @export
 get_species_file_from_pa <- function(habitat_code, ias_id, obs_type, base_url) {
   url <- paste0(base_url, "outputs/", habitat_code, "/observed_distribution/PA.txt")
-  
+
   tryCatch({
     df <- read.delim(url, sep = "\t", header = TRUE)
     row <- df[df$ias_id == ias_id, ]
@@ -189,4 +189,3 @@ get_species_file_from_pa <- function(habitat_code, ias_id, obs_type, base_url) {
     NULL
   })
 }
-
