@@ -1,7 +1,7 @@
 box::use(
-  shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler, reactiveVal, selectInput, conditionalPanel, actionButton, absolutePanel, eventReactive, observe, updateSelectInput, isolate, showNotification],
+  shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler, reactiveVal, selectInput, conditionalPanel, actionButton, absolutePanel, eventReactive, observe, updateSelectInput, isolate, showNotification, updateRadioButtons],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
-  shinyWidgets[actionBttn, pickerInput, switchInput],
+  shinyWidgets[actionBttn, pickerInput, switchInput, updatePickerInput],
   leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula],
   dplyr[filter, mutate, slice, `%>%`, case_when, if_else],
   stringr[str_detect],
@@ -318,6 +318,47 @@ ias_app_server <- function(id, tab_selected) {
       })
     })
     
+    # Update Climate Model picker
+    observeEvent(predictions_summary(), {
+      req(predictions_summary())
+      
+      climate_models <- predictions_summary()$climate_model
+      climate_models <- setdiff(unique(climate_models), "Current")
+      
+      ordered_climate_models <- c(
+        "Ensemble",
+        setdiff(climate_models, "Ensemble")
+      )
+      
+      updatePickerInput(session, "climateModelPicker",
+                        choices = ordered_climate_models,
+                        selected = "Ensemble")
+    })
+    
+    # Update Climate Scenario picker
+    observeEvent(predictions_summary(), {
+      req(predictions_summary())
+      
+      climate_scenarios <- predictions_summary()$climate_scenario
+      climate_scenarios <- setdiff(unique(climate_scenarios), "Current")
+      
+      updatePickerInput(session, "climateScenarioPicker",
+                        choices = climate_scenarios,
+                        selected = climate_scenarios[1])
+    })
+    
+    # Update Time Period picker
+    observeEvent(predictions_summary(), {
+      req(predictions_summary())
+      
+      periods <- predictions_summary()$time_period
+      periods <- setdiff(unique(periods), "1981-2010")
+      
+      updateRadioButtons(session, "timePeriodPicker",
+                         choices = periods,
+                         selected = periods[1])
+    })
+
     # UI: Species Picker
     output$speciesPicker <- renderUI({
       req(species_data())
@@ -381,8 +422,6 @@ ias_app_server <- function(id, tab_selected) {
       })
     })
     
-    
-    
     output$dataTypeUI <- renderUI({
       choices <- c(
         "Mean" = "mean",
@@ -443,34 +482,9 @@ ias_app_server <- function(id, tab_selected) {
     })
     
     # Filtered summary for Distribution mode
-    # observed_summary <- eventReactive(input$loadObserved, {
-    #   req(predictions_summary())
-    #   df <- predictions_summary()
-    #   
-    #   df <- df %>% filter(hab_name == names(habitat_mapping)[habitat_mapping == input$habitatDist])
-    #   
-    #   # support species filtering for Distribution
-    #   if (input$showSpeciesDist && !is.null(input$speciesDistInputUI)) {
-    #     df <- df %>% filter(species_name == input$speciesDistInputUI)
-    #   }
-    #   
-    #   # Choose data source based on obsType
-    #   if (input$obsType == "model") {
-    #     df <- df %>% filter(str_detect(tif_path_mean, "SR_model")) # Adjust this to your naming
-    #   } else {
-    #     df <- df %>% filter(str_detect(tif_path_mean, "SR_full")) # Adjust this to your naming
-    #   }
-    #   
-    #   df <- df %>% mutate(tif_path = tif_path_mean)
-    #   
-    #   df
-    # })
-    
-    # adding now more fixes
-    
     observeEvent(input$showSpeciesDist, {
       output$speciesDistInputUI <- renderUI({
-        req(input$habitatDist) # Essential requirement
+        req(input$habitatDist)
         habitat_code <- input$habitatDist
         
         file_url <- paste0(base_url(), "outputs/", habitat_code, "/predictions/Prediction_Summary_Shiny.RData")
@@ -502,10 +516,7 @@ ias_app_server <- function(id, tab_selected) {
         })
       })
     })
-    
-    
-    #TODO: not taking the distribution data from each species
-    
+
     # Replace your entire existing observed_summary reactive with this:
     observed_summary <- eventReactive(input$loadObserved, {
       req(input$habitatDist, input$obsType)
