@@ -275,6 +275,30 @@ ias_app_server <- function(id, tab_selected) {
       }
     })
     
+    observeEvent(input$pdtVersion, {
+      
+      req(input$pdtVersion)
+      version_to_try <- input$pdtVersion
+      
+      if (check_valid_version(version_to_try)) {
+        
+        # make it the active version used by get_base_url()
+        selected_version(version_to_try)
+        
+      } else {
+        
+        shinyalert::shinyalert(
+          title = "Version not fully deployed yet",
+          text  = paste("No valid data found in pDT version", version_to_try),
+          type  = "error"
+        )
+        
+        # roll the drop-down back to the last working version
+        updateSelectInput(session, "pdtVersion",
+                          selected = selected_version())
+      }
+    })
+    
     # Base URL derived from selected version
     base_url <- reactive({
       req(selected_version())
