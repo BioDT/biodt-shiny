@@ -2,7 +2,9 @@ box::use(
   shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler, reactiveVal, selectInput, conditionalPanel, actionButton, absolutePanel, eventReactive, observe, updateSelectInput, isolate, showNotification, updateRadioButtons],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
   shinyWidgets[actionBttn, pickerInput, switchInput, updatePickerInput],
-  leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula, addLegend],
+  leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS,
+          leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage,
+          evalFormula, addLegend, addPopups, clearPopups],
   dplyr[filter, mutate, slice, `%>%`, case_when, if_else],
   stringr[str_detect],
   sf[st_crs],
@@ -990,6 +992,38 @@ ias_app_server <- function(id, tab_selected) {
       }
       
       return(NULL)
+    })
+    
+    observeEvent(input$rasterMap_click, {
+      
+      click <- input$rasterMap_click
+      req(click$lng, click$lat)
+      
+      current_r <- if (input$dataMode == "Projection") raster_data() else observed_raster()
+      req(!is.null(current_r))
+      
+      pt_wgs  <- terra::vect(cbind(click$lng, click$lat), crs = "EPSG:4326")
+      pt_proj <- terra::project(pt_wgs, terra::crs(current_r))
+      
+      val <- terra::extract(current_r, pt_proj)[1, 2]
+      
+      leafletProxy("rasterMap") %>%
+        clearPopups() %>%
+        addPopups(
+          lng   = click$lng,
+          lat   = click$lat,
+        popup = paste0(
+           "<div style='font-size:14px; line-height:1.5;'>",
+           "<i class='fas fa-map-marker-alt' style='color:#FF5733;'></i> ",
+           "<b>Longitude:</b> ", sprintf("%.2f", click$lng), "<br>",
+           "<i class='fas fa-map-marker-alt' style='color:#FF5733;'></i> ",
+           "<b>Latitude:</b> ",  sprintf("%.2f", click$lat), "<br>",
+           "<i class='fas fa-chart-line' style='color:#2ecc71;'></i> ",
+           "<b>Value:</b> ",     ifelse(is.na(val), "NA", round(val, 2)),
+           "</div>"
+         )
+         
+        )
     })
 })
 }
