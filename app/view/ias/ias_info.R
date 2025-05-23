@@ -27,7 +27,7 @@ ias_info_ui <- function(id) {
           tags$li("Prediction Uncertainty Quantification – Enhances decision-making confidence."),
           tags$li("Maps and data download – Enables external use and knowledge transfer.")
         ),
-        p(strong("v0.0.9:"), em("last updated on"), em("2025-03-29"))
+        p(strong("v0.1.0:"), em("last updated on"), em("2025-05-23"))
       )
     ),
     column(

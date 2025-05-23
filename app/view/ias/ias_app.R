@@ -216,6 +216,21 @@ ias_app_server <- function(id, tab_selected) {
       "UKESM1-0-LL"   = "UKESM1_0_LL"
     )
     
+    # legend caption helper
+    get_projection_legend_title <- function(dataType, species_on, species_selected) {
+      switch(
+        dataType,
+        mean = if (species_on && !is.null(species_selected))
+          "Probability of occurrence"
+        else
+          "Level of invasion",
+        sd      = "Standard deviation",
+        cov     = "Coefficient of variation",
+        anomaly = "Prediction anomaly",
+        "Raster value"
+      )
+    }
+
     # Track available and selected versions from OPeNDAP
     available_versions <- reactive({
       get_available_versions()
@@ -634,30 +649,66 @@ ias_app_server <- function(id, tab_selected) {
     
     # Raster display
     observeEvent(filtered_raster(), {
-      r <- filtered_raster()
-      pal <- colorNumeric("plasma", domain = range(raster_data()[], na.rm = TRUE), na.color = "transparent")
-      leafletProxy("rasterMap") |>
-        clearImages() |>
-        clearControls() |>
-        addRasterImage(r, colors = pal, opacity = 0.85, project = TRUE) |>
-        addLegend_decreasing(pal = pal, values = raster_data()[], title = "Raster value", position = "bottomright", decreasing = TRUE)
+      req(filtered_raster())
+        
+        r          <- filtered_raster()
+        full_range <- range(raster_data()[], na.rm = TRUE)
+        pal        <- leaflet::colorNumeric("plasma", domain = full_range,
+                                            na.color = "transparent")
+        
+        legend_title <- get_projection_legend_title(
+          input$dataTypePicker,
+          input$showSpecies,
+          input$speciesNamePicker)
+        
+        leafletProxy("rasterMap") %>%
+          clearImages() %>%
+          clearControls() %>%
+          addRasterImage(
+            r,
+            colors  = pal,
+            opacity = input$opacitySlider,
+            project = TRUE,
+            layerId = "rasterLayer"
+          ) %>%
+          addLegend_decreasing(
+            pal      = pal,
+            values   = full_range,
+            title    = legend_title,
+            position = "bottomright",
+            decreasing = TRUE
+          )
     })
    
     observeEvent(input$opacitySlider, {
       if (input$dataMode == "Projection" && !is.null(filtered_raster())) {
-        r <- filtered_raster()
-        full_range <- range(raster_data()[], na.rm = TRUE)
-        pal <- leaflet::colorNumeric("plasma", domain = full_range, na.color = "transparent")
         
-        leafletProxy("rasterMap", session = session) %>% 
+        r          <- filtered_raster()
+        full_range <- range(raster_data()[], na.rm = TRUE)
+        pal        <- leaflet::colorNumeric("plasma", domain = full_range,
+                                            na.color = "transparent")
+        
+        legend_title <- get_projection_legend_title(
+          input$dataTypePicker,
+          input$showSpecies,
+          input$speciesNamePicker)
+        
+        leafletProxy("rasterMap") %>%
           clearImages() %>%
           clearControls() %>%
           addRasterImage(
-            r, colors = pal, opacity = input$opacitySlider, project = TRUE
+            r,
+            colors  = pal,
+            opacity = input$opacitySlider,
+            project = TRUE,
+            layerId = "rasterLayer"
           ) %>%
           addLegend_decreasing(
-            pal = pal, values = full_range, 
-            title = "Raster value", position = "bottomright", decreasing = TRUE
+            pal      = pal,
+            values   = full_range,
+            title    = legend_title,    
+            position = "bottomright",
+            decreasing = TRUE
           )
       } else if (input$dataMode == "Distribution" && !is.null(observed_raster())) {
         r <- observed_raster()
