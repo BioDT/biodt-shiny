@@ -375,7 +375,7 @@ ias_app_server <- function(id, tab_selected) {
     
     output$speciesInputUI <- renderUI({
       req(species_data())
-      species_list <- unique(species_data()$species_name)
+      species_list <- sort(unique(species_data()$species_name))
       
       shinyWidgets::pickerInput(
         inputId = ns("speciesNamePicker"),
@@ -383,7 +383,7 @@ ias_app_server <- function(id, tab_selected) {
         choices = species_list,
         selected = NULL,
         multiple = FALSE,
-        options = list(`none-selected-text` = "Select species"),
+        options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
         choicesOpt = list(
           content = lapply(species_list, function(name) {
             HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
@@ -403,15 +403,14 @@ ias_app_server <- function(id, tab_selected) {
         load(url(file_url), envir = tmp)
         df <- tmp$Prediction_Summary_Shiny
         
-        species_list <- unique(df$species_name)
-        
+        species_list <- sort(unique(df$species_name))
         pickerInput(
           inputId = ns("speciesNamePickerDist"),
           label = "Select species:",
           choices = species_list,
           selected = NULL,
           multiple = FALSE,
-          options = list(`none-selected-text` = "Select species"),
+          options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
           choicesOpt = list(
             content = lapply(species_list, function(name) {
               HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
