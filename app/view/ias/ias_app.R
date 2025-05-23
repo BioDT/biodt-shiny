@@ -205,6 +205,17 @@ ias_app_server <- function(id, tab_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # climate model mapping
+    climate_model_folder <- list(
+      "Current"       = "Current",
+      "Ensemble"      = "Ensemble",
+      "GFDL-ESM4"     = "GFDL_ESM4",
+      "IPSL-CM6A-LR"  = "IPSL_CM6A_LR",
+      "MPI-ESM1-2-HR" = "MPI_ESM1_2_HR",
+      "MRI-ESM2-0"    = "MRI_ESM2_0",
+      "UKESM1-0-LL"   = "UKESM1_0_LL"
+    )
+    
     # Track available and selected versions from OPeNDAP
     available_versions <- reactive({
       get_available_versions()
@@ -457,7 +468,9 @@ ias_app_server <- function(id, tab_selected) {
         df <- df %>% filter(species_name == input$speciesNamePicker)
         species_id <- unique(df$ias_id)
         scenario_folder <- if (input$timeFramePicker == "Future") {
-          paste0(gsub("-", "_", input$timePeriodPicker), "_", input$climateScenarioPicker, "_", input$climateModelPicker)
+          paste0(gsub("-", "_", input$timePeriodPicker), "_",
+                 input$climateScenarioPicker, "_",
+                 climate_model_folder[[input$climateModelPicker]])
         } else {
           "Current"
         }
