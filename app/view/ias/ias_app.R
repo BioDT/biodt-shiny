@@ -820,22 +820,81 @@ ias_app_server <- function(id, tab_selected) {
 
     # Download handler
     output$downloadTif <- downloadHandler(
+      
       filename = function() {
-        habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
-        parts <- c("pDT-IAS", gsub(" ", "_", input$habNamePicker), input$dataTypePicker, input$timeFramePicker)
-        if (input$timeFramePicker == "Future") {
-          parts <- c(parts, input$timePeriodPicker, input$climateModelPicker, input$climateScenarioPicker)
+        
+        if (input$dataMode == "Projection") {
+          
+          habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
+          data_type <- switch(input$dataTypePicker,
+                              mean = "Mean",
+                              sd   = "SD",
+                              cov  = "Uncertainty",
+                              anomaly = "Anomaly")
+          
+          parts <- c("pDT-IAS",
+                     gsub(" ", "_", habitat),
+                     data_type,
+                     input$timeFramePicker)
+          
+          if (input$timeFramePicker == "Future") {
+            parts <- c(parts,
+                       input$timePeriodPicker,
+                       input$climateModelPicker,
+                       input$climateScenarioPicker)
+          }
+          
+          if (input$showSpecies && !is.null(input$speciesNamePicker)) {
+            parts <- c(parts,
+                       gsub(" ", "_", input$speciesNamePicker))
+          }
+          
+        } else {
+          
+          habitat <- names(habitat_mapping)[habitat_mapping == input$habitatDist]
+          obs <- if (input$obsType == "full") "Observed" else "Modeled"
+          
+          parts <- c("pDT-IAS",
+                     gsub(" ", "_", habitat),
+                     obs)
+          
+          if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
+            parts <- c(parts,
+                       gsub(" ", "_", input$speciesNamePickerDist))
+          }
         }
-        if (input$showSpecies && !is.null(input$speciesNamePicker)) {
-          parts <- c(parts, gsub(" ", "_", input$speciesNamePicker))
-        }
+        
         paste0(paste(parts, collapse = "_"), ".tif")
       },
+      
       content = function(file) {
-        row <- filtered_summary()
-        if (nrow(row) == 0) return(NULL)
-        file.copy(from = row$tif_path[1], to = file)
+        if (input$dataMode == "Projection") {
+          
+          row <- filtered_summary()
+          if (nrow(row) == 0) {
+            showNotification("No raster selected.", type = "error"); return()
+          }
+          file_url <- row$tif_path[1]
+          
+        } else {
+          
+          row <- observed_summary()
+          if (nrow(row) == 0) {
+            showNotification("No raster selected.", type = "error"); return()
+          }
+          file_url <- row$tif_path[1]
+        }
+        
+        if (grepl("^https?://", file_url, ignore.case = TRUE)) {
+          utils::download.file(file_url,
+                               destfile = file,
+                               mode     = "wb",
+                               quiet    = TRUE)
+        } else {
+          file.copy(from = file_url, to = file, overwrite = TRUE)
+        }
       },
+      
       contentType = "application/octet-stream"
     )
     
