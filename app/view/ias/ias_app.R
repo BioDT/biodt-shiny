@@ -8,6 +8,9 @@ box::use(
   sf[st_crs],
   utils[str],
   terra[mask, ifel],
+  shinyalert[shinyalert],
+  htmltools[htmlEscape],
+  tibble[tibble],
 )
 
 box::use(
@@ -358,17 +361,6 @@ ias_app_server <- function(id, tab_selected) {
                          choices = periods,
                          selected = periods[1])
     })
-
-    # UI: Species Picker
-    output$speciesPicker <- renderUI({
-      req(species_data())
-      species_list <- unique(species_data()$species_name)
-      pickerInput(
-        ns("speciesNamePicker"), "Select species:",
-        choices = species_list,
-        selected = NULL, multiple = FALSE
-      )
-    })
     
     output$speciesInputUI <- renderUI({
       req(species_data())
@@ -481,42 +473,7 @@ ias_app_server <- function(id, tab_selected) {
       df
     })
     
-    # Filtered summary for Distribution mode
-    observeEvent(input$showSpeciesDist, {
-      output$speciesDistInputUI <- renderUI({
-        req(input$habitatDist)
-        habitat_code <- input$habitatDist
-        
-        file_url <- paste0(base_url(), "outputs/", habitat_code, "/predictions/Prediction_Summary_Shiny.RData")
-        
-        tmp <- new.env()
-        tryCatch({
-          load(url(file_url), envir = tmp)
-          df <- tmp$Prediction_Summary_Shiny
-          
-          species_list <- unique(df$species_name)
-          
-          pickerInput(
-            inputId = ns("speciesNamePickerDist"),
-            label = "Select species:",
-            choices = species_list,
-            selected = NULL,
-            multiple = FALSE,
-            options = list(`none-selected-text` = "Select species"),
-            choicesOpt = list(
-              content = lapply(species_list, function(name) {
-                HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
-              })
-            )
-          )
-          
-        }, error = function(e) {
-          showNotification("Unable to load species for the selected habitat in distribution mode.", type = "error")
-          NULL
-        })
-      })
-    })
-
+    
     # Replace your entire existing observed_summary reactive with this:
    observed_summary <- eventReactive(input$loadObserved, {
       req(input$habitatDist, input$obsType)
@@ -596,6 +553,56 @@ ias_app_server <- function(id, tab_selected) {
       
     })
     
+    # explanation text for the climate model and climate scenario
+    observeEvent(input$info_climate_models, {
+      shinyalert(
+        title = "Climate Model Information",
+        html  = TRUE,
+        size  = "m",
+        type  = "info",
+        text  = HTML(
+          "<table style='width:100%; margin-bottom: 10px;'>
+         <tr><th>Model</th><th>Institution</th></tr>
+         <tr><td><b>mpi-esm1-2-hr</b></td><td>Max&nbsp;Planck&nbsp;Institute for Meteorology, Germany</td></tr>
+         <tr><td><b>ipsl-cm6a-lr</b></td><td>Institut&nbsp;Pierre&nbsp;Simon&nbsp;Laplace, France</td></tr>
+         <tr><td><b>ukesm1-0-ll</b></td><td>Met&nbsp;Office&nbsp;Hadley&nbsp;Centre, UK</td></tr>
+         <tr><td><b>gfdl-esm4</b></td><td>NOAA&nbsp;GFDL, USA</td></tr>
+         <tr><td><b>mri-esm2-0</b></td><td>Meteorological&nbsp;Research&nbsp;Institute, Japan</td></tr>
+       </table>
+       <p style='margin-top: 15px; font-weight: bold;'>
+         <a href='https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf'
+            target='_blank' style='text-decoration:none;'>
+           📄 CHELSA V2.1 Technical Specifications
+         </a>
+       </p>"
+        )
+      )
+    })
+    
+    observeEvent(input$info_climate_scenarios, {
+      shinyalert(
+        title = "Climate Scenario Information",
+        html  = TRUE,
+        size  = "m",
+        type  = "info",
+        text  = HTML(
+          "<table style='width:100%; margin-bottom: 10px;'>
+         <tr><th>Scenario</th><th>Description</th></tr>
+         <tr><td><b>ssp126</b></td><td>SSP1-RCP2.6 climate as simulated by the GCMs.</td></tr>
+         <tr><td><b>ssp370</b></td><td>SSP3-RCP7 climate as simulated by the GCMs.</td></tr>
+         <tr><td><b>ssp585</b></td><td>SSP5-RCP8.5 climate as simulated by the GCMs.</td></tr>
+       </table>
+       <p style='margin-top: 15px;'>
+         More information on the scenarios can be found
+         <a href='https://www.dkrz.de/en/communication/climate-simulations/cmip6-en/the-ssp-scenarios'
+            target='_blank' style='font-weight:bold; text-decoration:none;'>
+           here
+         </a>.
+       </p>"
+        )
+      )
+    })
+    
     # Raster display
     observeEvent(filtered_raster(), {
       r <- filtered_raster()
@@ -613,7 +620,7 @@ ias_app_server <- function(id, tab_selected) {
         full_range <- range(raster_data()[], na.rm = TRUE)
         pal <- leaflet::colorNumeric("plasma", domain = full_range, na.color = "transparent")
         
-        leafletProxy(ns("rasterMap")) %>%
+        leafletProxy("rasterMap", session = session) %>% 
           clearImages() %>%
           clearControls() %>%
           addRasterImage(
@@ -627,7 +634,7 @@ ias_app_server <- function(id, tab_selected) {
         r <- observed_raster()
         full_range <- range(r[], na.rm = TRUE)
         
-        leafletProxy(ns("rasterMap")) %>%
+        leafletProxy("rasterMap", session = session) %>%
           clearImages() %>%
           clearControls() %>%
           addRasterImage(
@@ -668,6 +675,7 @@ ias_app_server <- function(id, tab_selected) {
     # Download handler
     output$downloadTif <- downloadHandler(
       filename = function() {
+        habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
         parts <- c("pDT-IAS", gsub(" ", "_", input$habNamePicker), input$dataTypePicker, input$timeFramePicker)
         if (input$timeFramePicker == "Future") {
           parts <- c(parts, input$timePeriodPicker, input$climateModelPicker, input$climateScenarioPicker)
