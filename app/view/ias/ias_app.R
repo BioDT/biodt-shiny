@@ -2,7 +2,7 @@ box::use(
   shiny[NS, tagList, tags, HTML, icon, div, span, strong, moduleServer, fluidRow, radioButtons, column, uiOutput, sliderInput, downloadButton, reactive, req, observeEvent, updateSliderInput, renderUI, downloadHandler, reactiveVal, selectInput, conditionalPanel, actionButton, absolutePanel, eventReactive, observe, updateSelectInput, isolate, showNotification, updateRadioButtons],
   bslib[layout_sidebar, sidebar, card, card_header, card_body, card_footer],
   shinyWidgets[actionBttn, pickerInput, switchInput, updatePickerInput],
-  leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula],
+  leaflet[leafletOutput, renderLeaflet, leaflet, addTiles, setView, addEasyButton, easyButton, JS, leafletOptions, colorNumeric, leafletProxy, clearImages, clearControls, addRasterImage, evalFormula, addLegend],
   dplyr[filter, mutate, slice, `%>%`, case_when, if_else],
   stringr[str_detect],
   sf[st_crs],
@@ -375,7 +375,10 @@ ias_app_server <- function(id, tab_selected) {
     
     output$speciesInputUI <- renderUI({
       req(species_data())
-      species_list <- sort(unique(species_data()$species_name))
+      
+      species_list <- species_data()$species_name
+      species_list <- species_list[!is.na(species_list)]   
+      species_list <- sort(unique(species_list))
       
       shinyWidgets::pickerInput(
         inputId = ns("speciesNamePicker"),
@@ -403,11 +406,15 @@ ias_app_server <- function(id, tab_selected) {
         load(url(file_url), envir = tmp)
         df <- tmp$Prediction_Summary_Shiny
         
+        df <- df |>                        
+          dplyr::filter(!is.na(ias_id), !is.na(species_name)) |>
+          dplyr::distinct(ias_id, species_name)
+        
         species_list <- sort(unique(df$species_name))
         pickerInput(
           inputId = ns("speciesNamePickerDist"),
           label = "Select species:",
-          choices = species_list,
+          choices  = df$ias_id,  
           selected = NULL,
           multiple = FALSE,
           options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
@@ -485,24 +492,34 @@ ias_app_server <- function(id, tab_selected) {
       df
     })
     
-    
-    # Replace your entire existing observed_summary reactive with this:
-   observed_summary <- eventReactive(input$loadObserved, {
-      req(input$habitatDist, input$obsType)
-      
-      tif_name <- if (input$obsType == "full") "SR_full.tif" else "SR_model.tif"
-      file_url <- paste0(base_url(), "outputs/", input$habitatDist, "/observed_distribution/", tif_name)
-      
-      if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
-        species_id <- input$speciesNamePickerDist
-        tif_name_species <- get_species_file_from_pa(input$habitatDist, species_id, input$obsType, base_url())
-        if (!is.null(tif_name_species)) {
-          file_url <- paste0(base_url(), "outputs/", input$habitatDist, "/observed_distribution/", tif_name_species)
+    observed_summary <- eventReactive(
+      {                         
+        input$loadObserved
+        input$habitatDist
+        input$speciesNamePickerDist
+        input$obsType
+      }, {
+        
+        req(input$habitatDist, input$obsType)
+        
+        tif_name <- if (input$obsType == "full") "SR_full.tif" else "SR_model.tif"
+        file_url <- paste0(base_url(), "outputs/", input$habitatDist,
+                           "/observed_distribution/", tif_name)
+        
+        if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
+          species_id       <- input$speciesNamePickerDist        
+          tif_name_species <- get_species_file_from_pa(
+            input$habitatDist,
+            species_id,
+            input$obsType,
+            base_url())
+          if (!is.null(tif_name_species))
+            file_url <- paste0(base_url(), "outputs/", input$habitatDist,
+                               "/observed_distribution/", tif_name_species)
         }
-      }
-      
-      tibble::tibble(tif_path = file_url)
-    })
+        
+        tibble::tibble(tif_path = file_url)
+      })
     
     # Raster loading
     raster_data <- reactive({
@@ -646,44 +663,110 @@ ias_app_server <- function(id, tab_selected) {
         r <- observed_raster()
         full_range <- range(r[], na.rm = TRUE)
         
-        leafletProxy("rasterMap", session = session) %>%
-          clearImages() %>%
-          clearControls() %>%
-          addRasterImage(
-            r, colors = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
-            opacity = input$opacitySlider, project = TRUE
-          ) %>%
-          addLegend_decreasing(
-            pal = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
-            values = full_range, title = "Observed values",
-            position = "bottomright", decreasing = TRUE
-          )
+        if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
+          
+          pal_cols <- c("#CCCCCC", "#2ca25f")
+          
+          leafletProxy("rasterMap", session = session) %>%
+            clearImages() %>%
+            clearControls() %>%
+            addRasterImage(
+              r,
+              colors  = pal_cols,
+              opacity = input$opacitySlider,
+              project = TRUE,
+              layerId = "observedLayer"
+            ) %>%
+            addLegend(
+              position = "bottomright",
+              colors   = pal_cols,
+              labels   = c("Absent", "Present"),
+              title    = "Presence / Absence",
+              opacity  = 1
+            )
+          
+        } else {
+          
+          vir_pal <- leaflet::colorNumeric("viridis", domain = full_range, na.color = "transparent")
+          
+          leafletProxy("rasterMap", session = session) %>%
+            clearImages() %>%
+            clearControls() %>%
+            addRasterImage(
+              r,
+              colors  = vir_pal,
+              opacity = input$opacitySlider,
+              project = TRUE,
+              layerId = "observedLayer"
+            ) %>%
+            addLegend_decreasing(
+              pal      = vir_pal,
+              values   = full_range,
+              title    = ifelse(input$obsType == "full",
+                                "Observed Distribution",
+                                "Modeled Distribution"),
+              position = "bottomright",
+              decreasing = TRUE
+            )
+        }
       }
-    })
+    }
+    )
     
-    observeEvent(input$loadObserved, {
+   observeEvent(input$loadObserved, {
       req(observed_raster())
       r <- observed_raster()
       full_range <- range(r[], na.rm = TRUE)
       
-      leafletProxy("rasterMap") %>%
-        clearImages() %>%
-        clearControls() %>%
-        addRasterImage(
-          r,
-          colors = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
-          opacity = input$opacitySlider,
-          project = TRUE
-        ) %>%
-        addLegend_decreasing(
-          pal = colorNumeric("viridis", domain = full_range, na.color = "transparent"),
-          values = full_range,
-          title = "Observed values",
-          position = "bottomright",
-          decreasing = TRUE
-        )
+      # Palette & legend depend on whether we are in species mode
+      if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
+        
+        pal_cols <- c("#CCCCCC", "#2ca25f") 
+        
+        leafletProxy("rasterMap", session = session) %>%
+          clearImages() %>%
+          clearControls() %>%
+          addRasterImage(
+            r,
+            colors  = pal_cols,
+            opacity = input$opacitySlider,
+            project = TRUE,
+            layerId = "observedLayer"
+          ) %>%
+          addLegend(
+            position = "bottomright",
+            colors   = pal_cols,
+            labels   = c("Absent", "Present"),
+            title    = "Presence / Absence",
+            opacity  = 1
+          )
+        
+      } else {
+        
+        vir_pal <- leaflet::colorNumeric("viridis", domain = full_range, na.color = "transparent")
+        
+        leafletProxy("rasterMap", session = session) %>%
+          clearImages() %>%
+          clearControls() %>%
+          addRasterImage(
+            r,
+            colors  = vir_pal,
+            opacity = input$opacitySlider,
+            project = TRUE,
+            layerId = "observedLayer"
+          ) %>%
+          addLegend_decreasing(
+            pal      = vir_pal,
+            values   = full_range,
+            title    = ifelse(input$obsType == "full",
+                              "Observed Distribution",
+                              "Modeled Distribution"),
+            position = "bottomright",
+            decreasing = TRUE
+          )
+      }
     })
-    
+
     # Download handler
     output$downloadTif <- downloadHandler(
       filename = function() {

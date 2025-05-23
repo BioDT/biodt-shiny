@@ -8,6 +8,7 @@ box::use(
   rvest[read_html, html_nodes, html_text],
   xml2[read_html],
   dplyr[`%>%`], 
+  readr[read_delim],
 )
 
 #' @export
@@ -176,14 +177,27 @@ get_base_url <- function(version) {
 # function to get the distribution species data 
 #' @export
 get_species_file_from_pa <- function(habitat_code, ias_id, obs_type, base_url) {
-  url <- paste0(base_url, "outputs/", habitat_code, "/observed_distribution/PA.txt")
-
+  
+  url <- paste0(base_url, "outputs/", habitat_code,
+                "/observed_distribution/PA.txt")
+  
   tryCatch({
-    df <- read.delim(url, sep = "\t", header = TRUE)
-    row <- df[df$ias_id == ias_id, ]
+    
+    df <- readr::read_delim(url(url), delim = "\t",
+                            show_col_types = FALSE, trim_ws = TRUE)
+    
+    names(df) <- tolower(trimws(names(df)))        # normalise headers
+    needed <- c("ias_id", "pa_file", "pa_model_file")
+    if (!all(needed %in% names(df))) return(NULL)
+    
+    row <- dplyr::filter(df, ias_id == !!ias_id)
     if (nrow(row) == 0) return(NULL)
-    tif_file <- if (obs_type == "full") row$pa_file else row$pa_model_file
-    tif_file
+    
+    tif_file <- if (obs_type == "full") row$pa_file[1] else row$pa_model_file[1]
+    tif_file <- trimws(tif_file)
+    
+    if (is.na(tif_file) || tif_file == "") NULL else tif_file
+    
   }, error = function(e) {
     warning("Failed to read PA.txt: ", e$message)
     NULL
