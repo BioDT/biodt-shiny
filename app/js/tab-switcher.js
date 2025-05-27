@@ -7,10 +7,10 @@ $(document).ready(function() {
     const tabLink = document.querySelector(`a[data-value="${tabId}"]`);
     
     if (tabLink) {
-      // First, close any open dropdowns
-      $('.dropdown-menu').removeClass('show');
-      $('.dropdown').removeClass('show');
-      $('.nav-item.dropdown').removeClass('show');
+      // First, close any open navigation dropdowns, but preserve form input dropdowns
+      $('.navbar .dropdown-menu').removeClass('show');
+      $('.navbar .dropdown').removeClass('show');
+      $('.navbar .nav-item.dropdown').removeClass('show');
       
       // If the tab is inside a dropdown, we need to handle it differently
       const parentDropdown = $(tabLink).closest('.dropdown-menu');
@@ -25,9 +25,10 @@ $(document).ready(function() {
         
         // Make sure dropdown stays closed by repeatedly checking
         const ensureDropdownClosed = () => {
-          $('.dropdown-menu').removeClass('show');
-          $('.dropdown').removeClass('show');
-          $('.nav-item.dropdown').removeClass('show');
+          // Only target navigation dropdowns, not form input dropdowns
+          $('.navbar .dropdown-menu').removeClass('show');
+          $('.navbar .dropdown').removeClass('show');
+          $('.navbar .nav-item.dropdown').removeClass('show');
           
           // Also collapse the navbar if it's expanded on mobile
           const navbarToggler = $('.navbar-toggler');
@@ -46,11 +47,11 @@ $(document).ready(function() {
         // For non-dropdown tabs, just trigger a normal click
         tabLink.click();
         
-        // Also ensure dropdowns are closed
+        // Also ensure navigation dropdowns are closed, but not form input dropdowns
         setTimeout(() => {
-          $('.dropdown-menu').removeClass('show');
-          $('.dropdown').removeClass('show');
-          $('.nav-item.dropdown').removeClass('show');
+          $('.navbar .dropdown-menu').removeClass('show');
+          $('.navbar .dropdown').removeClass('show');
+          $('.navbar .nav-item.dropdown').removeClass('show');
         }, 50);
       }
     } else {
