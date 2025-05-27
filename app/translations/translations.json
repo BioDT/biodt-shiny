@@ -130,6 +130,51 @@
       "en": "Output Plot",
       "cz": "Výstupní graf",
       "fi": "Tulosaineisto"
+    },
+    {
+      "en": "This pDT aims to investigate the impact of different forest management strategies and climate change scenarios on forests and biodiversity. The goal is to identify the most appropriate treatment option that improves biodiversity for a specific forest region under various climate scenarios."
+    },
+    {
+      "en": "Purpose: "
+    },
+    {
+      "en": "Forest Biodiversity Prototype Digital Twin (pDT)"
+    },
+    {
+      "en": "Replica of the Forest: "
+    },
+    {
+      "en": "Forest simulations conducted with LANDIS-II (Scheller and Mladenoff 2007, "
+    },
+    {
+      "en": "), which is a landscape model designed to simulate forest succession and disturbances."
+    },
+    {
+      "en": "Completely open-source with extensive documentation on GitHub: "
+    },
+    {
+      "en": "Replica of the Species Living in the Forest: "
+    },
+    {
+      "en": "Biodiversity modeling was conducted using the joint species distribution model - HMSC (Ovaskainen et al., 2017, "
+    },
+    {
+      "en": ")  for analyzing community ecological data."
+    },
+    {
+      "en": "HMSC Home Page: "
+    },
+    {
+      "en": "HSMC R-package is available on CRAN "
+    },
+    {
+      "en": "), and the development version can be found on GitHub ("
+    },
+    {
+      "en": "Source code and scripts of the pDT can be found at "
+    },
+    {
+      "en": "Start prototyping"
     }
   ]
 }

@@ -7,8 +7,9 @@ box::use(
 box::use(
   app / view / forest / forest_info[forest_info_ui, forest_info_server],
   app / view / forest / forest_app[forest_app_ui, forest_app_server],
-  # app / view / forest / forest_contributors[forest_contributors_ui],
+  app / view / forest / forest_contributors[forest_contributors_ui]
 )
+
 #' @export
 forest_main_ui <- function(id, i18n) {
   ns <- NS(id)
@@ -36,17 +37,16 @@ forest_main_ui <- function(id, i18n) {
       )
     ),
     # Forest Contributors ----
-    # nav_panel(
-    #   title = i18n$translate("Contributors"),
-    #   value = "Contributors",
-    #   icon = icon("sitemap"),
-    #   bee_contributors_ui(
-    #     ns("forest_contributors"),
-    #     i18n
-    #   )
-    # ),
+    nav_panel(
+      title = i18n$translate("Contributors"),
+      value = "Contributors",
+      icon = icon("sitemap"),
+      forest_contributors_ui(
+        ns("forest_contributors"),
+        i18n
+      )
+    )
   )
-  # )
 }
 
 #' @export
