@@ -1,0 +1,17 @@
+services:
+  shiny:
+    container_name: biodt-shiny
+    platform: linux/amd64
+    image: ghcr.io/biodt/shiny-app:latest
+    ports:
+      - "7860:7860"
+    volumes:
+      - "${PWD}/app/data:/app/data"
+      # docker.sock is required for docker executor Honeybee and Disease Outbreaks pDTs
+      - "/var/run/docker.sock:/var/run/docker.sock" 
+    environment:
+      - SHINY_LOG_LEVEL=debug
+      - R_CONFIG_ACTIVE="prod"
+      - BASE_PATH="/app/data/shared"
+      - HOST_BASE_PATH="${PWD}/app/data"
+      - DATA_PATH="/app/data"

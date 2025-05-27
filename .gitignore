@@ -38,7 +38,6 @@ app/data/grassland/*
 # Testing script
 test.R
 background.R
-docker-compose.yml
 Dockerfile_old
 .vscode/settings.json
 .rhino/node_modules
