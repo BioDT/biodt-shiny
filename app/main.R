@@ -219,29 +219,25 @@ ui <- function(id) {
           class = "p-0",
           disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
         ),
-        if (env_active == "dev") {
-          ## Dynamics and threats from and for species of policy concern ----
-          nav_item(
+        ## Dynamics and threats from and for species of policy concern ----
+        nav_item(
+          shiny$div(
+            class = "p-2",
             shiny$div(
-              class = "p-2",
-              shiny$div(
-                shiny$icon("bugs", `aria-hidden` = "true"),
-                shiny$strong(i18n$translate(
-                  "Dynamics and threats from and for species of policy concern"
-                )),
-                style = "width: 450px"
-              ),
-            )
+              shiny$icon("bugs", `aria-hidden` = "true"),
+              shiny$strong(i18n$translate(
+                "Dynamics and threats from and for species of policy concern"
+              )),
+              style = "width: 450px"
+            ),
           )
-        },
-        if (env_active == "dev") {
-          nav_panel(
-            title = i18n$translate("Invasive Alien Species"),
-            value = "ias",
-            class = "p-0",
-            ias_ui(ns("ias_main"), i18n)
-          )
-        },
+        ),
+        nav_panel(
+          title = i18n$translate("Invasive Alien Species"),
+          value = "ias",
+          class = "p-0",
+          ias_ui(ns("ias_main"), i18n)
+        ),
       ),
       nav_spacer(),
       ## Acknowledgements - main menu item ----
