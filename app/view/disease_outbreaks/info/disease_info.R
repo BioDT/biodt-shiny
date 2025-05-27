@@ -25,25 +25,34 @@ disease_info_ui <- function(id, i18n) {
         ),
         tags$p(
           "Read more about the pDT here:",
-          tags$a("https://riojournal.com/article/125521/", href = "https://riojournal.com/article/125521/"),
+          tags$a(
+            "https://riojournal.com/article/125521/",
+            href = "https://riojournal.com/article/125521/",
+            target = "_blank"
+          ),
           "."
         ),
         tags$p(
           "Read more about the wild boar-ASF simulation model here:",
-          tags$a("https://doi.org/10.1007/s00477-016-1358-8", href = "https://doi.org/10.1007/s00477-016-1358-8"),
+          tags$a(
+            "https://doi.org/10.1007/s00477-016-1358-8",
+            href = "https://doi.org/10.1007/s00477-016-1358-8",
+            target = "_blank"
+          ),
           "."
         ),
         tags$p(
           "Video source: Alexis Lours, Sus scrofa Linnaeus, 1758 observed in France,",
           tags$a(
             "https://www.inaturalist.org/observations/197802817",
-            href = "https://www.inaturalist.org/observations/197802817"
+            href = "https://www.inaturalist.org/observations/197802817",
+            target = "_blank"
           ),
           "."
         ),
         tags$p(
           "Source code and scripts of the pDT can be found at ",
-          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"),
+          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
       ),

@@ -30,11 +30,15 @@ cwr_info_ui <- function(id) {
         ),
         tags$p(
           "Read more: ",
-          tags$a("https://doi.org/10.3897/rio.10.e125192", href = "https://doi.org/10.3897/rio.10.e125192")
+          tags$a(
+            "https://doi.org/10.3897/rio.10.e125192",
+            href = "https://doi.org/10.3897/rio.10.e125192",
+            target = "_blank"
+          )
         ),
         tags$p(
           "Source code and scripts of the pDT can be found at ",
-          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"),
+          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
       )

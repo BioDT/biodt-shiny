@@ -53,7 +53,12 @@ beekeeper_control_ui <- function(id, i18n) {
             "button",
           ),
         ),
-        tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu.")
+        tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu."),
+        tags$p(
+          "Should you want to read more about the use case and learn how to use the pDT, you can refer to the relevant tutorial that can be found on the BioDT Training Platform ",
+          tags$a("here", href = "https://training.lifewatch.eu:9001/course/view.php?id=122", target = "_blank"),
+          "."
+        )
       )
     )
   )

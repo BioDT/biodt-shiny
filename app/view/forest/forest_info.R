@@ -29,41 +29,48 @@ forest_info_ui <- function(id, i18n) {
           i18n$translate("Forest simulations conducted with LANDIS-II (Scheller and Mladenoff 2007, "),
           tags$a(
             "https://doi.org/10.1016/j.ecolmodel.2006.10.009",
-            href = "https://doi.org/10.1016/j.ecolmodel.2006.10.009"
+            href = "https://doi.org/10.1016/j.ecolmodel.2006.10.009",
+            target = "_blank"
           ),
           i18n$translate("), which is a landscape model designed to simulate forest succession and disturbances.")
         ),
         tags$p(
           i18n$translate("LANDIS-II Home Page: "),
-          tags$a("https://landis-ii.org/", href = "https://landis-ii.org/")
+          tags$a("https://landis-ii.org/", href = "https://landis-ii.org/", target = "_blank")
         ),
         tags$p(
           i18n$translate("Completely open-source with extensive documentation on GitHub: "),
-          tags$a("https://github.com/LANDIS-II-Foundation", href = "https://github.com/LANDIS-II-Foundation")
+          tags$a(
+            "https://github.com/LANDIS-II-Foundation",
+            href = "https://github.com/LANDIS-II-Foundation",
+            target = "_blank"
+          )
         ),
         tags$p(
           tags$strong(i18n$translate("Replica of the Species Living in the Forest: ")),
           i18n$translate(
             "Biodiversity modeling was conducted using the joint species distribution model - HMSC (Ovaskainen et al., 2017, "
           ),
-          tags$a("https://doi.org/10.1111/ele.12757", href = "https://doi.org/10.1111/ele.12757"),
+          tags$a("https://doi.org/10.1111/ele.12757", href = "https://doi.org/10.1111/ele.12757", target = "_blank"),
           i18n$translate(")  for analyzing community ecological data.")
         ),
         tags$p(
           i18n$translate("HMSC Home Page: "),
           tags$a(
             "https://www.helsinki.fi/en/researchgroups/statistical-ecology/software/hmsc",
-            href = "https://www.helsinki.fi/en/researchgroups/statistical-ecology/software/hmsc"
+            href = "https://www.helsinki.fi/en/researchgroups/statistical-ecology/software/hmsc",
+            target = "_blank"
           ),
         ),
         tags$p(
           i18n$translate("HSMC R-package is available on CRAN "),
           tags$a(
             "https://cran.r-project.org/web/packages/Hmsc/index.html",
-            href = "https://cran.r-project.org/web/packages/Hmsc/index.html"
+            href = "https://cran.r-project.org/web/packages/Hmsc/index.html",
+            target = "_blank"
           ),
           i18n$translate("), and the development version can be found on GitHub ("),
-          tags$a("https://github.com/hmsc-r/HMSC", href = "https://github.com/hmsc-r/HMSC"),
+          tags$a("https://github.com/hmsc-r/HMSC", href = "https://github.com/hmsc-r/HMSC", target = "_blank"),
           ")."
         ),
         tags$p(
@@ -71,7 +78,8 @@ forest_info_ui <- function(id, i18n) {
           tags$a(
             icon("github"),
             "https://github.com/BioDT/uc-forest-bird",
-            href = "https://github.com/BioDT/uc-forest-bird"
+            href = "https://github.com/BioDT/uc-forest-bird",
+            target = "_blank"
           ),
           "."
         ),

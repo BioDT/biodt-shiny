@@ -37,14 +37,22 @@ ias_info_ui <- function(id) {
         ),
         p(
           tags$strong("Source code: "),
-          tags$a("https://github.com/BioDT/IASDT.R", href = "https://github.com/BioDT/IASDT.R"),
+          tags$a("https://github.com/BioDT/IASDT.R", href = "https://github.com/BioDT/IASDT.R", target = "_blank"),
           " and ",
-          tags$a("https://github.com/BioDT/uc-ias-workflows", href = "https://github.com/BioDT/uc-ias-workflows")
+          tags$a(
+            "https://github.com/BioDT/uc-ias-workflows",
+            href = "https://github.com/BioDT/uc-ias-workflows",
+            target = "_blank"
+          )
         ),
         p(
           tags$strong("Licence: "),
           "The data may be used freely for scientific and policy purposes under the ",
-          tags$a("Creative Commons Licence CC BY 4.0", href = "https://creativecommons.org/licenses/by/4.0/")
+          tags$a(
+            "Creative Commons Licence CC BY 4.0",
+            href = "https://creativecommons.org/licenses/by/4.0/",
+            target = "_blank"
+          )
         ),
         p(
           tags$strong("Contact: "),

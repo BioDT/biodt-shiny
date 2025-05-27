@@ -5,16 +5,48 @@ box::use(
 
   # HTML tools for structured UI building
   htmltools[
-    div, h5, p, em, a, img, tags, css, span, strong
+    div,
+    h5,
+    p,
+    em,
+    a,
+    img,
+    tags,
+    css,
+    span,
+    strong
   ],
 
   # Interactive map
   leaflet[
-    leaflet, addTiles, setView, addProviderTiles, clearShapes, addCircles,
-    addCircleMarkers, clearControls, addLegend, addPolylines, addPolygons,
-    layersControlOptions, addLayersControl, clearImages, colorNumeric, addMarkers,
-    clearGroup, makeIcon, addRectangles, removeTiles, hideGroup, showGroup, labelFormat,
-    renderLeaflet, leafletOutput, leafletProxy, removeControl, addControl
+    leaflet,
+    addTiles,
+    setView,
+    addProviderTiles,
+    clearShapes,
+    addCircles,
+    addCircleMarkers,
+    clearControls,
+    addLegend,
+    addPolylines,
+    addPolygons,
+    layersControlOptions,
+    addLayersControl,
+    clearImages,
+    colorNumeric,
+    addMarkers,
+    clearGroup,
+    makeIcon,
+    addRectangles,
+    removeTiles,
+    hideGroup,
+    showGroup,
+    labelFormat,
+    renderLeaflet,
+    leafletOutput,
+    leafletProxy,
+    removeControl,
+    addControl
   ],
   leaflet.extras[addHeatmap],
 
@@ -58,8 +90,7 @@ map_module_ui <- function(id) {
 #' @param bird_spp_info A reactive expression containing info for all bird species
 #' @return A list containing the update_map_with_frame function
 #' @export
-map_module_server <- function(id, finland_border, current_date, species_data,
-                              selected_species, bird_spp_info) {
+map_module_server <- function(id, finland_border, current_date, species_data, selected_species, bird_spp_info) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -73,7 +104,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
     # Function to create bird info card HTML using htmltools
     create_bird_info_card <- function(species_name, scientific_name_val, wiki_url_val, photo_url_val, song_url_val) {
       # Check for NULLs before creating
-      if (is.null(species_name) || is.null(scientific_name_val) || is.null(wiki_url_val) || is.null(photo_url_val) || is.null(song_url_val)) {
+      if (
+        is.null(species_name) ||
+          is.null(scientific_name_val) ||
+          is.null(wiki_url_val) ||
+          is.null(photo_url_val) ||
+          is.null(song_url_val)
+      ) {
         return(NULL)
       }
 
@@ -169,7 +206,8 @@ map_module_server <- function(id, finland_border, current_date, species_data,
     }
 
     # Update photo/wiki/song based on the selected species from the sidebar
-    observeEvent(selected_species(),
+    observeEvent(
+      selected_species(),
       {
         # Ensure bird species info and selection are available
         req(bird_spp_info(), selected_species())
@@ -335,7 +373,13 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                   tryCatch(
                     {
                       proxy |>
-                        addPolylines(data = finland_border, color = "#FF6B6B", weight = 2, opacity = 0.8, group = "Finland Border")
+                        addPolylines(
+                          data = finland_border,
+                          color = "#FF6B6B",
+                          weight = 2,
+                          opacity = 0.8,
+                          group = "Finland Border"
+                        )
                     },
                     error = function(e) {
                       safe_print("Error adding Finland border: ", e$message)
@@ -394,8 +438,16 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                   lon_range <- range(points_data$longitude, na.rm = TRUE)
                   lat_range <- range(points_data$latitude, na.rm = TRUE)
                   safe_print(
-                    "Coordinate Range: Longitude [", lon_range[1], ", ", lon_range[2], "], ",
-                    "Latitude [", lat_range[1], ", ", lat_range[2], "]"
+                    "Coordinate Range: Longitude [",
+                    lon_range[1],
+                    ", ",
+                    lon_range[2],
+                    "], ",
+                    "Latitude [",
+                    lat_range[1],
+                    ", ",
+                    lat_range[2],
+                    "]"
                   )
                   # ---------------------------
 
@@ -416,7 +468,8 @@ map_module_server <- function(id, finland_border, current_date, species_data,
                       # Debug intensities (Original log)
                       safe_print(
                         "Original Intensity range log: ",
-                        min(points_data$intensity, na.rm = TRUE), " to ",
+                        min(points_data$intensity, na.rm = TRUE),
+                        " to ",
                         max(points_data$intensity, na.rm = TRUE)
                       )
 
@@ -481,11 +534,20 @@ map_module_server <- function(id, finland_border, current_date, species_data,
 
                   # Add debug message to the map UI
                   debug_msg <- paste0(
-                    "Points: ", nrow(points_data),
+                    "Points: ",
+                    nrow(points_data),
                     " | Intensity: ",
-                    if (length(valid_intensities) > 0) paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE)) else "NA",
-                    " | Lon: ", lon_range[1], " to ", lon_range[2],
-                    " | Lat: ", lat_range[1], " to ", lat_range[2]
+                    if (length(valid_intensities) > 0)
+                      paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE)) else
+                      "NA",
+                    " | Lon: ",
+                    lon_range[1],
+                    " to ",
+                    lon_range[2],
+                    " | Lat: ",
+                    lat_range[1],
+                    " to ",
+                    lat_range[2]
                   )
                   proxy |>
                     addControl(
@@ -499,7 +561,8 @@ map_module_server <- function(id, finland_border, current_date, species_data,
 
                   # Log success
                   safe_print("Successfully processed data for the map.")
-                } else { # This else corresponds to `if (all(coord_cols %in% colnames(points_data)))`
+                } else {
+                  # This else corresponds to `if (all(coord_cols %in% colnames(points_data)))`
                   safe_print("WARNING: Expected columns (longitude, latitude, intensity) not found in parquet file")
                   safe_print("Available columns: ", paste(colnames(points_data), collapse = ", "))
                 }

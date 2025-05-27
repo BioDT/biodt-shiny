@@ -33,7 +33,7 @@ grassland_info_ui <- function(id, i18n) {
         )),
         tags$p(
           i18n$translate("Source code and scripts of the pDT can be found at "),
-          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT"),
+          tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
       )
