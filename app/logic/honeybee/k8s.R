@@ -45,7 +45,7 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
           containers = list(
             list(
               name = "beehave",
-              image = "ghcr.io/biodt/beehave:0.3.11",
+              image = "ghcr.io/biodt/beehave:0.3.13",
               command = list("/scripts/cloud/run_docker_flow.sh"),
               env = list(
                 list(name = "INPUT_DIR", value = "/data"),

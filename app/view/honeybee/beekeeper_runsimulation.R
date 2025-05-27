@@ -221,7 +221,7 @@ beekeeper_runsimulation_server <- function(
             " --cpus 1",
             " --platform linux/amd64",
             " --entrypoint /scripts/cloud/run_docker_flow.sh",
-            " ghcr.io/biodt/beehave:0.3.11"
+            " ghcr.io/biodt/beehave:0.3.13"
           )
 
           system(docker_call)
