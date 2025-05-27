@@ -16,7 +16,7 @@ disease_contributors_ui <- function(id, i18n) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(i18n$translate("CONTRIBUTORS"), style = "greeting display-4 font-weight-bold"),
-        tags$p("Kate Ingenloff, GBIF"),
+        tags$p("Kate Ingenloff, GBIF Secretariat Universitetsparken, 15 DK-2100, Copenhagen Ø, Denmark"),
         tags$p(
           "Radek Halfar and Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava, 17. listopadu 2172/15, 708 00 Ostrava-Poruba, Czech Republic"
         ),
