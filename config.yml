@@ -8,6 +8,12 @@ default:
 dev:
   rhino_log_level: !expr Sys.getenv("RHINO_LOG_LEVEL", "DEBUG")
 
+local_docker:
+  base_path: !expr Sys.getenv("BASE_PATH")
+  data_path: !expr Sys.getenv("DATA_PATH")
+  host_base_path: !expr Sys.getenv("HOST_BASE_PATH")
+  executor: "docker"
+
 prod:
   base_path: !expr Sys.getenv("BASE_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")

@@ -19,6 +19,7 @@ box::use(
   fs[file_copy],
   utils[write.csv],
   config,
+  stringr[str_replace],
 )
 
 box::use(
@@ -205,9 +206,16 @@ beekeeper_runsimulation_server <- function(
         run_id <- counter()
 
         if (config$get("executor") == "docker") {
+          host_base_path <- config$get("host_base_path")
+          if (!is.null(host_base_path)) {
+            mount_dir <- str_replace(run_dir, temp_dir, host_base_path)
+          } else {
+            mount_dir <- run_dir
+          }
+
           docker_call <- paste0(
             'docker run -v "',
-            run_dir,
+            mount_dir,
             '":"/data"',
             ' -e INPUT_DIR="/data"',
             ' -e OUTPUT_DIR="/data/output"',
