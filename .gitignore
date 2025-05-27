@@ -34,7 +34,6 @@ renv
 local_data
 app/data
 shared
-app/data/grassland/*
 # Testing script
 test.R
 background.R
