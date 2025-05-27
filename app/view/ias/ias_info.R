@@ -75,7 +75,7 @@ ias_info_ui <- function(id) {
       tags$div(
         tags$img(
           class = "info-picture",
-          src = "static/img/ias/IAS.png",
+          src = "static/img/ias/IAS2.png",
           alt = "",
         )
       )

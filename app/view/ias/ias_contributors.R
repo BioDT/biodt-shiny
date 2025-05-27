@@ -34,9 +34,9 @@ ias_contributors_ui <- function(id, i18n = NULL) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
-          src = "static/img/ias/IAS.png",
+          src = "static/img/ias/IAS2.png",
           class = "info-picture",
-          alt = ""
+          alt = "Picture of invasive species"
         )
       )
     )
