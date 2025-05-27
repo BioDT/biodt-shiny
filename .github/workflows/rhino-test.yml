@@ -1,5 +1,6 @@
 name: Rhino Test
 on:
+  workflow-dispatch:
   push:
     paths:
       - 'app/**'
