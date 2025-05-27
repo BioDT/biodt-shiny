@@ -72,7 +72,6 @@ ui <- function(id) {
     # Head ----
     shiny$tags$head(
       shiny$tags$link(rel = "shortcut icon", href = "static/favicon.ico"),
-      shiny$tags$html(lang = "en"),
       useShinyjs(),
       useWaiter(),
       useHostess(),
@@ -289,6 +288,7 @@ server <- function(id) {
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
+      shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
     })
 
     # Info page ----
