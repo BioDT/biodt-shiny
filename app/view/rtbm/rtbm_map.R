@@ -368,25 +368,6 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                   removeControl(layerId = "date-display-control") |>
                   removeControl(layerId = "error-message-control")
 
-                # Add Finland border back if available
-                if (!is.null(finland_border)) {
-                  tryCatch(
-                    {
-                      proxy |>
-                        addPolylines(
-                          data = finland_border,
-                          color = "#FF6B6B",
-                          weight = 2,
-                          opacity = 0.8,
-                          group = "Finland Border"
-                        )
-                    },
-                    error = function(e) {
-                      safe_print("Error adding Finland border: ", e$message)
-                    }
-                  )
-                }
-
                 # Add date display
                 date_to_display <- format_date_for_display(date)
                 proxy |>
@@ -408,24 +389,24 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
               # No need for: m <- leaflet() |> addProviderTiles(...) |> setView(...)
 
               # Add Finland border if available using proxy
-              if (!is.null(finland_border)) {
-                tryCatch(
-                  {
-                    proxy |>
-                      addPolylines(
-                        data = finland_border,
-                        color = "#FF6B6B",
-                        weight = 2,
-                        opacity = 0.8,
-                        group = "Finland Border"
-                      )
-                  },
-                  error = function(e) {
-                    safe_print("Error adding Finland border: ", e$message)
-                    # Continue without the border
-                  }
-                )
-              }
+              # if (!is.null(finland_border)) {
+              #   tryCatch(
+              #     {
+              #       proxy |>
+              #         addPolylines(
+              #           data = finland_border,
+              #           color = "#FF6B6B",
+              #           weight = 2,
+              #           opacity = 0.8,
+              #           group = "Finland Border"
+              #         )
+              #     },
+              #     error = function(e) {
+              #       safe_print("Error adding Finland border: ", e$message)
+              #       # Continue without the border
+              #     }
+              #   )
+              # }
 
               # Only add bird data if we have points
               if (nrow(points_data) > 0) {
@@ -528,16 +509,16 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                   # --- End Intensity Validation ---
 
                   # Add layer controls using proxy (always add controls)
-                  controls_already_added <- FALSE
-                  if (!controls_already_added) {
-                    proxy |>
-                      addLayersControl(
-                        baseGroups = c("Base Map"),
-                        overlayGroups = c("Finland Border", "Heat Map"), # Keep Heat Map group even if empty
-                        options = layersControlOptions(collapsed = FALSE)
-                      )
-                    controls_already_added <<- TRUE # Mark controls as added
-                  }
+                  # controls_already_added <- FALSE
+                  # if (!controls_already_added) {
+                  #   proxy |>
+                  #     addLayersControl(
+                  #       baseGroups = c("Base Map"),
+                  #       overlayGroups = c("Finland Border", "Heat Map"), # Keep Heat Map group even if empty
+                  #       options = layersControlOptions(collapsed = FALSE)
+                  #     )
+                  #   controls_already_added <<- TRUE # Mark controls as added
+                  # }
 
                   # Add debug message to the map UI
                   debug_msg <- paste0(
