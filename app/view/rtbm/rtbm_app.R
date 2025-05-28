@@ -183,9 +183,9 @@ rtbm_app_ui <- function(id, i18n) {
           inputId = ns("summary_plot_choice"),
           label = "Choose Summary View:",
           choices = c(
-            "Overall Activity" = "overall",
-            "Species Ranking" = "rank",
-            "Data Table" = "table"
+            "Activity Summary" = "overall",
+            "Top 5 Species Rank Trends" = "rank",
+            "Top 5 Daily Species Counts" = "table"
           ),
           selected = "overall",
           inline = TRUE
@@ -566,7 +566,8 @@ rtbm_app_server <- function(id, tab_selected) {
       if (input$summary_plot_choice == "overall") {
         create_summary_plots(summary_data())
       } else if (input$summary_plot_choice == "rank") {
-        create_top_species_rank_plot(summary_data())
+        req(bird_spp_info()) # Ensure bird_spp_info is available for rank plot
+        create_top_species_rank_plot(summary_data(), bird_spp_info())
       }
     })
 
