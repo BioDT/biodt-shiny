@@ -114,6 +114,7 @@ disease_app_server <- function(
     shiny$observeEvent(
       tab_disease_selected(),
       {
+        shiny$req(tab_disease_selected())
         output$map <- leaflet$renderLeaflet(
           leaflet$leaflet() |>
             leaflet$addTiles() |>
@@ -122,6 +123,11 @@ disease_app_server <- function(
               lat = 53,
               zoom = 4
             )
+        )
+
+        r_disease$tiff_raster <- terra$rast(
+          config$get("data_path") |>
+            file.path("disease_outbreak", "Mosaic_final.tif")
         )
       }
     )
@@ -151,6 +157,7 @@ disease_app_server <- function(
 
         # Create a base leaflet map
         map <- leaflet$leafletProxy("map") |>
+          leaflet$removeImage("Input Map") |>
           leaflet$addTiles() |>
           leaflet$addRasterImage(
             r_disease$tiff_raster,
@@ -360,20 +367,21 @@ disease_app_server <- function(
           )
         })
 
-        shiny$req(input$file) # Ensure a file is uploaded
-
-        # Extract the file name
-        map_name <- basename(input$file$name)
+        terra$writeRaster(
+          r_disease$tiff_raster,
+          file.path(r_disease$run_dir, "map.tif")
+        )
 
         # Retrieve parameters
         area <- paste("[", paste(r_disease$bounds, collapse = ", "), "]", sep = "")
         release_coord <- paste("[", paste(r_disease$release_point, collapse = ", "), "]", sep = "")
-        fence_polygon <- r_disease$fences
-
-        file.copy(input$file$datapath, file.path(r_disease$run_dir, "map.tif"))
+        if (!is.null(r_disease$fences)) {
+          fence_polygon <- r_disease$fences
+        } else {
+          fence_polygon <- ""
+        }
 
         if (config$get("executor") == "docker") {
-
           wsl_command <- sprintf(
             'docker run -e INPUT_MAP="map.tif" -e COMPUTED_AREA=%s -e RELEASE_COORDS=%s -e FENCE_COORDS=%s -e OUTPUT_DIR="/code/outputs" -v "%s:/code/outputs" asf_dckr python /code/experiments/shiny.py',
             shQuote(area),
@@ -398,7 +406,6 @@ disease_app_server <- function(
             }
           )
         } else if (config$get("executor") == "k8s") {
-
           data_subpath <- stringr::str_remove(
             r_disease$run_dir,
             paste0(config$get("base_path"), "/")
