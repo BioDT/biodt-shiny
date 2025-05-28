@@ -474,19 +474,23 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                       )
 
                       # Use YlGnBu colormap from RColorBrewer
-                      ylgnbu_colors <- colorRampPalette(brewer.pal(9, "YlGnBu"))(20)
+                      # Defines a color ramp from light yellow (low intensity) to dark blue (high intensity)
+                      ylgnbu_color_ramp <- colorRampPalette(brewer.pal(9, "YlGnBu"))(20)
 
-                      # Create color function for intensity values
-                      # Domain uses validated min/max
+                      # Define the domain for the intensity scale
                       if (intensity_min == intensity_max) {
-                        domain <- c(intensity_min, intensity_min + 0.000001)
+                        # Handle case where all intensity values are the same
+                        domain <- c(intensity_min, intensity_min + 0.000001) # Add epsilon for colorNumeric
                       } else {
                         domain <- c(intensity_min, intensity_max)
                       }
 
-                      base_pal <- colorNumeric(ylgnbu_colors, domain = domain, na.color = NA)
+                      # Create the palette function for the legend
+                      # This maps original intensity values to the color ramp
+                      legend_palette <- colorNumeric(palette = ylgnbu_color_ramp, domain = domain, na.color = NA)
+                      # The pal_na function was defined but seems unused. Leaving as is unless issues arise.
                       pal_na <- function(x) {
-                        col <- base_pal(x)
+                        col <- legend_palette(x) # Corrected to use legend_palette if it were used
                         col[is.na(col)] <- "#00000000" # Transparent for NA values
                         col
                       }
@@ -497,25 +501,28 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                           data = points_data,
                           lng = ~longitude,
                           lat = ~latitude,
-                          intensity = ~ intensity * 4.0,
+                          intensity = ~ intensity * 4.0, # Intensity values are scaled for visualization
                           blur = 18,
+                          # max for heatmap scaling; an arbitrary scaling factor based on observed intensities
                           max = intensity_max * 4.0 * 0.8,
                           radius = 15,
                           minOpacity = 0.7,
-                          gradient = rev(ylgnbu_colors),
+                          # The gradient for the heatmap should match the legend's color ramp
+                          # leaflet.heat maps lower data values to the start of the gradient array
+                          gradient = ylgnbu_color_ramp, # Use the non-reversed ramp for consistency
                           group = "Heat Map"
                         )
                       heatmap_added <- TRUE # Set flag
 
                       # Add legend
-                      # proxy |> addLegend(
-                      #   layerId = "intensity-legend",
-                      #   position = "bottomright",
-                      #   pal = base_pal,
-                      #   values = domain,
-                      #   title = "Observation intensity",
-                      #   opacity = 1.0
-                      # )
+                      proxy |> addLegend(
+                        layerId = "intensity-legend",
+                        position = "bottomright",
+                        pal = legend_palette, # Use the consistent palette
+                        values = domain,      # Reflects the original intensity range
+                        title = "Observation Intensity",
+                        opacity = 1.0
+                      )
                     }
                   }
                   # --- End Intensity Validation ---
