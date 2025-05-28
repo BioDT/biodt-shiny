@@ -1,13 +1,13 @@
 box::use(
   ggplot2[ggplot, aes, geom_line, geom_point, labs, theme_bw, scale_y_continuous, scale_x_date, scale_y_reverse, scale_color_discrete, theme, element_blank],
-  patchwork,
+  patchwork[plot_layout],
   dplyr[mutate, select, across, arrange, n, summarize, rowwise, ungroup, group_by, filter, desc, dense_rank, left_join, rename],
-  lubridate[as_date],
+  lubridate[as_date, days],
   scales[label_number, cut_short_scale],
   rlang[sym],
   tidyr[pivot_longer],
   utils[head],
-  stringr[str_replace_all, str_to_title] # Added stringr for str_replace_all and str_to_title
+  stringr[str_replace_all, str_to_title]
 )
 
 #' Create Summary Statistics Plots
@@ -93,7 +93,8 @@ create_summary_plots <- function(summary_data) {
     common_theme
 
   # Combine plots using patchwork
-  combined_plot <- p1 + p2 + p3
+  # Always stack plots vertically (one plot per row)
+  combined_plot <- p1 / p2 / p3
 
   return(combined_plot)
 }
@@ -231,11 +232,13 @@ create_top_species_table_data <- function(summary_data, bird_spp_info) {
     # Format the name_col for display
     mutate(name_col = str_replace_all(name_col, "_", " ")) |>
     mutate(name_col = str_to_title(name_col)) |>
+    # Format display_scientific_name for italics and spaces
+    mutate(display_scientific_name = paste0("<em>", str_replace_all(display_scientific_name, "_", " "), "</em>")) |>
     # Select and rename columns
     select(
       Date = date,
-      Name = name_col,
-      `Vernacular name` = common_name,
+      # Name = name_col, # Column hidden as per user request
+      `Common name` = common_name,
       `Scientific name` = display_scientific_name,
       Count = count,
       rank # Keep rank for sorting

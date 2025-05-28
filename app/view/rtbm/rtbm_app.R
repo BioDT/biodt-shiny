@@ -564,6 +564,7 @@ rtbm_app_server <- function(id, tab_selected) {
 
       # Conditionally call the correct plotting function
       if (input$summary_plot_choice == "overall") {
+        # For overall summary, plot layout is now fixed, no need to pass dates for layout
         create_summary_plots(summary_data())
       } else if (input$summary_plot_choice == "rank") {
         req(bird_spp_info()) # Ensure bird_spp_info is available for rank plot
@@ -582,7 +583,8 @@ rtbm_app_server <- function(id, tab_selected) {
       datatable(table_data,
         options = list(pageLength = 10),
         rownames = FALSE,
-        colnames = c("Date", "Name", "Vernacular name", "Scientific name", "Count")
+        escape = -3,
+        colnames = c("Date", "Common name", "Scientific name", "Count")
       )
     })
 
