@@ -1,13 +1,13 @@
 box::use(
   ggplot2[ggplot, aes, geom_line, geom_point, labs, theme_bw, scale_y_continuous, scale_x_date, scale_y_reverse, scale_color_discrete, theme, element_blank],
-  patchwork,
+  patchwork[plot_layout],
   dplyr[mutate, select, across, arrange, n, summarize, rowwise, ungroup, group_by, filter, desc, dense_rank, left_join, rename],
-  lubridate[as_date],
+  lubridate[as_date, days],
   scales[label_number, cut_short_scale],
   rlang[sym],
   tidyr[pivot_longer],
   utils[head],
-  stringr[str_replace_all, str_to_title] # Added stringr for str_replace_all and str_to_title
+  stringr[str_replace_all, str_to_title],
 )
 
 #' Create Summary Statistics Plots
@@ -93,7 +93,8 @@ create_summary_plots <- function(summary_data) {
     common_theme
 
   # Combine plots using patchwork
-  combined_plot <- p1 + p2 + p3
+  # Always stack plots vertically (one plot per row)
+  combined_plot <- p1 / p2 / p3
 
   return(combined_plot)
 }
@@ -104,9 +105,11 @@ create_summary_plots <- function(summary_data) {
 #'
 #' @param summary_data A data frame containing summary statistics in wide format:
 #'   'date' column and subsequent columns for each species count.
+#' @param bird_spp_info A dataframe mapping scientific names to vernacular names.
+#'   Expected columns: 'join_key_scientific_name', 'common_name'.
 #' @return A ggplot object.
 #' @export
-create_top_species_rank_plot <- function(summary_data) {
+create_top_species_rank_plot <- function(summary_data, bird_spp_info) {
   # Ensure data is valid
   if (is.null(summary_data) || nrow(summary_data) == 0 || ncol(summary_data) < 2) {
     return(
@@ -115,24 +118,42 @@ create_top_species_rank_plot <- function(summary_data) {
         theme_bw()
     )
   }
+  # Check for 'join_key_scientific_name' and 'common_name' in bird_spp_info
+  if (is.null(bird_spp_info) || !all(c("join_key_scientific_name", "common_name") %in% names(bird_spp_info))) {
+    return(
+      ggplot() +
+        labs(title = "Bird species information is missing required columns (join_key_scientific_name, common_name)") +
+        theme_bw()
+    )
+  }
 
   # --- Data Transformation for Rank Plot --- #
-  rank_data <- summary_data |>
+  rank_data_intermediate <- summary_data |>
     mutate(date = as_date(date)) |>
-    # Pivot to long format: date, species, count
-    pivot_longer(cols = -date, names_to = "species", values_to = "count") |>
+    # Pivot to long format: date, species_scientific, count
+    pivot_longer(cols = -date, names_to = "species_scientific", values_to = "count") |>
     # Remove rows where count is 0 or NA, as they can't be ranked
     filter(count > 0 & !is.na(count)) |>
     group_by(date) |>
     # Rank species within each date based on count (descending)
-    # dense_rank ensures consecutive ranks even with ties
     mutate(rank = dense_rank(desc(count))) |>
     # Keep only the top 5 ranks
     filter(rank <= 5) |>
     ungroup()
+
+  # Join with bird_spp_info to get common names
+  # Ensure the scientific name format matches for joining (e.g. "Genus_species")
+  rank_data <- rank_data_intermediate |>
+    mutate(species_scientific_join_key = str_replace_all(species_scientific, " ", "_")) |>
+    left_join(
+      select(bird_spp_info, join_key_scientific_name, common_name),
+      by = c("species_scientific_join_key" = "join_key_scientific_name")
+    ) |>
+    # Handle cases where a common name might be NA after the join (though ideally shouldn't happen with good data)
+    mutate(common_name = ifelse(is.na(common_name), species_scientific, common_name))
   # --- End Data Transformation --- #
 
-  # Check if we have data after filtering
+  # Check if we have data after filtering and joining
   if (nrow(rank_data) == 0) {
     return(
       ggplot() +
@@ -142,19 +163,19 @@ create_top_species_rank_plot <- function(summary_data) {
   }
 
   # --- Create Plot --- #
-  p_rank <- ggplot(rank_data, aes(x = date, y = rank, color = species)) +
-    geom_line(linewidth = 1) + # Use linewidth instead of size
+  p_rank <- ggplot(rank_data, aes(x = date, y = rank, color = common_name)) +
+    geom_line(linewidth = 1) +
     geom_point(size = 3) +
-    scale_y_reverse(breaks = 1:5) + # Reverse Y axis, show breaks 1 to 5
+    scale_y_reverse(breaks = 1:5) +
     scale_x_date(date_breaks = "2 days", date_labels = "%b %d") +
-    scale_color_discrete(name = "Bird species") + # Legend title
+    scale_color_discrete(name = "Bird Species") +
     labs(
       title = "Top 5 most recorded species per day",
       x = "Date",
       y = "Count rank number"
     ) +
     theme_bw() +
-    theme(legend.position = "bottom") # Place legend at the bottom
+    theme(legend.position = "bottom")
 
   return(p_rank)
 }
@@ -211,11 +232,13 @@ create_top_species_table_data <- function(summary_data, bird_spp_info) {
     # Format the name_col for display
     mutate(name_col = str_replace_all(name_col, "_", " ")) |>
     mutate(name_col = str_to_title(name_col)) |>
+    # Format display_scientific_name for italics and spaces
+    mutate(display_scientific_name = paste0("<em>", str_replace_all(display_scientific_name, "_", " "), "</em>")) |>
     # Select and rename columns
     select(
       Date = date,
-      Name = name_col,
-      `Vernacular name` = common_name,
+      # Name = name_col, # Column hidden as per user request
+      `Common name` = common_name,
       `Scientific name` = display_scientific_name,
       Count = count,
       rank # Keep rank for sorting

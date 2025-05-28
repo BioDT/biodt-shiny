@@ -20,7 +20,10 @@ box::use(
     sliderInput,
     updateSliderInput,
     uiOutput,
-    tagList # Needed to wrap UI elements
+    tagList, # Needed to wrap UI elements
+    div,
+    withProgress,
+    incProgress
   ],
 
   # HTML tools for structured UI building
@@ -64,15 +67,17 @@ rtbm_sidebar_ui <- function(id) {
         inputId = ns("dateRange"),
         label = "Select Date Range",
         start = Sys.Date() - 30,
-        end = Sys.Date(),
+        end = Sys.Date() - 1,
         min = "2025-01-16",
-        max = Sys.Date(),
+        max = Sys.Date() - 1,
         format = "yyyy-mm-dd",
         startview = "month",
         weekstart = 1,
         separator = " to ",
         language = "en"
       ),
+      # Summary progress indicator (shown only for summary view)
+      uiOutput(ns("summaryProgressIndicator")),
       # Always render the species picker, but hide/show with shinyjs
       shinyjs::hidden(
         pickerInput(
@@ -100,6 +105,7 @@ rtbm_sidebar_ui <- function(id) {
 #' @param id Module ID.
 #' @param bird_spp_info Reactive value containing bird species info.
 #' @param available_dates Reactive value containing available observation dates.
+#' @param summary_progress_info Reactive value containing summary loading progress information.
 #'
 #' @return A list of reactive values/expressions:
 #'   - current_date: The currently selected date.
@@ -111,7 +117,7 @@ rtbm_sidebar_ui <- function(id) {
 #'   - selected_view: The selected view.
 #'   - load_button_clicked: Reactive trigger for the load data button.
 #' @export
-rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
+rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_progress_info = reactive(NULL)) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -334,6 +340,45 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates) {
         }
       } else {
         NULL # Hide controls for non-map views
+      }
+    })
+
+    # --- Summary Progress Indicator ---
+    output$summaryProgressIndicator <- renderUI({
+      if (!is.null(input$viewSelector) && input$viewSelector == "summary") {
+        progress_info <- summary_progress_info()
+        if (!is.null(progress_info)) {
+          div(
+            class = "mt-2 mb-2",
+            div(
+              class = "alert alert-info",
+              style = "margin-bottom: 5px; padding: 8px 12px;",
+              tags$small(
+                icon("sync", class = "fa-spin"),
+                " ",
+                progress_info$message
+              )
+            ),
+            if (!is.null(progress_info$current) && !is.null(progress_info$total)) {
+              div(
+                class = "progress",
+                style = "height: 8px;",
+                div(
+                  class = "progress-bar progress-bar-striped progress-bar-animated",
+                  role = "progressbar",
+                  style = paste0("width: ", round((progress_info$current / progress_info$total) * 100), "%;"),
+                  `aria-valuenow` = progress_info$current,
+                  `aria-valuemin` = "0",
+                  `aria-valuemax` = progress_info$total
+                )
+              )
+            }
+          )
+        } else {
+          NULL
+        }
+      } else {
+        NULL
       }
     })
 

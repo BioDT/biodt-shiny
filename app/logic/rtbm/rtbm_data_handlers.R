@@ -7,7 +7,7 @@ box::use(
   lubridate[as_date, today, days, ymd],
   fs[dir_create, dir_exists, dir_ls, file_exists, path_file],
   config[get],
-  purrr[safely, map, discard, map_dfr, possibly, list_rbind, imap],
+  purrr[safely, map, discard, map_dfr, possibly, list_rbind, imap, map2_dfr],
   stringr[str_replace, str_extract, str_replace_all],
   arrow[read_parquet],
   tibble[as_tibble, tibble],
@@ -336,6 +336,8 @@ create_finland_bbox <- function() {
 #'                   Defaults to "2025-01-16".
 #' @param end_date Date object or string (YYYY-MM-DD). The end date for fetching data.
 #'                 Defaults to yesterday's date.
+#' @param progress_callback Optional function to call for progress updates. Should accept
+#'                         parameters: current (integer), total (integer), message (string).
 #' @return A tibble where the first column is `date` and subsequent columns
 #'         represent bird species, containing the total daily observation count.
 #'         Returns NULL if no data can be fetched or processed.
@@ -345,7 +347,7 @@ create_finland_bbox <- function() {
 #'         | 2025-05-01 | 100   | 200   | ... |
 #'         | 2025-05-02 | 120   | 180   | ... |
 #' @export
-preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
+preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL, progress_callback = NULL) {
   # --- Input Validation and Date Setup ---
   start_date <- tryCatch(ymd(start_date), error = function(e) stop("Invalid start_date format. Use YYYY-MM-DD."))
 
@@ -360,12 +362,23 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
   }
 
   date_sequence <- seq.Date(from = start_date, to = end_date, by = "day")
+  total_dates <- length(date_sequence)
   base_url <- "https://2007581-webportal.a3s.fi/daily/"
 
   # --- Helper function to fetch and process data for a single date ---
-  fetch_and_process_date <- function(current_date) {
+  fetch_and_process_date <- function(current_date, index) {
     date_str <- format(current_date, "%Y-%m-%d")
     url <- glue(base_url, "{date_str}/web_portal_summary_data.json")
+
+    # Call progress callback if provided
+    if (!is.null(progress_callback)) {
+      progress_callback(
+        current = index,
+        total = total_dates,
+        message = paste("Fetching", index, "of", total_dates, ":", date_str)
+      )
+    }
+
     message("Fetching data for: ", date_str, " from ", url)
 
     # Safely perform request and parse JSON
@@ -431,7 +444,16 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL) {
   }
 
   # --- Fetch data for all dates and combine ---
-  all_data_long <- map_dfr(date_sequence, fetch_and_process_date)
+  all_data_long <- map2_dfr(date_sequence, seq_along(date_sequence), fetch_and_process_date)
+
+  # Final progress update
+  if (!is.null(progress_callback)) {
+    progress_callback(
+      current = total_dates,
+      total = total_dates,
+      message = "Processing data..."
+    )
+  }
 
   if (nrow(all_data_long) == 0) {
     warning("No summary data could be fetched or processed for the specified date range.")
