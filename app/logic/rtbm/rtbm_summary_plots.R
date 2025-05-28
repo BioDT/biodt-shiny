@@ -7,7 +7,7 @@ box::use(
   rlang[sym],
   tidyr[pivot_longer],
   utils[head],
-  stringr[str_replace_all, str_to_title]
+  stringr[str_replace_all, str_to_title],
 )
 
 #' Create Summary Statistics Plots

@@ -225,6 +225,7 @@ rtbm_app_server <- function(id, tab_selected) {
     loaded_earliest_date <- reactiveVal(NULL)
     loaded_latest_date <- reactiveVal(NULL)
     all_summary_data_store <- reactiveVal(tibble(date = as.Date(character(0)))) # Initialize with empty tibble with date column
+    summary_progress_info <- reactiveVal(NULL) # Track summary loading progress
 
     # --- Initial Data Loading ---
     # Load Finland border and bird species info only when tab is selected
@@ -253,7 +254,8 @@ rtbm_app_server <- function(id, tab_selected) {
     sidebar_returns <- rtbm_sidebar_server(
       id = "sidebar",
       bird_spp_info = bird_spp_info,
-      available_dates = available_dates
+      available_dates = available_dates,
+      summary_progress_info = summary_progress_info
     )
 
     # --- Connect Sidebar Outputs to App Logic ---
@@ -424,124 +426,151 @@ rtbm_app_server <- function(id, tab_selected) {
         start_date_summary <- date_range_val[1]
         end_date_summary <- date_range_val[2]
 
-        # Update status message for loading
-        output$statusMsg <- renderUI({
-          div(
-            class = "alert alert-info",
-            role = "alert",
-            "Loading summary data..."
-          )
-        })
+        # Clear previous progress info
+        summary_progress_info(NULL)
 
-        # Isolate to prevent re-triggering from dependent reactives changing inside
-        isolate({
-          current_earliest <- loaded_earliest_date()
-          current_latest <- loaded_latest_date()
-          current_store <- all_summary_data_store()
+        # Wrap summary data loading with progress
+        withProgress(
+          message = "Loading summary data",
+          value = 0,
+          {
+            # Isolate to prevent re-triggering from dependent reactives changing inside
+            isolate({
+              current_earliest <- loaded_earliest_date()
+              current_latest <- loaded_latest_date()
+              current_store <- all_summary_data_store()
 
-          # --- Determine date ranges to fetch --- #
-          dates_to_fetch_before <- NULL
-          dates_to_fetch_after <- NULL # Ensure this is initialized to NULL
+              # --- Determine date ranges to fetch --- #
+              dates_to_fetch_before <- NULL
+              dates_to_fetch_after <- NULL # Ensure this is initialized to NULL
 
-          if (is.null(current_earliest)) { # Cache is empty, or first load
-            # Fetch the entire requested range if valid
-            if (start_date_summary <= end_date_summary) {
-              dates_to_fetch_before <- list(start = start_date_summary, end = end_date_summary)
-            }
-            # dates_to_fetch_after remains NULL, ensuring only one fetch operation
-          } else {
-            # Cache exists, determine segments to fetch before the current earliest
-            if (start_date_summary < current_earliest) {
-              # Fetch from selected start_date up to one day before current_earliest,
-              # but not exceeding selected end_date.
-              fetch_end_b <- min(end_date_summary, current_earliest - days(1))
-              if (start_date_summary <= fetch_end_b) {
-                dates_to_fetch_before <- list(start = start_date_summary, end = fetch_end_b)
+              if (is.null(current_earliest)) { # Cache is empty, or first load
+                # Fetch the entire requested range if valid
+                if (start_date_summary <= end_date_summary) {
+                  dates_to_fetch_before <- list(start = start_date_summary, end = end_date_summary)
+                }
+                # dates_to_fetch_after remains NULL, ensuring only one fetch operation
+              } else {
+                # Cache exists, determine segments to fetch before the current earliest
+                if (start_date_summary < current_earliest) {
+                  # Fetch from selected start_date up to one day before current_earliest,
+                  # but not exceeding selected end_date.
+                  fetch_end_b <- min(end_date_summary, current_earliest - days(1))
+                  if (start_date_summary <= fetch_end_b) {
+                    dates_to_fetch_before <- list(start = start_date_summary, end = fetch_end_b)
+                  }
+                }
+
+                # Determine segments to fetch after the current latest
+                if (end_date_summary > current_latest) {
+                  # Fetch from one day after current_latest up to selected end_date,
+                  # but not before selected start_date.
+                  fetch_start_a <- max(start_date_summary, current_latest + days(1))
+                  if (fetch_start_a <= end_date_summary) {
+                    dates_to_fetch_after <- list(start = fetch_start_a, end = end_date_summary)
+                  }
+                }
               }
-            }
 
-            # Determine segments to fetch after the current latest
-            if (end_date_summary > current_latest) {
-              # Fetch from one day after current_latest up to selected end_date,
-              # but not before selected start_date.
-              fetch_start_a <- max(start_date_summary, current_latest + days(1))
-              if (fetch_start_a <= end_date_summary) {
-                dates_to_fetch_after <- list(start = fetch_start_a, end = end_date_summary)
+              # Progress callback function to update both withProgress and sidebar
+              progress_callback <- function(current, total, message) {
+                # Update Shiny's built-in progress
+                progress_value <- current / total
+                incProgress(progress_value * 0.8, detail = message) # Reserve 20% for final processing
+                
+                # Update sidebar progress indicator
+                summary_progress_info(list(
+                  current = current,
+                  total = total,
+                  message = message
+                ))
               }
-            }
+
+              incProgress(0.1, detail = "Analyzing data requirements")
+
+              data_before <- NULL
+              if (!is.null(dates_to_fetch_before)) {
+                message(paste("Fetching summary data for range (before):", dates_to_fetch_before$start, "to", dates_to_fetch_before$end))
+                data_before <- preload_summary_data(
+                  start_date = dates_to_fetch_before$start, 
+                  end_date = dates_to_fetch_before$end,
+                  progress_callback = progress_callback
+                )
+              }
+
+              data_after <- NULL
+              if (!is.null(dates_to_fetch_after)) {
+                message(paste("Fetching summary data for range (after):", dates_to_fetch_after$start, "to", dates_to_fetch_after$end))
+                data_after <- preload_summary_data(
+                  start_date = dates_to_fetch_after$start, 
+                  end_date = dates_to_fetch_after$end,
+                  progress_callback = progress_callback
+                )
+              }
+
+              incProgress(0.85, detail = "Processing and combining data")
+
+              # --- Combine data --- #
+              # Ensure current_store is a tibble, even if it was NULL or not yet set properly.
+              if (is.null(current_store) || !is_tibble(current_store)) {
+                current_store <- tibble(date = as.Date(character(0)))
+              }
+
+              # Prepare list of data frames to bind, removing NULLs
+              updated_store_list <- list(current_store, data_before, data_after)
+              updated_store_list <- discard(updated_store_list, is.null)
+              updated_store_list <- discard(updated_store_list, ~ nrow(.) == 0) # Remove empty tibbles
+
+              if (length(updated_store_list) > 0) {
+                updated_store <- bind_rows(updated_store_list)
+
+                # Replace NAs (from new species columns) with 0 for count columns
+                cols_to_fill_na <- setdiff(names(updated_store), "date")
+                if (length(cols_to_fill_na) > 0) {
+                  updated_store <- updated_store |>
+                    mutate(across(all_of(cols_to_fill_na), ~ replace_na(.x, 0)))
+                }
+
+                updated_store <- updated_store |>
+                  distinct(date, .keep_all = TRUE) |>
+                  arrange(date)
+              } else {
+                # Fallback if all parts are NULL or empty
+                updated_store <- tibble(date = as.Date(character(0)))
+              }
+              all_summary_data_store(updated_store)
+
+              # --- Update loaded date range tracker --- #
+              if (nrow(updated_store) > 0) {
+                new_loaded_earliest <- min(updated_store$date, na.rm = TRUE)
+                new_loaded_latest <- max(updated_store$date, na.rm = TRUE)
+                loaded_earliest_date(new_loaded_earliest)
+                loaded_latest_date(new_loaded_latest)
+                message(paste("Updated summary store. New loaded range:", new_loaded_earliest, "to", new_loaded_latest, ". Rows:", nrow(updated_store)))
+              } else {
+                loaded_earliest_date(NULL)
+                loaded_latest_date(NULL)
+                message("Updated summary store is empty. Resetting loaded range.")
+              }
+
+              incProgress(0.95, detail = "Filtering data for display")
+
+              # --- Filter data for display --- #
+              if (nrow(updated_store) > 0) {
+                filtered_display_data <- updated_store |>
+                  filter(date >= start_date_summary & date <= end_date_summary)
+                summary_data(filtered_display_data)
+                message(paste("Summary data updated for display. Range:", start_date_summary, "to", end_date_summary, ". Rows:", nrow(filtered_display_data)))
+              } else {
+                summary_data(tibble(date = as.Date(character(0)))) # Ensure consistent empty structure
+                message("No summary data to display for the selected range.")
+              }
+
+              # Clear progress indicator
+              summary_progress_info(NULL)
+            })
           }
-
-          data_before <- NULL
-          if (!is.null(dates_to_fetch_before)) {
-            message(paste("Fetching summary data for range (before):", dates_to_fetch_before$start, "to", dates_to_fetch_before$end))
-            data_before <- preload_summary_data(start_date = dates_to_fetch_before$start, end_date = dates_to_fetch_before$end)
-          }
-
-          data_after <- NULL
-          if (!is.null(dates_to_fetch_after)) {
-            message(paste("Fetching summary data for range (after):", dates_to_fetch_after$start, "to", dates_to_fetch_after$end))
-            data_after <- preload_summary_data(start_date = dates_to_fetch_after$start, end_date = dates_to_fetch_after$end)
-          }
-
-          # --- Combine data --- #
-          # Ensure current_store is a tibble, even if it was NULL or not yet set properly.
-          if (is.null(current_store) || !is_tibble(current_store)) {
-            current_store <- tibble(date = as.Date(character(0)))
-          }
-
-          # Prepare list of data frames to bind, removing NULLs
-          updated_store_list <- list(current_store, data_before, data_after)
-          updated_store_list <- discard(updated_store_list, is.null)
-          updated_store_list <- discard(updated_store_list, ~ nrow(.) == 0) # Remove empty tibbles
-
-          if (length(updated_store_list) > 0) {
-            updated_store <- bind_rows(updated_store_list)
-
-            # Replace NAs (from new species columns) with 0 for count columns
-            cols_to_fill_na <- setdiff(names(updated_store), "date")
-            if (length(cols_to_fill_na) > 0) {
-              updated_store <- updated_store |>
-                mutate(across(all_of(cols_to_fill_na), ~ replace_na(.x, 0)))
-            }
-
-            updated_store <- updated_store |>
-              distinct(date, .keep_all = TRUE) |>
-              arrange(date)
-          } else {
-            # Fallback if all parts are NULL or empty
-            updated_store <- tibble(date = as.Date(character(0)))
-          }
-          all_summary_data_store(updated_store)
-
-          # --- Update loaded date range tracker --- #
-          if (nrow(updated_store) > 0) {
-            new_loaded_earliest <- min(updated_store$date, na.rm = TRUE)
-            new_loaded_latest <- max(updated_store$date, na.rm = TRUE)
-            loaded_earliest_date(new_loaded_earliest)
-            loaded_latest_date(new_loaded_latest)
-            message(paste("Updated summary store. New loaded range:", new_loaded_earliest, "to", new_loaded_latest, ". Rows:", nrow(updated_store)))
-          } else {
-            loaded_earliest_date(NULL)
-            loaded_latest_date(NULL)
-            message("Updated summary store is empty. Resetting loaded range.")
-          }
-
-          # --- Filter data for display --- #
-          if (nrow(updated_store) > 0) {
-            filtered_display_data <- updated_store |>
-              filter(date >= start_date_summary & date <= end_date_summary)
-            summary_data(filtered_display_data)
-            message(paste("Summary data updated for display. Range:", start_date_summary, "to", end_date_summary, ". Rows:", nrow(filtered_display_data)))
-          } else {
-            summary_data(tibble(date = as.Date(character(0)))) # Ensure consistent empty structure
-            message("No summary data to display for the selected range.")
-          }
-        })
-
-        # Clear status message or set a success message for summary
-        output$statusMsg <- renderUI({
-          NULL
-        }) # Or a success message
+        )
       } else {
         # Handle unknown view selection
         print(paste("Load Data clicked for unknown view:", selected_view))
