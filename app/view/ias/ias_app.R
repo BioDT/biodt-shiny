@@ -315,6 +315,7 @@ ias_app_server <- function(id, tab_selected) {
     observeEvent(
       tab_selected(),
       {
+        req(tab_selected() == "IAS App")
         available_versions(get_available_versions())
       }
     )
@@ -394,7 +395,7 @@ ias_app_server <- function(id, tab_selected) {
         tab_selected()
       },
       {
-        req(input$pdtVersion, input$habitat, tab_selected())
+        req(input$pdtVersion, input$habitat, tab_selected() == "IAS App")
 
         file_url <- paste0(
           get_base_url(selected_version()),
