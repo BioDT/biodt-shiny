@@ -20,7 +20,9 @@ rtbm_contributors_ui <- function(id, i18n = NULL) {
           if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "CONTRIBUTORS",
           style = "greeting display-4 font-weight-bold"
         ),
-        tags$p("Allan T. Souza, INAR - Institute for Atmospheric and Earth System Research, University of Helsinki, Helsinki, Finland"),
+        tags$p(
+          "Allan T. Souza, INAR - Institute for Atmospheric and Earth System Research, University of Helsinki, Helsinki, Finland"
+        ),
         tags$p("Anis U. Rahman, University of Jyväskylä, Jyväskylä, Finland"),
         tags$p("Ari Lehtiö, University of Jyväskylä, Jyväskylä, Finland"),
         tags$p("Aurélie Vancraeyenest"),
@@ -38,7 +40,11 @@ rtbm_contributors_ui <- function(id, i18n = NULL) {
       style = "height: 100vh;",
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        tags$img()
+        tags$img(
+          class = "info-picture",
+          src = "static/img/rtbm/bird.webp",
+          alt = ""
+        )
       )
     )
   )

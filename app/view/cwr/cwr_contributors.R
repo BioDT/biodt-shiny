@@ -36,7 +36,10 @@ cwr_contributors_ui <- function(id, i18n = NULL) {
       style = "height: 100vh;",
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        tags$img()
+        tags$img(
+          src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
+          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
+        )
       )
     )
   )

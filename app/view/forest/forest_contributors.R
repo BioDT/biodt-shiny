@@ -41,7 +41,11 @@ forest_contributors_ui <- function(id, i18n = NULL) {
       style = "height: 100vh;",
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
-        tags$img()
+        tags$img(
+          class = "info-picture",
+          src = "static/img/forest/trees-975091_1280.jpg",
+          alt = "Forest. Image by Robert Balog from Pixabay",
+        )
       )
     )
   )
