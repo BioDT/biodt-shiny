@@ -500,7 +500,7 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                         layerId = "intensity-legend",
                         position = "bottomright",
                         pal = legend_palette, # Use the consistent palette
-                        values = domain,      # Reflects the original intensity range
+                        values = domain, # Reflects the original intensity range
                         title = "Observation Intensity",
                         opacity = 1.0
                       )
@@ -525,9 +525,11 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                     "Points: ",
                     nrow(points_data),
                     " | Intensity: ",
-                    if (length(valid_intensities) > 0)
-                      paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE)) else
-                      "NA",
+                    if (length(valid_intensities) > 0) {
+                      paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE))
+                    } else {
+                      "NA"
+                    },
                     " | Lon: ",
                     lon_range[1],
                     " to ",

@@ -477,7 +477,7 @@ rtbm_app_server <- function(id, tab_selected) {
                 # Update Shiny's built-in progress
                 progress_value <- current / total
                 incProgress(progress_value * 0.8, detail = message) # Reserve 20% for final processing
-                
+
                 # Update sidebar progress indicator
                 summary_progress_info(list(
                   current = current,
@@ -492,7 +492,7 @@ rtbm_app_server <- function(id, tab_selected) {
               if (!is.null(dates_to_fetch_before)) {
                 message(paste("Fetching summary data for range (before):", dates_to_fetch_before$start, "to", dates_to_fetch_before$end))
                 data_before <- preload_summary_data(
-                  start_date = dates_to_fetch_before$start, 
+                  start_date = dates_to_fetch_before$start,
                   end_date = dates_to_fetch_before$end,
                   progress_callback = progress_callback
                 )
@@ -502,7 +502,7 @@ rtbm_app_server <- function(id, tab_selected) {
               if (!is.null(dates_to_fetch_after)) {
                 message(paste("Fetching summary data for range (after):", dates_to_fetch_after$start, "to", dates_to_fetch_after$end))
                 data_after <- preload_summary_data(
-                  start_date = dates_to_fetch_after$start, 
+                  start_date = dates_to_fetch_after$start,
                   end_date = dates_to_fetch_after$end,
                   progress_callback = progress_callback
                 )

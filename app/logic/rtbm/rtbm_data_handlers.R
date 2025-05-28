@@ -369,7 +369,7 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL, pro
   fetch_and_process_date <- function(current_date, index) {
     date_str <- format(current_date, "%Y-%m-%d")
     url <- glue(base_url, "{date_str}/web_portal_summary_data.json")
-    
+
     # Call progress callback if provided
     if (!is.null(progress_callback)) {
       progress_callback(
@@ -378,7 +378,7 @@ preload_summary_data <- function(start_date = "2025-01-16", end_date = NULL, pro
         message = paste("Fetching", index, "of", total_dates, ":", date_str)
       )
     }
-    
+
     message("Fetching data for: ", date_str, " from ", url)
 
     # Safely perform request and parse JSON
