@@ -91,7 +91,7 @@ box::use(
 )
 
 # UI function
-ces_rp_biodiversity_ui <- function(id) {
+ces_rp_biodiversity_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     tags$head(

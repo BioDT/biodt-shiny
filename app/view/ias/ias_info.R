@@ -20,7 +20,7 @@ box::use(
 )
 
 #' @export
-ias_info_ui <- function(id) {
+ias_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "fluid-row",

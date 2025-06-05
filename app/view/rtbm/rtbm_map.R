@@ -75,7 +75,7 @@ box::use(
 #' @param id The module ID
 #' @return A Shiny UI definition
 #' @export
-map_module_ui <- function(id) {
+map_module_ui <- function(id, i18n) {
   ns <- NS(id)
   leafletOutput(ns("rasterMap"), height = "800px")
 }
@@ -496,14 +496,15 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
                       heatmap_added <- TRUE # Set flag
 
                       # Add legend
-                      proxy |> addLegend(
-                        layerId = "intensity-legend",
-                        position = "bottomright",
-                        pal = legend_palette, # Use the consistent palette
-                        values = domain, # Reflects the original intensity range
-                        title = "Observation Intensity",
-                        opacity = 1.0
-                      )
+                      proxy |>
+                        addLegend(
+                          layerId = "intensity-legend",
+                          position = "bottomright",
+                          pal = legend_palette, # Use the consistent palette
+                          values = domain, # Reflects the original intensity range
+                          title = "Observation Intensity",
+                          opacity = 1.0
+                        )
                     }
                   }
                   # --- End Intensity Validation ---

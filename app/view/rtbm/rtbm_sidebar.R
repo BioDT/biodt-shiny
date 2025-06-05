@@ -46,7 +46,7 @@ box::use(
 #'
 #' @return A Shiny UI definition.
 #' @export
-rtbm_sidebar_ui <- function(id) {
+rtbm_sidebar_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(
@@ -162,7 +162,8 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
 
     # Update available dates based on date range (Handled in rtbm_app.R, triggered by returned date_range)
     # This module only reacts to the `available_dates` passed in.
-    observeEvent(available_dates(),
+    observeEvent(
+      available_dates(),
       {
         req(available_dates())
         dates <- available_dates()

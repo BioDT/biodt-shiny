@@ -82,7 +82,7 @@ box::use(
 )
 
 #' @export
-ias_app_ui <- function(id) {
+ias_app_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(

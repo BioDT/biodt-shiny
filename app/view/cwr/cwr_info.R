@@ -4,7 +4,7 @@ box::use(
 )
 
 #' @export
-cwr_info_ui <- function(id) {
+cwr_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",

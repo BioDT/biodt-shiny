@@ -48,7 +48,7 @@ box::use(
 )
 
 #' @export
-ces_biodiversity_ui <- function(id) {
+ces_biodiversity_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(
