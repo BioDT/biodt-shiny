@@ -1,20 +1,39 @@
+# Core UI components
 box::use(
   shiny[
     NS,
     tagList,
     tags,
     HTML,
-    icon,
     div,
     span,
     strong,
-    moduleServer,
     fluidRow,
+  ],
+)
+
+# UI Inputs and Controls
+box::use(
+  shiny[
     radioButtons,
-    column,
-    uiOutput,
     sliderInput,
     downloadButton,
+    uiOutput,
+    column,
+    icon,
+  ],
+  shinyWidgets[
+    actionBttn,
+    pickerInput,
+    switchInput,
+    updatePickerInput,
+  ],
+)
+
+# Server functionality
+box::use(
+  shiny[
+    moduleServer,
     reactive,
     req,
     observeEvent,
@@ -22,12 +41,12 @@ box::use(
     renderUI,
     downloadHandler,
     reactiveVal,
-    selectInput,
-    conditionalPanel,
-    actionButton,
-    absolutePanel,
-    eventReactive,
-    observe,
+  ],
+)
+
+# Event handlers
+box::use(
+  shiny[
     updateSelectInput,
     isolate,
     showNotification,
@@ -44,6 +63,12 @@ box::use(
     addEasyButton,
     easyButton,
     JS,
+  ],
+)
+
+# Map functionality
+box::use(
+  leaflet[
     leafletOptions,
     colorNumeric,
     leafletProxy,
@@ -52,10 +77,19 @@ box::use(
     addRasterImage,
     evalFormula,
     addLegend,
-    addPopups,
-    clearPopups
   ],
-  dplyr[filter, mutate, slice, `%>%`, case_when, if_else],
+)
+
+# Data handling
+box::use(
+  dplyr[
+    filter,
+    mutate,
+    slice,
+    `%>%`,
+    case_when,
+    if_else,
+  ],
   stringr[str_detect],
   sf[st_crs],
   utils[str],
@@ -65,20 +99,18 @@ box::use(
   tibble[tibble],
 )
 
+# Local modules
 box::use(
-  app /
-    logic /
-    ias /
-    helper[
-      process_raster_file,
-      addLegend_decreasing,
-      url.exists,
-      habitat_mapping,
-      get_available_versions,
-      check_valid_version,
-      get_base_url,
-      get_species_file_from_pa
-    ],
+  app/logic/ias/helper[
+    process_raster_file,
+    addLegend_decreasing,
+    url.exists,
+    habitat_mapping,
+    get_available_versions,
+    check_valid_version,
+    get_base_url,
+    get_species_file_from_pa,
+  ],
 )
 
 #' @export
@@ -95,185 +127,27 @@ ias_app_ui <- function(id, i18n) {
 
             selectInput(
               inputId = ns("pdtVersion"),
-              label = "Select pDT version:",
+              label = i18n$translate("Select pDT version:"),
               choices = NULL
             ),
-
-            radioButtons(
-              inputId = ns("dataMode"),
-              label = "Select data mode:",
-              choices = c("Projection", "Distribution"),
-              selected = "Projection"
+            selectInput(
+              inputId = ns("scenario"),
+              label = i18n$translate("Select a scenario:"),
+              choices = NULL
             ),
-
-            conditionalPanel(
-              condition = sprintf("input['%s'] == 'Projection'", ns("dataMode")),
-              tagList(
-                pickerInput(
-                  ns("habitat"),
-                  "Select habitat type:",
-                  choices = habitat_mapping,
-                  selected = NULL
-                ),
-
-                radioButtons(
-                  ns("timeFramePicker"),
-                  "Select time frame:",
-                  choices = c("Present", "Future"),
-                  selected = NULL
-                ),
-
-                uiOutput(ns("dataTypeUI")),
-
-                conditionalPanel(
-                  condition = sprintf("input['%s'] == 'Future'", ns("timeFramePicker")),
-                  tagList(
-                    radioButtons(
-                      ns("timePeriodPicker"),
-                      "Select time period:",
-                      choices = c("2011-2040", "2041-2070", "2071-2100")
-                    ),
-
-                    div(
-                      style = "display: flex; align-items: center;",
-                      pickerInput(
-                        ns("climateModelPicker"),
-                        "Select climate model:",
-                        choices = NULL,
-                        selected = NULL,
-                        multiple = FALSE
-                      ),
-                      actionBttn(
-                        inputId = ns("info_climate_models"),
-                        label = NULL,
-                        icon = icon("info-circle"),
-                        color = "warning",
-                        size = "xs"
-                      )
-                    ),
-
-                    div(
-                      style = "display: flex; align-items: center;",
-                      pickerInput(
-                        ns("climateScenarioPicker"),
-                        "Select climate scenario:",
-                        choices = NULL,
-                        selected = NULL,
-                        multiple = FALSE
-                      ),
-                      actionBttn(
-                        inputId = ns("info_climate_scenarios"),
-                        label = NULL,
-                        icon = icon("info-circle"),
-                        color = "warning",
-                        size = "xs"
-                      )
-                    )
-                  )
-                ),
-
-                switchInput(
-                  ns("showSpecies"),
-                  label = "Species",
-                  onLabel = "ON",
-                  offLabel = "OFF",
-                  value = FALSE
-                ),
-
-                conditionalPanel(
-                  condition = sprintf("input['%s'] == true", ns("showSpecies")),
-                  uiOutput(ns("speciesInputUI"))
-                ),
-
-                sliderInput(
-                  ns("valueRange"),
-                  label = "Filter values between:",
-                  min = 0,
-                  max = 10,
-                  value = c(0, 10),
-                  step = 0.1
-                )
-              )
+            selectInput(
+              inputId = ns("species"),
+              label = i18n$translate("Select a species:"),
+              choices = NULL
             ),
-
-            conditionalPanel(
-              condition = sprintf("input['%s'] == 'Distribution'", ns("dataMode")),
-              tagList(
-                pickerInput(
-                  ns("habitatDist"),
-                  "Select habitat type:",
-                  choices = habitat_mapping,
-                  selected = NULL
-                ),
-
-                switchInput(
-                  ns("showSpeciesDist"),
-                  label = "Species",
-                  onLabel = "ON",
-                  offLabel = "OFF",
-                  value = FALSE
-                ),
-
-                conditionalPanel(
-                  condition = sprintf("input['%s'] == true", ns("showSpeciesDist")),
-                  uiOutput(ns("speciesDistInputUI"))
-                ),
-
-                radioButtons(
-                  inputId = ns("obsType"),
-                  label = "Observed data type:",
-                  choices = c("Observed values" = "full", "Modeled values" = "model"),
-                  selected = "full"
-                )
-              )
-            ),
-
-            conditionalPanel(
-              condition = sprintf("input['%s'] == 'Projection'", ns("dataMode")),
-              actionButton(ns("loadMap"), "Load map", icon = icon("globe-europe"), class = "btn-warning")
-            ),
-
-            conditionalPanel(
-              condition = sprintf("input['%s'] == 'Distribution'", ns("dataMode")),
-              actionButton(ns("loadObserved"), "Load observed map", icon = icon("map"), class = "btn-warning")
-            ),
-
-            downloadButton(ns("downloadTif"), "Download TIFF File", class = "btn-danger")
-          )
-        )
-      ),
-      column(
-        width = 9,
-        card(
-          height = 650,
-          full_screen = TRUE,
-          card_header("Map Viewer"),
-          card_body(
-            leafletOutput(ns("rasterMap"), height = "100%"),
-            absolutePanel(
-              id = ns("opacityControl"),
-              class = "panel panel-default",
-              fixed = TRUE,
-              draggable = FALSE,
-              top = 120,
-              right = 35,
-              width = 150,
-              height = "auto",
-              style = "
-                z-index: 9999;
-                padding: 10px;
-                background-color: rgba(248, 249, 250, 0.9);
-                border-radius: 8px;
-                box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
-                display: none;
-                font-size: 12px;
-              ",
-              sliderInput(ns("opacitySlider"), "Transparency:", min = 0, max = 1, value = 1, step = 0.1)
+            sliderInput(
+              ns("opacitySlider"),
+              i18n$translate("Transparency:"),
+              min = 0,
+              max = 1,
+              value = 1,
+              step = 0.1
             )
-          ),
-          card_footer(
-            class = "fs-6",
-            uiOutput(ns("selectedOptions"))
           )
         )
       )
@@ -527,11 +401,12 @@ ias_app_server <- function(id, tab_selected) {
 
       shinyWidgets::pickerInput(
         inputId = ns("speciesNamePicker"),
-        label = "Select species:",
+        label = i18n$translate("Select species:"),
         choices = species_list,
         selected = NULL,
         multiple = FALSE,
-        options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
+        # TO RM
+        options = list(`live-search` = TRUE, `none-selected-text` = i18n$translate("Select species")),
         choicesOpt = list(
           content = lapply(species_list, function(name) {
             HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
@@ -559,11 +434,12 @@ ias_app_server <- function(id, tab_selected) {
           species_list <- sort(unique(df$species_name))
           pickerInput(
             inputId = ns("speciesNamePickerDist"),
-            label = "Select species:",
+            label = i18n$translate("Select species:"),
             choices = df$ias_id,
             selected = NULL,
             multiple = FALSE,
-            options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
+            # TO RM
+            options = list(`live-search` = TRUE, `none-selected-text` = i18n$translate("Select species")),
             choicesOpt = list(
               content = lapply(species_list, function(name) {
                 HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
@@ -572,7 +448,7 @@ ias_app_server <- function(id, tab_selected) {
           )
         },
         error = function(e) {
-          showNotification("Unable to load species for the selected habitat in distribution mode.", type = "error")
+          showNotification(i18n$translate("Unable to load species for the selected habitat in distribution mode."), type = "error")
           NULL
         }
       )

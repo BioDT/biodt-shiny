@@ -4,13 +4,13 @@ box::use(
     NS,
     tagList,
     tags,
-    uiOutput,
+    # TO RM uiOutput,
     renderUI,
     HTML,
     observeEvent,
     reactiveVal,
     reactive,
-    textOutput,
+    # TO RM textOutput,
     renderText
   ],
   bslib[card, card_header, card_body],
@@ -29,7 +29,7 @@ box::use(
   ],
   htmlwidgets[onRender],
   terra[vect, extract, project, buffer, crop],
-  shinyjs[hide, show, useShinyjs]
+  shinyjs[hide, show, useShinyjs],
 )
 
 box::use(
@@ -139,8 +139,9 @@ honeybee_map_server <- function(
           fillColor = "transparent"
         )
 
+# https://www.paulamoraga.com/book-spatial/the-terra-package-for-raster-and-vector-data.html
       if (length(input$map_plot_draw_new_feature) > 0) {
-        # https://www.paulamoraga.com/book-spatial/the-terra-package-for-raster-and-vector-data.html#vector-data-1
+
         pts_long <- c(long)
         pts_lat <- c(lat)
 

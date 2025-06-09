@@ -1,9 +1,49 @@
 # External packages
 box::use(
+  # Core Shiny UI
   shiny[
     moduleServer,
     NS,
+    uiOutput,
     renderUI,
+    plotOutput,
+    textOutput,
+    renderText,
+    renderPlot,
+    updateSliderInput,
+    updateTextInput,
+    updateSelectInput
+  ],
+
+  # Shiny UI Components
+  shiny[
+    column,
+    fluidRow,
+    selectInput,
+    radioButtons,
+    dateRangeInput,
+    actionButton,
+    icon,
+    div,
+    conditionalPanel,
+    wellPanel,
+    checkboxInput,
+    numericInput,
+    helpText
+  ],
+
+  # Shiny UI Elements
+  shiny[
+    tags,
+    tagList,
+    p,
+    br,
+    hr,
+    HTML
+  ],
+
+  # Shiny Reactivity
+  shiny[
     observe,
     observeEvent,
     isolate,
@@ -11,45 +51,32 @@ box::use(
     reactiveValues,
     req,
     reactive,
-    renderPlot,
-    invalidateLater,
-    updateSliderInput,
-    updateTextInput,
-    withProgress,
-    incProgress,
-    removeUI,
-    actionButton,
-    column,
-    fluidRow,
-    selectInput,
-    radioButtons,
-    insertUI,
-    uiOutput,
-    renderText,
-    updateDateRangeInput,
-    updateSelectInput,
-    dateRangeInput,
-    icon,
-    tagList,
-    tags,
-    div,
-    conditionalPanel,
-    plotOutput,
-    textOutput,
-    p,
-    br,
-    hr,
-    HTML,
-    wellPanel,
-    checkboxInput,
-    numericInput,
-    helpText
+    invalidateLater
   ],
 
-  # Base R functions needed
-  stats[setNames, na.omit, quantile, median, sd, var],
+  # Shiny DOM Manipulation
+  shiny[
+    removeUI,
+    insertUI
+  ],
 
-  # HTML structure
+  # Shiny Progress
+  shiny[
+    withProgress,
+    incProgress
+  ],
+
+  # Statistics
+  stats[
+    setNames,
+    na.omit,
+    quantile,
+    median,
+    sd,
+    var
+  ],
+
+  # HTML Structure
   htmltools[
     a,
     div,
@@ -67,12 +94,10 @@ box::use(
     strong,
     tagList,
     span,
-    hr,
-    tags,
     pre
   ],
 
-  # Rhinoverse ecosystem UI components
+  # UI Framework
   bslib[
     card,
     card_header,
@@ -81,50 +106,108 @@ box::use(
     sidebar
   ],
 
-  # Modern Shiny components
-  shinyjs[useShinyjs, runjs, extendShinyjs, disable, enable, toggleState, hidden],
+  # UI Enhancements
+  shinyjs[
+    useShinyjs,
+    runjs,
+    extendShinyjs,
+    disable,
+    enable,
+    toggleState,
+    hidden
+  ],
 
-  # Data manipulation with tidyverse
+  # Data Manipulation
   dplyr[
-    bind_rows, mutate, across, all_of, distinct, arrange, filter, select,
-    summarise, group_by, pull, n, slice_max, rename, left_join
+    bind_rows,
+    mutate,
+    across,
+    all_of,
+    distinct,
+    arrange,
+    filter,
+    select,
+    summarise,
+    group_by,
+    pull,
+    n,
+    slice_max,
+    rename,
+    left_join
   ],
 
-  # Data tidying
-  tidyr[
-    replace_na
+  # Data Tidying
+  tidyr[replace_na],
+
+  # File Handling
+  arrow[
+    read_parquet,
+    write_parquet,
+    Schema,
+    schema
   ],
 
-  # File handling with arrow (Apache Arrow)
-  arrow[read_parquet, write_parquet, Schema, schema],
-
-  # Spatial data handling
-  sf[st_read, st_as_sfc, st_bbox, st_transform, st_crs],
-
-  # Basic utilities
+  # Utils
   utils[head, tail, str],
   jsonlite[fromJSON, toJSON],
   fs[dir_exists],
   glue[glue],
   config[get],
+
+  # Tables
   DT[DTOutput, renderDT, datatable],
+
+  # Mapping
   leaflet[
-    leaflet, leafletOutput, renderLeaflet, addTiles, fitBounds, clearBounds,
-    addMarkers, markerClusterOptions, clearMarkers, addPolygons, addLegend,
-    addLayersControl, layersControlOptions, addScaleBar, flyTo, awesomeIcons,
+    leaflet,
+    leafletOutput,
+    renderLeaflet,
+    addTiles,
+    fitBounds,
+    clearBounds,
+    addMarkers,
+    markerClusterOptions,
+    clearMarkers,
+    addPolygons,
+    addLegend,
+    addLayersControl,
+    layersControlOptions,
+    addScaleBar,
+    flyTo,
+    awesomeIcons,
     makeAwesomeIcon
   ],
+
+  # Data Types and Dates
   tibble[tibble, is_tibble],
   lubridate[as_date, ymd, today, days],
-  purrr[discard, map, map_dfr, map_chr, safely, possibly],
+
+  # Functional Programming
+  purrr[
+    discard,
+    map,
+    map_dfr,
+    map_chr,
+    safely,
+    possibly
+  ],
 )
 
 # Local modules
 box::use(
-  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, preload_summary_data, load_finland_border_geojson],
-  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
-  app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
-  app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
+  app/logic/rtbm/rtbm_data_handlers[
+    load_bird_species_info,
+    load_parquet_data,
+    preload_summary_data,
+    load_finland_border_geojson
+  ],
+  app/logic/rtbm/rtbm_summary_plots[
+    create_summary_plots,
+    create_top_species_rank_plot,
+    create_top_species_table_data
+  ],
+  app/view/rtbm/rtbm_map[map_module_ui, map_module_server],
+  app/view/rtbm/rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
 )
 
 #' Real-time Bird Monitoring UI Module

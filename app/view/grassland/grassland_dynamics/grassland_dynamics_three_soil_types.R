@@ -9,7 +9,7 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_three_soil_types_ui <- function(
+gl_dynamics_soil_fractions_ui <- function(
   id,
   i18n
 ) {

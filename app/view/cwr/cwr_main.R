@@ -1,58 +1,102 @@
 box::use(
+  # Core Shiny
   shiny[
     moduleServer,
     NS,
     tagList,
     column,
     fluidRow,
-    verbatimTextOutput,
-    actionButton,
     observe,
     observeEvent,
+    req,
+    reactive,
+    renderUI,
+    uiOutput,
+    htmlOutput,
+    reactiveValues
+  ],
+
+  # UI Components
+  shiny[
+    verbatimTextOutput,
+    actionButton,
     radioButtons,
     checkboxInput,
     p,
     textOutput,
     renderText,
-    reactive,
     HTML,
     selectInput,
-    req,
-    renderUI,
-    uiOutput,
-    htmlOutput,
     selectizeInput,
-    tags,
-    reactiveValues,
-    div,
     sliderInput,
     updateSliderInput,
+    tags,
+    div
   ],
+
+  # UI Styling
   htmltools[css],
-  bslib[navset_tab, nav_panel, card, card_header, card_body, layout_column_wrap],
-  shinyjs[hidden, show, hide, runjs, delay],
+  bslib[
+    navset_tab,
+    nav_panel,
+    card,
+    card_header,
+    card_body,
+    layout_column_wrap
+  ],
+
+  # UI Enhancements
+  shinyjs[
+    hidden,
+    show,
+    hide,
+    runjs,
+    delay
+  ],
+
+  # Data Visualization
   leaflet,
+  echarty[
+    ecs.render,
+    ecs.output,
+    ec.init
+  ],
+
+  # Data Handling
   terra,
-  shinyWidgets[pickerInput, updatePickerInput, pickerOptions],
-  waiter[Waiter],
   dplyr[bind_rows],
-  echarty[ecs.render, ecs.output, ec.init],
   utils[str],
   config,
+
+  # UI Components
+  shinyWidgets[
+    pickerInput,
+    updatePickerInput,
+    pickerOptions
+  ],
+
+  # Loading States
+  waiter[Waiter],
 )
 
+# Local modules
 box::use(
-  app / logic / waiter[waiter_text],
-  app / view / cwr / cwr_info[cwr_info_ui, cwr_info_server],
-  app /
-    view /
-    cwr /
-    cwr_contributors[cwr_contributors_ui, cwr_contributors_server],
-  app /
-    logic /
-    cwr /
-    map_utils[update_leaflet_map],
-  app / logic / cwr / tolerance_plot[create_tolerance_plot],
+  # Loading State
+  app/logic/waiter[waiter_text],
+  
+  # CWR Components
+  app/view/cwr/cwr_info[
+    cwr_info_ui,
+    cwr_info_server
+  ],
+  app/view/cwr/cwr_map[
+    cwr_map_ui,
+    cwr_map_server
+  ],
+  app/view/cwr/cwr_contributors[
+    cwr_contributors_ui,
+    cwr_contributors_server
+  ],
 )
 
 crop_table <-

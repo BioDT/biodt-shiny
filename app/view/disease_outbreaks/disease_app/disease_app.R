@@ -29,16 +29,16 @@ disease_app_ui <- function(id, i18n) {
       shiny$sidebarPanel(
         shiny$fileInput(
           ns("file"),
-          "Upload a GeoTIFF file",
+          i18n$translate("Upload a GeoTIFF file"),
           accept = c(".tiff", ".tif")
         ),
-        disabled(shiny$actionButton(ns("run_command"), "Run model")),
+        disabled(shiny$actionButton(ns("run_command"), i18n$translate("Run model"))),
         shiny$verbatimTextOutput(ns("command_output")), # Display WSL command output
         shiny$hr(), # Add a horizontal line for visual separation
         hidden(
           shiny$sliderInput(
             ns("tick_slider"),
-            "Select Time Step:",
+            i18n$translate("Select Time Step:"),
             min = -1,
             max = 0, # This will be updated dynamically
             value = -1,
@@ -48,7 +48,7 @@ disease_app_ui <- function(id, i18n) {
         hidden(
           shiny$actionButton(
             ns("export_zip"),
-            "Export Outputs",
+            i18n$translate("Export Outputs"),
             icon = shiny$icon("file-zipper")
           )
         ),
@@ -136,7 +136,7 @@ disease_app_server <- function(
       shiny$div(
         class = "alert alert-info",
         role = "alert",
-        "Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon."
+        i18n$translate("Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon.")
       )
     })
 
@@ -226,15 +226,17 @@ disease_app_server <- function(
             leaflet$addGeoJSON(
               feature,
               group = "Bounds",
-              layerId = "Bounds",
-              output$statusMsg <- shiny$renderUI({
-                shiny$div(
-                  class = "alert alert-info",
-                  role = "alert",
-                  "Area selected"
-                )
-              })
+              layerId = "Bounds"
             )
+
+          # Update output messages
+          output$statusMsg <- shiny$renderUI({
+            shiny$div(
+              class = "alert alert-info",
+              role = "alert",
+              i18n$translate("Area selected")
+            )
+          })
 
           helper_bbox <- terra::ext(
             coords[[1]][[1]][[1]], # xmin
@@ -259,15 +261,17 @@ disease_app_server <- function(
               fillOpacity = 0.2, # fill
               opacity = 0.2, # border
               color = "#a20101",
-              fillColor = "#a20101",
-              output$statusMsg <- shiny$renderUI({
-                shiny$div(
-                  class = "alert alert-info",
-                  role = "alert",
-                  "Fences selected"
-                )
-              })
+              fillColor = "#a20101"
             )
+
+          # Update output messages
+          output$statusMsg <- shiny$renderUI({
+            shiny$div(
+              class = "alert alert-info",
+              role = "alert",
+              i18n$translate("Fences selected")
+            )
+          })
 
           # Convert the coordinates list to a matrix
           coords_matrix <- do.call(rbind, lapply(coords[[1]], function(pt) c(pt[[1]], pt[[2]])))
@@ -297,15 +301,18 @@ disease_app_server <- function(
             leaflet$addGeoJSON(
               feature,
               group = "Release Point",
-              layerId = "Release Point",
-              output$statusMsg <- shiny$renderUI({
-                shiny$div(
-                  class = "alert alert-info",
-                  role = "alert",
-                  "Releasing point selected"
-                )
-              })
+              layerId = "Release Point"
             )
+
+          # Update output messages
+          output$statusMsg <- shiny$renderUI({
+            shiny$div(
+              class = "alert alert-info",
+              role = "alert",
+              i18n$translate("Releasing point selected")
+            )
+          })
+
           temp <- terra$vect(
             matrix(
               c(
@@ -363,7 +370,7 @@ disease_app_server <- function(
           shiny$div(
             class = "alert alert-info",
             role = "alert",
-            "Please wait, modelling started"
+            i18n$translate("Please wait, modelling started")
           )
         })
 

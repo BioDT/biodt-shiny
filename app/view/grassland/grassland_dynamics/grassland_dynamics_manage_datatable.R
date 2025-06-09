@@ -28,11 +28,10 @@ grassland_dynamics_manage_datatable_ui <- function(
         ),
         uiOutput(ns("show_management_btn")),
       ),
-      # checkboxInput(ns("show_mngmntdata"), "Show Management Data Table", value = FALSE, width = "200px")
     ),
     card_body(
-        uiOutput(
-          ns("mngmnt_data_table_wrap")
+      DTOutput(
+        ns("manage_data")
       )
     )
   )

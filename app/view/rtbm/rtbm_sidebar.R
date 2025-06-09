@@ -55,7 +55,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
       # View selector (always visible)
       selectInput(
         inputId = ns("viewSelector"),
-        label = "Select View",
+        label = i18n$translate("Select View"),
         choices = c(
           "Map" = "map",
           "Summary" = "summary"
@@ -65,7 +65,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
       # Date range input (always visible)
       dateRangeInput(
         inputId = ns("dateRange"),
-        label = "Select Date Range",
+        label = i18n$translate("Select Date Range"),
         start = Sys.Date() - 30,
         end = Sys.Date() - 1,
         min = "2025-01-16",
@@ -73,7 +73,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
         format = "yyyy-mm-dd",
         startview = "month",
         weekstart = 1,
-        separator = " to ",
+        separator = i18n$translate(" to "),
         language = "en"
       ),
       # Summary progress indicator (shown only for summary view)
@@ -82,7 +82,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
       shinyjs::hidden(
         pickerInput(
           inputId = ns("speciesPicker"),
-          label = "Select Bird Species",
+          label = i18n$translate("Select Bird Species"),
           choices = NULL,
           options = list(`live-search` = TRUE)
         )
@@ -90,7 +90,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
       # Add Load Data button here
       actionButton(
         inputId = ns("loadDataButton"),
-        label = "Load Data",
+        label = i18n$translate("Load Data"),
         icon = icon("sync"),
         class = "btn btn-primary w-100 mt-3 mb-3" # Changed btn-success to btn-primary
       ),

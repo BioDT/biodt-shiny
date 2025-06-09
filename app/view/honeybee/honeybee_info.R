@@ -81,7 +81,7 @@ honeybee_info_ui <- function(id, i18n) {
         tags$img(
           class = "info-picture",
           src = "static/img/boba-jaglicic-mkk_9x42sbg-unsplash-min-scaled.jpg",
-          alt = "Picture of honeybees",
+          alt = i18n$translate("Picture of honeybees"),
         )
       )
     )

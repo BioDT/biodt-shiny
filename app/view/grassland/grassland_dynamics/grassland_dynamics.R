@@ -26,8 +26,8 @@ box::use(
     grassland /
     grassland_dynamics /
     grassland_dynamics_weather_grass_chart[
-      grassland_dynamics_double_chart_ui,
-      grassland_dynamics_double_chart_server
+      gl_dynamics_multichart_ui,
+      gl_dynamics_multichart_server
     ],
   app /
     view /
@@ -71,7 +71,7 @@ box::use(
     grassland /
     grassland_dynamics /
     grassland_dynamics_three_soil_types[
-      grassland_dynamics_three_soil_types_ui,
+      gl_dynamics_soil_fractions_ui,
       grassland_dynamics_three_soil_types_server
     ],
 )
@@ -91,10 +91,10 @@ grassland_dynamics_ui <- function(id, i18n) {
       width = NULL,
       fill = FALSE,
       style = css(grid_template_columns = "3fr 1fr"),
-      grassland_dynamics_double_chart_ui(ns("double_chart"), i18n),
+      gl_dynamics_multichart_ui(ns("double_chart"), i18n),
       grassland_dynamics_double_chart_controls_ui(ns("controls"), i18n)
     ),
-    grassland_dynamics_three_soil_types_ui(ns("three_soil_types"), i18n),
+    gl_dynamics_soil_fractions_ui(ns("three_soil_types"), i18n),
     grassland_dynamics_manage_datatable_ui(ns("mngmnt_data_table"), i18n),
     grassland_dynamics_soil_datatable_ui(ns("soil_data_table"), i18n)
   )
@@ -118,8 +118,6 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     mng_lat_lon_path <- get_lat_lon_name(mng_filename)
     mng_file_path <- get_file_path(type_of_input_file = "management", mng_lat_lon_path)
     mng_data_table <- read_management_data_table(mng_file_path)
-    # print("mng_data_table:::")
-    # print(n = 23, mng_data_table) # TODO - remove later
 
     # SOIL data table (optional - controled by checkbox) ----
     soil_filename <- get_soil_file_name(project_conf)
@@ -133,7 +131,7 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected)
 
     # Output plot ----
-    grassland_dynamics_double_chart_server(
+    gl_dynamics_multichart_server(
       "double_chart",
       plot_type,
       tab_grassland_selected

@@ -16,7 +16,7 @@ mod_acknowledgements_ui <- function(id, i18n) {
         card_header(
           tags$h2(
             class = "card_title",
-            "Acknowledgements"
+            i18n$translate("Acknowledgements")
           ),
         ),
         card_body(
@@ -24,19 +24,19 @@ mod_acknowledgements_ui <- function(id, i18n) {
           tags$div(
             class = "row d-flex justify-content-between",
             tags$p(
-              "This project has received funding from the European Union's Horizon Europe
-              research and innovation programme under grant agreement No 101057437
-              (BioDT project, https://doi.org/10.3030/101057437)."
+              i18n$translate(
+                "This project has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, https://doi.org/10.3030/101057437)."
+              )
             ),
             tags$p(
-              "We acknowledge the EuroHPC Joint Undertaking and CSC - IT Center for Science,
-              Finland for awarding this project access to the EuroHPC supercomputer LUMI, hosted
-              by CSC – IT Center for Science and the LUMI consortium, through Development Access
-              calls."
+              i18n$translate(
+                "We acknowledge the EuroHPC Joint Undertaking and CSC - IT Center for Science, Finland for awarding this project access to the EuroHPC supercomputer LUMI, hosted by CSC – IT Center for Science and the LUMI consortium, through Development Access calls."
+              )
             ),
             tags$p(
-              "Additionally, we wish to acknowledge CSC - IT Center for Science for Rahti
-              and Pouta services."
+              i18n$translate(
+                "Additionally, we wish to acknowledge CSC - IT Center for Science for Rahti and Pouta services."
+              )
             ),
           )
         )
@@ -47,7 +47,7 @@ mod_acknowledgements_ui <- function(id, i18n) {
         card_header(
           tags$h2(
             class = "card_title",
-            "Credits"
+            i18n$translate("Credits")
           ),
         ),
         card_body(
@@ -55,9 +55,9 @@ mod_acknowledgements_ui <- function(id, i18n) {
           tags$div(
             class = "row d-flex justify-content-between acknowledgement-card",
             tags$p(
-              "Credits to the main development contributors of the shiny web app",
+              i18n$translate("Credits to the main development contributors of the Shiny web app"),
               tags$br(),
-              "The contributors for the pDTs are listed on the pDT pages"
+              i18n$translate("The contributors for the pDTs are listed on the pDT pages")
             ),
             tags$ul(
               tags$style(
@@ -79,7 +79,7 @@ mod_acknowledgements_ui <- function(id, i18n) {
           ),
           tags$div(
             tags$p(
-              "You can report issues for the shiny web app on ",
+              i18n$translate("You can report issues for the Shiny web app on "),
               tags$a(
                 "Github",
                 icon("github"),

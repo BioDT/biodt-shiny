@@ -1,19 +1,90 @@
 # /app/logic/rtbm/rtbm_data_handlers.R
 
 box::use(
-  httr2[request, req_perform, resp_body_json, req_retry, resp_status, resp_body_string, resp_status_desc],
-  jsonlite[read_json, write_json, fromJSON],
-  dplyr[arrange, mutate, filter, bind_rows, rename, group_by, summarise, across, everything, left_join],
-  lubridate[as_date, today, days, ymd],
-  fs[dir_create, dir_exists, dir_ls, file_exists, path_file],
+  # HTTP Client
+  httr2[
+    request,
+    req_perform,
+    resp_body_json,
+    req_retry,
+    resp_status,
+    resp_body_string,
+    resp_status_desc
+  ],
+
+  # JSON Handling
+  jsonlite[
+    read_json,
+    write_json,
+    fromJSON
+  ],
+
+  # Data Manipulation
+  dplyr[
+    arrange,
+    mutate,
+    filter,
+    bind_rows,
+    rename,
+    group_by,
+    summarise,
+    across,
+    everything,
+    left_join
+  ],
+
+  # Date/Time
+  lubridate[
+    as_date,
+    today,
+    days,
+    ymd
+  ],
+
+  # File System
+  fs[
+    dir_create,
+    dir_exists,
+    dir_ls,
+    file_exists,
+    path_file
+  ],
+
+  # Configuration
   config[get],
-  purrr[safely, map, discard, map_dfr, possibly, list_rbind, imap, map2_dfr],
-  stringr[str_replace, str_extract, str_replace_all],
+
+  # Functional Programming
+  purrr[
+    safely,
+    map,
+    discard,
+    map_dfr,
+    possibly,
+    list_rbind,
+    imap,
+    map2_dfr
+  ],
+
+  # String Operations
+  stringr[
+    str_replace,
+    str_extract,
+    str_replace_all
+  ],
+
+  # Data Storage
   arrow[read_parquet],
   tibble[as_tibble, tibble],
   tidyr[pivot_wider, unnest],
   glue[glue],
-  sf[st_bbox, st_crs, st_as_sfc, st_read],
+
+  # Spatial Data
+  sf[
+    st_bbox,
+    st_crs,
+    st_as_sfc,
+    st_read
+  ],
 )
 
 # --- Configuration & Setup ---

@@ -1,13 +1,45 @@
+# Core Shiny functions
 box::use(
-  shiny[NS, moduleServer, tags, reactiveVal, observeEvent, checkboxInput, uiOutput, renderUI, req, actionButton, HTML],
-  bslib[card, card_header, card_body],
-  waiter[Waiter],
-  DT[DTOutput, renderDT, datatable],
-  dplyr[select]
+  shiny[
+    NS,
+    moduleServer,
+    tags,
+    reactiveVal,
+    observeEvent,
+    req,
+  ],
 )
 
+# UI components
 box::use(
-  app / logic / waiter[waiter_text],
+  shiny[
+    checkboxInput,
+    uiOutput,
+    renderUI,
+    actionButton,
+    HTML,
+  ],
+  bslib[
+    card,
+    card_header,
+    card_body,
+  ],
+)
+
+# Data handling
+box::use(
+  DT[
+    DTOutput,
+    renderDT,
+    datatable,
+  ],
+  dplyr[select],
+  waiter[Waiter],
+)
+
+# Local modules
+box::use(
+  app/logic/waiter[waiter_text],
 )
 
 #' @export

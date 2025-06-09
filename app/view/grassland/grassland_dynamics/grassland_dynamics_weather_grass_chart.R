@@ -15,7 +15,7 @@ box::use(
 )
 
 #' @export
-grassland_dynamics_double_chart_ui <- function(
+gl_dynamics_multichart_ui <- function(
   id,
   i18n,
   plot_width = "100%",
@@ -59,7 +59,7 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected) {
+gl_dynamics_multichart_server <- function(id, plot_type, tab_grassland_selected) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
