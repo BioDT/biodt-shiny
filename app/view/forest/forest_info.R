@@ -19,6 +19,12 @@ forest_info_ui <- function(id, i18n) {
           i18n$translate("Forest Biodiversity Prototype Digital Twin (pDT)")
         ),
         tags$p(
+          class = "pt-3 fw-bold",
+          i18n$translate(
+            "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+          )
+        ),
+        tags$p(
           tags$strong(i18n$translate("Purpose: ")),
           i18n$translate(
             "This pDT aims to investigate the impact of different forest management strategies and climate change scenarios on forests and biodiversity. The goal is to identify the most appropriate treatment option that improves biodiversity for a specific forest region under various climate scenarios."

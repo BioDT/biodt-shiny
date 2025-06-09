@@ -17,7 +17,13 @@ rtbm_info_ui <- function(id, i18n = NULL) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          if (!is.null(i18n)) i18n$translate("Real-Time Bird Monitoring Prototype Digital Twin (DT)") else "Real-Time Bird Monitoring Prototype Digital Twin (DT)"
+          "Real-Time Bird Monitoring Prototype Digital Twin (DT)"
+        ),
+        tags$p(
+          class = "pt-3 fw-bold",
+          i18n$translate(
+            "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+          )
         ),
         tags$p(
           class = "pt-3",
@@ -26,12 +32,28 @@ rtbm_info_ui <- function(id, i18n = NULL) {
         tags$p(
           strong("Data sources:"),
           " Bird observation data are provided by national and international monitoring programs, including citizen science initiatives. For more details, see ",
-          tags$a("BioDT RTBM Use Case", href = "https://biodt.eu/use-cases/real-time-bird-monitoring-citizen-science-data", target = "_blank"), ". Data are updated regularly to reflect the latest findings."
+          tags$a(
+            "BioDT RTBM Use Case",
+            href = "https://biodt.eu/use-cases/real-time-bird-monitoring-citizen-science-data",
+            target = "_blank"
+          ),
+          ". Data are updated regularly to reflect the latest findings."
         ),
         tags$p(
           strong("Open Science:"),
           " The RTBM pDT is developed as part of the BioDT project, with source code and documentation available on ",
-          tags$a("GitHub", href = "https://github.com/BioDT/biodt-shiny", target = "_blank"), "."
+          tags$a("GitHub", href = "https://github.com/BioDT/biodt-shiny", target = "_blank"),
+          "."
+        ),
+        tags$div(
+          class = "mt-5",
+          actionButton(
+            ns("start"),
+            label = i18n$translate("Start prototyping"),
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
+          )
         )
       )
     ),

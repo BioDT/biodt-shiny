@@ -104,6 +104,7 @@ crop_table <-
     "Yam" = "Dioscorea",
     "Zucchini" = "Cucurbita"
   )
+crop_table <- crop_table[order(names(crop_table))]
 
 mod_cwr_ui <- function(id, i18n) {
   ns <- NS(id)
@@ -114,7 +115,7 @@ mod_cwr_ui <- function(id, i18n) {
       nav_panel(
         title = "Info",
         value = "Info",
-        cwr_info_ui("cwr_info")
+        cwr_info_ui(ns("cwr_info"), i18n)
       ),
       # Map -----
       nav_panel(
@@ -273,7 +274,12 @@ mod_cwr_server <- function(id, i18n) {
         # r_cwr$map
         output$map <- leaflet$renderLeaflet(
           leaflet$leaflet() |>
-            leaflet$addTiles()
+            leaflet$addTiles() |>
+            leaflet$setView(
+              lat = 20,
+              lng = 0,
+              zoom = 2
+            )
         )
 
         # r_cwr$map_stress
@@ -549,5 +555,7 @@ mod_cwr_server <- function(id, i18n) {
         # )
       }
     )
+
+    cwr_info_server("cwr_info", session)
   })
 }

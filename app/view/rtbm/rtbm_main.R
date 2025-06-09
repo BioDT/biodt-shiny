@@ -20,12 +20,13 @@ rtbm_ui <- function(id, i18n) {
       value = "Info",
       icon = icon("circle-info"),
       rtbm_info_ui(
-        ns("rtbm_info")
+        ns("rtbm_info"),
+        i18n
       )
     ),
     nav_panel(
       title = "RTBM App",
-      value = "RTBM App",
+      value = "rtbm_app",
       icon = icon("tree"),
       rtbm_app_ui(
         ns("rtbm_app")
@@ -36,7 +37,8 @@ rtbm_ui <- function(id, i18n) {
       value = "Contributors",
       icon = icon("tree"),
       rtbm_contributors_ui(
-        ns("rtbm_contributors")
+        ns("rtbm_contributors"),
+        i18n
       )
     )
   )

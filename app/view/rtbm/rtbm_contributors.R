@@ -17,7 +17,7 @@ rtbm_contributors_ui <- function(id, i18n = NULL) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(
-          if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "CONTRIBUTORS",
+          i18n$translate("CONTRIBUTORS"),
           style = "greeting display-4 font-weight-bold"
         ),
         tags$p(
@@ -25,7 +25,7 @@ rtbm_contributors_ui <- function(id, i18n = NULL) {
         ),
         tags$p("Anis U. Rahman, University of Jyväskylä, Jyväskylä, Finland"),
         tags$p("Ari Lehtiö, University of Jyväskylä, Jyväskylä, Finland"),
-        tags$p("Aurélie Vancraeyenest"),
+        tags$p("Aurélie Vancraeyenest, CSC - IT Center for Science, Espoo, Finland"),
         tags$p("Gleb Tikhonov, University of Helsinki, Helsinki, Finland and Aalto University, Espoo, Finland"),
         tags$p("Julian Lopez Gordillo, Naturalis Biodiversity Center, Netherlands"),
         tags$p("Jussi Talaskivi, University of Jyväskylä, Jyväskylä, Finland"),

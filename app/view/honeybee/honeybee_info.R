@@ -19,6 +19,12 @@ honeybee_info_ui <- function(id, i18n) {
           i18n$translate("Honeybee Prototype Digital Twin (DT)")
         ),
         tags$p(
+          class = "pt-3 fw-bold",
+          i18n$translate(
+            "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+          )
+        ),
+        tags$p(
           class = "pt-3",
           i18n$translate(
             "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE."

@@ -175,7 +175,7 @@ ui <- function(id) {
             class = "p-2",
             shiny$icon("temperature-arrow-up"),
             shiny$tags$strong(i18n$translate(
-              "Species response to environmental change"
+              "Genetically detected biodiversity"
             ))
           )
         ),
@@ -188,6 +188,20 @@ ui <- function(id) {
           mod_cwr_ui(
             ns("cwr_main"),
             i18n
+          )
+        ),
+        nav_item(
+          shiny$a(
+            i18n$translate("Phylogenetic Diversity (external link)"),
+            href = "https://phylonext.gbif.org/",
+            target = "_blank"
+          )
+        ),
+        nav_item(
+          shiny$a(
+            target = "_blank",
+            href = "https://riojournal.com/article/124978/",
+            i18n$translate("Prioritisation of DNA metabarcoding sampling locations (conceptual article)")
           )
         ),
         ## Species interactions (themselves, human) - menu subitem ----

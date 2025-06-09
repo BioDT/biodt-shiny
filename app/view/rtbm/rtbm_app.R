@@ -43,7 +43,8 @@ box::use(
     wellPanel,
     checkboxInput,
     numericInput,
-    helpText
+    helpText,
+    showNotification
   ],
 
   # Base R functions needed
@@ -86,8 +87,21 @@ box::use(
 
   # Data manipulation with tidyverse
   dplyr[
-    bind_rows, mutate, across, all_of, distinct, arrange, filter, select,
-    summarise, group_by, pull, n, slice_max, rename, left_join
+    bind_rows,
+    mutate,
+    across,
+    all_of,
+    distinct,
+    arrange,
+    filter,
+    select,
+    summarise,
+    group_by,
+    pull,
+    n,
+    slice_max,
+    rename,
+    left_join
   ],
 
   # Data tidying
@@ -109,9 +123,22 @@ box::use(
   config[get],
   DT[DTOutput, renderDT, datatable],
   leaflet[
-    leaflet, leafletOutput, renderLeaflet, addTiles, fitBounds, clearBounds,
-    addMarkers, markerClusterOptions, clearMarkers, addPolygons, addLegend,
-    addLayersControl, layersControlOptions, addScaleBar, flyTo, awesomeIcons,
+    leaflet,
+    leafletOutput,
+    renderLeaflet,
+    addTiles,
+    fitBounds,
+    clearBounds,
+    addMarkers,
+    markerClusterOptions,
+    clearMarkers,
+    addPolygons,
+    addLegend,
+    addLayersControl,
+    layersControlOptions,
+    addScaleBar,
+    flyTo,
+    awesomeIcons,
     makeAwesomeIcon
   ],
   tibble[tibble, is_tibble],
@@ -121,8 +148,14 @@ box::use(
 
 # Local modules
 box::use(
-  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info, load_parquet_data, preload_summary_data, load_finland_border_geojson],
-  app / logic / rtbm / rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
+  app /
+    logic /
+    rtbm /
+    rtbm_data_handlers[load_bird_species_info, load_parquet_data, preload_summary_data, load_finland_border_geojson],
+  app /
+    logic /
+    rtbm /
+    rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
 )
@@ -261,7 +294,8 @@ rtbm_app_server <- function(id, tab_selected) {
     # --- Connect Sidebar Outputs to App Logic ---
 
     # React to date range changes from sidebar to update available_dates
-    observeEvent(sidebar_returns$date_range(),
+    observeEvent(
+      sidebar_returns$date_range(),
       {
         req(sidebar_returns$date_range())
         start_date <- sidebar_returns$date_range()[1]
@@ -419,7 +453,8 @@ rtbm_app_server <- function(id, tab_selected) {
             map_functions$update_map_with_frame()
           }
         )
-      } else if (selected_view == "summary") { # UPDATED CONDITION
+      } else if (selected_view == "summary") {
+        # UPDATED CONDITION
         print(paste("Load Data clicked for Summary view"))
         # --- Load Summary-Specific Data ---
         req(date_range_val)
@@ -444,7 +479,8 @@ rtbm_app_server <- function(id, tab_selected) {
               dates_to_fetch_before <- NULL
               dates_to_fetch_after <- NULL # Ensure this is initialized to NULL
 
-              if (is.null(current_earliest)) { # Cache is empty, or first load
+              if (is.null(current_earliest)) {
+                # Cache is empty, or first load
                 # Fetch the entire requested range if valid
                 if (start_date_summary <= end_date_summary) {
                   dates_to_fetch_before <- list(start = start_date_summary, end = end_date_summary)
@@ -490,7 +526,12 @@ rtbm_app_server <- function(id, tab_selected) {
 
               data_before <- NULL
               if (!is.null(dates_to_fetch_before)) {
-                message(paste("Fetching summary data for range (before):", dates_to_fetch_before$start, "to", dates_to_fetch_before$end))
+                message(paste(
+                  "Fetching summary data for range (before):",
+                  dates_to_fetch_before$start,
+                  "to",
+                  dates_to_fetch_before$end
+                ))
                 data_before <- preload_summary_data(
                   start_date = dates_to_fetch_before$start,
                   end_date = dates_to_fetch_before$end,
@@ -500,7 +541,12 @@ rtbm_app_server <- function(id, tab_selected) {
 
               data_after <- NULL
               if (!is.null(dates_to_fetch_after)) {
-                message(paste("Fetching summary data for range (after):", dates_to_fetch_after$start, "to", dates_to_fetch_after$end))
+                message(paste(
+                  "Fetching summary data for range (after):",
+                  dates_to_fetch_after$start,
+                  "to",
+                  dates_to_fetch_after$end
+                ))
                 data_after <- preload_summary_data(
                   start_date = dates_to_fetch_after$start,
                   end_date = dates_to_fetch_after$end,
@@ -546,7 +592,14 @@ rtbm_app_server <- function(id, tab_selected) {
                 new_loaded_latest <- max(updated_store$date, na.rm = TRUE)
                 loaded_earliest_date(new_loaded_earliest)
                 loaded_latest_date(new_loaded_latest)
-                message(paste("Updated summary store. New loaded range:", new_loaded_earliest, "to", new_loaded_latest, ". Rows:", nrow(updated_store)))
+                message(paste(
+                  "Updated summary store. New loaded range:",
+                  new_loaded_earliest,
+                  "to",
+                  new_loaded_latest,
+                  ". Rows:",
+                  nrow(updated_store)
+                ))
               } else {
                 loaded_earliest_date(NULL)
                 loaded_latest_date(NULL)
@@ -560,7 +613,14 @@ rtbm_app_server <- function(id, tab_selected) {
                 filtered_display_data <- updated_store |>
                   filter(date >= start_date_summary & date <= end_date_summary)
                 summary_data(filtered_display_data)
-                message(paste("Summary data updated for display. Range:", start_date_summary, "to", end_date_summary, ". Rows:", nrow(filtered_display_data)))
+                message(paste(
+                  "Summary data updated for display. Range:",
+                  start_date_summary,
+                  "to",
+                  end_date_summary,
+                  ". Rows:",
+                  nrow(filtered_display_data)
+                ))
               } else {
                 summary_data(tibble(date = as.Date(character(0)))) # Ensure consistent empty structure
                 message("No summary data to display for the selected range.")
@@ -609,7 +669,8 @@ rtbm_app_server <- function(id, tab_selected) {
 
       table_data <- create_top_species_table_data(summary_data(), bird_spp_info())
 
-      datatable(table_data,
+      datatable(
+        table_data,
         options = list(pageLength = 10),
         rownames = FALSE,
         escape = -3,

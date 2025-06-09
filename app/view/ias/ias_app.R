@@ -315,7 +315,7 @@ ias_app_server <- function(id, tab_selected) {
     observeEvent(
       tab_selected(),
       {
-        req(tab_selected() == "IAS App")
+        req(tab_selected() == "ias_app")
         available_versions(get_available_versions())
       }
     )
@@ -681,8 +681,9 @@ ias_app_server <- function(id, tab_selected) {
             input$obsType,
             base_url()
           )
-          if (!is.null(tif_name_species))
+          if (!is.null(tif_name_species)) {
             file_url <- paste0(base_url(), "outputs/", input$habitatDist, "/observed_distribution/", tif_name_species)
+          }
         }
 
         tibble::tibble(tif_path = file_url)
@@ -693,14 +694,18 @@ ias_app_server <- function(id, tab_selected) {
     raster_data <- reactive({
       req(filtered_summary())
       row <- filtered_summary()
-      if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
+      if (nrow(row) == 0 || is.na(row$tif_path[1])) {
+        return(NULL)
+      }
       process_raster_file(row$tif_path[1])
     })
 
     # Reactive: Load raster for Distribution
     observed_raster <- reactive({
       row <- observed_summary()
-      if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
+      if (nrow(row) == 0 || is.na(row$tif_path[1])) {
+        return(NULL)
+      }
       process_raster_file(row$tif_path[1])
     })
 

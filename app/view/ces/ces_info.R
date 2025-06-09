@@ -4,7 +4,7 @@ box::use(
 )
 
 #' @export
-ces_info_ui <- function(id) {
+ces_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "fluid-row",
@@ -18,6 +18,12 @@ ces_info_ui <- function(id) {
         tags$h2(
           class = "greeting display-4 font-weight-bold",
           "Cultural Ecosystem Services Prototype Digital Twin"
+        ),
+        tags$p(
+          class = "pt-3 fw-bold",
+          i18n$translate(
+            "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+          )
         ),
         tags$p(
           "This digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
@@ -42,6 +48,16 @@ ces_info_ui <- function(id) {
           tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
+        tags$div(
+          class = "mt-5",
+          actionButton(
+            ns("start"),
+            label = i18n$translate("Start prototyping"),
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
+          )
+        )
       )
     ),
     column(

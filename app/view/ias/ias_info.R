@@ -20,8 +20,8 @@ box::use(
 )
 
 #' @export
-ias_info_ui <- function(id) {
-  ns <- NS(id)
+ias_info_ui <- function(id, i18n) {
+  ns = NS(id)
   fluidRow(
     class = "fluid-row",
     style = "overflow-x: hidden",
@@ -32,6 +32,12 @@ ias_info_ui <- function(id) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         h2("Invasive Alien Species Digital Twin (DT)"),
+        tags$p(
+          class = "pt-3 fw-bold",
+          i18n$translate(
+            "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+          )
+        ),
         p(
           "This dashboard provides projections of the distribution of invasive alien plant species (IAS) in Europe under current and future climate scenarios. Species distributions were modelled at the broad-habitat level using joint species distribution models. For each habitat type, the dashboard shows interactive gridded maps for the level of plant invasion (i.e., projected number of IAS) and species-specific habitat suitability. For more information on the IAS pDT, see Khan et al. 2024."
         ),
@@ -65,6 +71,16 @@ ias_info_ui <- function(id) {
         p(
           tags$strong("Citations: "),
           "soon"
+        ),
+        tags$div(
+          class = "mt-5",
+          actionButton(
+            ns("start"),
+            label = i18n$translate("Start prototyping"),
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
+          )
         )
       )
     ),

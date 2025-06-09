@@ -29,9 +29,6 @@ forest_contributors_ui <- function(id, i18n = NULL) {
           "Martijn Versluijs, Altenburg & Wymenga Ecological Consultants and Research, Suderwei 2, 9269 TZ Feanwâlden, Netherlands"
         ),
         tags$p(
-          "Martijn Versluijs, Altenburg & Wymenga Ecological Consultants and Research, Suderwei 2, 9269 TZ Feanwâlden, Netherlands"
-        ),
-        tags$p(
           "Radek Halfar and Tomas Martinovic, IT4Innovations, VSB - Technical University of Ostrava, 708 00 Ostrava-Poruba, Czech Republic"
         )
       )

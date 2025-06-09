@@ -1,5 +1,6 @@
 box::use(
-  shiny[NS, column, tags, fluidRow, icon],
+  shiny[NS, column, tags, fluidRow, icon, actionButton, moduleServer, observeEvent],
+  bslib[nav_select]
 )
 
 #' @export
@@ -18,9 +19,8 @@ grassland_info_ui <- function(id, i18n) {
           class = "greeting display-6 fw-bold",
           i18n$translate("Grassland Biodiversity Dynamics")
         ),
-        tags$h6(i18n$translate("Prototype Digital Twin (pDT) in EARLY ACCESS")),
         tags$p(
-          class = "pt-3 text-danger fw-bold",
+          class = "pt-3 fw-bold",
           i18n$translate(
             "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
           )
@@ -36,6 +36,16 @@ grassland_info_ui <- function(id, i18n) {
           tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
+        tags$div(
+          class = "mt-5",
+          actionButton(
+            ns("start"),
+            label = i18n$translate("Start prototyping"),
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
+          )
+        )
       )
     ),
     column(
@@ -53,9 +63,18 @@ grassland_info_ui <- function(id, i18n) {
   )
 }
 
-# #' @export
-# grassland_info_server <- function(id) {
-#   moduleServer(id, function(input, output, session) {
-
-#   })
-# }
+#' @export
+grassland_info_server <- function(id, main_session) {
+  moduleServer(id, function(input, output, session) {
+    observeEvent(
+      input$start,
+      {
+        nav_select(
+          "tab",
+          selected = "grassland_app",
+          session = main_session
+        )
+      }
+    )
+  })
+}
