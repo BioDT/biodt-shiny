@@ -8,8 +8,13 @@ box::use(
     grassland_dynamics_ui,
     grassland_dynamics_server
   ],
-  app/view/grassland/info/grassland_info[grassland_info_ui],
-  app/view/grassland/grassland_contributors[grassland_contributors_ui,grassland_contributors_server],
+  app/view/grassland/info/grassland_info[
+    grassland_info_ui
+  ],
+  app/view/grassland/grassland_contributors[
+    grassland_contributors_ui,
+    grassland_contributors_server
+  ],
 )
 
 #' @export
@@ -19,7 +24,7 @@ grassland_main_ui <- function(id, i18n) {
     id = (ns("tab")),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$translate("Info"),
       value = "Info",
       icon = icon("circle-info"),
       grassland_info_ui(

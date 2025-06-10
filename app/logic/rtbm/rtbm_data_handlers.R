@@ -88,18 +88,9 @@ box::use(
 )
 
 # --- Configuration & Setup ---
-
 base_data_path <- get("data_path")
 rtbm_data_path <- file.path(base_data_path, "rtbm")
 rtbm_parquet_path <- file.path(rtbm_data_path, "parquet")
-
-# Ensure directories exist
-# if (!dir_exists(rtbm_parquet_path)) {
-#   stop(
-#     "RTBM Parquet directory not found. Please configure the data_path in your config file.",
-#     call. = FALSE
-#   )
-# }
 
 bird_info_url <- "https://bird-photos.a3s.fi/bird_info.json"
 s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
@@ -110,7 +101,7 @@ s3_endpoint_base <- "https://2007581-webportal.a3s.fi"
 #'
 #' Loads the Finland border GeoJSON file from the configured data path.
 #'
-#' @return An sf object representing the Finland border, or NULL if an error occurs or the file is not found.
+#' @return An sf object representing the Finland border, or NULL if an error occurs or the file is not found. # nolint: line_length_linter.
 #' @export
 load_finland_border_geojson <- function() {
   tryCatch(

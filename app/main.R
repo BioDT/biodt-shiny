@@ -1,6 +1,4 @@
-# Core packages
 box::use(
-  # Core Shiny
   shiny,
   config,
 )
@@ -20,7 +18,6 @@ box::use(
 
 # UI Enhancements
 box::use(
-  # Basic enhancements
   shinyjs[useShinyjs],
   cicerone[use_cicerone],
   htmltools[includeScript],
@@ -99,8 +96,10 @@ box::use(
 # Initialize theme
 biodt_theme <- bs_theme(
   version = 5,
-  primary = "#414f2f",
-  secondary = "#999900",
+  primary = "#A86200",
+  secondary = "#414f2f",
+  info = "#DDA15E",
+  warning = "#6E3E18",
   success = "#f8f2e4",
   bg = "#fff",
   fg = "#414f2f",
@@ -133,6 +132,7 @@ ui <- function(id) {
       usei18n(i18n),
       includeScript("app/js/tab-index.js"),
       includeScript("app/js/tab-switcher.js"),
+      includeScript("app/js/popover.js"),
     ),
     waiterShowOnLoad(
       html = spin_loaders(
@@ -144,30 +144,31 @@ ui <- function(id) {
 
     # --- Navigation Menu ---
     page_navbar(
-      title = tags$div(
-        class = "logo-text",
-        tags$img(
-          src = "static/img/biodt_logo_notext_transparent.png",
-          height = "50px",
-          alt = "BioDT logo"
-        ),
-        tags$span(
-          i18n$translate("Biodiversity Digital Twin")
+      window_title = "BioDT",
+      title = shiny$actionLink(
+        inputId = ns("biodt_logo"),
+        shiny$img(
+          src = "static/logo.svg",
+          height = "70px",
+          style = "padding-right: 20px",
+          alt = i18n$translate("Biodiversity Digital Twin"),
         ),
       ),
-      underline = TRUE,
+      id = ns("navbar"),
+      theme = biodt_theme,
       bg = "#fff",
+      fillable = TRUE,
+      # must be true
+      collapsible = TRUE,
       fluid = TRUE,
 
       # Info Menu ----
       nav_panel(
         title = i18n$translate("Info"),
-        value = "Info",
-        icon = shiny$icon("circle-info"),
-        mod_info_ui(
-          ns("info"),
-          i18n
-        )
+        value = "info",
+        icon = shiny$icon("circle-info", `aria-hidden` = "true"),
+        class = "container-fluid index-info",
+        mod_info_ui(ns("info"), i18n)
       ),
 
       # Digital Twin Menu ----
@@ -294,23 +295,53 @@ ui <- function(id) {
             theme = biodt_theme,
             i18n
           )
-        )
-      ),
-
-      # --- About Menu ---
-      nav_menu(
-        title = i18n$translate("About"),
-        align = "left",
-        icon = shiny$icon("user"),
+        ),
         nav_panel(
-          title = i18n$translate("Acknowledgements"),
-          value = "acknowledgements",
-          mod_acknowledgements_ui(
-            ns("acknowledgements"),
-            i18n
+          title = i18n$translate("Disease Outbreaks"),
+          value = "disease",
+          class = "p-0",
+          disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
+        ),
+        ## Dynamics and threats from and for species of policy concern ----
+        nav_item(
+          shiny$div(
+            class = "p-2",
+            shiny$div(
+              shiny$icon("bugs", `aria-hidden` = "true"),
+              shiny$strong(i18n$translate(
+                "Dynamics and threats from and for species of policy concern"
+              )),
+              style = "width: 450px"
+            ),
+          )
+        ),
+        nav_panel(
+          title = i18n$translate("Invasive Alien Species"),
+          value = "ias",
+          class = "p-0",
+          ias_ui(ns("ias_main"), i18n)
+        ),
+      ),
+      nav_spacer(),
+      ## Acknowledgements - main menu item ----
+      nav_panel(
+        title = i18n$translate("Acknowledgements"),
+        value = "acknowledgements",
+        icon = shiny$icon("users-gear", `aria-hidden` = "true"),
+        class = "container-fluid index-info",
+        mod_acknowledgements_ui("info")
+      ),
+      if (env_active == "dev") {
+        nav_item(
+          shiny$selectInput(
+            ns("selected_language"),
+            shiny$span(), # shiny$p(i18n$translate("Language:")),
+            choices = i18n$get_languages(),
+            selected = i18n$get_key_translation(),
+            width = "75px"
           )
         )
-      )
+      }
     )
   )
 }
@@ -320,14 +351,68 @@ server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Handle main actions
-    mod_info_server("info", session)
-    grassland_main_server("grassland_main")
-    forest_main_server("forest_main")
-    rtbm_server("rtbm_main")
-    ces_server("ces_main")
-    mod_cwr_server("cwr_main")
-    disease_outbreaks_main_server("disease_outbreaks_main")
-    honeybee_server("honeybee_main")
+    session_dir <- file.path(
+      config$get("base_path"),
+      paste0(
+        Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S"),
+        "_",
+        stri_rand_strings(1, 8)
+      )
+    )
+
+    r <- shiny$reactiveValues(
+      biodt_theme = biodt_theme
+    )
+
+    # Language change support see shiny.i18n
+    shiny$observeEvent(input$selected_language, {
+      update_lang(input$selected_language)
+      shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
+    })
+
+    # Info page ----
+    mod_info_server(
+      "info",
+      main_session = session
+    )
+    # CWR pDT ----
+    mod_cwr_server(
+      "cwr_main",
+      i18n
+    )
+
+    # Honeybee pDT ----
+    honeybee_server(
+      "honeybee_main",
+      session_dir
+    )
+    # Grassland pDT ----
+    grassland_main_server(
+      "grassland_main"
+    )
+    # Forest pDT ----
+    forest_main_server(
+      "forest_main"
+    )
+    # Cultural Ecosystem Services pDT ----
+    ces_server(
+      "ces_main"
+    )
+    # Disease Outbreaks pDT ----
+    disease_outbreaks_main_server("disease_outbreaks_main", session_dir)
+    # Invasie Alien Species pDT ----
+    ias_main_server("ias_main")
+    # Real-time Bird Monitoring pDT ----
+    rtbm_main_server("rtbm_main")
+
+    shiny$observeEvent(input$biodt_logo, {
+      nav_select(
+        id = "navbar",
+        selected = "info",
+        session = session
+      )
+    })
+
+    waiter_hide()
   })
 }

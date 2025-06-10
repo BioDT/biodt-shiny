@@ -16,7 +16,7 @@ rtbm_ui <- function(id, i18n) {
     id = ns("tab"),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$translate("Info"),
       value = "Info",
       icon = icon("circle-info"),
       rtbm_info_ui(
@@ -24,7 +24,7 @@ rtbm_ui <- function(id, i18n) {
       )
     ),
     nav_panel(
-      title = "RTBM App",
+      title = i18n$translate("RTBM App"),
       value = "RTBM App",
       icon = icon("tree"),
       rtbm_app_ui(
@@ -32,7 +32,7 @@ rtbm_ui <- function(id, i18n) {
       )
     ),
     nav_panel(
-      title = "Contributors",
+      title = i18n$translate("Contributors"),
       value = "Contributors",
       icon = icon("tree"),
       rtbm_contributors_ui(

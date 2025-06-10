@@ -17,7 +17,7 @@ honeybee_lookup_ui <- function(id, i18n) {
       card_header(
         tags$h2(
           class = "card_title",
-          "Lookup Table"),
+          i18n$translate("Lookup Table")),
       ),
       card_body(
         tags$p("In the landscape surrounding the hive, floral resources are considered only in the fields and meadows, called 'food patches'. Each food patch is characterised by the metrics listed below (the area in m² is given and cannot be changed). Pollen and nectar quantities are based on estimates of quantity per flower, number of flowers per plant and number of plants per square metre. For simplicity, and in the absence of more detailed data, the daily supply of nectar and pollen provided by the plants was assumed to be constant throughout the flowering period."),

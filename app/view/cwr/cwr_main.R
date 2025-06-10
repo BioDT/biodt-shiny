@@ -18,15 +18,9 @@ box::use(
 
   # UI Components
   shiny[
-    verbatimTextOutput,
     actionButton,
-    radioButtons,
     checkboxInput,
-    p,
-    textOutput,
-    renderText,
     HTML,
-    selectInput,
     selectizeInput,
     sliderInput,
     updateSliderInput,
@@ -74,8 +68,6 @@ box::use(
     updatePickerInput,
     pickerOptions
   ],
-
-  # Loading States
   waiter[Waiter],
 )
 
@@ -83,7 +75,7 @@ box::use(
 box::use(
   # Loading State
   app/logic/waiter[waiter_text],
-  
+
   # CWR Components
   app/view/cwr/cwr_info[
     cwr_info_ui,
@@ -193,7 +185,7 @@ mod_cwr_ui <- function(id, i18n) {
             card_header(
               tags$h2(
                 class = "card_title",
-                "Crop and Crop Wild Relatives"
+                i18n$translate("Crop and Crop Wild Relatives")
               )
             ),
             card_body(

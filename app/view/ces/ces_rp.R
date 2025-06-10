@@ -50,7 +50,7 @@ ces_rp_ui <- function(id, i18n) {
     card(
       title = "rec_pot_map",
       full_screen = TRUE,
-      card_title("Recreation potential mapping"),
+      card_title(i18n$translate("Recreation potential mapping")),
       card_body(
         radioButtons(
           ns("persona"),
