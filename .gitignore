@@ -47,3 +47,7 @@ biodt-shiny.code-workspace
 app/view/rtbm/.cursorrules
 # MD files documenting the progresses made with Copilot to be able to continue the work where I left it
 docs
+Chat-History-Export-Guide.md
+exported-chat-by-method-1.json
+Project-State-Summary.md
+Repository-Transfer-Guide.md
