@@ -30,11 +30,10 @@ box::use(
 beekeeper_plot_ui <- function(
   id,
   i18n,
-  card_header = "Output plot",
+  card_header = i18n$translate("Output plot"),
   title = "output_plot",
   plot_width = "100%",
   plot_height = "500px"
-  # custom_code = NULL
 ) {
   ns <- NS(id)
   tagList(
@@ -46,7 +45,7 @@ beekeeper_plot_ui <- function(
       card_header(
         tags$h2(
           class = "card_title",
-          card_header
+          i18n$translate(card_header)
         )
       ),
       tags$div(
@@ -55,20 +54,18 @@ beekeeper_plot_ui <- function(
           class = "col-10",
           selectInput(
             ns("experiment"),
-            label = "Choose experiment:",
+            label = i18n$translate("Choose experiment:"),
             choices = c(
               Example = file.path(config$get("data_path"), "honeybee", "output_example", "Result_table_original.csv")
             )
           ),
-          # style = "max-width: 200px"
         ),
         tags$div(
           class = "col-2 d-flex align-items-end flex-column",
           downloadButton(
             class = "",
             ns("download_data"),
-            label = "Download plot data",
-            # style = "max-width: 200px"
+            label = i18n$translate("Download plot data"),
           )
         )
       ),
@@ -94,7 +91,7 @@ beekeeper_plot_server <- function(
     plot_data <- reactiveVal()
 
     msg <- waiter_text(
-      message = tags$h3("Updating plot...", style = "color: #414f2f;")
+      message = tags$h3(i18n$translate("Updating plot..."), style = "color: #414f2f;")
     )
 
     w <- Waiter$new(

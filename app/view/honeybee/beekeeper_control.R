@@ -28,7 +28,7 @@ beekeeper_control_ui <- function(id, i18n) {
         class = "row d-flex justify-content-between card-list",
         tags$h3(
           class = "pdt_instructions_title",
-          "Instructions"
+          i18n$translate("Instructions")
         ),
         tags$ol(
           tags$style(
@@ -40,23 +40,23 @@ beekeeper_control_ui <- function(id, i18n) {
           "
           ),
           tags$li(
-            tags$b("Select"),
-            "point on the map by clicking the",
+            tags$b(i18n$translate("Select")),
+            i18n$translate("point on the map by clicking the"),
             shiny::icon("location-dot"),
-            tags$b("icon")
+            tags$b(i18n$translate("icon"))
           ),
-          tags$li(tags$b("Adjust"), "the parameters"),
-          tags$li(tags$b("Change"), "the lookup table values if needed"),
+          tags$li(tags$b(i18n$translate("Adjust")), i18n$translate("the parameters")),
+          tags$li(tags$b(i18n$translate("Change")), i18n$translate("the lookup table values if needed")),
           tags$li(
-            "Click the",
-            tags$b("Run simulation"),
-            "button",
+            i18n$translate("Click the"),
+            tags$b(i18n$translate("Run simulation")),
+            i18n$translate("button"),
           ),
         ),
-        tags$p("The simulation results can be seen in the output plot, select your experiment from the dropdown menu."),
+        tags$p(i18n$translate("The simulation results can be seen in the output plot, select your experiment from the dropdown menu.")),
         tags$p(
-          "Should you want to read more about the use case and learn how to use the pDT, you can refer to the relevant tutorial that can be found on the BioDT Training Platform ",
-          tags$a("here", href = "https://training.lifewatch.eu:9001/course/view.php?id=122", target = "_blank"),
+          i18n$translate("Should you want to read more about the use case and learn how to use the pDT, you can refer to the relevant tutorial that can be found on the BioDT Training Platform "),
+          tags$a(i18n$translate("here"), href = "https://training.lifewatch.eu:9001/course/view.php?id=122", target = "_blank"),
           "."
         )
       )

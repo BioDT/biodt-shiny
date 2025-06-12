@@ -48,7 +48,7 @@ honeybee_map_ui <- function(id, i18n) {
       card_header(
         tags$h2(
           class = "card_title",
-          "Input Map"
+          i18n$translate("Input Map")
         )
       ),
       card_body(
@@ -58,12 +58,12 @@ honeybee_map_ui <- function(id, i18n) {
           tags$div(
             class = "col-lg-6 col-sm-12",
             tags$p(
-              tags$b("Click the"),
+              tags$b(i18n$translate("Click the")),
               shiny::icon("location-dot"),
-              tags$b("icon"),
-              "and",
-              tags$b("select"),
-              "desired placement on the map."
+              tags$b(i18n$translate("icon")),
+              i18n$translate("and"),
+              tags$b(i18n$translate("select")),
+              i18n$translate("desired placement on the map.")
             ),
             uiOutput(ns("map_coordinates"), ),
           ),
@@ -85,7 +85,9 @@ honeybee_map_server <- function(
   leaflet_map,
   experiment_list,
   map,
-  map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")
+  map_acknowledgment =
+    reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")
+  # NOTE^^^ no i18n, no translation
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -139,9 +141,8 @@ honeybee_map_server <- function(
           fillColor = "transparent"
         )
 
-# https://www.paulamoraga.com/book-spatial/the-terra-package-for-raster-and-vector-data.html
+      # https://www.paulamoraga.com/book-spatial/the-terra-package-for-raster-and-vector-data.html
       if (length(input$map_plot_draw_new_feature) > 0) {
-
         pts_long <- c(long)
         pts_lat <- c(lat)
 
@@ -158,7 +159,7 @@ honeybee_map_server <- function(
           HTML(
             paste(
               "<span class='text-danger'>",
-              "WARNING! Selected location is outside boundaries.",
+              i18n$translate("WARNING! Selected location is outside boundaries."),
               "</span>"
             )
           ) |>
@@ -170,11 +171,11 @@ honeybee_map_server <- function(
           show("map_mini")
           HTML(
             paste(
-              "Selected coordinates are: <br>",
-              "Latitude: ",
+              i18n$translate("Selected coordinates are:"), "<br>",
+              i18n$translate("Latitude:"), " ",
               lat,
               "<br>",
-              "Longitude: ",
+              i18n$translate("Longitude:"), " ",
               long
             )
           ) |>
@@ -215,7 +216,7 @@ honeybee_map_server <- function(
             out()
         }
       } else {
-        coordinates_text("No location selected.")
+        coordinates_text(i18n$translate("No location selected."))
         out(NULL)
         zoomed_map(NULL)
       }
