@@ -45,3 +45,5 @@ biodt-shiny.code-workspace
 .windsurfrules
 .cursorrules
 app/view/rtbm/.cursorrules
+# MD files documenting the progresses made with Copilot to be able to continue the work where I left it
+docs
