@@ -53,12 +53,13 @@ gl_dynamics_soil_fractions_ui <- function(
 grassland_dynamics_three_soil_types_server <- function(
   id,
   soil_type_shares,
-  tab_grassland_selected
+  tab_grassland_selected,
+  i18n
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("three_soil_types"),
       html = msg,

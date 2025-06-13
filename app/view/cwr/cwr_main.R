@@ -148,13 +148,13 @@ mod_cwr_ui <- function(id, i18n) {
       id = ns("tab"),
       # Info ----
       nav_panel(
-        title = "Info",
+        title = i18n$translate("Info"),
         value = "Info",
         cwr_info_ui("cwr_info")
       ),
       # Map -----
       nav_panel(
-        title = "Map",
+        title = i18n$translate("Map"),
         value = "Map",
         layout_column_wrap(
           width = NULL,
@@ -166,7 +166,7 @@ mod_cwr_ui <- function(id, i18n) {
             card_header(
               tags$h2(
                 class = "card_title",
-                "Input map"
+                i18n$translate("Input map")
               )
             ),
             card_body(
@@ -191,20 +191,20 @@ mod_cwr_ui <- function(id, i18n) {
             card_body(
               pickerInput(
                 ns("stress_var"),
-                "Select Stress Variable:",
+                i18n$translate("Select Stress Variable:"),
                 choices = c(
-                  "None" = "None",
-                  "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
-                  "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
-                  "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
-                  "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
+                  "None" = i18n$translate("None"),
+                  "resampled_wc2.1_2.5m_bio_1.tif" = i18n$translate("Annual Temperature"),
+                  "resampled_wc2.1_2.5m_bio_8.tif" = i18n$translate("Wettest Quarter Temperature"),
+                  "resampled_wc2.1_2.5m_bio_12.tif" = i18n$translate("Precipitation"),
+                  "resampled_wc2.1_2.5m_bio_13.tif" = i18n$translate("Wettest Quarter Precipitation")
                 ),
                 selected = "None"
               ),
               hidden(
                 sliderInput(
                   ns("stress_range"),
-                  "Select Stress Range:",
+                  i18n$translate("Select Stress Range:"),
                   min = 0,
                   max = 1,
                   value = c(0, 1)
@@ -213,13 +213,13 @@ mod_cwr_ui <- function(id, i18n) {
               hidden(
                 checkboxInput(
                   ns("subset_suitability_map"),
-                  "Subset Stressor Map with Suitability Map",
+                  i18n$translate("Subset Stressor Map with Suitability Map"),
                   FALSE
                 )
               ),
               pickerInput(
                 ns("genus"),
-                label = "Choose Crop",
+                label = i18n$translate("Choose Crop"),
                 choices = list(""),
                 multiple = FALSE,
                 options = list(
@@ -230,7 +230,7 @@ mod_cwr_ui <- function(id, i18n) {
               ),
               pickerInput(
                 ns("species"),
-                label = "Choose Wild Relatives",
+                label = i18n$translate("Choose Wild Relatives"),
                 choices = list(""),
                 multiple = TRUE,
                 selected = c(""),
@@ -239,12 +239,12 @@ mod_cwr_ui <- function(id, i18n) {
                   `live-search` = TRUE,
                   container = "body",
                   maxOptions = 5,
-                  maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
+                  maxOptionsText = i18n$translate("Comparison is restricted to maximum of 5 species at once.")
                 )
               ),
               actionButton(
                 ns("update"),
-                label = "Update map",
+                label = i18n$translate("Update map"),
                 class = "btn-primary mt-3",
               )
             ),
@@ -252,7 +252,7 @@ mod_cwr_ui <- function(id, i18n) {
         ),
       ),
       nav_panel(
-        title = i18n$t("Contributors"),
+        title = i18n$translate("Contributors"),
         value = "Contributors",
         cwr_contributors_ui(
           ns("cwr_contributors"),
@@ -269,7 +269,7 @@ mod_cwr_server <- function(id, i18n) {
 
     msg <-
       waiter_text(
-        message = tags$h3("Loading...", style = "color: #414f2f;")
+        message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;")
       )
 
     w <- Waiter$new(

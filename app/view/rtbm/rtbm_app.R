@@ -264,11 +264,11 @@ rtbm_app_ui <- function(id, i18n) {
       card_body(
         radioButtons(
           inputId = ns("summary_plot_choice"),
-          label = "Choose Summary View:",
+          label = i18n$translate("Choose Summary View:"),
           choices = c(
-            "Activity Summary" = "overall",
-            "Top 5 Species Rank Trends" = "rank",
-            "Top 5 Daily Species Counts" = "table"
+            "overall" = i18n$translate("Activity Summary"),
+            "rank" = i18n$translate("Top 5 Species Rank Trends"),
+            "table" = i18n$translate("Top 5 Daily Species Counts")
           ),
           selected = "overall",
           inline = TRUE

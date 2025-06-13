@@ -38,7 +38,7 @@ grassland_dynamics_manage_datatable_ui <- function(
 }
 
 #' @export
-grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grassland_selected) {
+grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -46,21 +46,21 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
     data_table_reactive(data_table)
 
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("mngmnt_data_table_wrap"),
       html = msg,
       color = "rgba(256,256,256,0.9)",
     )
-    
+
     # Reactive toggle for showing table
     show_managementtable <- reactiveVal(FALSE)
-    
+
     div_table_wrap_tag <- tags$div(
       id = "div_table_wrap",
       DTOutput(ns("mngmnt_data_table"))
     )
-    
+
     # Toggle button UI
     output$show_management_btn <- renderUI({
       icon_dir <- if (show_managementtable()) "up" else "down"
@@ -73,12 +73,12 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
         title = if (show_managementtable()) "Collapse management actions table" else "Expand management actions table"
       )
     })
-    
+
     # Toggle reactive state
     observeEvent(input$show_management, {
       show_managementtable(!show_managementtable())
     })
-    
+
     # Show or hide the datatable container
     observeEvent(show_managementtable(), ignoreInit = TRUE, {
       req(data_table_reactive())
@@ -90,7 +90,7 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
         output$mngmnt_data_table_wrap <- renderUI(NULL)
       }
     })
-    
+
     # Render DT on tab change
     observeEvent(tab_grassland_selected(), ignoreNULL = TRUE, ignoreInit = TRUE, {
       w$show()

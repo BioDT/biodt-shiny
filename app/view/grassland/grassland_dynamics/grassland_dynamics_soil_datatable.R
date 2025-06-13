@@ -68,11 +68,11 @@ grassland_dynamics_soil_datatable_ui <- function(
 }
 
 #' @export
-grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassland_selected) {
+grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("datatable"),
       html = msg,
@@ -98,7 +98,7 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
         title = if (show_soiltable()) "Collapse soil data table" else "Expand soil data table",
       )
     })
-    
+
     observeEvent(input$show_soildata, {
       show_soiltable(!show_soiltable())
     })
@@ -127,8 +127,8 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
           {
             datatable(
               data_table,
-              class = paste('cell-border stripe compact'),
-              style = 'auto',
+              class = paste("cell-border stripe compact"),
+              style = "auto",
               fillContainer = FALSE,
               rownames = FALSE
             )

@@ -56,17 +56,17 @@ ces_biodiversity_ui <- function(id, i18n) {
       title = "biodiversity_controls",
       full_screen = FALSE,
       max_height = "550px",
-      card_title("Biodiversity"),
+      card_title(i18n$translate("Biodiversity")),
       card_body(
         radioButtons(
           ns("radio_group_select"),
-          "Please select a species group from the list below:",
-          c(
-            "All biodiversity" = "all",
-            "Mammals" = "mammals",
-            "Birds" = "birds",
-            "Plants" = "plants",
-            "Insects" = "insects"
+          i18n$translate("Please select a species group from the list below:"),
+          choices = c(
+            "all" = i18n$translate("All biodiversity"),
+            "mammals" = i18n$translate("Mammals"),
+            "birds" = i18n$translate("Birds"),
+            "plants" = i18n$translate("Plants"),
+            "insects" = i18n$translate("Insects")
           ),
           inline = TRUE,
           selected = character(0)
@@ -80,15 +80,21 @@ ces_biodiversity_ui <- function(id, i18n) {
           title = "biodiversity_map",
           full_screen = TRUE,
           max_height = "650px",
-          card_title("Biodiversity mapping"),
+          card_title(i18n$translate("Biodiversity mapping")),
           card_body(
             leafletOutput(ns("sp_map"), height = 600, width = "100%"),
+            # TODO check whether it works
             HTML(
-              '<p><span style="background-color: #FFFFCC; color: black;">Low biodiversity</span>
-             <span style="background-color: #A1DAB4;color: #A1DAB4;">----</span>
-             <span style="background-color: #41B6C4;color: #41B6C4;">----</span>
-             <span style="background-color: #2C7FB8;color: #2C7FB8;">----</span>
-             <span style="background-color: #253494; color: white;">High biodiversity</span></p>'
+              paste0(
+                '<p><span style="background-color: #FFFFCC; color: black;">',
+                i18n$translate("Low biodiversity"),
+                '</span> <span style="background-color: #A1DAB4;color: #A1DAB4;">----</span>',
+                '<span style="background-color: #41B6C4;color: #41B6C4;">----</span>',
+                '<span style="background-color: #2C7FB8;color: #2C7FB8;">----</span>',
+                '<span style="background-color: #253494; color: white;">',
+                i18n$translate("High biodiversity"),
+                '</span></p>'
+              )
             ),
             textOutput(ns("selected_species"))
           )
@@ -100,10 +106,10 @@ ces_biodiversity_ui <- function(id, i18n) {
           title = "sdm_table",
           full_screen = TRUE,
           min_height = "800px",
-          card_title("Species list"),
+          card_title(i18n$translate("Species list")),
           card_body(
             min_height = "1200px",
-            p("Click on a species in the species list to show its distribution on the map"),
+            p(i18n$translate("Click on a species in the species list to show its distribution on the map")),
             DTOutput(ns('sp_tbl'), height = 1200)
           )
         )
@@ -117,7 +123,7 @@ ces_biodiversity_ui <- function(id, i18n) {
 ces_biodiversity_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     msg <-
-      waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+      waiter_text(message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;"))
 
     w <- Waiter$new(
       html = msg,

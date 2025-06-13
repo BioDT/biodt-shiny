@@ -467,7 +467,7 @@ ias_app_server <- function(id, tab_selected) {
 
       radioButtons(
         inputId = ns("dataTypePicker"),
-        label = "Select model output type:",
+        label = i18n$translate("Select model output type:"),
         choices = choices,
         selected = isolate(input$dataTypePicker %||% "mean")
       )

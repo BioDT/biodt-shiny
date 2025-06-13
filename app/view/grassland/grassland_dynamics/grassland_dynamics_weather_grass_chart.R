@@ -59,11 +59,11 @@ gl_dynamics_multichart_ui <- function(
 }
 
 #' @export
-gl_dynamics_multichart_server <- function(id, plot_type, tab_grassland_selected) {
+gl_dynamics_multichart_server <- function(id, plot_type, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("multichart_wrap"),
       html = msg,
