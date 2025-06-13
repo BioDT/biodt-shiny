@@ -88,9 +88,10 @@ map_module_ui <- function(id, i18n) {
 #' @param species_data A reactive expression for the species data
 #' @param selected_species A reactive expression for the selected species name
 #' @param bird_spp_info A reactive expression containing info for all bird species
+#' @param i18n The internationalization function
 #' @return A list containing the update_map_with_frame function
 #' @export
-map_module_server <- function(id, finland_border, current_date, species_data, selected_species, bird_spp_info) {
+map_module_server <- function(id, finland_border, current_date, species_data, selected_species, bird_spp_info, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -159,7 +160,7 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
               src = song_url_val,
               type = "audio/mp3"
             ),
-            "Your browser does not support the audio element."
+            i18n$translate("Your browser does not support the audio element.")
           )
         )
       )
@@ -523,21 +524,21 @@ map_module_server <- function(id, finland_border, current_date, species_data, se
 
                   # Add debug message to the map UI
                   debug_msg <- paste0(
-                    "Points: ",
+                    i18n$translate("Points: "),
                     nrow(points_data),
-                    " | Intensity: ",
+                    i18n$translate(" | Intensity: "),
                     if (length(valid_intensities) > 0) {
-                      paste0(min(valid_intensities, na.rm = TRUE), " to ", max(valid_intensities, na.rm = TRUE))
+                      paste0(min(valid_intensities, na.rm = TRUE), i18n$translate(" to "), max(valid_intensities, na.rm = TRUE))
                     } else {
-                      "NA"
+                      i18n$translate("NA")
                     },
-                    " | Lon: ",
+                    i18n$translate(" | Lon: "),
                     lon_range[1],
-                    " to ",
+                    i18n$translate(" to "),
                     lon_range[2],
-                    " | Lat: ",
+                    i18n$translate(" | Lat: "),
                     lat_range[1],
-                    " to ",
+                    i18n$translate(" to "),
                     lat_range[2]
                   )
                   proxy |>

@@ -234,7 +234,7 @@ rtbm_app_ui <- function(id, i18n) {
           # Card Header now includes collapse button directly
           div(
             class = "card-header d-flex justify-content-between align-items-center",
-            span("Bird Observation Controls")
+            span(i18n$translate("Bird Observation Controls"))
           ),
           # Call Sidebar Module UI (contains card body)
           rtbm_sidebar_ui(ns("sidebar"))
@@ -260,7 +260,7 @@ rtbm_app_ui <- function(id, i18n) {
     base_layout,
     # Add plot output for summary statistics
     card(
-      card_header("Summary Statistics"),
+      card_header(i18n$translate("Summary Statistics")),
       card_body(
         radioButtons(
           inputId = ns("summary_plot_choice"),
@@ -338,7 +338,8 @@ rtbm_app_server <- function(id, tab_selected) {
       id = "sidebar",
       bird_spp_info = bird_spp_info,
       available_dates = available_dates,
-      summary_progress_info = summary_progress_info
+      summary_progress_info = summary_progress_info,
+      i18n = i18n
     )
 
     # --- Connect Sidebar Outputs to App Logic ---
@@ -418,7 +419,7 @@ rtbm_app_server <- function(id, tab_selected) {
             div(
               class = "alert alert-danger",
               role = "alert",
-              "Error: Please select a species for the map view."
+              i18n$translate("Error: Please select a species for the map view.")
             )
           })
           return()
@@ -434,7 +435,7 @@ rtbm_app_server <- function(id, tab_selected) {
             div(
               class = "alert alert-danger",
               role = "alert",
-              "Error: Could not find scientific name for the selected species."
+              i18n$translate("Error: Could not find scientific name for the selected species.")
             )
           })
           return()
@@ -445,7 +446,7 @@ rtbm_app_server <- function(id, tab_selected) {
           div(
             class = "alert alert-info",
             role = "alert",
-            "Loading map data... This may take a few moments."
+            i18n$translate("Loading map data... This may take a few moments.")
           )
         })
 
@@ -455,13 +456,13 @@ rtbm_app_server <- function(id, tab_selected) {
           message = "Processing map data",
           value = 0,
           {
-            incProgress(0.2, detail = "Fetching observation data")
+            incProgress(0.2, detail = i18n$translate("Fetching observation data"))
             result <- load_parquet_data(
               scientific_name = scientific_name_val,
               start_date = start_date,
               end_date = end_date
             )
-            incProgress(0.3, detail = "Processing observations")
+            incProgress(0.3, detail = i18n$translate("Processing observations"))
 
             # Handle no data scenario
             if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
@@ -469,7 +470,7 @@ rtbm_app_server <- function(id, tab_selected) {
                 div(
                   class = "alert alert-warning",
                   role = "alert",
-                  "No map data available for the selected species and date range."
+                  i18n$translate("No map data available for the selected species and date range.")
                 )
               })
               available_dates(NULL)
@@ -494,7 +495,7 @@ rtbm_app_server <- function(id, tab_selected) {
               div(
                 class = "alert alert-success",
                 role = "alert",
-                paste0("Loaded map data for ", length(result$dates), " dates.")
+                paste0(i18n$translate("Loaded map data for "), length(result$dates), i18n$translate(" dates."))
               )
             })
 
@@ -569,11 +570,11 @@ rtbm_app_server <- function(id, tab_selected) {
                 ))
               }
 
-              incProgress(0.1, detail = "Analyzing data requirements")
+              incProgress(0.1, detail = i18n$translate("Analyzing data requirements"))
 
               data_before <- NULL
               if (!is.null(dates_to_fetch_before)) {
-                message(paste("Fetching summary data for range (before):", dates_to_fetch_before$start, "to", dates_to_fetch_before$end))
+                message(paste(i18n$translate("Fetching summary data for range (before):"), dates_to_fetch_before$start, i18n$translate("to"), dates_to_fetch_before$end))
                 data_before <- preload_summary_data(
                   start_date = dates_to_fetch_before$start,
                   end_date = dates_to_fetch_before$end,
@@ -583,7 +584,7 @@ rtbm_app_server <- function(id, tab_selected) {
 
               data_after <- NULL
               if (!is.null(dates_to_fetch_after)) {
-                message(paste("Fetching summary data for range (after):", dates_to_fetch_after$start, "to", dates_to_fetch_after$end))
+                message(paste(i18n$translate("Fetching summary data for range (after):"), dates_to_fetch_after$start, i18n$translate("to"), dates_to_fetch_after$end))
                 data_after <- preload_summary_data(
                   start_date = dates_to_fetch_after$start,
                   end_date = dates_to_fetch_after$end,
@@ -591,7 +592,7 @@ rtbm_app_server <- function(id, tab_selected) {
                 )
               }
 
-              incProgress(0.85, detail = "Processing and combining data")
+              incProgress(0.85, detail = i18n$translate("Processing and combining data"))
 
               # --- Combine data --- #
               # Ensure current_store is a tibble, even if it was NULL or not yet set properly.
@@ -636,7 +637,7 @@ rtbm_app_server <- function(id, tab_selected) {
                 message("Updated summary store is empty. Resetting loaded range.")
               }
 
-              incProgress(0.95, detail = "Filtering data for display")
+              incProgress(0.95, detail = i18n$translate("Filtering data for display"))
 
               # --- Filter data for display --- #
               if (nrow(updated_store) > 0) {
@@ -707,7 +708,8 @@ rtbm_app_server <- function(id, tab_selected) {
       current_date = sidebar_returns$current_date, # Use reactive from sidebar
       species_data = species_data, # Pass the processed species data
       selected_species = sidebar_returns$selected_species, # Use reactive from sidebar
-      bird_spp_info = bird_spp_info # Pass all species info
+      bird_spp_info = bird_spp_info, # Pass all species info
+      i18n = i18n # Pass the internationalization function
     )
   })
 }

@@ -69,11 +69,12 @@ disease_app_ui <- function(id, i18n) {
 disease_app_server <- function(
   id,
   tab_disease_selected,
-  session_dir
+  session_dir,
+  i18n
 ) {
   shiny$moduleServer(id, function(input, output, session) {
     # Define waiter ----
-    msg <- waiter_text(message = shiny$tags$h3("Loading data...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = shiny$tags$h3(i18n$translate("Loading data..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       html = msg,
       color = "rgba(256,256,256,0.9)"
@@ -364,7 +365,7 @@ disease_app_server <- function(
         dir.create(r_disease$run_dir, recursive = TRUE)
 
         # Show a notification
-        shiny$showNotification("Modelling started.", type = "message")
+        shiny$showNotification(i18n$translate("Modelling started."), type = "message")
 
         output$statusMsg <- shiny$renderUI({
           shiny$div(
@@ -598,7 +599,7 @@ disease_app_server <- function(
 
       if (file.exists(file_name)) {
         shiny$showNotification(
-          paste("The outputs are successfully exported to", file_name),
+          paste(i18n$translate("The outputs are successfully exported to"), file_name),
           type = "message"
         )
       }

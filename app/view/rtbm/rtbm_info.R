@@ -21,17 +21,17 @@ rtbm_info_ui <- function(id, i18n = NULL) {
         ),
         tags$p(
           class = "pt-3",
-          "The Real-Time Bird Monitoring (RTBM) prototype Digital Twin (pDT) provides an interactive platform for visualizing and analyzing bird species distributions across Finland. Leveraging real-time and historical observation data, this dashboard enables researchers, conservationists, and enthusiasts to explore bird migration patterns, population trends, and species diversity with intuitive controls and dynamic visualizations."
+          i18n$translate("The Real-Time Bird Monitoring (RTBM) prototype Digital Twin (pDT) provides an interactive platform for visualizing and analyzing bird species distributions across Finland. Leveraging real-time and historical observation data, this dashboard enables researchers, conservationists, and enthusiasts to explore bird migration patterns, population trends, and species diversity with intuitive controls and dynamic visualizations.")
         ),
         tags$p(
-          strong("Data sources:"),
-          " Bird observation data are provided by national and international monitoring programs, including citizen science initiatives. For more details, see ",
-          tags$a("BioDT RTBM Use Case", href = "https://biodt.eu/use-cases/real-time-bird-monitoring-citizen-science-data", target = "_blank"), ". Data are updated regularly to reflect the latest findings."
+          strong(i18n$translate("Data sources:")),
+          i18n$translate(" Bird observation data are provided by national and international monitoring programs, including citizen science initiatives. For more details, see "),
+          tags$a(i18n$translate("BioDT RTBM Use Case"), href = "https://biodt.eu/use-cases/real-time-bird-monitoring-citizen-science-data", target = "_blank"), i18n$translate(". Data are updated regularly to reflect the latest findings.")
         ),
         tags$p(
-          strong("Open Science:"),
-          " The RTBM pDT is developed as part of the BioDT project, with source code and documentation available on ",
-          tags$a("GitHub", href = "https://github.com/BioDT/biodt-shiny", target = "_blank"), "."
+          strong(i18n$translate("Open Science:")),
+          i18n$translate(" The RTBM pDT is developed as part of the BioDT project, with source code and documentation available on "),
+          tags$a(i18n$translate("GitHub"), href = "https://github.com/BioDT/biodt-shiny", target = "_blank"), i18n$translate(".")
         )
       )
     ),

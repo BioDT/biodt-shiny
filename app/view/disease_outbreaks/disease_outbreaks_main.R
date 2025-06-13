@@ -61,6 +61,6 @@ disease_outbreaks_main_server <- function(id, session_dir) {
       }
     )
 
-    disease_app_server("disease_app", tab_disease_selected, session_dir)
+    disease_app_server("disease_app", tab_disease_selected, session_dir, i18n)
   })
 }
