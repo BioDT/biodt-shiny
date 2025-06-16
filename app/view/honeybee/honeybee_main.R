@@ -82,7 +82,8 @@ honeybee_server <- function(id,
     honeybee_beekeeper_server(
       "honeybee_beekeeper",
       session_dir,
-      beekeeper_selected
+      beekeeper_selected,
+      i18n = i18n
     )
   })
 }

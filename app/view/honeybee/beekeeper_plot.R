@@ -82,7 +82,8 @@ beekeeper_plot_ui <- function(
 beekeeper_plot_server <- function(
   id,
   beekeeper_selected,
-  experiment_list
+  experiment_list,
+  i18n
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

@@ -67,19 +67,20 @@ beekeeper_runsimulation_server <- function(
   lookup,
   parameters,
   landuse_map,
-  session_dir
+  session_dir,
+  i18n
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
     msg <- waiter_text(
       message = tagList(
-        tags$h3("Computing Beehave simulation...", style = "color: #414f2f;"),
+        tags$h3(i18n$translate("Computing Beehave simulation..."), style = "color: #414f2f;"),
         tags$br(),
-        tags$h4("This operation takes some time.", style = "color: #414f2f;"),
-        tags$h4("You can expect it to run for 2 to 4 minutes.", style = "color: #414f2f;"),
+        tags$h4(i18n$translate("This operation takes some time."), style = "color: #414f2f;"),
+        tags$h4(i18n$translate("You can expect it to run for 2 to 4 minutes."), style = "color: #414f2f;"),
         tags$h4(
-          "Please do not close the tab during this time. You can browse other tabs.",
+          i18n$translate("Please do not close the tab during this time. You can browse other tabs."),
           style = "color: #414f2f;"
         )
       ),

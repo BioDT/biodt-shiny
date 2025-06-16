@@ -40,7 +40,8 @@ honeybee_lookup_ui <- function(id, i18n) {
 
 #' @export
 honeybee_lookup_server <- function(id,
-                                   lookup_table) {
+                                   lookup_table,
+                                   i18n) {
   moduleServer(id, function(input, output, session) {
     lookup_table_react <- reactiveVal()
 
