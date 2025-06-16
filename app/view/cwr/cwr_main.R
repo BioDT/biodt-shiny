@@ -150,7 +150,7 @@ mod_cwr_ui <- function(id, i18n) {
       nav_panel(
         title = i18n$translate("Info"),
         value = "Info",
-        cwr_info_ui("cwr_info")
+        cwr_info_ui("cwr_info", i18n)
       ),
       # Map -----
       nav_panel(

@@ -156,7 +156,7 @@ ias_app_ui <- function(id, i18n) {
 }
 
 #' @export
-ias_app_server <- function(id, tab_selected) {
+ias_app_server <- function(id, tab_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 

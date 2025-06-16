@@ -16,14 +16,14 @@ ias_contributors_ui <- function(id, i18n) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(
-          if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
+          i18n$translate("CONTRIBUTORS"),
           style = "greeting display-4 font-weight-bold"
         ),
         tags$p(
-          "Ahmed El-Gabbas, Taimur Khan, Marina Golivets, and Ingolf Kühn — Department of Community Ecology, Helmholtz Centre for Environmental Research - UFZ; Theodor-Lieser-Str. 4, 06120 Halle, Germany"
+          "Ahmed El-Gabbas, Taimur Khan, Marina Golivets, and Ingolf Kühn — Department of Community Ecology, Helmholtz Centre for Environmental Research - UFZ; Theodor-Lieser-Str. 4, 06120 Halle, Germany"  # NOTE no i18n, no translation
         ),
         tags$p(
-          "Allan Souza — Institute for Atmospheric and Earth System Research INAR, Forest Sciences, Faculty of Agriculture and Forestry, P.O. Box 27, 00014 University of Helsinki, Helsinki, Finland"
+          "Allan Souza — Institute for Atmospheric and Earth System Research INAR, Forest Sciences, Faculty of Agriculture and Forestry, P.O. Box 27, 00014 University of Helsinki, Helsinki, Finland"  # NOTE no i18n, no translation
         ),
         tags$p("Tuomas Rossi - CSC - IT Center for Science, P.O. Box 405, 02101, Espoo, Finland")
       )
@@ -36,7 +36,7 @@ ias_contributors_ui <- function(id, i18n) {
         tags$img(
           src = "static/img/ias/IAS2.png",
           class = "info-picture",
-          alt = "Picture of invasive species"
+          alt = i18n$translate("Picture of invasive species")
         )
       )
     )

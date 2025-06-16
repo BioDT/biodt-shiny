@@ -31,12 +31,12 @@ ias_info_ui <- function(id, i18n) {
       style = "height: 100vh;",
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
-        h2("Invasive Alien Species Digital Twin (DT)"),
+        h2(i18n$translate("Invasive Alien Species Digital Twin (DT)")),
         p(
-          "This dashboard provides projections of the distribution of invasive alien plant species (IAS) in Europe under current and future climate scenarios. Species distributions were modelled at the broad-habitat level using joint species distribution models. For each habitat type, the dashboard shows interactive gridded maps for the level of plant invasion (i.e., projected number of IAS) and species-specific habitat suitability. For more information on the IAS pDT, see Khan et al. 2024."
+          i18n$translate("This dashboard provides projections of the distribution of invasive alien plant species (IAS) in Europe under current and future climate scenarios. Species distributions were modelled at the broad-habitat level using joint species distribution models. For each habitat type, the dashboard shows interactive gridded maps for the level of plant invasion (i.e., projected number of IAS) and species-specific habitat suitability. For more information on the IAS pDT, see Khan et al. 2024.")
         ),
         p(
-          tags$strong("Source code: "),
+          tags$strong(i18n$translate("Source code: ")),
           tags$a("https://github.com/BioDT/IASDT.R", href = "https://github.com/BioDT/IASDT.R", target = "_blank"),
           " and ",
           tags$a(
@@ -46,8 +46,8 @@ ias_info_ui <- function(id, i18n) {
           )
         ),
         p(
-          tags$strong("Licence: "),
-          "The data may be used freely for scientific and policy purposes under the ",
+          tags$strong(i18n$translate("Licence: ")),
+          i18n$translate("The data may be used freely for scientific and policy purposes under the "),
           tags$a(
             "Creative Commons Licence CC BY 4.0",
             href = "https://creativecommons.org/licenses/by/4.0/",
@@ -55,16 +55,16 @@ ias_info_ui <- function(id, i18n) {
           )
         ),
         p(
-          tags$strong("Contact: "),
-          "For more information, please contact: ",
+          tags$strong(i18n$translate("Contact: ")),
+          i18n$translate("For more information, please contact: "),
           tags$a("Ahmed El-Gabbas", href = "mailto:elgabbas@outlook.com"),
           " (data & models); ",
           tags$a("Taimur Khan", href = "mailto:taimur.khan@ufz.de"),
           " (pDT workflow & data server)."
         ),
         p(
-          tags$strong("Citations: "),
-          "soon"
+          tags$strong(i18n$translate("Citations: ")),
+          i18n$translate("soon")
         )
       )
     ),
@@ -84,7 +84,7 @@ ias_info_ui <- function(id, i18n) {
 }
 
 #' @export
-ias_info_server <- function(id, main_session) {
+ias_info_server <- function(id, main_session, i18n) {
   moduleServer(id, function(input, output, session) {
     observeEvent(
       input$start,

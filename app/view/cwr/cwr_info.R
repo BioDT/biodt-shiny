@@ -82,7 +82,7 @@ cwr_info_ui <- function(id, i18n) {
 
 
 #' @export
-cwr_info_server <- function(id, main_session) {
+cwr_info_server <- function(id, main_session, i18n) {
   moduleServer(id, function(input, output, session) {
     observeEvent(
       input$start,
