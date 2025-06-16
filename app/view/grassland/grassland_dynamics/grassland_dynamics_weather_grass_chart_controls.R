@@ -32,7 +32,7 @@ grassland_dynamics_double_chart_controls_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_double_chart_controls_server <- function(id, plot_type) {
+grassland_dynamics_double_chart_controls_server <- function(id, plot_type, i18n) {
   # nolint
   moduleServer(id, function(input, output, session) {
     observeEvent(input$line_or_bar, ignoreInit = TRUE, {

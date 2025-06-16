@@ -67,7 +67,7 @@ grassland_dynamics_location_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_location_server <- function(id) { # nolint
+grassland_dynamics_location_server <- function(id, i18n) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -120,7 +120,7 @@ grassland_dynamics_location_server <- function(id) { # nolint
           if (is.numeric(coords_outtext$lng) & is.numeric(coords_outtext$lat)) {
             output$deimsidinfo <- renderText(
               paste0(
-                "Found coordinates:\nlng = ", coords_outtext$lng, ", lat = ", coords_outtext$lat
+                i18n$translate("Found coordinates:"), "\nlng = ", coords_outtext$lng, ", lat = ", coords_outtext$lat
               )
             )
           }

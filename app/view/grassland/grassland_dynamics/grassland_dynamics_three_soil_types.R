@@ -76,13 +76,13 @@ grassland_dynamics_three_soil_types_server <- function(
         soil_type_shares_reactive(soil_type_shares)
 
         output$silt <- renderText({
-          names(soil_type_shares_reactive())[1]
+          i18n$translate(names(soil_type_shares_reactive())[1]) # TODO check whether this is correct
         })
         output$clay <- renderText({
-          names(soil_type_shares_reactive())[2]
+          i18n$translate(names(soil_type_shares_reactive())[2])
         })
         output$sand <- renderText({
-          names(soil_type_shares_reactive())[3]
+          i18n$translate(names(soil_type_shares_reactive())[3])
         })
 
         output$silt_val <- renderText(soil_type_shares_reactive()[[1]])

@@ -101,14 +101,14 @@ grassland_dynamics_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_server <- function(id, tab_grassland_selected) {
+grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     plot_type <- reactiveVal("bar")
 
     # LOCATION settings ----
-    coordinates <- grassland_dynamics_location_server("location")
+    coordinates <- grassland_dynamics_location_server("location", i18n)
 
     # the additional data are displayed as DATA TABLES below the main chart ----
     project_conf <- read_project_config(project_name = "project1")
@@ -128,22 +128,24 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     soil_type_shares <- read_soil_shares(soil_file_path)
 
     # MAP itself ----
-    grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected)
+    grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected, i18n)
 
     # Output plot ----
     gl_dynamics_multichart_server(
       "double_chart",
       plot_type,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
 
-    grassland_dynamics_double_chart_controls_server("controls", plot_type)
+    grassland_dynamics_double_chart_controls_server("controls", plot_type, i18n)
 
     # Management Actions Table - server module call ----
     grassland_dynamics_manage_datatable_server(
       "mngmnt_data_table",
       mng_data_table,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
 
     # shares of 3 soil "types" (clay, sand and silt) above soil data table
@@ -151,14 +153,16 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     grassland_dynamics_three_soil_types_server(
       "three_soil_types",
       soil_type_shares,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
 
     # Soil data table
     grassland_dynamics_soil_datatable_server(
       "soil_data_table",
       soil_data_table,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
   })
 }
