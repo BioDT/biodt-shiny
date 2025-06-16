@@ -50,7 +50,7 @@ forest_main_ui <- function(id, i18n) {
 }
 
 #' @export
-forest_main_server <- function(id) {
+forest_main_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -71,7 +71,8 @@ forest_main_server <- function(id) {
 
     forest_info_server(
       "forest_info",
-      session
+      session,
+      i18n
     )
 
     forest_app_server(

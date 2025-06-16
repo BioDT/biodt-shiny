@@ -43,7 +43,7 @@ rtbm_ui <- function(id, i18n) {
 }
 
 #' @export
-rtbm_main_server <- function(id) {
+rtbm_main_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -60,7 +60,8 @@ rtbm_main_server <- function(id) {
 
     rtbm_info_server(
       "rtbm_info",
-      session
+      session,
+      i18n
     )
 
     rtbm_app_server(

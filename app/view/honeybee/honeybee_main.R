@@ -55,7 +55,8 @@ honeybee_ui <- function(id,
 
 #' @export
 honeybee_server <- function(id,
-                            session_dir) {
+                            session_dir,
+                            i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -74,7 +75,8 @@ honeybee_server <- function(id,
 
     honeybee_info_server(
       "honeybee_info",
-      session
+      session,
+      i18n
     )
 
     honeybee_beekeeper_server(
