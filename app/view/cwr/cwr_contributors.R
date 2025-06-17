@@ -46,7 +46,7 @@ cwr_contributors_ui <- function(id, i18n) {
 }
 
 #' @export
-cwr_contributors_server <- function(id, r, i18n) {
+cwr_contributors_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
   })

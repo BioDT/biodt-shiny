@@ -22,7 +22,7 @@ box::use(
 
 #' @export
 cwr_info_ui <- function(id, i18n) {
-  # TO RM ns <- NS(id)
+  ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
     style = "overflow-x: hidden",
@@ -64,6 +64,16 @@ cwr_info_ui <- function(id, i18n) {
           tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
+        tags$div(
+          class = "mt-5",
+          actionButton(
+            ns("start"),
+            label = i18n$translate("Start prototyping"),
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
+          )
+        )
       )
     ),
     column(
@@ -72,8 +82,9 @@ cwr_info_ui <- function(id, i18n) {
       class = "d-none d-lg-block m-0 p-0",
       tags$div(
         tags$img(
-          src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
-          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;"
+          src = "static/img/rye-5447847_1920.jpg",
+          style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;",
+          alt = 'Image by <a href="https://pixabay.com/users/nickype-10327513/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=5447847">Nicky ❤️🌿🐞🌿❤️</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=5447847">Pixabay</a>'
         )
       )
     )
@@ -82,14 +93,14 @@ cwr_info_ui <- function(id, i18n) {
 
 
 #' @export
-cwr_info_server <- function(id, main_session, i18n) {
+cwr_info_server <- function(id, main_session) {
   moduleServer(id, function(input, output, session) {
     observeEvent(
       input$start,
       {
         nav_select(
           "tab",
-          selected = "cwr-map",
+          selected = "Map",
           session = main_session
         )
       }

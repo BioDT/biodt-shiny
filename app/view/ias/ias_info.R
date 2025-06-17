@@ -38,7 +38,7 @@ ias_info_ui <- function(id, i18n) {
         p(
           tags$strong(i18n$translate("Source code: ")),
           tags$a("https://github.com/BioDT/IASDT.R", href = "https://github.com/BioDT/IASDT.R", target = "_blank"),
-          " and ",
+          i18n$translate(" and "),
           tags$a(
             "https://github.com/BioDT/uc-ias-workflows",
             href = "https://github.com/BioDT/uc-ias-workflows",
@@ -58,13 +58,23 @@ ias_info_ui <- function(id, i18n) {
           tags$strong(i18n$translate("Contact: ")),
           i18n$translate("For more information, please contact: "),
           tags$a("Ahmed El-Gabbas", href = "mailto:elgabbas@outlook.com"),
-          " (data & models); ",
+          i18n$translate(" (data & models); "),
           tags$a("Taimur Khan", href = "mailto:taimur.khan@ufz.de"),
-          " (pDT workflow & data server)."
+          i18n$translate(" (pDT workflow & data server).")
         ),
         p(
-          tags$strong(i18n$translate("Citations: ")),
-          i18n$translate("soon")
+          tags$strong("Citations: "),
+          "soon"
+        ),
+        tags$div(
+          class = "mt-5",
+          actionButton(
+            ns("start"),
+            label = i18n$translate("Start prototyping"),
+            width = "100%",
+            class = "btn-secondary",
+            style = "max-width: 200px"
+          )
         )
       )
     ),

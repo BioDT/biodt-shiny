@@ -86,8 +86,8 @@ honeybee_map_server <- function(
   experiment_list,
   map,
   map_acknowledgment =
-    reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)")
-  # NOTE^^^ no i18n, no translation
+    reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)"),
+  i18n
 ) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns

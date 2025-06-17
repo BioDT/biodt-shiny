@@ -124,7 +124,6 @@ ias_app_ui <- function(id, i18n) {
         card(
           div(
             class = "sidebar-content",
-
             selectInput(
               inputId = ns("pdtVersion"),
               label = i18n$translate("Select pDT version:"),
@@ -164,8 +163,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
     # climate model mapping
     climate_model_folder <- list(
-      "Current" = "Current",
-      "Ensemble" = "Ensemble",
+      "Current" = i18n$translate("Current"),
+      "Ensemble" = i18n$translate("Ensemble"),
       "GFDL-ESM4" = "GFDL_ESM4",
       "IPSL-CM6A-LR" = "IPSL_CM6A_LR",
       "MPI-ESM1-2-HR" = "MPI_ESM1_2_HR",
@@ -177,14 +176,15 @@ ias_app_server <- function(id, tab_selected, i18n) {
     get_projection_legend_title <- function(dataType, species_on, species_selected) {
       switch(
         dataType,
-        mean = if (species_on && !is.null(species_selected)) "Probability of occurrence" else "Level of invasion",
-        sd = "Standard deviation",
-        cov = "Coefficient of variation",
-        anomaly = "Prediction anomaly",
-        "Raster value"
+        mean = if (species_on && !is.null(species_selected)) i18n$translate("Probability of occurrence") else i18n$translate("Level of invasion"),
+        sd = i18n$translate("Standard deviation"),
+        cov = i18n$translate("Coefficient of variation"),
+        anomaly = i18n$translate("Prediction anomaly"),
+        i18n$translate("Raster value")
       )
     }
 
+    # TODO WIP continue with the translation of a code below
     # Track available and selected versions from OPeNDAP
     observeEvent(
       tab_selected(),
@@ -219,8 +219,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
       } else if (length(versions) >= 2 && check_valid_version(versions[2])) {
         selected_version(versions[2])
         shinyalert::shinyalert(
-          title = "Fallback to Previous Version",
-          text = paste("Version", try_version, "was invalid. Using fallback:", versions[2]),
+          title = i18n$translate("Fallback to Previous Version"),
+          text = paste(i18n$translate("Version"), try_version, i18n$translate("was invalid. Using fallback:"), versions[2]),
           type = "warning"
         )
       } else {
