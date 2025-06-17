@@ -129,6 +129,12 @@ honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected, i18n)
       }
     )
 
+    # Control ----
+    beekeeper_control_server(
+      "beekeeper_control",
+      i18n
+    )
+
     # Map ----
     coordinates <- honeybee_map_server(
       "beekeeper_map",
@@ -143,7 +149,7 @@ honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected, i18n)
 
     # Lookup table ----
     lookup <- honeybee_lookup_server(
-      "beekeeper_lookup", 
+      "beekeeper_lookup",
       lookup_table = lookup_table,
       i18n = i18n
     )

@@ -56,7 +56,7 @@ forest_app_ui <- function(id, i18n) {
           shiny$selectInput(
             ns("climate"),
             i18n$translate("Select Climate Scenario:"),
-            choices = c("Current climate", "RCP4.5", "RCP8.5")
+            choices = c(i18n$translate("Current climate"), "RCP4.5", "RCP8.5")
           ),
           shiny$selectInput(
             ns("output"),
@@ -127,24 +127,24 @@ forest_app_ui <- function(id, i18n) {
 }
 
 #' @export
-forest_app_server <- function(id, app_selected) {
+forest_app_server <- function(id, app_selected, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
     data_folder <- file.path(config$get("data_path"), "forest_bird")
     output$selection <- shiny$renderText({
       text <- paste(
-        "Management Regime:",
+        i18n$translate("Management Regime:"),
         input$management,
         "\n",
-        "Climate Scenario:",
+        i18n$translate("Climate Scenario:"),
         input$climate,
         "\n",
-        "Output Type:",
+        i18n$translate("Output Type:"),
         input$output
       )
 
-      if (input$output %in% c("Above-ground biomass", "Max-age of selected species")) {
-        text <- paste(text, "\nSpecies Type:", input$species)
+      if (input$output %in% c(i18n$translate("Above-ground biomass"), i18n$translate("Max-age of selected species"))) {
+        text <- paste(text, "\n", i18n$translate("Species Type:"), input$species)
       }
 
       text
@@ -333,8 +333,8 @@ forest_app_server <- function(id, app_selected) {
         ext <- terra$ext(raster_data)
 
         terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() |> print()
-        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() ) {
-          shiny$showNotification("Warning: Raster contains infinite values!", type = "error")
+        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite()) {
+          shiny$showNotification(i18n$translate("Warning: Raster contains infinite values!"), type = "error")
         }
 
         pal <- leaflet$colorNumeric(
@@ -393,7 +393,7 @@ forest_app_server <- function(id, app_selected) {
 
         if(input$show_results){
 
-          climate_scenarios <- c("current", "4.5", "8.5")
+          climate_scenarios <- c(i18n$translate("current"), "4.5", "8.5")
           management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
           years <- seq(0, 100, by = 10)
 

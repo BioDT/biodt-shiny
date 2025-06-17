@@ -4,7 +4,7 @@ box::use(
 
 
 #' @export
-forest_contributors_ui <- function(id, i18n = NULL) {
+forest_contributors_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",

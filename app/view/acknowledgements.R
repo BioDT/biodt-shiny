@@ -94,9 +94,10 @@ mod_acknowledgements_ui <- function(id, i18n) {
   )
 }
 
+# TODO - remove?
 #' @export
-mod_acknowledgements_server <- function(id, r) {
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-  })
-}
+# mod_acknowledgements_server <- function(id, r) {
+#   moduleServer(id, function(input, output, session) {
+#     ns <- session$ns
+#   })
+# }

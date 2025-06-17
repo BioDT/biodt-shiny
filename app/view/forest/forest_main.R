@@ -77,7 +77,8 @@ forest_main_server <- function(id, i18n) {
 
     forest_app_server(
       "forest_app",
-      app_selected
+      app_selected,
+      i18n
     )
   })
 }

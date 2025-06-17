@@ -65,7 +65,7 @@ beekeeper_control_ui <- function(id, i18n) {
 }
 
 #' @export
-beekeeper_control_server <- function(id) {
+beekeeper_control_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
   })
