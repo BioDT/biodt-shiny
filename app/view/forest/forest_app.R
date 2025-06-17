@@ -109,7 +109,7 @@ forest_app_ui <- function(id, i18n) {
       )
     ),
     bslib$card(
-      echarty$ecs.output(
+      ecs.output(
         ns("multichart"),
         # width = "100%",
         height = "400px"
@@ -117,7 +117,7 @@ forest_app_ui <- function(id, i18n) {
       # leaflet$leafletOutput(ns("map")),
       # shiny$plotOutput(ns("plot"), height = "800px")
       # shiny$uiOutput(ns("plot"))
-      echarty$ecs.output(
+      ecs.output(
         ns("plot"),
         # width = "100%",
         height = "600px"
@@ -378,7 +378,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         chart <- get_multichart(experiment_data_file())
         experiment_chart(chart)
-        output$multichart <- echarty$ecs.render(
+        output$multichart <- ecs.render(
           experiment_chart()
         )
       }
@@ -405,7 +405,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       }
     )
 
-    output$plot <- echarty$ecs.render(
+    output$plot <- ecs.render(
       output_plot()
     )
 
@@ -415,13 +415,13 @@ forest_app_server <- function(id, app_selected, i18n) {
       app_selected(),
       {
         # Create a basic bar chart
-        chart <- echarty$ec.init()
+        chart <- ec.init()
         experiment_chart(chart)
 
       }
     )
 
-    output$multichart <- echarty$ecs.render(
+    output$multichart <- ecs.render(
       experiment_chart()
     )
   })

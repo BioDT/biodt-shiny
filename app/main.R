@@ -88,8 +88,8 @@ box::use(
     forest_main_server
   ],
   app/view/rtbm/rtbm_main[
-    rtbm_ui,
-    rtbm_server
+    rtbm_main_ui,
+    rtbm_main_server
   ],
 )
 
@@ -217,7 +217,7 @@ ui <- function(id) {
             "Real-time Bird Monitoring with Citizen Science Data"
           ),
           value = "rtbm",
-          rtbm_ui(
+          rtbm_main_ui(
             ns("rtbm_main"),
             i18n
           )

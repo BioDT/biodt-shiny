@@ -80,10 +80,10 @@ box::use(
     cwr_info_ui,
     cwr_info_server
   ],
-  app/view/cwr/cwr_map[
-    cwr_map_ui,
-    cwr_map_server
-  ],
+  # app/view/cwr/cwr_map[
+  #   cwr_map_ui,
+  #   cwr_map_server
+  # ],
   app/view/cwr/cwr_contributors[
     cwr_contributors_ui,
     cwr_contributors_server

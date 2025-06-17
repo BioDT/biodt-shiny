@@ -10,7 +10,7 @@ box::use(
 )
 
 #' @export
-rtbm_ui <- function(id, i18n) {
+rtbm_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
     id = ns("tab"),
