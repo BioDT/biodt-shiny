@@ -335,7 +335,7 @@ ui <- function(id) {
         nav_item(
           shiny$selectInput(
             ns("selected_language"),
-            shiny$span(), # shiny$p(i18n$translate("Language:")),
+            shiny$span(i18n$translate("Language:")),
             choices = i18n$get_languages(),
             selected = i18n$get_key_translation(),
             width = "75px"

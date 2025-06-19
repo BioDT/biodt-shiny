@@ -1,9 +1,10 @@
 box::use(
-  shiny[NS, fillPage, div, p, moduleServer, tags, h1, fluidRow, observeEvent, actionLink],
+  shiny[NS, fillPage, div, p, moduleServer, tags, h1, fluidRow],
+  shiny[observeEvent, actionLink],
   bslib[card, card_header, card_body, bs_theme, nav_select],
 )
 
-box::use(app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server], )
+box::use(app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],)
 
 
 #' @export
@@ -14,11 +15,17 @@ mod_info_ui <- function(id, i18n) {
     tags$div(
       class = "col mx-auto col-lg-8",
       tags$h1(
-        tags$span(i18n$translate("Prototype"), class = "text-primary", id = ns("heading-first-part")),
-        tags$span(i18n$translate("Digital Twins"), id = ns("heading-second-part")),
+        tags$span(
+          i18n$translate("Prototype"),
+          class = "text-primary",
+          id = ns("heading-first-part")
+        ),
+        tags$span(
+          i18n$translate("Digital Twins"),
+          id = ns("heading-second-part")
+        ),
         class = "justify-content-center",
       ),
-      # THIS DESIGN IS STORAGED HERE FOR THE TIME BEING, problems shown in issue #56 on Github
       tags$div(
         class = "info-text justify-content-center",
         tags$p(
@@ -132,7 +139,9 @@ mod_info_ui <- function(id, i18n) {
                   tags$a(
                     target = "_blank",
                     href = "https://riojournal.com/article/124978/",
-                    i18n$translate("Prioritisation of DNA metabarcoding sampling locations (conceptual article)")
+                    i18n$translate(
+                      "Prioritisation of DNA metabarcoding sampling locations (conceptual article)"
+                    )
                   )
                 ),
                 tags$li(
