@@ -9,6 +9,8 @@ box::use(
     span,
     strong,
     fluidRow,
+    observe,
+    eventReactive,
   ],
 )
 
@@ -17,6 +19,7 @@ box::use(
   shiny[
     radioButtons,
     sliderInput,
+    selectInput,
     downloadButton,
     uiOutput,
     column,
@@ -101,16 +104,19 @@ box::use(
 
 # Local modules
 box::use(
-  app/logic/ias/helper[
-    process_raster_file,
-    addLegend_decreasing,
-    url.exists,
-    habitat_mapping,
-    get_available_versions,
-    check_valid_version,
-    get_base_url,
-    get_species_file_from_pa,
-  ],
+  app /
+    logic /
+    ias /
+    helper[
+      process_raster_file,
+      addLegend_decreasing,
+      url.exists,
+      habitat_mapping,
+      get_available_versions,
+      check_valid_version,
+      get_base_url,
+      get_species_file_from_pa,
+    ],
 )
 
 #' @export
@@ -176,7 +182,11 @@ ias_app_server <- function(id, tab_selected, i18n) {
     get_projection_legend_title <- function(dataType, species_on, species_selected) {
       switch(
         dataType,
-        mean = if (species_on && !is.null(species_selected)) i18n$translate("Probability of occurrence") else i18n$translate("Level of invasion"),
+        mean = if (species_on && !is.null(species_selected)) {
+          i18n$translate("Probability of occurrence")
+        } else {
+          i18n$translate("Level of invasion")
+        },
         sd = i18n$translate("Standard deviation"),
         cov = i18n$translate("Coefficient of variation"),
         anomaly = i18n$translate("Prediction anomaly"),
@@ -184,7 +194,6 @@ ias_app_server <- function(id, tab_selected, i18n) {
       )
     }
 
-    # TODO WIP continue with the translation of a code below
     # Track available and selected versions from OPeNDAP
     observeEvent(
       tab_selected(),
@@ -220,14 +229,19 @@ ias_app_server <- function(id, tab_selected, i18n) {
         selected_version(versions[2])
         shinyalert::shinyalert(
           title = i18n$translate("Fallback to Previous Version"),
-          text = paste(i18n$translate("Version"), try_version, i18n$translate("was invalid. Using fallback:"), versions[2]),
+          text = paste(
+            i18n$translate("Version"),
+            try_version,
+            i18n$translate("was invalid. Using fallback:"),
+            versions[2]
+          ),
           type = "warning"
         )
       } else {
         selected_version(try_version)
         shinyalert::shinyalert(
-          title = "Warning",
-          text = paste("No valid data found in version", try_version),
+          title = i18n$translate("Warning"),
+          text = paste(i18n$translate("No valid data found in version"), try_version),
           type = "warning"
         )
       }
@@ -242,8 +256,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
         selected_version(version_to_try)
       } else {
         shinyalert::shinyalert(
-          title = "Version not fully deployed yet",
-          text = paste("No valid data found in pDT version", version_to_try),
+          title = i18n$translate("Version not fully deployed yet"),
+          text = paste(i18n$translate("No valid data found in pDT version"), version_to_try),
           type = "error"
         )
 
@@ -448,7 +462,10 @@ ias_app_server <- function(id, tab_selected, i18n) {
           )
         },
         error = function(e) {
-          showNotification(i18n$translate("Unable to load species for the selected habitat in distribution mode."), type = "error")
+          showNotification(
+            i18n$translate("Unable to load species for the selected habitat in distribution mode."),
+            type = "error"
+          )
           NULL
         }
       )
@@ -488,7 +505,11 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
       if (input$timeFramePicker == "Present") {
         df <- df %>%
-          filter(time_period == "1981-2010", climate_model == "Current", climate_scenario == "Current")
+          filter(
+            time_period == "1981-2010",
+            climate_model == "Current",
+            climate_scenario == "Current"
+          )
       } else {
         df <- df %>%
           filter(
@@ -557,8 +578,9 @@ ias_app_server <- function(id, tab_selected, i18n) {
             input$obsType,
             base_url()
           )
-          if (!is.null(tif_name_species))
+          if (!is.null(tif_name_species)) {
             file_url <- paste0(base_url(), "outputs/", input$habitatDist, "/observed_distribution/", tif_name_species)
+          }
         }
 
         tibble::tibble(tif_path = file_url)
@@ -569,14 +591,18 @@ ias_app_server <- function(id, tab_selected, i18n) {
     raster_data <- reactive({
       req(filtered_summary())
       row <- filtered_summary()
-      if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
+      if (nrow(row) == 0 || is.na(row$tif_path[1])) {
+        return(NULL)
+      }
       process_raster_file(row$tif_path[1])
     })
 
     # Reactive: Load raster for Distribution
     observed_raster <- reactive({
       row <- observed_summary()
-      if (nrow(row) == 0 || is.na(row$tif_path[1])) return(NULL)
+      if (nrow(row) == 0 || is.na(row$tif_path[1])) {
+        return(NULL)
+      }
       process_raster_file(row$tif_path[1])
     })
 

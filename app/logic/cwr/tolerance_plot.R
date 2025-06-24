@@ -52,7 +52,7 @@ create_tolerance_plot <- function(
 
   tolerance_plot <- ec.init()
   tolerance_plot$x$opts <- list(
-    title = list(text = "Tolerance analysis"),
+    title = list(text = "Tolerance analysis"),  # TODO add i18n$translate
     grid = list(
       bottom = 90
     ),
@@ -63,7 +63,7 @@ create_tolerance_plot <- function(
     xAxis = list(
       type = "category",
       boundaryGap = TRUE,
-      name = "Stressor value",
+      name = "Stressor value",  # TODO add i18n$translate
       nameLocation = "middle",
       nameGap = 25,
       nameTextStyle = list(fontWeight = "bolder"),
@@ -71,7 +71,7 @@ create_tolerance_plot <- function(
     ),
     yAxis = list(
       type = "value",
-      name = "Count",
+      name = "Count",  # TODO add i18n$translate
       boundaryGap = FALSE,
       nameLocation = "middle",
       nameGap = 40,

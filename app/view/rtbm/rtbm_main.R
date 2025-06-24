@@ -20,7 +20,8 @@ rtbm_main_ui <- function(id, i18n) {
       value = "Info",
       icon = icon("circle-info"),
       rtbm_info_ui(
-        ns("rtbm_info")
+        ns("rtbm_info"),
+        i18n
       )
     ),
     nav_panel(
@@ -28,7 +29,8 @@ rtbm_main_ui <- function(id, i18n) {
       value = "RTBM App",
       icon = icon("tree"),
       rtbm_app_ui(
-        ns("rtbm_app")
+        ns("rtbm_app"),
+        i18n
       )
     ),
     nav_panel(
@@ -36,7 +38,8 @@ rtbm_main_ui <- function(id, i18n) {
       value = "Contributors",
       icon = icon("tree"),
       rtbm_contributors_ui(
-        ns("rtbm_contributors")
+        ns("rtbm_contributors"),
+        i18n
       )
     )
   )
@@ -60,13 +63,13 @@ rtbm_main_server <- function(id, i18n) {
 
     rtbm_info_server(
       "rtbm_info",
-      session,
-      i18n
+      session
     )
 
     rtbm_app_server(
       "rtbm_app",
-      tab_selected = tab
+      tab_selected = tab,
+      i18n
     )
   })
 }

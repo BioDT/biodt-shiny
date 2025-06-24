@@ -1280,9 +1280,9 @@ get_file_list <- function(
 ) {
 
   if (length(experiment_data) == 0) {
-    shiny$showNotification("No files found matching the specified structure.", type = "error")
+    shiny$showNotification("No files found matching the specified structure.", type = "error")  # TODO add i18n$translate
   } else if (length(experiment_data) > 1) {
-    shiny$showNotification("Multiple files found matching the specified structure.", type = "error")
+    shiny$showNotification("Multiple files found matching the specified structure.", type = "error")  # TODO add i18n$translate
   } else if (length(experiment_data) != 1) {
     return(NULL)
   }

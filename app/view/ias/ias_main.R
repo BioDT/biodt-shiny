@@ -4,13 +4,13 @@ box::use(
 )
 
 box::use(
-  app/view/ias/ias_info[ias_info_ui, ias_info_server],
-  app/view/ias/ias_app[ias_app_ui, ias_app_server],
-  app/view/ias/ias_contributors[ias_contributors_ui,ias_contributors_server],
+  app / view / ias / ias_info[ias_info_ui, ias_info_server],
+  app / view / ias / ias_app[ias_app_ui, ias_app_server],
+  app / view / ias / ias_contributors[ias_contributors_ui, ias_contributors_server],
 )
 
 #' @export
-ias_ui <- function(id, i18n) {
+ias_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
     id = ns("tab"),
@@ -20,7 +20,8 @@ ias_ui <- function(id, i18n) {
       value = "Info",
       icon = icon("circle-info"),
       ias_info_ui(
-        ns("ias_info")
+        ns("ias_info"),
+        i18n
       )
     ),
     nav_panel(
@@ -28,7 +29,8 @@ ias_ui <- function(id, i18n) {
       value = "IAS App",
       icon = icon("tree"),
       ias_app_ui(
-        ns("ias_app")
+        ns("ias_app"),
+        i18n
       )
     ),
     nav_panel(
@@ -36,7 +38,8 @@ ias_ui <- function(id, i18n) {
       value = "Contributors",
       icon = icon("tree"),
       ias_contributors_ui(
-        ns("ias_contributors")
+        ns("ias_contributors"),
+        i18n
       )
     )
   )
@@ -51,10 +54,12 @@ ias_main_server <- function(id, i18n) {
 
     observeEvent(
       input$tab,
-      ignoreInit = TRUE, {
-      print(input$tab)
-      tab(input$tab)
-    })
+      ignoreInit = TRUE,
+      {
+        print(input$tab)
+        tab(input$tab)
+      }
+    )
 
     ias_info_server(
       "ias_info",

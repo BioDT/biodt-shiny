@@ -98,7 +98,7 @@ generate_chart_lines_mean <- function(
         formatter = JS(
           "
           function (param) {
-            return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
+            return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' + // TODO add i18n$translate for all text strings
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #18A547\"></i>Mean of PFT 0 - grasses - ' + param.find(item => item.seriesName ==  'PFT 0 mean').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #AF2C6E\"></i>Mean of PFT 1 - forbs - ' + param.find(item => item.seriesName ==  'PFT 1 mean').value + '<br />' +
               '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #422CAF\"></i>Mean of PFT 2 - legumes - ' + param.find(item => item.seriesName ==  'PFT 2 mean').value +
@@ -247,7 +247,7 @@ generate_chart_lines_mean <- function(
       ),
       yAxis = list(
         list(
-          name = "Fraction",
+          name = "Fraction",  # TODO add i18n$translate
           type = "value",
           boundaryGap = FALSE,
           nameLocation = "middle",
@@ -262,7 +262,7 @@ generate_chart_lines_mean <- function(
           )
         ),
         list(
-          name = "Precipitation [mm]",
+          name = "Precipitation [mm]",  # TODO add i18n$translate
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -285,7 +285,7 @@ generate_chart_lines_mean <- function(
           )
         ),
         list(
-          name = "Temperature [degC] & \nTemp. Daylight [degC]",
+          name = "Temperature [degC] & \nTemp. Daylight [degC]",  # TODO add i18n$translate
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -308,7 +308,7 @@ generate_chart_lines_mean <- function(
           )
         ),
         list(
-          name = "PAR [µmolm-2s-1]",
+          name = "PAR [µmolm-2s-1]",  # TODO add i18n$translate
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -331,7 +331,7 @@ generate_chart_lines_mean <- function(
           )
         ),
         list(
-          name = "PET [mm]",
+          name = "PET [mm]",  # TODO add i18n$translate
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),

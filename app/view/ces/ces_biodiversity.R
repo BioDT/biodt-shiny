@@ -120,7 +120,7 @@ ces_biodiversity_ui <- function(id, i18n) {
 
 
 #' @export
-ces_biodiversity_server <- function(id) {
+ces_biodiversity_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     msg <-
       waiter_text(message = tags$h3(i18n$translate("Loading..."), style = "color: #414f2f;"))

@@ -4,13 +4,13 @@ box::use(
     NS,
     tagList,
     tags,
-    # TO RM uiOutput,
+    uiOutput,
     renderUI,
     HTML,
     observeEvent,
     reactiveVal,
     reactive,
-    # TO RM textOutput,
+    textOutput,
     renderText
   ],
   bslib[card, card_header, card_body],
@@ -65,7 +65,7 @@ honeybee_map_ui <- function(id, i18n) {
               tags$b(i18n$translate("select")),
               i18n$translate("desired placement on the map.")
             ),
-            uiOutput(ns("map_coordinates"), ),
+            uiOutput(ns("map_coordinates")),
           ),
           tags$div(
             class = "col-lg-6 col-sm-12",
@@ -85,8 +85,7 @@ honeybee_map_server <- function(
   leaflet_map,
   experiment_list,
   map,
-  map_acknowledgment =
-    reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)"),
+  map_acknowledgment = reactiveVal("Land Use Classification 2016 (Preidl et al. RSE 2020)"),
   i18n
 ) {
   moduleServer(id, function(input, output, session) {
@@ -171,11 +170,14 @@ honeybee_map_server <- function(
           show("map_mini")
           HTML(
             paste(
-              i18n$translate("Selected coordinates are:"), "<br>",
-              i18n$translate("Latitude:"), " ",
+              i18n$translate("Selected coordinates are:"),
+              "<br>",
+              i18n$translate("Latitude:"),
+              " ",
               lat,
               "<br>",
-              i18n$translate("Longitude:"), " ",
+              i18n$translate("Longitude:"),
+              " ",
               long
             )
           ) |>

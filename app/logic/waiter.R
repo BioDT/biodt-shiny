@@ -5,7 +5,7 @@ box::use(
 
 #' @export
 waiter_text <- function(
-    message = h3("Working..."),
+    message = h3(i18n$translate("Working...")),  # TODO add i18n$translate
     style = "color: #414f2f;",
     css = NULL,
     spinner = spin_loaders(

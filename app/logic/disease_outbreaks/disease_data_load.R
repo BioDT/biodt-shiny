@@ -103,7 +103,7 @@ load_simulated_data <- function(
   }
 
   shiny$showNotification(
-    "Results loaded",
+    "Results loaded",  # TODO add i18n$translate
     type = "message"
   )
 
@@ -120,7 +120,7 @@ load_simulated_data <- function(
 
   # If no secondary infection ticks found, show error
   if (length(r_disease$sec_inf_ticks) == 0) {
-    shiny$showNotification("No secondary infection data found", type = "error")
+    shiny$showNotification("No secondary infection data found", type = "error")  # TODO add i18n$translate
   }
 
   # Initialize list to store secondary infection data

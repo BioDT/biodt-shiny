@@ -18,7 +18,7 @@ disease_histogram <- function(
   chart <- ec.init()
   chart$x$opts <-
     list(
-      title = list(text = "Secondary infection data"),
+      title = list(text = "Secondary infection data"),  # TODO add i18n$translate
       tooltip = list(
         trigger = "axis"
       ),
@@ -26,7 +26,7 @@ disease_histogram <- function(
       xAxis = list(
         type = "category",
         boundaryGap = TRUE,
-        name = "Number of Secondary Infections",
+        name = "Number of Secondary Infections",  # TODO add i18n$translate
         nameLocation = "middle",
         nameGap = 40,
         nameTextStyle = list(fontWeight = "bolder"),
@@ -35,7 +35,7 @@ disease_histogram <- function(
       yAxis = list(
         type = "value",
         boundaryGap = FALSE,
-        name = "Frequency",
+        name = "Frequency",  # TODO add i18n$translate
         nameLocation = "middle",
         nameGap = 25,
         nameTextStyle = list(fontWeight = "bolder"),

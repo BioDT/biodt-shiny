@@ -38,7 +38,7 @@ shared
 test.R
 background.R
 Dockerfile_old
-.vscode/settings.json
+.vscode
 .rhino/node_modules
 .win
 biodt-shiny.code-workspace

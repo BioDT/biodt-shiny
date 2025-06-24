@@ -54,18 +54,24 @@ ces_rp_ui <- function(id, i18n) {
       card_body(
         radioButtons(
           ns("persona"),
-          "Please select a recreation potential persona from the list below:",
-          choiceNames = c(
-            "Hard recreationalist - visitors who prefer high-adrenaline activities that require a high level of fitness",
-            "Soft recreationalist - who prefer calmer activities that do not require a high fitness level"
+          i18n$translate("Please select a recreation potential persona from the list below:"),
+          choiceNames = list(
+            i18n$translate(
+              "Hard recreationalist - visitors who prefer high-adrenaline activities that require a high level of fitness"
+            ),
+            i18n$translate(
+              "Soft recreationalist - who prefer calmer activities that do not require a high fitness level"
+            )
           ),
-          choiceValues = c("hard", "soft"),
+          choiceValues = list("hard", "soft"),
           width = "100%",
           selected = character(0)
         ),
         leafletOutput(ns("rec_pot_map_plot"), height = 600),
         p(
-          "Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterized by scoring landscape features such as water bodies, types of forest."
+          i18n$translate(
+            "Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterized by scoring landscape features such as water bodies, types of forest."
+          )
         )
       )
     )
@@ -73,7 +79,7 @@ ces_rp_ui <- function(id, i18n) {
 }
 
 #' @export
-ces_rp_server <- function(id) {
+ces_rp_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- file.path(config$get("data_path"), "ces")

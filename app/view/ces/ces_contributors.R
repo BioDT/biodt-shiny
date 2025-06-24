@@ -4,7 +4,7 @@ box::use(
 
 
 #' @export
-ces_contributors_ui <- function(id) {
+ces_contributors_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
@@ -16,13 +16,17 @@ ces_contributors_ui <- function(id) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(
-          if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
+          i18n$translate("CONTRIBUTORS"),
           style = "greeting display-4 font-weight-bold"
         ),
         tags$p("Simon Rolph and Dylan Carbone, UK Centre for Ecology & Hydrology, Wallingford, United Kingdom"),
-        tags$p("Jan Dick, Chris Andrews, Maddalena Tigli, Megan Williams and Joe Marsh Rossney, UK Centre for Ecology & Hydrology, Edinburgh, United Kingdom"),
+        tags$p(
+          "Jan Dick, Chris Andrews, Maddalena Tigli, Megan Williams and Joe Marsh Rossney, UK Centre for Ecology & Hydrology, Edinburgh, United Kingdom"
+        ),
         tags$p("John Watkins and Will Bolton, UK Centre for Ecology & Hydrology, Lancaster, United Kingdom"),
-        tags$p("Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava, Ostrava-Poruba, Czech Republic"),
+        tags$p(
+          "Tomas Martinovic, IT4Innovations, VSB – Technical University of Ostrava, Ostrava-Poruba, Czech Republic"
+        ),
         tags$p("Kata Sara-aho, CSC – IT Center for Science Ltd, Espoo, Finland"),
         tags$p("Dirk Pleiter, KTH – Royal Institute of Technology, Stockholm, Sweden"),
         tags$p("Christoph Wohner, Environment Agency Austria, Vienna, Austria"),
@@ -38,7 +42,7 @@ ces_contributors_ui <- function(id) {
         tags$img(
           src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
           class = "info-picture",
-          alt = "Cairngorms National Park"
+          alt = i18n$translate("Cairngorms National Park")
         )
       )
     )

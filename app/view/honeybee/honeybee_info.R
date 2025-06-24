@@ -90,7 +90,7 @@ honeybee_info_ui <- function(id, i18n) {
 
 
 #' @export
-honeybee_info_server <- function(id, main_session) {
+honeybee_info_server <- function(id, main_session, i18n) {
   moduleServer(id, function(input, output, session) {
     observeEvent(
       input$start,

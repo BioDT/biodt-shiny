@@ -42,8 +42,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
   echarty_plot <- ec.init(
     preset = FALSE,
     xAxis = list(
-      type = "category",
-      name = "Date",
+      type = "category",        name = "Date",  # TODO add i18n$translate
       nameGap = 0,
       nameLocation = "center",
       nameTextStyle = list(
@@ -58,7 +57,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         type = "value",
         min = 0,
         max = max(input$`Honey (kg)`) + 5,
-        name = "Honey (kg)",
+        name = "Honey (kg)",  # TODO add i18n$translate
         nameTextStyle = list(fontSize = 15)
       ),
       list(
@@ -66,13 +65,13 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         min = 0,
         max = 24,
         show = FALSE,
-        name = "Day hours for collecting"
+        name = "Day hours for collecting"  # TODO add i18n$translate
       ),
       list(
         type = "value",
         min = 0,
         max = max(input$`TotalIHbees + TotalForagers` + 100),
-        name = "Bees count",
+        name = "Bees count",  # TODO add i18n$translate
         nameTextStyle = list(fontSize = 15)
       )
     ),
@@ -87,7 +86,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         color = "#009E73",
         itemStyle = list(opacity = 0.3),
         barWidth = "100%",
-        name = "Collection hours"
+        name = "Collection hours"  # TODO add i18n$translate
       ),
       list(
         type = "line",
@@ -112,7 +111,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         yAxisIndex = 3,
         lineStyle = list(width = 3),
         color = "#0072B2",
-        name = "Bees Count"
+        name = "Bees Count"  # TODO add i18n$translate
       )
     ),
     tooltip = list(

@@ -154,9 +154,9 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                   label = i18n$translate("Select recreationist type:"),
                   selected = "Soft",
                   choices = list(
-                    "Soft" = i18n$translate("Soft"),
-                    "Hard" = i18n$translate("Hard"),
-                    "Empty" = i18n$translate("Empty")
+                    "Soft",
+                    "Hard",
+                    "Empty"
                   )
                 ),
                 tags$div(
@@ -240,12 +240,12 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 radioButtons(
                   inputId = ns("map_base_layers"),
                   label = i18n$translate("Choose base map:"),
-                  choices = c(
-                    i18n$translate("Open Street Map"),
-                    i18n$translate("ESRI World Imagery"),
-                    i18n$translate("Open Topo Map")
+                  choices = list(
+                    "Open Street Map",
+                    "ESRI World Imagery",
+                    "Open Topo Map"
                   ),
-                  selected = i18n$translate("Open Street Map")
+                  selected = "Open Street Map"
                 ),
                 tags$h4(i18n$translate("Biodiversity Data"), class = "mt-3"),
                 checkboxInput(
@@ -263,7 +263,7 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
 }
 
 # Server function
-ces_rp_biodiversity_server <- function(id, ces_selected) {
+ces_rp_biodiversity_server <- function(id, ces_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- file.path(config$get("data_path"), "ces")
@@ -348,7 +348,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     # Logic for basic sidebar closing
     observeEvent(input$closeButton, {
-      runjs('App.toggleSidebar()')
+      runjs("App.toggleSidebar()")
     })
 
     # Only trigger when ces_selected() becomes TRUE (after which the value will not change).

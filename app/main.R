@@ -42,55 +42,85 @@ box::use(
 
 # General Information Views
 box::use(
-  app/view/info[
-    mod_info_ui,
-    mod_info_server
-  ],
-  app/view/acknowledgements[mod_acknowledgements_ui],
+  app /
+    view /
+    info[
+      mod_info_ui,
+      mod_info_server
+    ],
+  app / view / acknowledgements[mod_acknowledgements_ui],
 )
 
-# Honeybee Beekeeper pDT & Grassland Dynamics
+# Honeybee Beekeeper pDT & Grassland Dynamics & Invasive Alien Species (IAS) pDT
 box::use(
-  app/view/honeybee/honeybee_main[
-    honeybee_ui,
-    honeybee_server
-  ],
-  app/view/grassland/grassland_main[
-    grassland_main_ui,
-    grassland_main_server
-  ],
+  app /
+    view /
+    honeybee /
+    honeybee_main[
+      honeybee_ui,
+      honeybee_server
+    ],
+  app /
+    view /
+    grassland /
+    grassland_main[
+      grassland_main_ui,
+      grassland_main_server
+    ],
+  app /
+    view /
+    ias /
+    ias_main[
+      ias_main_ui,
+      ias_main_server
+    ],
 )
 
 # Cultural Ecosystem Services (CES) pDT
 box::use(
-  app/view/ces/ces_main[
-    ces_ui,
-    ces_server
-  ],
+  app /
+    view /
+    ces /
+    ces_main[
+      ces_ui,
+      ces_server
+    ],
 )
 
 # Disease Outbreaks pDT and Crop Wild Relatives (CWR) pDT
 box::use(
-  app/view/disease_outbreaks/disease_outbreaks_main[
-    disease_outbreaks_main_ui,
-    disease_outbreaks_main_server
-  ],
-  app/view/cwr/cwr_main[
-    mod_cwr_ui,
-    mod_cwr_server
-  ],
+  app /
+    view /
+    disease_outbreaks /
+    disease_outbreaks_main[
+      disease_outbreaks_main_ui,
+      disease_outbreaks_main_server
+    ],
+  app /
+    view /
+    cwr /
+    cwr_main[
+      mod_cwr_ui,
+      mod_cwr_server
+    ],
 )
 
 # Forest Services pDT and Real Time Bird Monitoring (RTBM) pDT
 box::use(
-  app/view/forest/forest_main[
-    forest_main_ui,
-    forest_main_server
-  ],
-  app/view/rtbm/rtbm_main[
-    rtbm_main_ui,
-    rtbm_main_server
-  ],
+  app /
+    view /
+    forest /
+    forest_main[
+      forest_main_ui,
+      forest_main_server
+    ],
+  app /
+    view /
+    rtbm /
+    rtbm_main[
+      rtbm_main_ui,
+      rtbm_main_server
+    ],
 )
 
 # Initialize theme
@@ -177,7 +207,7 @@ ui <- function(id) {
         align = "left",
         icon = shiny$icon("people-group", `aria-hidden` = "true"),
 
-        # --- Species response to environment ---
+        ## --- Species response to environment ---
         nav_item(
           shiny$div(
             class = "p-2",
@@ -188,7 +218,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Grassland Dynamics ---
+        ## --- UI: Grassland Dynamics ---
         nav_panel(
           class = "p-0",
           title = i18n$translate("Grassland Dynamics"),
@@ -199,7 +229,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Forest Biodiversity ---
+        ## --- UI: Forest Biodiversity ---
         nav_panel(
           class = "p-0",
           title = i18n$translate("Forest Biodiversity Dynamics"),
@@ -210,7 +240,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Bird Monitoring ---
+        ## --- UI: Bird Monitoring ----
         nav_panel(
           class = "p-0",
           title = i18n$translate(
@@ -223,7 +253,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- CES ---
+        ## --- UI: Cultural Ecosystem Services ----
         nav_panel(
           class = "p-0",
           title = i18n$translate("Cultural Ecosystem Services"),
@@ -234,7 +264,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Environmental Change ---
+        ## --- UI: Environmental Change ----
         nav_item(
           shiny$tags$div(
             class = "p-2",
@@ -245,7 +275,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- CWR ---
+        ## --- UI: CWR ----
         nav_panel(
           class = "p-0",
           title = i18n$translate(
@@ -258,7 +288,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Disease Outbreaks ---
+        ## --- UI: Disease Outbreaks ----
         nav_panel(
           class = "p-0",
           title = i18n$translate("Disease Outbreaks"),
@@ -269,7 +299,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Species Interactions ---
+        ## --- UI: Species Interactions ----
         nav_item(
           shiny$div(
             class = "p-2",
@@ -285,7 +315,7 @@ ui <- function(id) {
           )
         ),
 
-        # --- Honeybee ---
+        ## --- UI: Honeybee ----
         nav_panel(
           title = i18n$translate("Honeybee"),
           value = "Honeybee",
@@ -302,7 +332,7 @@ ui <- function(id) {
           class = "p-0",
           disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
         ),
-        ## Dynamics and threats from and for species of policy concern ----
+        ## --- UI: Dynamics and threats from and for species of policy concern ----
         nav_item(
           shiny$div(
             class = "p-2",
@@ -315,21 +345,28 @@ ui <- function(id) {
             ),
           )
         ),
+        ## --- UI: Invasive Alien Species ----
         nav_panel(
           title = i18n$translate("Invasive Alien Species"),
           value = "ias",
           class = "p-0",
-          ias_ui(ns("ias_main"), i18n)
+          ias_main_ui(
+            ns("ias_main"),
+            i18n
+          )
         ),
       ),
       nav_spacer(),
-      ## Acknowledgements - main menu item ----
+      # Acknowledgements - main menu item ----
       nav_panel(
         title = i18n$translate("Acknowledgements"),
         value = "acknowledgements",
         icon = shiny$icon("users-gear", `aria-hidden` = "true"),
         class = "container-fluid index-info",
-        mod_acknowledgements_ui("info")
+        mod_acknowledgements_ui(
+          "info",
+          i18n
+        )
       ),
       if (env_active == "dev") {
         nav_item(
@@ -348,7 +385,7 @@ ui <- function(id) {
 
 #' @export
 server <- function(id) {
-  moduleServer(id, function(input, output, session) {
+  shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     session_dir <- file.path(
@@ -384,26 +421,40 @@ server <- function(id) {
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",
-      session_dir
+      session_dir,
+      i18n
     )
     # Grassland pDT ----
     grassland_main_server(
-      "grassland_main"
+      "grassland_main",
+      i18n
     )
     # Forest pDT ----
     forest_main_server(
-      "forest_main"
+      "forest_main",
+      i18n
     )
     # Cultural Ecosystem Services pDT ----
     ces_server(
-      "ces_main"
+      "ces_main",
+      i18n
     )
     # Disease Outbreaks pDT ----
-    disease_outbreaks_main_server("disease_outbreaks_main", session_dir)
-    # Invasie Alien Species pDT ----
-    ias_main_server("ias_main")
+    disease_outbreaks_main_server(
+      "disease_outbreaks_main",
+      session_dir,
+      i18n
+    )
+    # Invasive Alien Species pDT ----
+    ias_main_server(
+      "ias_main",
+      i18n
+    )
     # Real-time Bird Monitoring pDT ----
-    rtbm_main_server("rtbm_main")
+    rtbm_main_server(
+      "rtbm_main",
+      i18n
+    )
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
