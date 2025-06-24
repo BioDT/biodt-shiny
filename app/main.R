@@ -136,11 +136,9 @@ biodt_theme <- bs_theme(
   bootswatch = "bootstrap"
 )
 
-env_active <- Sys.getenv("R_CONFIG_ACTIVE")
-
 # Initialize translations
 i18n <- Translator$new(
-  translation_json_path = "app/translations/translations.json"
+  translation_json_path = "app/translations/multilingual_translations_gpt.json"
 )
 i18n$set_translation_language("en")
 
@@ -368,17 +366,16 @@ ui <- function(id) {
           i18n
         )
       ),
-      if (env_active == "dev") {
-        nav_item(
-          shiny$selectInput(
-            ns("selected_language"),
-            shiny$span(i18n$translate("Language:")),
-            choices = i18n$get_languages(),
-            selected = i18n$get_key_translation(),
-            width = "75px"
-          )
+      # Lang select - main menu item ----
+      nav_item(
+        shiny$selectInput(
+          ns("selected_language"),
+          shiny$span(i18n$translate("Lang:")),
+          choices = i18n$get_languages(),
+          selected = i18n$get_key_translation(),
+          width = "75px"
         )
-      }
+      )
     )
   )
 }
@@ -403,6 +400,7 @@ server <- function(id) {
 
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
+      print("Language changed")
       update_lang(input$selected_language)
       shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
     })
