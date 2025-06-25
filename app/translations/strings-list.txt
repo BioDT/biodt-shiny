@@ -1,0 +1,390 @@
+""Output plot"
+"Biodiversity Digital Twin"
+"Info"
+"Digital Twin"
+"Species response to environmental change"
+"Grassland Dynamics"
+"Forest Biodiversity Dynamics"
+"Real-time Bird Monitoring with Citizen Science Data"
+"Cultural Ecosystem Services"
+"Crop wild relatives and genetic resources for food security"
+"Disease Outbreaks"
+"Species interactions with each other and with humans"
+"Honeybee"
+"Dynamics and threats from and for species of policy concern"
+"Invasive Alien Species"
+"Acknowledgements"
+"Lang:"
+"Prototype"
+"Digital Twins"
+"The Biodiversity Digital Twin prototype will provide advanced models for simulation and prediction capabilities, through practical use cases addressing critical issues related to global biodiversity dynamics."
+"BioDT exploits the LUMI Supercomputer and employs FAIR data combined with digital infrastructure, predictive modelling and AI solutions, facilitating evidence-based solutions for biodiversity protection and restoration."
+"The project responds to key EU and international policy initiatives, including the EU Biodiversity Strategy 2030, EU Green Deal, UN Sustainable Development Goals, Destination Earth."
+"Grassland Biodiversity Dynamics"
+"Genetically detected biodiversity"
+"Crop Wild Relatives"
+"Prioritisation of DNA metabarcoding sampling locations (conceptual article)"
+"Phylogenetic Diversity (external link)"
+"Honey Bees in Agricultural Landscapes"
+"This project has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No 101057437 (BioDT project, https://doi.org/10.3030/101057437)."
+"We acknowledge the EuroHPC Joint Undertaking and CSC - IT Center for Science, Finland for awarding this project access to the EuroHPC supercomputer LUMI, hosted by CSC – IT Center for Science and the LUMI consortium, through Development Access calls."
+"Additionally, we wish to acknowledge CSC - IT Center for Science for Rahti and Pouta services."
+"Credits"
+"Credits to the main development contributors of the Shiny web app"
+"The contributors for the pDTs are listed on the pDT pages"
+"You can report issues for the Shiny web app on "
+"Choose experiment:"
+"Download plot data"
+"Updating plot..."
+"CONTRIBUTORS"
+"Start simulation"
+"Run simulation"
+"Computing Beehave simulation..."
+"This operation takes some time."
+"You can expect it to run for 2 to 4 minutes."
+"Please do not close the tab during this time. You can browse other tabs."
+"Loading data..."
+"Beekeeper"
+"Input Map"
+"Lookup Table"
+"Honeybee Prototype Digital Twin (DT)"
+"Picture of honeybees"
+"Click the"
+"icon"
+"and"
+"select"
+"desired placement on the map."
+"WARNING! Selected location is outside boundaries."
+"Selected coordinates are:"
+"Latitude:"
+"Longitude:"
+"No location selected."
+"Honeybee Beekeeper Case"
+"Instructions"
+"Select"
+"point on the map by clicking the"
+"Adjust"
+"the parameters"
+"Change"
+"the lookup table values if needed"
+"button"
+"The simulation results can be seen in the output plot, select your experiment from the dropdown menu."
+"Should you want to read more about the use case and learn how to use the pDT, you can refer to the relevant tutorial that can be found on the BioDT Training Platform "
+"here"
+"Simulation Parameters"
+"Number of adult bees at the beginning of the simulation"
+"Number of Mites at the beginning of the simulation"
+"Number of infected Mites at the beginning of the simulation"
+"Honey Harvest"
+"Varroa treatment with arcaricide"
+"Drone Brood Removal"
+"Choose start year of the simulation:"
+'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]]]
+]]]
+]
+]
+]
+'774,48§§]
+,]]
+,""For how many days:"
+"Cairngorms National Park"
+"Cultural Ecosystem Services Prototype Digital Twin"
+"This digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment."
+"The pDT is described in "
+"Biodiversity data is accessed from Global Biodiversity Information Facility (GBIF)"
+"Source code and scripts of the pDT can be found at "
+"Recreation potential mapping"
+"Please select a recreation potential persona from the list below:"
+"Hard recreationalist - visitors who prefer high-adrenaline activities that require a high level of fitness"
+"Soft recreationalist - who prefer calmer activities that do not require a high fitness level"
+"Recreation Potential (RP), an estimate of the potential capacity of a landscapes to provide opportunities for outdoor recreation, parameterized by scoring landscape features such as water bodies, types of forest."
+"Recreation & Biodiversity"
+"Recreation potential"
+"Biodiversity"
+"Contributors"
+"Please select a species group from the list below:"
+"All biodiversity"
+"Mammals"
+"Birds"
+"Plants"
+"Insects"
+"Biodiversity mapping"
+"Low biodiversity"
+"High biodiversity"
+"Species list"
+"Click on a species in the species list to show its distribution on the map"
+"Recreation & Biodiversity Mapping"
+"Hiker Settings"
+"Species Occurence"
+"Map Layers"
+"Close Sidebar"
+"Recreation Potential"
+"Select recreationist type:"
+"Recreation Potential Filter"
+"Use the sliders below to filter the data:"
+"Filter Recreation Potential:"
+"Apply filter"
+"Species Selection"
+"Select species group:"
+"Select species:"
+"Species Occurrence"
+"Filter Species Occurrence:"
+"Show Species Occurence"
+"Base Map Layer"
+"Choose base map:"
+"Biodiversity Data"
+""Biodiversity Occurence Density Layer(GBIF)"
+"Crop Wild Relatives pDT"
+"The Crop Wild Relatives Digital Twin (CWR DT) aims to support crop breeding programs by broadening the genetic base of cultivated crops—ultimately enhancing their resilience to climate change–induced environmental stresses."
+"Using environmental profiling techniques and species distribution modeling (SDM), the CWR DT identifies, and maps populations of wild relatives adapted to extreme conditions such as high or low temperatures, soil acidity, salinity, drought, and more."
+"By highlighting these marginally thriving CWR populations, the digital twin enables breeders to tap into valuable traits for widening the genetic bases of crops and strengthening crops' resilience and adaptability."
+"Read more: "
+"Start prototyping"
+"Map"
+"Input map"
+"Crop and Crop Wild Relatives"
+"Select Stress Variable:"
+"None"
+"Annual Temperature"
+"Wettest Quarter Temperature"
+"Precipitation"
+"Wettest Quarter Precipitation"
+"Select Stress Range:"
+"Subset Stressor Map with Suitability Map"
+"Choose Crop"
+"Choose Wild Relatives"
+"Comparison is restricted to maximum of 5 species at once."
+""Update map"
+"Disease Outbreaks"
+"Upload a GeoTIFF file"
+"Run model"
+"Select Time Step:"
+"Export Outputs"
+"Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon."
+"Area selected"
+"Fences selected"
+"Releasing point selected"
+"Modelling started."
+"Please wait, modelling started"
+"The outputs are successfully exported to"
+"Disease Outbreak pDT"
+"The BioDT wild boar (Sus scrofa)-African swine fever (ASF) prototype digital twin (pDT)implements a stochastic, spatially- and temporally-explicit, and individually-baselandscape-level mechanistic model as a digital twin aimed at providing informed support for management decisions in response to the spread of African swine fever in European wild boar populations."
+"The model incorporates wild boar ecology and ASF epidemiology to simulate infection dynamics in the wild boar population. The first run of a wild boar-ASF model simulation is triggered when habitat structure data are supplied to the model. Each time additional information (wild boar locality data, ASF infection detections) is provided, the model reruns, incorporating the new data and returning an updated, dynamic prediction of African swine fever infection including identification of active and recovered cases as well as incidents of wild boar death due to the virus."
+"Read more about the pDT here:"
+"Read more about the wild boar-ASF simulation model here:"
+"Video source: Alexis Lours, Sus scrofa Linnaeus, 1758 observed in France,"
+""Video of wild boar pack"
+"Forest Biodiversity Prototype Digital Twin (pDT)"
+"This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+"LANDIS-II Home Page: "
+"HSMC R-package is available on CRAN "
+"Forest. Image by Robert Balog from Pixabay"
+"App"
+"Select Forest Management Regime:"
+"Select Climate Scenario:"
+"Current climate"
+"Select Output Type:"
+"Above-ground biomass"
+"Below-ground biomass"
+"Harvested biomass"
+"Woody Debris"
+"Max-age of selected species"
+"Average age of all trees"
+"Median age of all trees"
+"Select Species Type:"
+"Birch (betulaSP)"
+"Pine (pinussyl)"
+"Spruce (piceabbies)"
+"Other trees (other)"
+"Select year:"
+"Show results"
+"Management Regime:"
+"Climate Scenario:"
+"Output Type:"
+"Species Type:"
+"Warning: Raster contains infinite values!"
+""current"
+"Grassland Biodiversity Dynamics"
+"Prototype Digital Twin (pDT) in EARLY ACCESS"
+"This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
+"Explore the Digital Twin for grassland dynamics! Our Digital Twin is designed to help you understand the growth dynamics and improve the management of temperate grassland for sites across Europe. "
+"Once a specific site location has been selected, the pDT will simulate productivity (aboveground biomass and yield) and plant functional composition (grasses, forbs and legumes) over a selected time span in the past and, optionally, projected into the short-term future. Users may define and test the effects of different management scenarios. "
+"Grassland Dynamics"
+"Grassland Simulations & Weather"
+"Choose output dataset"
+"Show results"
+"Location"
+"Choose location type:"
+"Latitude"
+"Longitude"
+"Update Map Location"
+"Found coordinates:"
+"Model Output"
+"Choose output files"
+"Grassland Management Actions"
+"Shares of 3 Soil Types"
+"Soil Data"
+"Controls"
+""PFT plot type:"
+"Picture of invasive species"
+"Invasive Alien Species Digital Twin (DT)"
+"This dashboard provides projections of the distribution of invasive alien plant species (IAS) in Europe under current and future climate scenarios. Species distributions were modelled at the broad-habitat level using joint species distribution models. For each habitat type, the dashboard shows interactive gridded maps for the level of plant invasion (i.e., projected number of IAS) and species-specific habitat suitability. For more information on the IAS pDT, see Khan et al. 2024."
+"Source code: "
+" and "
+"Licence: "
+"The data may be used freely for scientific and policy purposes under the "
+"Contact: "
+"For more information, please contact: "
+" (data & models); "
+" (pDT workflow & data server)."
+"Select pDT version:"
+"Select a scenario:"
+"Select a species:"
+"Transparency:"
+"Current"
+"Ensemble"
+"Probability of occurrence"
+"Level of invasion"
+"Standard deviation"
+"Coefficient of variation"
+"Prediction anomaly"
+"Raster value"
+"Fallback to Previous Version"
+"Version"
+"was invalid. Using fallback:"
+"Warning"
+"No valid data found in version"
+"Version not fully deployed yet"
+"No valid data found in pDT version"
+"Select species:"
+"Select species"
+"Unable to load species for the selected habitat in distribution mode."
+""Select model output type:"
+"Real-Time Bird Monitoring Prototype Digital Twin (DT)"
+"The Real-Time Bird Monitoring (RTBM) prototype Digital Twin (pDT) provides an interactive platform for visualizing and analyzing bird species distributions across Finland. Leveraging real-time and historical observation data, this dashboard enables researchers, conservationists, and enthusiasts to explore bird migration patterns, population trends, and species diversity with intuitive controls and dynamic visualizations."
+"Data sources:"
+" Bird observation data are provided by national and international monitoring programs, including citizen science initiatives. For more details, see "
+"BioDT RTBM Use Case"
+". Data are updated regularly to reflect the latest findings."
+"Open Science:"
+" The RTBM pDT is developed as part of the BioDT project, with source code and documentation available on "
+"GitHub"
+"."
+"RTBM App"
+"Select View"
+"Select Date Range"
+" to "
+"Select Bird Species"
+"Load Data"
+"Select date range and species, then click Load Data."
+" observation dates found."
+"No data found for the selected date range."
+"Pause"
+"Play"
+"No observation dates available for selected range."
+"Animation Delay (ms)"
+"Your browser does not support the audio element."
+"Points: "
+" | Intensity: "
+"NA"
+" | Lon: "
+" | Lat: "
+"Bird Observation Controls"
+"Summary Statistics"
+"Choose Summary View:"
+"Activity Summary"
+"Top 5 Species Rank Trends"
+"Top 5 Daily Species Counts"
+"Error: Please select a species for the map view."
+"Error: Could not find scientific name for the selected species."
+"Loading map data... This may take a few moments."
+"Fetching observation data"
+"Processing observations"
+"No map data available for the selected species and date range."
+"Loaded map data for "
+" dates."
+"Analyzing data requirements"
+"Fetching summary data for range (before):"
+"to"
+"Fetching summary data for range (after):"
+"Processing and combining data"
+"Filtering data for display"""""""""
+"Working..."

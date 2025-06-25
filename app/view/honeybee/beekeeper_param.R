@@ -1,6 +1,28 @@
+# Shiny - UI's imports
 box::use(
-  shiny[moduleServer, NS, tagList, sliderInput, tags, div, numericInput, bootstrapPage, reactiveVal, observeEvent, reactive, updateSliderInput, checkboxInput],
-  bslib[card, card_header, card_body],
+  shiny[
+    NS,
+    sliderInput,
+    tags,
+    div,
+    bootstrapPage,
+  ],
+  bslib[
+    card,
+    card_header,
+    card_body
+  ],
+)
+
+# Shiny - server module imports
+box::use(
+  shiny[
+    moduleServer,
+    reactiveVal,
+    observeEvent,
+    reactive,
+    updateSliderInput
+  ],
 )
 
 #' @export
@@ -120,9 +142,7 @@ honeybee_param_server <- function(id) {
           "N_INITIAL_MITES_INFECTED",
           "HoneyHarvesting",
           "VarroaTreatment",
-          "DroneBroodRemoval"# comments TO RM?
-          #"SimulationYearStart",
-          #"DaysLimit"
+          "DroneBroodRemoval"
         ),
         Value = c(
           input$N_INITIAL_BEES,
@@ -130,9 +150,7 @@ honeybee_param_server <- function(id) {
           input$N_INITIAL_MITES_INFECTED,
           input$HoneyHarvesting,
           input$VarroaTreatment,
-          input$DroneBroodRemoval#, comments TO RM?
-          #input$SimulationYearStart,
-          #input$DaysLimit
+          input$DroneBroodRemoval
         ),
         Default.Value = NA
       )
@@ -143,7 +161,9 @@ honeybee_param_server <- function(id) {
         {
           updateSliderInput(
             inputId = "DaysLimit",
-            max = as.integer((Sys.Date() - 31) - as.Date(paste0(input$SimulationYearStart, "-01-01")))
+            max = as.integer(
+              (Sys.Date() - 31) - as.Date(paste0(input$SimulationYearStart, "-01-01"))
+            )
           )
         }
       )

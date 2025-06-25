@@ -1,4 +1,12 @@
-box::use(shiny[NS, column, tags, fluidRow, icon])
+box::use(
+  shiny[
+    NS,
+    column,
+    tags,
+    fluidRow,
+    icon
+  ],
+)
 
 #' @export
 disease_info_ui <- function(id, i18n) {

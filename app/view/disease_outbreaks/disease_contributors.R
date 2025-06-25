@@ -36,11 +36,3 @@ disease_contributors_ui <- function(id, i18n) {
     )
   )
 }
-
-#' @export
-disease_contributors_server <- function(id, r) {
-  # nolint
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-  })
-}
