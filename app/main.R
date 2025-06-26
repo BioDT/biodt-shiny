@@ -138,7 +138,7 @@ biodt_theme <- bs_theme(
 
 # Initialize translations
 i18n <- Translator$new(
-  translation_json_path = "app/translations/multilingual_translations_gpt.json"
+  translation_json_path = "app/translations/multilingual_translations.json"
 )
 i18n$set_translation_language("en")
 
