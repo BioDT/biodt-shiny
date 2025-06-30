@@ -129,10 +129,10 @@ ces_biodiversity_server <- function(id, i18n) {
       html = msg,
       color = "rgba(256,256,256,0.9)"
     )
+    ns <- session$ns
 
     # Define the path to the data directory
     ces_path <- file.path(config$get("data_path"), "ces")
-    ns <- session$ns
 
     # Load the species list if the file exists, otherwise show an error notification
     if (file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))) {

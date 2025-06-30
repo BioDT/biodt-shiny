@@ -27,4 +27,3 @@ k8s:
   token: !expr Sys.getenv("KUBERNETES_API_TOKEN")
   shinyproxy_id: !expr Sys.getenv("SHINYPROXY_ID")
   executor: "k8s"
-
