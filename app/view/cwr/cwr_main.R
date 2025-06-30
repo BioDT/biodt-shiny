@@ -73,21 +73,27 @@ box::use(
 # Local modules
 box::use(
   # Loading State
-  app/logic/waiter[waiter_text],
+  app / logic / waiter[waiter_text],
 
   # CWR Components
-  app/view/cwr/cwr_info[
-    cwr_info_ui,
-    cwr_info_server
-  ],
+  app /
+    view /
+    cwr /
+    cwr_info[
+      cwr_info_ui,
+      cwr_info_server
+    ],
   # app/view/cwr/cwr_map[
   #   cwr_map_ui,
   #   cwr_map_server
   # ],
-  app/view/cwr/cwr_contributors[
-    cwr_contributors_ui,
-    cwr_contributors_server
-  ],
+  app /
+    view /
+    cwr /
+    cwr_contributors[
+      cwr_contributors_ui,
+      cwr_contributors_server
+    ],
 )
 
 crop_table <-

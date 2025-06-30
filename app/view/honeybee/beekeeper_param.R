@@ -6,6 +6,7 @@ box::use(
     tags,
     div,
     bootstrapPage,
+    checkboxInput
   ],
   bslib[
     card,
