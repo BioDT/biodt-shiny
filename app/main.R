@@ -18,7 +18,10 @@ box::use(
 
 # UI Enhancements
 box::use(
-  shinyjs[useShinyjs],
+  shinyjs[
+    useShinyjs,
+    showLog
+  ],
   cicerone[use_cicerone],
   htmltools[includeScript],
   stringi[stri_rand_strings],
@@ -142,63 +145,17 @@ i18n <- Translator$new(
 )
 i18n$set_translation_language("en")
 
-#' @export
-ui <- function(id) {
-  ns <- shiny$NS(id)
-  page(
-    theme = biodt_theme,
-    # Head ----
-    shiny$tags$head(
-      shiny$tags$link(
-        rel = "shortcut icon",
-        href = "static/favicon.ico"
-      ),
-      useShinyjs(),
-      useWaiter(),
-      useHostess(),
-      use_cicerone(),
-      usei18n(i18n),
-      includeScript("app/js/tab-index.js"),
-      includeScript("app/js/tab-switcher.js"),
-      includeScript("app/js/popover.js"),
-    ),
-    waiterShowOnLoad(
-      html = spin_loaders(
-        id = 19,
-        color = "#414f2f"
-      ),
-      color = "#414f2f"
-    ),
 
+
+# Main UI ----
+## a proper solution found here: https://deanattali.com/shinyjs/advanced#usage-navbarpage
+## + https://shiny.posit.co/r/articles/build/templates/
+
+wholepage <-
+  tagList(
     # --- Navigation Menu ---
     page_navbar(
-      window_title = "BioDT",
-      title = shiny$actionLink(
-        inputId = ns("biodt_logo"),
-        shiny$img(
-          src = "static/logo.svg",
-          height = "70px",
-          style = "padding-right: 20px",
-          alt = i18n$translate("Biodiversity Digital Twin"),
-        ),
-      ),
-      id = ns("navbar"),
-      theme = biodt_theme,
-      bg = "#fff",
-      fillable = TRUE,
-      # must be true
-      collapsible = TRUE,
-      fluid = TRUE,
-
-      # Info Menu ----
-      nav_panel(
-        title = i18n$translate("Info"),
-        value = "info",
-        icon = shiny$icon("circle-info", `aria-hidden` = "true"),
-        class = "container-fluid index-info",
-        mod_info_ui(ns("info"), i18n)
-      ),
-
+      html_head,
       # Digital Twin Menu ----
       nav_menu(
         title = i18n$translate("Digital Twin"),
@@ -320,16 +277,17 @@ ui <- function(id) {
           class = "p-0",
           honeybee_ui(
             ns("honeybee_main"),
-            theme = biodt_theme,
             i18n
           )
         ),
+
         nav_panel(
           title = i18n$translate("Disease Outbreaks"),
           value = "disease",
           class = "p-0",
           disease_outbreaks_main_ui(ns("disease_outbreaks_main"), i18n)
         ),
+
         ## --- UI: Dynamics and threats from and for species of policy concern ----
         nav_item(
           shiny$div(
@@ -343,6 +301,7 @@ ui <- function(id) {
             ),
           )
         ),
+
         ## --- UI: Invasive Alien Species ----
         nav_panel(
           title = i18n$translate("Invasive Alien Species"),
@@ -355,6 +314,7 @@ ui <- function(id) {
         ),
       ),
       nav_spacer(),
+
       # Acknowledgements - main menu item ----
       nav_panel(
         title = i18n$translate("Acknowledgements"),
@@ -364,19 +324,92 @@ ui <- function(id) {
         mod_acknowledgements_ui(
           "info",
           i18n
+        ),
+        shiny$tags$div(
+          class = "text-center",
+          shiny$tags$code(
+            paste(i18n$get_key_translation())
+          )
         )
       ),
+
       # Lang select - main menu item ----
       nav_item(
         shiny$selectInput(
           ns("selected_language"),
-          shiny$span(i18n$translate("Lang:")),
+          label = NULL,
+          width = "75px",
           choices = i18n$get_languages(),
-          selected = i18n$get_key_translation(),
-          width = "75px"
+          selected = i18n$get_key_translation()
         )
-      )
+      ),
+      title = shiny$actionLink(
+        inputId = ns("biodt_logo"),
+        shiny$img(
+          src = "static/logo.svg",
+          height = "70px",
+          style = "padding-right: 20px",
+          alt = i18n$translate("Biodiversity Digital Twin"),
+        ),
+      ),
+
+      # Info Menu ----
+      nav_panel(
+        title = i18n$translate("Info"),
+        value = "info",
+        icon = shiny$icon("circle-info", `aria-hidden` = "true"),
+        class = "container-fluid index-info",
+        mod_info_ui(ns("info"), i18n)
+      ),
+      id = ns("navbar"),
+      theme = biodt_theme,
+      window_title = "Biodiversity Digital Twin",
+      bg = "#fff",
+      fillable = TRUE,
+      collapsible = TRUE, # must be true
+      fluid = TRUE,
+      lang = i18n$get_key_translation()
     )
+  )
+
+# !!!! TO DO TO FINISH !!!! ALL THIS COMMENTED STUFF BELOW TRANSFER INTO THE html-main.html template:: ----
+## !!! ALSO DON'T FORGET WHAT IS IN THESE TWO VIGNETTES !!!
+## important for including JS properly:
+# ?htmltools::renderDocument
+# ?htmltools::htmlDependency
+# VIZ ALSO INNERS OF shiny::htmlTemplate WHEN CHECKED IN CONSOLE!!!!!
+#   # Head ----
+# TODO figure out, how to include this:   ns <- NS(id)
+#   html_head <- shiny$tags$head(
+#     shiny$tags$link(
+#       rel = "shortcut icon",
+#       href = "static/favicon.ico"
+#     ),
+#     useShinyjs(),
+#     useWaiter(),
+#     waiterShowOnLoad(
+#       html = spin_loaders(
+#         id = 19,
+#         color = "#414f2f"
+#       ),
+#       color = "#414f2f"
+#     ),
+#     useHostess(),
+#     use_cicerone(),
+#     usei18n(i18n),
+#     includeScript("app/js/tab-index.js"),
+#     includeScript("app/js/tab-switcher.js"),
+#     includeScript("app/js/popover.js"),
+#   )
+
+
+
+#' @export
+ui <- function(id) {
+  shiny::htmlTemplate("html-main.html",
+    id = id,
+    wholepage = wholepage,
+    lang = i18n$get_key_translation()
   )
 }
 
@@ -384,6 +417,7 @@ ui <- function(id) {
 server <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
+    showLog("main server started")
 
     session_dir <- file.path(
       config$get("base_path"),
@@ -402,7 +436,7 @@ server <- function(id) {
     shiny$observeEvent(input$selected_language, {
       print("Language changed")
       update_lang(input$selected_language)
-      shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
+      # shinyjs::runjs(paste0("document.documentElement.lang = '", input$selected_language, "';"))
     })
 
     # Info page ----
@@ -455,13 +489,15 @@ server <- function(id) {
     )
 
     shiny$observeEvent(input$biodt_logo, {
-      nav_select(
-        id = "navbar",
-        selected = "info",
-        session = session
-      )
-    })
+        nav_select(
+          id = "navbar",
+          selected = "info",
+          session = session
+        )
+      }
+    )
 
-    waiter_hide()
-  })
-}
+        waiter_hide()
+      })
+    }
+  }

@@ -4,9 +4,6 @@ box::use(
   bslib[card, card_header, card_body, bs_theme, nav_select],
 )
 
-box::use(app / view / honeybee / honeybee_main[honeybee_ui, honeybee_server],)
-
-
 #' @export
 mod_info_ui <- function(id, i18n) {
   ns <- NS(id)

@@ -27,10 +27,10 @@ box::use(
 )
 
 #' @export
-honeybee_param_ui <- function(id, theme, i18n) {
+honeybee_param_ui <- function(id, i18n) {
   ns <- NS(id)
   bootstrapPage(
-    theme = theme,
+    #theme = theme,
     card(
       class = "me-md-3 card-shadow overflow-hidden",
       title = "params_simulation",
