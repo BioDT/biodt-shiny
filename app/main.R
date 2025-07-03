@@ -146,7 +146,6 @@ i18n <- Translator$new(
 i18n$set_translation_language("en")
 
 
-
 # Main UI ----
 ## a proper solution found here: https://deanattali.com/shinyjs/advanced#usage-navbarpage
 ## + https://shiny.posit.co/r/articles/build/templates/
@@ -397,16 +396,12 @@ wholepage <-
 #     useHostess(),
 #     use_cicerone(),
 #     usei18n(i18n),
-#     includeScript("app/js/tab-index.js"),
-#     includeScript("app/js/tab-switcher.js"),
-#     includeScript("app/js/popover.js"),
 #   )
-
-
 
 #' @export
 ui <- function(id) {
-  shiny::htmlTemplate("html-main.html",
+  shiny::htmlTemplate(
+    "html-main.html",
     id = id,
     wholepage = wholepage,
     lang = i18n$get_key_translation()
@@ -489,15 +484,13 @@ server <- function(id) {
     )
 
     shiny$observeEvent(input$biodt_logo, {
-        nav_select(
-          id = "navbar",
-          selected = "info",
-          session = session
-        )
-      }
-    )
+      nav_select(
+        id = "navbar",
+        selected = "info",
+        session = session
+      )
+    })
 
-        waiter_hide()
-      })
-    }
-  }
+    waiter_hide()
+  })
+}

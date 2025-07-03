@@ -2,6 +2,15 @@
 <!DOCTYPE html>
 <html lang="{{ lang() }}">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="static/favicon.ico" />
+    <script defer fetchpriority="high" src="js/tab-index.js" />
+    <script defer fetchpriority="high" src="js/tab-switcher.js" />
+    <script defer fetchpriority="low" src="js/popover.js" />
+    <style media="print">
+      .bslib-page-fill, .bslib-gap-spacing, .bslib-flow-mobile, .html-fill-container{padding:2px} .bslib-page-navbar
+    </style>
     {{ headContent() }}
     {{ bootstrapLib() }}
   </head>
@@ -9,4 +18,9 @@
     {{ actionButton("action", name) }}
   </body>
 </html>
-{% endraw %}
+{{% endraw %}}
+<!-- This file is part of the Biodt Shiny app. -->
+<!-- It is used to render the main HTML template for the app. -->
+<!-- This is a Shiny custom template based on https://shiny.posit.co/r/articles/build/templates/ -->
+<!-- It provides the basic structure for the Biodt Shiny app -->
+<!-- The template includes a head section with meta tags, a favicon, and a script for popover functionality -->
