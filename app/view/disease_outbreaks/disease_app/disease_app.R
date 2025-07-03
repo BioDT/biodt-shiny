@@ -29,8 +29,9 @@ disease_app_ui <- function(id, i18n) {
       shiny$sidebarPanel(
         shiny$fileInput(
           ns("file"),
-          i18n$translate("Upload a GeoTIFF file"),
-          accept = c(".tiff", ".tif")
+          label = i18n$translate("Upload a GeoTIFF file"),
+          accept = c(".tiff", ".tif"),
+          placeholder = NULL,
         ),
         disabled(shiny$actionButton(ns("run_command"), i18n$translate("Run model"))),
         shiny$verbatimTextOutput(ns("command_output")), # Display WSL command output
@@ -65,7 +66,6 @@ disease_app_ui <- function(id, i18n) {
 }
 
 #' @export
-
 disease_app_server <- function(
   id,
   tab_disease_selected,
@@ -137,7 +137,9 @@ disease_app_server <- function(
       shiny$div(
         class = "alert alert-info",
         role = "alert",
-        i18n$translate("Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon.")
+        i18n$translate(
+          "Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon."
+        )
       )
     })
 

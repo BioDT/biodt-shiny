@@ -264,10 +264,10 @@ rtbm_app_ui <- function(id, i18n) {
   # Wrap everything in tagList with styles
   tagList(
     # Include CSS resources
-    tags$head(
-      # Global styles (with RTBM styles now integrated into main.scss)
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles/main.css")
-    ),
+    # tags$head(
+    #   # Global styles (with RTBM styles now integrated into main.scss)
+    #   tags$link(rel = "stylesheet", type = "text/css", href = "styles/main.css")
+    # ),
     useShinyjs(), # Initialize shinyjs
     base_layout,
     # Add plot output for summary statistics

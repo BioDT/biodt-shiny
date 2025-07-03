@@ -12,7 +12,8 @@ box::use(
     nav_spacer,
     nav_item,
     nav_panel,
-    page
+    page,
+    navbar_options,
   ],
 )
 
@@ -138,7 +139,7 @@ biodt_theme <- bs_theme(
 
 # Initialize translations
 i18n <- Translator$new(
-  translation_json_path = "app/translations/multilingual_translations.json"
+  translation_json_path = "app/translations/translation.json"
 )
 i18n$set_translation_language("en")
 
@@ -147,6 +148,16 @@ ui <- function(id) {
   ns <- shiny$NS(id)
   page(
     theme = biodt_theme,
+    #lang = "en_US",
+    title = shiny$actionLink(
+      inputId = ns("biodt_logo"),
+      shiny$img(
+        src = "static/logo.svg",
+        height = "70px",
+        style = "padding-right: 20px",
+        alt = "Biodiversity Digital Twin"
+      ),
+    ),
     # Head ----
     shiny$tags$head(
       shiny$tags$link(
@@ -157,7 +168,6 @@ ui <- function(id) {
       useWaiter(),
       useHostess(),
       use_cicerone(),
-      usei18n(i18n),
       includeScript("app/js/tab-index.js"),
       includeScript("app/js/tab-switcher.js"),
       includeScript("app/js/popover.js"),
@@ -169,27 +179,9 @@ ui <- function(id) {
       ),
       color = "#414f2f"
     ),
-
+    usei18n(i18n),
     # --- Navigation Menu ---
     page_navbar(
-      window_title = "BioDT",
-      title = shiny$actionLink(
-        inputId = ns("biodt_logo"),
-        shiny$img(
-          src = "static/logo.svg",
-          height = "70px",
-          style = "padding-right: 20px",
-          alt = i18n$translate("Biodiversity Digital Twin"),
-        ),
-      ),
-      id = ns("navbar"),
-      theme = biodt_theme,
-      bg = "#fff",
-      fillable = TRUE,
-      # must be true
-      collapsible = TRUE,
-      fluid = TRUE,
-
       # Info Menu ----
       nav_panel(
         title = i18n$translate("Info"),
@@ -370,11 +362,20 @@ ui <- function(id) {
       nav_item(
         shiny$selectInput(
           ns("selected_language"),
-          shiny$span(i18n$translate("Lang:")),
+          NULL,
           choices = i18n$get_languages(),
           selected = i18n$get_key_translation(),
           width = "75px"
         )
+      ),
+      window_title = "BioDT",
+      id = ns("navbar"),
+      fillable = TRUE,
+      # must be true
+      fluid = TRUE,
+      navbar_options = navbar_options(
+        collapsible = TRUE,
+        bg = "#fff"
       )
     )
   )
@@ -400,9 +401,9 @@ server <- function(id) {
 
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
-      print("Language changed")
-      update_lang(input$selected_language)
-      shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
+      print(paste("Language change!", input$selected_language))
+      shiny.i18n::update_lang(input$selected_language)
+      # shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
     })
 
     # Info page ----

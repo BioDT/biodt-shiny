@@ -84,7 +84,7 @@ cwr_info_ui <- function(id, i18n) {
         tags$img(
           src = "static/img/rye-5447847_1920.jpg",
           style = "width: 50vw; height: 100vh; max-height: 1000px; object-fit: cover;",
-          alt = 'Image by <a href="https://pixabay.com/users/nickype-10327513/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=5447847">Nicky ❤️🌿🐞🌿❤️</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=5447847">Pixabay</a>'
+          alt = "Crop Wild Relatives"
         )
       )
     )
