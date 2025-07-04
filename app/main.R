@@ -141,6 +141,7 @@ biodt_theme <- bs_theme(
 i18n <- Translator$new(
   translation_json_path = "app/translations/translation.json"
 )
+# i18n$use_js()
 i18n$set_translation_language("en")
 
 #' @export
@@ -395,14 +396,21 @@ server <- function(id) {
       )
     )
 
+    trans <- shiny$reactiveVal(NULL)
+
     r <- shiny$reactiveValues(
       biodt_theme = biodt_theme
     )
 
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
+      # i18n$get_key_translation() |>
+      #   trans()
+      i18n$get_languages() |>
+        trans()
       print(paste("Language change!", input$selected_language))
-      shiny.i18n::update_lang(input$selected_language)
+      print(paste("translations reactive:::\n", trans()))
+      update_lang(trans())
       # shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
     })
 
