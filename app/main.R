@@ -404,12 +404,20 @@ server <- function(id) {
 
     # Language change support see shiny.i18n
     shiny$observeEvent(input$selected_language, {
-      # i18n$get_key_translation() |>
-      #   trans()
-      i18n$get_languages() |>
+      # t_len <- length(trans())
+      # print("translations length1: ", t_len)
+
+      i18n$get_translation_language() |>
         trans()
-      print(paste("Language change!", input$selected_language))
-      print(paste("translations reactive:::\n", trans()))
+
+      shiny::req(trans())
+
+      # req(length(trans()))
+      # t_len <- length(trans())
+      # print("translations length2: ", t_len)
+
+      print(paste("Language changed to: ", input$selected_language), "\n")
+      print(paste("Selected translations reactive:\n", trans()))
       update_lang(trans())
       # shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
     })
