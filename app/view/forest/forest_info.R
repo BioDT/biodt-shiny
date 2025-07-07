@@ -31,21 +31,25 @@ forest_info_ui <- function(id, i18n) {
           )
         ),
         tags$p(
-          tags$a(i18n$translate("Replica of the Forest: ")),
-          i18n$translate("Forest simulations conducted with LANDIS-II (Scheller and Mladenoff 2007, "),
+          tags$strong(i18n$translate("Replica of the Forest: ")),
+          i18n$translate(
+            "Forest simulations conducted with LANDIS-II (Scheller and Mladenoff 2007, "
+          ),
           tags$a(
             "https://doi.org/10.1016/j.ecolmodel.2006.10.009",
             href = "https://doi.org/10.1016/j.ecolmodel.2006.10.009",
             target = "_blank"
           ),
-          i18n$translate("), which is a landscape model designed to simulate forest succession and disturbances.")
+          i18n$translate(
+            "), which is a landscape model designed to simulate forest succession and disturbances."
+          )
         ),
         tags$p(
-          i18n$translate("LANDIS-II Home Page: "),
-          tags$a("https://landis-ii.org/", href = "https://landis-ii.org/", target = "_blank")
-        ),
-        tags$p(
-          i18n$translate("Completely open-source with extensive documentation on GitHub: "),
+          tags$strong(i18n$translate("LANDIS-II Home Page: ")),
+          tags$a("https://landis-ii.org/", href = "https://landis-ii.org/", target = "_blank"),
+          i18n$translate(
+            " LANDIS-II is completely open source software. Its extensive documentation can be found on GitHub: " # nolint: line_length_linter.
+          ),
           tags$a(
             "https://github.com/LANDIS-II-Foundation",
             href = "https://github.com/LANDIS-II-Foundation",
@@ -61,23 +65,24 @@ forest_info_ui <- function(id, i18n) {
           i18n$translate(")  for analyzing community ecological data.")
         ),
         tags$p(
-          i18n$translate("HMSC Home Page: "),
+          i18n$translate(" HMSC Home Page: "),
           tags$a(
             "https://www.helsinki.fi/en/researchgroups/statistical-ecology/software/hmsc",
             href = "https://www.helsinki.fi/en/researchgroups/statistical-ecology/software/hmsc",
             target = "_blank"
           ),
-        ),
-        tags$p(
-          i18n$translate("HSMC R-package is available on CRAN "),
+          i18n$translate(" HSMC R-package is available on CRAN: "),
           tags$a(
             "https://cran.r-project.org/web/packages/Hmsc/index.html",
             href = "https://cran.r-project.org/web/packages/Hmsc/index.html",
             target = "_blank"
           ),
-          i18n$translate("), and the development version can be found on GitHub ("),
-          tags$a("https://github.com/hmsc-r/HMSC", href = "https://github.com/hmsc-r/HMSC", target = "_blank"),
-          ")."
+          i18n$translate(" And the development version can be found on GitHub: "),
+          tags$a(
+            "https://github.com/hmsc-r/HMSC",
+            href = "https://github.com/hmsc-r/HMSC",
+            target = "_blank"
+          )
         ),
         tags$p(
           i18n$translate("Source code and scripts of the pDT can be found at "),
@@ -86,8 +91,7 @@ forest_info_ui <- function(id, i18n) {
             "https://github.com/BioDT/uc-forest-bird",
             href = "https://github.com/BioDT/uc-forest-bird",
             target = "_blank"
-          ),
-          "."
+          )
         ),
         tags$div(
           class = "mt-5",
