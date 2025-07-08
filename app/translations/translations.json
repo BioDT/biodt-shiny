@@ -2739,40 +2739,6 @@
       "el": "Συγκομισμένη βιομάζα"
     },
     {
-      "en": "Woody Debris",
-      "cz": "Dřevní odpad",
-      "fi": "Puujäte",
-      "it": "Detriti legnosi",
-      "nl": "Houtafval",
-      "est": "Puujäätmed",
-      "sv": "Trädrester",
-      "de": "Holzreste",
-      "no": "Trevirke avfall",
-      "da": "Træaffald",
-      "es": "Desechos leñosos",
-      "pt": "Detritos lenhosos",
-      "sl": "Lesni ostanki",
-      "bg": "Дървесни отпадъци",
-      "el": "Ξυλώδη υπολείμματα"
-    },
-    {
-      "en": "Max-age of selected species",
-      "cz": "Maximální věk vybraného druhu",
-      "fi": "Valitun lajin maksimi-ikä",
-      "it": "Età massima della specie selezionata",
-      "nl": "Maximale leeftijd van geselecteerde soort",
-      "est": "Valitud liigi maksimaalne vanus",
-      "sv": "Maxålder för vald art",
-      "de": "Maximales Alter der ausgewählten Art",
-      "no": "Maksimal alder for valgt art",
-      "da": "Maksimal alder for valgte art",
-      "es": "Edad máxima de la especie seleccionada",
-      "pt": "Idade máxima da espécie selecionada",
-      "sl": "Največja starost izbrane vrste",
-      "bg": "Максимална възраст на избрания вид",
-      "el": "Μέγιστη ηλικία του επιλεγμένου είδους"
-    },
-    {
       "en": "Average age of all trees",
       "cz": "Průměrný věk všech stromů",
       "fi": "Kaikkien puiden keski-ikä",
@@ -5372,6 +5338,40 @@
       "sl": "parametri",
       "bg": "параметрите",
       "el": "οι παράμετροι"
+    },
+    {
+        "en": "Woody Debris",
+        "cz": "Dřevní suť",
+        "fi": "Puutähteet",
+        "it": "Residui legnosi",
+        "nl": "Houtachtig afval",
+        "est": "Puidujäätmed",
+        "sv": "Vedartat avfall",
+        "de": "Holzreste",
+        "no": "Tremateriale",
+        "da": "Træaffald",
+        "es": "Restos leñosos",
+        "pt": "Detritos lenhosos",
+        "sl": "Lesni ostanki",
+        "bg": "Дървесни отпадъци",
+        "el": "Ξυλώδη υπολείμματα"
+    },
+    {
+        "en": "Max-age of selected species",
+        "cz": "Maximální věk vybraných druhů",
+        "fi": "Valittujen lajien enimmäisikä",
+        "it": "Età massima delle specie selezionate",
+        "nl": "Maximale leeftijd van geselecteerde soorten",
+        "est": "Valitud liikide maksimaalne vanus",
+        "sv": "Maxålder för valda arter",
+        "de": "Maximalalter der ausgewählten Arten",
+        "no": "Maksimal alder for valgte arter",
+        "da": "Maksimal alder for valgte arter",
+        "es": "Edad máxima de las especies seleccionadas",
+        "pt": "Idade máxima das espécies selecionadas",
+        "sl": "Največja starost izbranih vrst",
+        "bg": "Максимална възраст на избраните видове",
+        "el": "Μέγιστη ηλικία των επιλεγμένων ειδών"
     }
   ]
 }

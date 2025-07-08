@@ -323,7 +323,8 @@ server <- function(id) {
     )
     # Forest pDT ----
     forest_main_server(
-      "forest_main"
+      "forest_main",
+      i18n
     )
     # Cultural Ecosystem Services pDT ----
     ces_server(
