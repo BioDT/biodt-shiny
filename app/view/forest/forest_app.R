@@ -48,43 +48,14 @@ forest_app_ui <- function(id, i18n) {
           shiny$selectInput(
             ns("output"),
             i18n$t("Select Output Type:"),
-            selectize = TRUE,
-            # choices = c(
-            #   "Above-ground biomass",
-            #   "Below-ground biomass",
-            #   "Harvested biomass",
-            #   "Woody Debris",
-            #   "Max-age of selected species",
-            #   "Average age of all trees",
-            #   "Median age of all trees"
-            # )
-            options = I(
-              "
-                  valueField: 'lowercase_shortcut',
-                  labelField: 'label',
-                  options: [
-                    { lowercase_shortcut: 'above', label: ",
-              i18n$t("Above-ground biomass"),
-              " },
-                    { lowercase_shortcut: 'below', label: ",
-              i18n$t("Below-ground biomass"),
-              " },
-                    { lowercase_shortcut: 'harvested', label: ",
-              i18n$t("Harvested biomass"),
-              " },
-                    { lowercase_shortcut: 'debris', label: ",
-              i18n$t("Woody Debris"),
-              " },
-                    { lowercase_shortcut: 'maxage', label: ",
-              i18n$t("Max-age of selected species"),
-              " },
-                    { lowercase_shortcut: 'avgage', label: ",
-              i18n$t("Average age of all trees"),
-              " },
-                    { lowercase_shortcut: 'medianage', label",
-              i18n$t("Median age of all trees"),
-              " }
-                  ]"
+            choices = c(
+              "Above-ground biomass",
+              "Below-ground biomass",
+              "Harvested biomass",
+              "Woody Debris",
+              "Max-age of selected species",
+              "Average age of all trees",
+              "Median age of all trees"
             )
           ),
           shiny$conditionalPanel(
@@ -175,6 +146,7 @@ forest_app_server <- function(id, app_selected, i18n) {
     i18n_r <- shiny$reactive({
       i18n
     })
+
     shiny$observe({
       shiny$updateSelectInput(
         session,
@@ -296,6 +268,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         shiny$req(app_selected())
 
         # experiment_data <- get_experiment_data_file(input, data_folder)
+
         input_selection <- get_file_list(
           input,
           data_folder,
