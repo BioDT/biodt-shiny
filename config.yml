@@ -3,6 +3,7 @@ default:
   rhino_log_file: !expr Sys.getenv("RHINO_LOG_FILE", NA)
   base_path: !expr file.path(getwd(), "app", "data", "shared")
   data_path: !expr file.path(getwd(), "app", "data")
+  transl_file: !expr file.path(getwd(), "app", "translations", "translations.json")
   executor: "docker"
 
 dev:
@@ -12,11 +13,13 @@ local_docker:
   base_path: !expr Sys.getenv("BASE_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
   host_base_path: !expr Sys.getenv("HOST_BASE_PATH")
+  transl_file: !expr Sys.getenv("TRANSL_FILE")
   executor: "docker"
 
 prod:
   base_path: !expr Sys.getenv("BASE_PATH")
   data_path: !expr Sys.getenv("DATA_PATH")
+  transl_file: !expr Sys.getenv("TRANSL_FILE")
   executor: "docker"
 
 k8s:
@@ -26,5 +29,5 @@ k8s:
   namespace: !expr Sys.getenv("KUBERNETES_NAMESPACE")
   token: !expr Sys.getenv("KUBERNETES_API_TOKEN")
   shinyproxy_id: !expr Sys.getenv("SHINYPROXY_ID")
+  transl_file: !expr Sys.getenv("TRANSL_FILE")
   executor: "k8s"
-

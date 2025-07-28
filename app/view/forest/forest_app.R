@@ -24,6 +24,7 @@ box::use(
       get_multichart,
       get_experiment_data_file
     ],
+  app / logic / extract_translated_strings_into_arr[extract_tnsltions_as_arr],
 )
 
 
@@ -212,9 +213,11 @@ forest_app_server <- function(id, app_selected, i18n) {
         experiment_data <- get_experiment_data_file(input, data_folder)
 
         input_selection <- get_file_list(
-          input,
+          input$species,
+          input$output,
           data_folder,
-          experiment_data
+          experiment_data, # "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
+          i18n
         )
 
         experiment_data_file(experiment_data)
@@ -223,7 +226,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         timestep <- input_selection$timestep
         start_year <- input_selection$start_year
         # duration <- input_selection$duration
-        simulated_years <- res_file_list_tick + start_year
+        simulated_years <- start_year + res_file_list_tick
 
         if (length(simulated_years) > 0) {
           min_value <- min(simulated_years, na.rm = TRUE)
@@ -252,7 +255,13 @@ forest_app_server <- function(id, app_selected, i18n) {
             100,
             {
               # Update res_file based on the slider value (file names starts from 0)
-              res_file_name <- get_file_name(input, input_selection$res_folder, value - start_year)
+              res_file_name <- get_file_name(
+                input$species,
+                input$output,
+                input_selection$res_folder,
+                value - start_year,
+                i18n
+              )
               res_file(res_file_name)
             }
           )
@@ -267,12 +276,14 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        # experiment_data <- get_experiment_data_file(input, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder)
 
         input_selection <- get_file_list(
-          input,
-          data_folder,
-          experiment_data_file()
+          input$species,
+          input$output,
+          data_folder, # OK: "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
+          experiment_data_file(), # OK? "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
+          i18n
         )
 
         # experiment_data_file(experiment_data)
@@ -281,7 +292,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         timestep <- input_selection$timestep
         start_year <- input_selection$start_year
         # duration <- input_selection$duration
-        simulated_years <- res_file_list_tick + start_year
+        simulated_years <- start_year + res_file_list_tick
 
         if (length(simulated_years) > 0) {
           min_value <- min(simulated_years, na.rm = TRUE)
@@ -310,7 +321,13 @@ forest_app_server <- function(id, app_selected, i18n) {
             100,
             {
               # Update res_file based on the slider value (file names starts from 0)
-              res_file_name <- get_file_name(input, input_selection$res_folder, value - start_year)
+              res_file_name <- get_file_name(
+                input$species,
+                input$output,
+                input_selection$res_folder,
+                value - start_year,
+                i18n
+              )
               res_file(res_file_name)
             }
           )
@@ -379,7 +396,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       ),
       ignoreInit = TRUE,
       {
-        chart <- get_multichart(experiment_data_file())
+        chart <- get_multichart(experiment_data_file(), i18n)
         experiment_chart(chart)
         output$multichart <- echarty$ecs.render(
           experiment_chart()
