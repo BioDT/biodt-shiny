@@ -1,4 +1,3 @@
-# Load the libraries
 box::use(
   dplyr,
   terra[rast, `values<-`, values, project, flip],
@@ -9,7 +8,11 @@ box::use(
 )
 
 box::use(
-  app / logic / extract_translated_strings_into_arr[extract_tnsltions_as_arr],
+  app / logic / extract_translated_strings_into_arr[extract_translated_ass_array],
+)
+
+box::use(
+  app / logic / extract_translated_strings_into_arr[extract_translated_ass_array],
 )
 
 #' @export
@@ -58,6 +61,15 @@ get_data <- function(
           "TotalCohorts.txt"
         )
       )
+      file_inside_zip <- file.path(
+        data_folder,
+        paste0(
+          "run_landis_",
+          paste0(climate, "_", management),
+          "_7141504/output/",
+          "TotalCohorts.txt"
+        )
+      )
 
       # get simulation start year
       lines <- readLines(file.path(
@@ -65,7 +77,14 @@ get_data <- function(
         paste0("run_landis_", paste0(climate, "_", management), "_7141504"),
         "PnET-succession.txt"
       ))
+      lines <- readLines(file.path(
+        data_folder,
+        paste0("run_landis_", paste0(climate, "_", management), "_7141504"),
+        "PnET-succession.txt"
+      ))
       start_year_line <- grep("^StartYear", lines, value = TRUE)
+      # Extract numbers (i.e. year) after "StartYear" keyword in PnET-succession.txt files
+      start_year <- as.numeric(sub("^StartYear\\s+([0-9]+).*$", "\\1", start_year_line))
       # Extract numbers (i.e. year) after "StartYear" keyword in PnET-succession.txt files
       start_year <- as.numeric(sub("^StartYear\\s+([0-9]+).*$", "\\1", start_year_line))
 
@@ -82,15 +101,23 @@ get_data <- function(
 
   # Combine all data into a single data frame
   combined_data <- dplyr$bind_rows(all_data)
+
   combined_data
 }
 
+#' @export
 #' @export
 get_figure <- function(
   combined_data,
   i18n
 ) {
   chart <- echarty$ec.init()
+
+  # Extract common data to avoid repetition and reduce line length
+  time_data <- as.character(
+    combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]
+  )
+
   chart$x$opts <- list(
     legend = list(
       data = c("4.5", "8.5", "current"),
@@ -150,202 +177,273 @@ get_figure <- function(
         top = "5%",
         text = "SA",
         textStyle = list(fontSize = 14)
+      ),
+      list(
+        left = "8%",
+        top = "5%",
+        text = "BAU",
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = "22%",
+        top = "5%",
+        text = "EXT10",
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = "36%",
+        top = "5%",
+        text = "EXT30",
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = "50%",
+        top = "5%",
+        text = "GTR30",
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = "64%",
+        top = "5%",
+        text = "NTLR",
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = "78%",
+        top = "5%",
+        text = "NTSR",
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = "92%",
+        top = "5%",
+        text = "SA",
+        textStyle = list(fontSize = 14)
       )
     ),
     xAxis = list(
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 0
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 1
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 2
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 3
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 4
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 5
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 6
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 7
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 8
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 9
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 10
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 11
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 12
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 13
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 14
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 15
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 16
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 17
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 18
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 19
       ),
       list(
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 20
       ),
       list(
         name = "year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 21
       ),
       list(
         name = "year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 22
       ),
       list(
         name = "year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 23
       ),
       list(
         name = "year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 24
       ),
       list(
         name = "year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
+        data = time_data,
         gridIndex = 25
       ),
       list(
         name = "year",
         nameLocation = "middle",
-        nameGap = 30,
-        nameTextStyle = list(
-          fontSize = 13,
-          align = "center",
-          color = "black"
-        ),
-        type = "category",
-        data = as.character(combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]),
-        gridIndex = 26
-      ),
-      list(
-        name = "year",
         nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
+        data = time_data,
+        gridIndex = 26
+      ),
+      list(
+        name = "year",
+        nameLocation = "middle",
+        nameLocation = "middle",
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = "center",
+          align = "center",
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(
+          combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]
+        ),
         data = as.character(
           combined_data[combined_data$Management == "BAU" & combined_data$Climate == "4.5", "Time"]
         ),
@@ -356,9 +454,11 @@ get_figure <- function(
       list(
         name = "AGBiomass (g/m^2)",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 50,
         nameTextStyle = list(
           fontSize = 12,
+          align = "center",
           align = "center",
           color = "black"
         ),
@@ -392,9 +492,11 @@ get_figure <- function(
       list(
         name = "BGBiomass (g/m^2)",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 50,
         nameTextStyle = list(
           fontSize = 12,
+          align = "center",
           align = "center",
           color = "black"
         ),
@@ -428,9 +530,12 @@ get_figure <- function(
       list(
         name = "Age in years",
         nameLocation = "middle",
+        name = "Age in years",
+        nameLocation = "middle",
         nameGap = 50,
         nameTextStyle = list(
           fontSize = 12,
+          align = "center",
           align = "center",
           color = "black"
         ),
@@ -464,9 +569,11 @@ get_figure <- function(
       list(
         name = "Woody Debris (kgDW/m^2)",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 50,
         nameTextStyle = list(
           fontSize = 12,
+          align = "center",
           align = "center",
           color = "black"
         ),
@@ -499,6 +606,34 @@ get_figure <- function(
       )
     ),
     grid = list(
+      list(left = "4%", top = "10%", width = "10%", height = "12%"),
+      list(left = "18%", top = "10%", width = "10%", height = "12%"),
+      list(left = "32%", top = "10%", width = "10%", height = "12%"),
+      list(left = "46%", top = "10%", width = "10%", height = "12%"),
+      list(left = "60%", top = "10%", width = "10%", height = "12%"),
+      list(left = "74%", top = "10%", width = "10%", height = "12%"),
+      list(left = "88%", top = "10%", width = "10%", height = "12%"),
+      list(left = "4%", top = "31%", width = "10%", height = "12%"),
+      list(left = "18%", top = "31%", width = "10%", height = "12%"),
+      list(left = "32%", top = "31%", width = "10%", height = "12%"),
+      list(left = "46%", top = "31%", width = "10%", height = "12%"),
+      list(left = "60%", top = "31%", width = "10%", height = "12%"),
+      list(left = "74%", top = "31%", width = "10%", height = "12%"),
+      list(left = "88%", top = "31%", width = "10%", height = "12%"),
+      list(left = "4%", top = "56%", width = "10%", height = "12%"),
+      list(left = "18%", top = "56%", width = "10%", height = "12%"),
+      list(left = "32%", top = "56%", width = "10%", height = "12%"),
+      list(left = "46%", top = "56%", width = "10%", height = "12%"),
+      list(left = "60%", top = "56%", width = "10%", height = "12%"),
+      list(left = "74%", top = "56%", width = "10%", height = "12%"),
+      list(left = "88%", top = "56%", width = "10%", height = "12%"),
+      list(left = "4%", top = "81%", width = "10%", height = "12%"),
+      list(left = "18%", top = "81%", width = "10%", height = "12%"),
+      list(left = "32%", top = "81%", width = "10%", height = "12%"),
+      list(left = "46%", top = "81%", width = "10%", height = "12%"),
+      list(left = "60%", top = "81%", width = "10%", height = "12%"),
+      list(left = "74%", top = "81%", width = "10%", height = "12%"),
+      list(left = "88%", top = "81%", width = "10%", height = "12%"),
       list(left = "4%", top = "10%", width = "10%", height = "12%"),
       list(left = "18%", top = "10%", width = "10%", height = "12%"),
       list(left = "32%", top = "10%", width = "10%", height = "12%"),
@@ -591,6 +726,10 @@ get_figure <- function(
           combined_data$Management == "BAU" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "BAU" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 7,
         yAxisIndex = 7,
@@ -598,6 +737,10 @@ get_figure <- function(
         color = "red"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "EXT10" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
@@ -613,6 +756,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 9,
         yAxisIndex = 9,
@@ -620,6 +767,10 @@ get_figure <- function(
         color = "red"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
@@ -635,6 +786,10 @@ get_figure <- function(
           combined_data$Management == "NTLR" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTLR" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 11,
         yAxisIndex = 11,
@@ -646,6 +801,10 @@ get_figure <- function(
           combined_data$Management == "NTSR" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTSR" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 12,
         yAxisIndex = 12,
@@ -653,6 +812,10 @@ get_figure <- function(
         color = "red"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "SA" & combined_data$Climate == "4.5",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "SA" & combined_data$Climate == "4.5",
           "AverageBelowGround.g.m2."
@@ -724,6 +887,10 @@ get_figure <- function(
           combined_data$Management == "BAU" & combined_data$Climate == "4.5",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "BAU" & combined_data$Climate == "4.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 21,
         yAxisIndex = 21,
@@ -731,6 +898,10 @@ get_figure <- function(
         color = "red"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "4.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "EXT10" & combined_data$Climate == "4.5",
           "WoodyDebris.kgDW.m2."
@@ -746,6 +917,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "4.5",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "4.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 23,
         yAxisIndex = 23,
@@ -753,6 +928,10 @@ get_figure <- function(
         color = "red"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "4.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "4.5",
           "WoodyDebris.kgDW.m2."
@@ -768,6 +947,10 @@ get_figure <- function(
           combined_data$Management == "NTLR" & combined_data$Climate == "4.5",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTLR" & combined_data$Climate == "4.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 25,
         yAxisIndex = 25,
@@ -775,6 +958,10 @@ get_figure <- function(
         color = "red"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "NTSR" & combined_data$Climate == "4.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "NTSR" & combined_data$Climate == "4.5",
           "WoodyDebris.kgDW.m2."
@@ -855,6 +1042,10 @@ get_figure <- function(
           combined_data$Management == "BAU" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "BAU" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 7,
         yAxisIndex = 7,
@@ -862,6 +1053,10 @@ get_figure <- function(
         color = "green"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "EXT10" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
@@ -877,6 +1072,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 9,
         yAxisIndex = 9,
@@ -884,6 +1083,10 @@ get_figure <- function(
         color = "green"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
@@ -899,6 +1102,10 @@ get_figure <- function(
           combined_data$Management == "NTLR" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTLR" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 11,
         yAxisIndex = 11,
@@ -910,6 +1117,10 @@ get_figure <- function(
           combined_data$Management == "NTSR" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTSR" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 12,
         yAxisIndex = 12,
@@ -917,6 +1128,10 @@ get_figure <- function(
         color = "green"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "SA" & combined_data$Climate == "8.5",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "SA" & combined_data$Climate == "8.5",
           "AverageBelowGround.g.m2."
@@ -988,6 +1203,10 @@ get_figure <- function(
           combined_data$Management == "BAU" & combined_data$Climate == "8.5",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "BAU" & combined_data$Climate == "8.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 21,
         yAxisIndex = 21,
@@ -995,6 +1214,10 @@ get_figure <- function(
         color = "green"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "8.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "EXT10" & combined_data$Climate == "8.5",
           "WoodyDebris.kgDW.m2."
@@ -1010,6 +1233,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "8.5",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "8.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 23,
         yAxisIndex = 23,
@@ -1017,6 +1244,10 @@ get_figure <- function(
         color = "green"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "8.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "8.5",
           "WoodyDebris.kgDW.m2."
@@ -1032,6 +1263,10 @@ get_figure <- function(
           combined_data$Management == "NTLR" & combined_data$Climate == "8.5",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTLR" & combined_data$Climate == "8.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 25,
         yAxisIndex = 25,
@@ -1039,6 +1274,10 @@ get_figure <- function(
         color = "green"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "NTSR" & combined_data$Climate == "8.5",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "NTSR" & combined_data$Climate == "8.5",
           "WoodyDebris.kgDW.m2."
@@ -1071,6 +1310,10 @@ get_figure <- function(
           combined_data$Management == "EXT10" & combined_data$Climate == "current",
           "AverageB.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "current",
+          "AverageB.g.m2."
+        ],
         type = "line",
         xAxisIndex = 1,
         yAxisIndex = 1,
@@ -1082,6 +1325,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "current",
           "AverageB.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "current",
+          "AverageB.g.m2."
+        ],
         type = "line",
         xAxisIndex = 2,
         yAxisIndex = 2,
@@ -1089,6 +1336,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "current",
+          "AverageB.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "current",
           "AverageB.g.m2."
@@ -1128,6 +1379,10 @@ get_figure <- function(
           combined_data$Management == "BAU" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "BAU" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 7,
         yAxisIndex = 7,
@@ -1135,6 +1390,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "EXT10" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
@@ -1150,6 +1409,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 9,
         yAxisIndex = 9,
@@ -1157,6 +1420,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
@@ -1172,6 +1439,10 @@ get_figure <- function(
           combined_data$Management == "NTLR" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTLR" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 11,
         yAxisIndex = 11,
@@ -1183,6 +1454,10 @@ get_figure <- function(
           combined_data$Management == "NTSR" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTSR" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         type = "line",
         xAxisIndex = 12,
         yAxisIndex = 12,
@@ -1190,6 +1465,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "SA" & combined_data$Climate == "current",
+          "AverageBelowGround.g.m2."
+        ],
         data = combined_data[
           combined_data$Management == "SA" & combined_data$Climate == "current",
           "AverageBelowGround.g.m2."
@@ -1261,6 +1540,10 @@ get_figure <- function(
           combined_data$Management == "BAU" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "BAU" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 21,
         yAxisIndex = 21,
@@ -1268,6 +1551,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "EXT10" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "EXT10" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
@@ -1283,6 +1570,10 @@ get_figure <- function(
           combined_data$Management == "EXT30" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "EXT30" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 23,
         yAxisIndex = 23,
@@ -1290,6 +1581,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "GTR30" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "GTR30" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
@@ -1305,6 +1600,10 @@ get_figure <- function(
           combined_data$Management == "NTLR" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTLR" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 25,
         yAxisIndex = 25,
@@ -1316,6 +1615,10 @@ get_figure <- function(
           combined_data$Management == "NTSR" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
         ],
+        data = combined_data[
+          combined_data$Management == "NTSR" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         type = "line",
         xAxisIndex = 26,
         yAxisIndex = 26,
@@ -1323,6 +1626,10 @@ get_figure <- function(
         color = "blue"
       ),
       list(
+        data = combined_data[
+          combined_data$Management == "SA" & combined_data$Climate == "current",
+          "WoodyDebris.kgDW.m2."
+        ],
         data = combined_data[
           combined_data$Management == "SA" & combined_data$Climate == "current",
           "WoodyDebris.kgDW.m2."
@@ -1366,22 +1673,7 @@ get_file_list <- function(
   if (stringr$str_starts(experiment, "/")) {
     experiment <- stringr$str_replace(experiment, "/", "")
   }
-
   data_file_list <- list.files(path = experiment_data, recursive = TRUE)
-  # with app/data/forest_bird/run_landis_current_BAU_7141504 returns e.g.:
-  # [1] "output/agbiomass/betulaSP/AGBiomass0.tif"
-  # "output/agbiomass/betulaSP/AGBiomass10.tif"
-  # "output/agbiomass/betulaSP/AGBiomass100.tif"
-  # "output/agbiomass/betulaSP/AGBiomass20.tif"
-  # "output/agbiomass/betulaSP/AGBiomass30.tif"
-  # [6] "output/agbiomass/betulaSP/AGBiomass40.tif"
-  # "output/agbiomass/betulaSP/AGBiomass50.tif"
-  # "output/agbiomass/betulaSP/AGBiomass60.tif"
-  # "output/agbiomass/betulaSP/AGBiomass70.tif"
-  # "output/agbiomass/betulaSP/AGBiomass80.tif"
-  # [11] "output/agbiomass/betulaSP/AGBiomass90.tif"
-  # "output/agbiomass/other/AGBiomass0.tif"
-  # ...
 
   # get simulated years
   lines <- readLines(file.path(experiment_data, "PnET-succession.txt"))
@@ -1393,29 +1685,26 @@ get_file_list <- function(
   duration_line <- grep("^Duration", lines, value = TRUE)
   duration <- as.numeric(sub(".*?(\\d+).*", "\\1", duration_line))
 
-  res_folder <- ""
-  res_working_folder <- ""
-  res_file_list_tick <- ""
-
-  if ("Above-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
-    if ("Birch (betulaSP)" %in% extract_tnsltions_as_arr(inp_species)) {
+  if ("Above-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+    if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {
       type <- "betulaSP"
-    } else if ("Pine (pinussyl)" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("Pine (pinussyl)" %in% extract_translated_ass_array(inp_species)) {
       type <- "pinussyl"
-    } else if ("Spruce (piceabbies)" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("Spruce (piceabbies)" %in% extract_translated_ass_array(inp_species)) {
       type <- "piceabies"
-    } else if ("Other trees (other)" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("Other trees (other)" %in% extract_translated_ass_array(inp_species)) {
       type <- "other"
     }
     res_folder <- paste0(experiment, "/output/agbiomass/", type)
     res_working_folder <- res_folder
 
+    res_file_list <- data_file_list[grep(paste0("output/agbiomass/", type, "AGBiomass[0-9]+\\.tif$"), data_file_list)]
     res_file_list <- data_file_list[grep(
       paste0("output/agbiomass/", type, "/", "AGBiomass[0-9]+\\.tif$"),
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Below-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_folder <- paste0(experiment, "/output/BelowGroundBiom/")
     res_working_folder <- res_folder
 
@@ -1424,7 +1713,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Below-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_folder <- paste0(experiment, "/output/harvest/")
     res_working_folder <- res_folder
 
@@ -1433,7 +1722,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Below-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_folder <- paste0(experiment, "/output/WoodyDebris/")
     res_working_folder <- res_folder
     res_file_list <- data_file_list[grep(
@@ -1441,16 +1730,16 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Max-age of selected species" %in% extract_tnsltions_as_arr(inp_species)) {
-    if ("Birch (betulaSP)" %in% extract_tnsltions_as_arr(inp_species)) {
+  } else if ("Max-age of selected species" %in% extract_translated_ass_array(inp_species)) {
+    if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {
       type <- "betulaSP"
-    } else if ("Pine (pinussyl)" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("Pine (pinussyl)" %in% extract_translated_ass_array(inp_species)) {
       type <- "pinussyl"
-    } else if ("Spruce (piceabbies)" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("Spruce (piceabbies)" %in% extract_translated_ass_array(inp_species)) {
       type <- "piceabies"
-    } else if ("All species" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("All species" %in% extract_translated_ass_array(inp_species)) {
       type <- "AllSppMaxAge"
-    } else if ("Other trees (other)" %in% extract_tnsltions_as_arr(inp_species)) {
+    } else if ("Other trees (other)" %in% extract_translated_ass_array(inp_species)) {
       type <- "other"
     }
     res_folder <- paste0(experiment, "/output/max-age-selected-spp/")
@@ -1460,8 +1749,13 @@ get_file_list <- function(
       data_file_list
     )]
 
+    res_file_list <- data_file_list[grep(
+      paste0("output/max-age-selected-spp/", type, "-[0-9]+\\.tif$"),
+      data_file_list
+    )]
+
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Average age of all trees)" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Average age of all trees)" %in% extract_translated_ass_array(inp_out)) {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
 
@@ -1470,7 +1764,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Median age of all trees" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Median age of all trees" %in% extract_translated_ass_array(inp_out)) {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
     print("res_working_folder:::")
@@ -1480,15 +1774,12 @@ get_file_list <- function(
       paste0("output/age-all-spp/", "AGE-MED-[0-9]+\\.tif$"),
       data_file_list
     )]
+    res_file_list <- data_file_list[grep(
+      paste0("output/age-all-spp/", "AGE-MED-[0-9]+\\.tif$"),
+      data_file_list
+    )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
   }
-
-  print("FINAL RETURNED res_working_folder:::")
-  print(res_working_folder)
-  print("FINAL RETURNED res_file_list_tick:::")
-  print(res_file_list_tick)
-  print("FINAL RETURNED res_folder:::")
-  print(res_folder)
 
   all_files_in_dir_out <- list(
     # experiment_data_file = experiment_data_file,
@@ -1510,69 +1801,52 @@ get_experiment_data_file <- function(
   data_folder,
   i18n
 ) {
-  climate <- "current"
-  if (inp_clim == "RCP4.5") {
-    climate <- "4.5"
-  } else if (inp_clim == "RCP8.5") {
-    climate <- "8.5"
-  }
-
   # Scan for files with the specified structure
   pattern <- paste0("^.+_", climate, "_", inp_mng, "_.+\\$")
   experiment_data <- list.dirs(path = data_folder, full.names = TRUE, recursive = FALSE)
-  experiment_data <- experiment_data[grepl(
-    paste0("_", climate, "_", inp_mng, "_"),
-    experiment_data
-  )]
+  experiment_data <- experiment_data[grepl(paste0("_", climate, "_", inp_mng, "_"), experiment_data)]
+
   experiment_data_file <- experiment_data
+
   experiment_data_file
 }
 
 
 #' @export
 get_file_name <- function(inp_species, inp_out, res_folder, tick, i18n) {
-  if ("Above-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  if ("Above-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_file <- paste0(res_folder, "/AGBiomass", tick, ".tif")
-  } else if ("Below-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_file <- paste0(res_folder, "BGB", tick, ".tif")
-  } else if ("Below-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_file <- paste0(res_folder, "biomass-removed-", tick, ".tif")
-  } else if ("Below-ground biomass" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
     res_file <- paste0(res_folder, "WoodyDebris-", tick, ".tif")
-  } else if ("Max-age of selected species" %in% extract_tnsltions_as_arr(inp_out)) {
-    if ("Birch (betulaSP)" %in% extract_tnsltions_as_arr(inp_species)) {
-      type <- "betulaSP"
-    } else if ("Pine (pinussyl)" %in% extract_tnsltions_as_arr(inp_species)) {
-      type <- "pinussyl"
-    } else if ("Spruce (piceabbies)" %in% extract_tnsltions_as_arr(inp_species)) {
-      type <- "piceabies"
-    } else if ("All species" %in% extract_tnsltions_as_arr(inp_species)) {
-      type <- "AllSppMaxAge"
-    } else if ("Other trees (other)" %in% extract_tnsltions_as_arr(inp_species)) {
-      type <- "other"
+  } else if ("Max-age of selected species" %in% extract_translated_ass_array(inp_out)) {
+    if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {} else if (
+      "Max-age of selected species" %in% extract_translated_ass_array(inp_out)
+    ) {
+      if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {
+        type <- "betulaSP"
+      } else if ("Pine (pinussyl)" %in% extract_translated_ass_array(inp_species)) {
+        type <- "pinussyl"
+      } else if ("Spruce (piceabbies)" %in% extract_translated_ass_array(inp_species)) {
+        type <- "piceabies"
+      } else if ("All species" %in% extract_translated_ass_array(inp_species)) {
+        type <- "AllSppMaxAge"
+      } else if ("Other trees (other)" %in% extract_translated_ass_array(inp_species)) {
+        type <- "other"
+      }
+
+      res_file <- paste0(res_folder, type, "-", tick, ".tif")
     }
-
-    res_file <- paste0(res_folder, type, "-", tick, ".tif")
-  } else if ("Average age of all trees" %in% extract_tnsltions_as_arr(inp_out)) {
+  } else if ("Average age of all trees" %in% extract_translated_ass_array(inp_out)) {
     res_file <- paste0(res_folder, "AGE-AVG-", tick, ".tif")
-  } else if ("Median age of all trees" %in% extract_tnsltions_as_arr(inp_out)) {
-    res_file <- paste0(res_folder, "AGE-MED-", tick, ".tif")
+  } else if ("Median age of all trees" %in% extract_translated_ass_array(inp_out)) {
+    all_data <- list()
+
+    file_inside_zip <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
   }
-
-  res_file
-}
-
-
-#' @export
-get_multichart <- function(
-  experiment_data_file,
-  i18n
-) {
-  # get data to plot
-
-  all_data <- list()
-
-  file_inside_zip <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
 
   # get simulation start year
   lines <- readLines(file.path(experiment_data_file, "PnET-succession.txt"))
@@ -1618,7 +1892,7 @@ get_multichart <- function(
         textStyle = list(
           fontSize = 14
         )
-      )
+      ),
     ),
     grid = list(
       list(left = "4%", top = "10%", width = "20%"),
@@ -1634,6 +1908,7 @@ get_multichart <- function(
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "category",
@@ -1643,9 +1918,11 @@ get_multichart <- function(
       list(
         name = "simulation year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
+          align = "center",
           align = "center",
           color = "black"
         ),
@@ -1656,9 +1933,11 @@ get_multichart <- function(
       list(
         name = "simulation year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
+          align = "center",
           align = "center",
           color = "black"
         ),
@@ -1669,16 +1948,18 @@ get_multichart <- function(
       list(
         name = "simulation year",
         nameLocation = "middle",
+        nameLocation = "middle",
         nameGap = 30,
         nameTextStyle = list(
           fontSize = 13,
+          align = "center",
           align = "center",
           color = "black"
         ),
         type = "category",
         data = as.character(data$Time),
         gridIndex = 3
-      )
+      ),
     ),
     yAxis = list(
       list(
@@ -1700,6 +1981,7 @@ get_multichart <- function(
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "value",
@@ -1712,6 +1994,7 @@ get_multichart <- function(
         nameTextStyle = list(
           fontSize = 13,
           align = "center",
+          align = "center",
           color = "black"
         ),
         type = "value",
@@ -1723,6 +2006,7 @@ get_multichart <- function(
         nameGap = 50,
         nameTextStyle = list(
           fontSize = 13,
+          align = "center",
           align = "center",
           color = "black"
         ),

@@ -21,10 +21,9 @@ box::use(
       get_file_name,
       get_data,
       get_figure,
-      get_multichart,
       get_experiment_data_file
     ],
-  app / logic / extract_translated_strings_into_arr[extract_tnsltions_as_arr],
+  app / logic / extract_translated_strings_into_arr[extract_translated_ass_array],
 )
 
 
@@ -62,7 +61,6 @@ forest_app_ui <- function(id, i18n) {
           shiny$conditionalPanel(
             condition = sprintf(
               "input['%s'] == 'Above-ground biomass' || input['%s'] == 'Max-age of selected species'",
-              ns("output"),
               ns("output")
             ),
             shiny$selectInput(
@@ -93,22 +91,16 @@ forest_app_ui <- function(id, i18n) {
       bslib$card(
         shiny$textOutput("selection"),
         leaflet$leafletOutput(ns("map")),
-        # echarty$ecs.output(
-        #   ns("multichart"),
-        #   # width = "100%",
-        #   # height = "400px"
-        # ),
       )
     ),
     bslib$card(
       echarty$ecs.output(
         ns("multichart"),
-        # width = "100%",
-        height = "400px"
+        height = "400px",
       ),
-      # leaflet$leafletOutput(ns("map")),
-      # shiny$plotOutput(ns("plot"), height = "800px")
-      # shiny$uiOutput(ns("plot"))
+      leaflet$leafletOutput(ns("map")),
+      shiny$plotOutput(ns("plot"), height = "800px"),
+      shiny$uiOutput(ns("plot")),
       echarty$ecs.output(
         ns("plot"),
         # width = "100%",
@@ -197,7 +189,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        experiment_data <- get_experiment_data_file(input, data_folder)
+        experiment_data <- get_experiment_data_file(input$climate, input$management, data_folder)
 
         experiment_data_file(experiment_data)
       }
@@ -210,10 +202,11 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        experiment_data <- get_experiment_data_file(input, data_folder)
+        experiment_data <- get_experiment_data_file(input$climate, input$management, data_folder)
 
         input_selection <- get_file_list(
           input$species,
+          input$output$species,
           input$output,
           data_folder,
           experiment_data, # "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
@@ -281,9 +274,10 @@ forest_app_server <- function(id, app_selected, i18n) {
         input_selection <- get_file_list(
           input$species,
           input$output,
-          data_folder, # OK: "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
-          experiment_data_file(), # OK? "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
-          i18n
+          data_folder,
+          # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
+          experiment_data_file(),
+          # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
         )
 
         # experiment_data_file(experiment_data)
@@ -327,6 +321,13 @@ forest_app_server <- function(id, app_selected, i18n) {
                 input_selection$res_folder,
                 value - start_year,
                 i18n
+              )
+              res_file_name <- get_file_name(
+                input$species,
+                input$output,
+                input_selection$res_folder,
+                i18n
+                # (value - start_year)
               )
               res_file(res_file_name)
             }
@@ -396,6 +397,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       ),
       ignoreInit = TRUE,
       {
+        chart <- get_multichart(experiment_data_file(), i18n)
         chart <- get_multichart(experiment_data_file(), i18n)
         experiment_chart(chart)
         output$multichart <- echarty$ecs.render(

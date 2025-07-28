@@ -6,7 +6,7 @@ box::use(
 )
 
 #' @export
-extract_tnsltions_as_arr <- function(en_string) {
+extract_translated_ass_array <- function(en_string) {
   filepath_with_translations <- config$get("transl_file")
 
   dframe_w_tnsl <- fromJSON(filepath_with_translations)
