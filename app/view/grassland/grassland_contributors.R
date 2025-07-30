@@ -4,7 +4,7 @@ box::use(
 
 
 #' @export
-grassland_contributors_ui <- function(id, i18n = NULL) {
+grassland_contributors_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "align-items-center justify-content-center m-0 p-0",
@@ -16,7 +16,7 @@ grassland_contributors_ui <- function(id, i18n = NULL) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5",
         tags$h2(
-          if (!is.null(i18n)) i18n$translate("CONTRIBUTORS") else "Contributors",
+          i18n$translate("CONTRIBUTORS"),
           style = "greeting display-4 font-weight-bold"
         ),
         tags$p(

@@ -184,7 +184,7 @@ rtbm_app_ui <- function(id, i18n) {
           # Card Header now includes collapse button directly
           div(
             class = "card-header d-flex justify-content-between align-items-center",
-            span("Bird Observation Controls")
+            span(i18n$t("Bird Observation Controls"))
           ),
           # Call Sidebar Module UI (contains card body)
           rtbm_sidebar_ui(ns("sidebar"), i18n)
