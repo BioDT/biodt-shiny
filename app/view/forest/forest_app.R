@@ -61,6 +61,7 @@ forest_app_ui <- function(id, i18n) {
           shiny$conditionalPanel(
             condition = sprintf(
               "input['%s'] == 'Above-ground biomass' || input['%s'] == 'Max-age of selected species'",
+              ns("output"),
               ns("output")
             ),
             shiny$selectInput(
