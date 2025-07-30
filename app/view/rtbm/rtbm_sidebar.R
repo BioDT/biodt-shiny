@@ -1,7 +1,4 @@
-# /app/view/rtbm/rtbm_sidebar.R
-
 box::use(
-  # Shiny fundamentals and UI
   shiny[
     actionButton,
     dateRangeInput,
@@ -46,7 +43,7 @@ box::use(
 #'
 #' @return A Shiny UI definition.
 #' @export
-rtbm_sidebar_ui <- function(id) {
+rtbm_sidebar_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(
@@ -55,7 +52,7 @@ rtbm_sidebar_ui <- function(id) {
       # View selector (always visible)
       selectInput(
         inputId = ns("viewSelector"),
-        label = "Select View",
+        label = i18n$t("Select View"),
         choices = c(
           "Map" = "map",
           "Summary" = "summary"
@@ -65,7 +62,7 @@ rtbm_sidebar_ui <- function(id) {
       # Date range input (always visible)
       dateRangeInput(
         inputId = ns("dateRange"),
-        label = "Select Date Range",
+        label = i18n$t("Select Date Range"),
         start = Sys.Date() - 30,
         end = Sys.Date() - 1,
         min = "2025-01-16",
@@ -82,7 +79,7 @@ rtbm_sidebar_ui <- function(id) {
       shinyjs::hidden(
         pickerInput(
           inputId = ns("speciesPicker"),
-          label = "Select Bird Species",
+          label = i18n$t("Select Bird Species"),
           choices = NULL,
           options = list(`live-search` = TRUE)
         )
@@ -90,7 +87,7 @@ rtbm_sidebar_ui <- function(id) {
       # Add Load Data button here
       actionButton(
         inputId = ns("loadDataButton"),
-        label = "Load Data",
+        label = i18n$t("Load Data"),
         icon = icon("sync"),
         class = "btn btn-primary w-100 mt-3 mb-3" # Changed btn-success to btn-primary
       ),

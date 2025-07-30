@@ -187,7 +187,7 @@ rtbm_app_ui <- function(id, i18n) {
             span("Bird Observation Controls")
           ),
           # Call Sidebar Module UI (contains card body)
-          rtbm_sidebar_ui(ns("sidebar"))
+          rtbm_sidebar_ui(ns("sidebar"), i18n)
         )
       ),
       # Map Column - will expand when sidebar collapses

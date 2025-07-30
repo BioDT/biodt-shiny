@@ -29,7 +29,8 @@ rtbm_ui <- function(id, i18n) {
       value = "rtbm_app",
       icon = icon("tree"),
       rtbm_app_ui(
-        ns("rtbm_app")
+        ns("rtbm_app"),
+        i18n
       )
     ),
     nav_panel(
