@@ -24,7 +24,13 @@ box::use(
       get_multichart,
       get_experiment_data_file,
       get_bird_species_list
-    ]
+    ],
+    app /
+      logic /
+      forest /
+      plot_map_functions[
+        plot_bird_species
+      ]
 )
 
 #' @export
@@ -125,6 +131,7 @@ forest_app_server <- function(id, app_selected) {
     ns <- session$ns
     # data_folder <- file.path(config$get("data_path"), "forest_bird")
     data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
+    prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
     output$selection <- shiny$renderText({
       text <- paste(
         "Management Regime:",
@@ -147,6 +154,7 @@ forest_app_server <- function(id, app_selected) {
     res_working_folder <- shiny$reactiveVal(NULL)
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
+    start_sim_year <- shiny$reactiveVal(NULL)
     
     output$map <- NULL
     
@@ -179,7 +187,7 @@ forest_app_server <- function(id, app_selected) {
         
         experiment_data_file(experiment_data)
 
-        bird_species_list <- get_bird_species_list(basename(experiment_data_file()))
+        bird_species_list <- get_bird_species_list(basename(experiment_data_file()), prediction_folder)
         
         shiny$updateSelectInput(
           session,
@@ -213,6 +221,7 @@ forest_app_server <- function(id, app_selected) {
         timestep <- input_selection$timestep
         start_year <- input_selection$start_year
         # duration <- input_selection$duration
+        start_sim_year(start_year)
         simulated_years <- res_file_list_tick + start_year
         
         if (length(simulated_years) > 0) {
@@ -377,6 +386,22 @@ forest_app_server <- function(id, app_selected) {
       }
     )
     
+    # bird species update
+    shiny$observeEvent(
+      c(
+        input$res_file_slider
+      ),
+      ignoreInit = TRUE,
+      {
+        plot_bird_species(
+          scenario = basename(experiment_data_file()),
+          bird_species = input$bird_species,
+          tick = input$res_file_slider - start_sim_year(),
+          prediction_folder = prediction_folder
+        )
+      }
+    )
+
     output_plot <- shiny$reactiveVal(NULL)
     
     shiny$observeEvent(

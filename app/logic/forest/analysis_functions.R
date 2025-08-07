@@ -3,7 +3,7 @@ box::use(
   # ggplot2,
   dplyr,
   # tidyr,
-  terra[rast, `values<-`, values, project, flip],
+  #terra[rast, `values<-`, values, project, flip],
   stringr,
   utils,
   shiny,
@@ -1672,8 +1672,8 @@ get_multichart <- function(
 }
 
 #' @export
-get_bird_species_list <- function(scenario){
-  prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
+get_bird_species_list <- function(scenario, prediction_folder){
+  
   prediction_folder_selected <- file.path(prediction_folder, scenario)
 
   bird_species_list <- list.files(path = prediction_folder_selected, recursive = TRUE, full.names = FALSE) |>
