@@ -348,7 +348,7 @@ forest_app_server <- function(id, app_selected) {
     # bird species update
     shiny$observeEvent(
       c(
-        input$res_file_slider
+        input$res_file_slider, input$bird_species
       ),
       ignoreInit = TRUE,
       {

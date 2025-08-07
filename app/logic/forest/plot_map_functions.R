@@ -32,6 +32,7 @@ plot_bird_species <- function(scenario,
         layerId = "bird_species",
         group = "bird_species"
     )
+
   } else {
     leaflet$leafletProxy("map") |>
       leaflet$removeImage("bird_species")
@@ -88,7 +89,6 @@ plot_tree_species <- function(data_folder, res_file) {
             values = terra$values(raster_data),
             opacity = 0.4
           )
-
 
   } else {
     leaflet$leafletProxy("map") |>
