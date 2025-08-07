@@ -115,7 +115,8 @@ forest_app_ui <- function(id, i18n) {
 forest_app_server <- function(id, app_selected) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    data_folder <- file.path(config$get("data_path"), "forest_bird")
+    # data_folder <- file.path(config$get("data_path"), "forest_bird")
+    data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
     output$selection <- shiny$renderText({
       text <- paste(
         "Management Regime:",

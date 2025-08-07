@@ -47,10 +47,10 @@ get_data <- function(
   for (climate in climate_scenarios) {
     for (management in management_scenarios) {
       # zip_file <- paste0(data_folder, "/run_landis_", paste0(climate, "_", management), "_7141504")
-      file_inside_zip <- file.path(data_folder, paste0("run_landis_", paste0(climate, "_", management), "_7141504/output/", "TotalCohorts.txt"))
+      file_inside_zip <- file.path(data_folder, paste0(paste0(climate, "_", management), "/output/", "TotalCohorts.txt"))
 
       # get simulation start year
-      lines <- readLines(file.path(data_folder, paste0("run_landis_", paste0(climate, "_", management), "_7141504"), "PnET-succession.txt"))
+      lines <- readLines(file.path(data_folder, paste0(paste0(climate, "_", management)), "PnET-succession.txt"))
       start_year_line <- grep("^StartYear", lines, value = TRUE)
       start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
 
@@ -1414,8 +1414,8 @@ get_experiment_data_file <- function(
   # Scan for files with the specified structure
   pattern <- paste0("^.+_", climate, "_", input$management, "_.+\\$")
   experiment_data <- list.dirs(path = data_folder, full.names = TRUE, recursive = FALSE)
-  experiment_data <- experiment_data[grepl(paste0("_", climate, "_", input$management, "_"), experiment_data)]
-  
+  experiment_data <- experiment_data[grepl(paste0(climate, "_", input$management), experiment_data)]
+
   experiment_data_file <- experiment_data
   
   return(experiment_data_file)
