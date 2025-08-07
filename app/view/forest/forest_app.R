@@ -113,9 +113,6 @@ forest_app_ui <- function(id, i18n) {
         # width = "100%",
         height = "400px"
       ),
-      # leaflet$leafletOutput(ns("map")),
-      # shiny$plotOutput(ns("plot"), height = "800px")
-      # shiny$uiOutput(ns("plot"))
       echarty$ecs.output(
         ns("plot"),
         # width = "100%",
@@ -349,13 +346,15 @@ forest_app_server <- function(id, app_selected) {
         # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
         
         leaflet$leafletProxy("map") |>
-          leaflet$clearImages() |>
+          leaflet$removeImage("tree_species") |>
           leaflet$clearControls() |>
           leaflet$addRasterImage(
             raster_data,
             opacity = 0.4,
             colors = pal,
-            project = FALSE
+            project = FALSE,
+            layerId = "tree_species",
+            group = "tree_species"
           ) |>
           leaflet$addLegend(
             position = "bottomright",
@@ -401,7 +400,7 @@ forest_app_server <- function(id, app_selected) {
         )
       }
     )
-
+    
     output_plot <- shiny$reactiveVal(NULL)
     
     shiny$observeEvent(
