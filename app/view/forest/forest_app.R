@@ -29,7 +29,8 @@ box::use(
       logic /
       forest /
       plot_map_functions[
-        plot_bird_species
+        plot_bird_species,
+        plot_tree_species
       ]
 )
 
@@ -324,49 +325,8 @@ forest_app_server <- function(id, app_selected) {
         shiny$req(res_file())
         # shiny$req(experiment_data_file())
         
-        raster_data <- terra$rast(
-          file.path(data_folder, res_file())
-        )
-        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+        plot_tree_species(data_folder, res_file())
         
-        ext <- terra$ext(raster_data)
-        
-        terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() |> print()
-        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() ) {
-          shiny$showNotification("Warning: Raster contains infinite values!", type = "error")
-        }
-        
-        pal <- leaflet$colorNumeric(
-          palette = "YlOrBr",
-          # domain = terra$values(raster_data),
-          domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
-          na.color = "transparent",
-          reverse = TRUE
-        )
-        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
-        
-        leaflet$leafletProxy("map") |>
-          leaflet$removeImage("tree_species") |>
-          leaflet$clearControls() |>
-          leaflet$addRasterImage(
-            raster_data,
-            opacity = 0.4,
-            colors = pal,
-            project = FALSE,
-            layerId = "tree_species",
-            group = "tree_species"
-          ) |>
-          leaflet$addLegend(
-            position = "bottomright",
-            pal = leaflet$colorNumeric(
-              palette = "YlOrBr",
-              # domain = terra$values(raster_data),
-              domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
-              na.color = "transparent"
-            ),
-            values = terra$values(raster_data),
-            opacity = 0.4
-          )
       }
     )
     

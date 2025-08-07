@@ -35,5 +35,64 @@ plot_bird_species <- function(scenario,
   } else {
     leaflet$leafletProxy("map") |>
       leaflet$removeImage("bird_species")
+    shiny$showNotification("Warning: Bird species file does not exist!", type = "error")
+  }
+}
+
+#' @export
+plot_tree_species <- function(data_folder, res_file) {
+  simulation_file <- file.path(data_folder, res_file)
+  
+  if (file.exists(simulation_file)) {
+    
+    raster_data <- terra$rast(
+          simulation_file
+        )
+        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+        
+        ext <- terra$ext(raster_data)
+        
+        terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() |> print()
+        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() ) {
+          shiny$showNotification("Warning: Raster contains infinite values!", type = "error")
+        }
+        
+        pal <- leaflet$colorNumeric(
+          palette = "YlOrBr",
+          # domain = terra$values(raster_data),
+          domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
+          na.color = "transparent",
+          reverse = TRUE
+        )
+        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
+        
+        leaflet$leafletProxy("map") |>
+          leaflet$removeImage("tree_species") |>
+          leaflet$clearControls() |>
+          leaflet$addRasterImage(
+            raster_data,
+            opacity = 0.4,
+            colors = pal,
+            project = FALSE,
+            layerId = "tree_species",
+            group = "tree_species"
+          ) |>
+          leaflet$addLegend(
+            position = "bottomright",
+            pal = leaflet$colorNumeric(
+              palette = "YlOrBr",
+              # domain = terra$values(raster_data),
+              domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
+              na.color = "transparent"
+            ),
+            values = terra$values(raster_data),
+            opacity = 0.4
+          )
+
+
+  } else {
+    leaflet$leafletProxy("map") |>
+      leaflet$removeImage("tree_species")
+    shiny$showNotification("Warning: Tree species file does not exist!", type = "error")
   }
 }
