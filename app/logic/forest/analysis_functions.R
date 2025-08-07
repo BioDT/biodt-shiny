@@ -1671,6 +1671,17 @@ get_multichart <- function(
   
 }
 
+#' @export
+get_bird_species_list <- function(scenario){
+  prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
+  prediction_folder_selected <- file.path(prediction_folder, scenario)
+
+  bird_species_list <- list.files(path = prediction_folder_selected, recursive = TRUE, full.names = FALSE) |>
+    basename() |> stringr$str_remove("\\.tif(\\.filepart)?$") |> unique() |> sort()
+
+  return(bird_species_list)
+}
+
 # #' @export
 # get_multichart <- function(
 #     experiment_data_file

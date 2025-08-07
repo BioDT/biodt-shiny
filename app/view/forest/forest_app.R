@@ -22,7 +22,8 @@ box::use(
       get_data,
       get_figure,
       get_multichart,
-      get_experiment_data_file
+      get_experiment_data_file,
+      get_bird_species_list
     ]
 )
 
@@ -72,6 +73,13 @@ forest_app_ui <- function(id, i18n) {
                 "Other trees (other)"
               )
             ),
+          ),
+          shiny$selectInput(
+            ns("bird_species"),
+            "Select Bird Species:",
+            choices = c(
+              "None"
+            )
           ),
           shiny$sliderInput(
             ns("res_file_slider"),
@@ -170,6 +178,17 @@ forest_app_server <- function(id, app_selected) {
         experiment_data <- get_experiment_data_file(input, data_folder)
         
         experiment_data_file(experiment_data)
+
+        bird_species_list <- get_bird_species_list(basename(experiment_data_file()))
+        
+        shiny$updateSelectInput(
+          session,
+          "bird_species",
+          choices = c(
+            "None",
+            bird_species_list
+          )
+        )
       }
     )
     
