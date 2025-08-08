@@ -26,11 +26,12 @@ plot_bird_species <- function(scenario,
       leaflet$removeImage("bird_species") |>
       leaflet$addRasterImage(
         species_rast,
-        opacity = 0.9,
+        opacity = 0.3,
         colors = "viridis",
         project = FALSE,
         layerId = "bird_species",
-        group = "bird_species"
+        group = "bird_species",
+        options = leaflet$tileOptions(zIndex = 2)
     )
 
   } else {
@@ -76,7 +77,8 @@ plot_tree_species <- function(data_folder, res_file) {
             colors = pal,
             project = FALSE,
             layerId = "tree_species",
-            group = "tree_species"
+            group = "tree_species",
+            options = leaflet$tileOptions(zIndex = 1)
           ) |>
           leaflet$addLegend(
             position = "bottomright",
