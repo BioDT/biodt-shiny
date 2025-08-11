@@ -20,8 +20,6 @@ box::use(
       get_file_list,
       get_file_name,
       get_data,
-      get_figure,
-      get_multichart,
       get_experiment_data_file,
       get_bird_species_list
     ],
@@ -30,7 +28,9 @@ box::use(
       forest /
       plot_helper_functions[
         plot_bird_species,
-        plot_tree_species
+        plot_tree_species,
+        get_multichart,
+        get_figure
       ]
 )
 

@@ -155,3 +155,320 @@ make_grids <- function() {
   }
   grids
 }
+
+#' @export
+make_series <- function(df) {
+  mgmt      <- c("BAU","EXT10","EXT30","GTR30","NTLR","NTSR","SA")
+  climate   <- c("4.5","8.5","current")
+  variables <- c("AverageB.g.m2.",
+                 "AverageBelowGround.g.m2.",
+                 "AverageAge",
+                 "WoodyDebris.kgDW.m2.")
+  climate_col <- c("4.5" = "red", "8.5" = "green", "current" = "blue")
+
+  series <- list()
+  idx <- 0L
+  for (var in variables) {
+    for (cl in climate) {
+      for (m in mgmt) {
+        series_item <- list(
+          data        = df[df$Management == m & df$Climate == cl, var],
+          type        = "line",
+          xAxisIndex  = idx %% 27,
+          yAxisIndex  = idx %% 27,
+          smooth      = TRUE,
+          color       = climate_col[[cl]]
+        )
+        # only one representative series per climate needs a legend entry
+        if (m == "BAU" && var == "AverageB.g.m2.") {
+          series_item$name <- cl
+        }
+        series[[length(series) + 1L]] <- series_item
+        idx <- idx + 1L
+      }
+    }
+  }
+  return(series)
+}
+
+#' @export
+get_figure <- function(
+    combined_data
+) {
+
+  chart <- echarty$ec.init()
+  chart$x$opts <- list(
+    legend = list(
+      data = c('4.5', '8.5', 'current'),
+      top = '1%'
+    ),
+    title = list(
+      list(left = '8%',
+           top = '5%',
+           text = 'BAU',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '22%',
+           top = '5%',
+           text = 'EXT10',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '36%',
+           top = '5%',
+           text = 'EXT30',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '50%',
+           top = '5%',
+           text = 'GTR30',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '64%',
+           top = '5%',
+           text = 'NTLR',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '78%',
+           top = '5%',
+           text = 'NTSR',
+           textStyle = list(
+             fontSize = 14
+           )),
+      list(left = '92%',
+           top = '5%',
+           text = 'SA',
+           textStyle = list(
+             fontSize = 14
+           ))
+    )
+
+  )
+
+  time_vec <- as.character(combined_data[combined_data$Management == 'BAU' & combined_data$Climate == '4.5', 'Time'])
+  chart$x$opts$xAxis <- make_x_axes(time_vec)
+  chart$x$opts$yAxis <- make_y_axes()
+  chart$x$opts$grid  <- make_grids()
+  chart$x$opts$series <- make_series(combined_data)
+  
+  return(chart)
+}
+
+#' @export
+get_multichart <- function(
+    experiment_data_file
+) 
+{
+  
+  # get data to plot
+  
+  all_data <- list()
+  
+  file_inside_zip <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
+  
+  # get simulation start year
+  lines <- readLines(file.path(experiment_data_file, "PnET-succession.txt"))
+  start_year_line <- grep("^StartYear", lines, value = TRUE)
+  start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
+  
+  # Read the data if the file exists
+  # if (file.exists(file_inside_zip)) {
+  data <- utils$read.csv(file_inside_zip)
+  
+  data$Time <- data$Time + start_year
+  chart <- echarty$ec.init()
+  chart$x$opts <- list(
+    title = list(
+      list(
+        left = '8%',
+        top = '1%',
+        text = 'Average age over time',
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = '30%',
+        top = '1%',
+        text = 'Average above-ground biomass over time',
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = '56%',
+        top = '1%',
+        text = 'Woody debris over time',
+        textStyle = list(
+          fontSize = 14
+        )
+      ),
+      list(
+        left = '78%',
+        top = '1%',
+        text = 'Average below-ground biomass over time',
+        textStyle = list(
+          fontSize = 14
+        )
+      )
+    ),
+    grid = list(
+      list(left = '4%', top = '10%', width = '20%'),
+      list(left = '28%', top = '10%', width = '20%'),
+      list(left = '52%', top = '10%', width = '20%'),
+      list(left = '76%', top = '10%', width = '20%')
+    ),
+    xAxis = list(
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 0
+        ),
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 1
+      ),
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 2
+      ),
+      list(
+        name = "simulation year",
+        nameLocation = 'middle',
+        nameGap = 30,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "category",
+        data = as.character(data$Time),
+        gridIndex = 3
+      )
+    ),
+    yAxis = list(
+      list(
+        name = "year",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 0
+        ),
+      list(
+        name = "g/m2",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 1
+      ),
+      list(
+        name = "kgDW/m2",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 2
+      ),
+      list(
+        name = "g/m2",
+        nameLocation = 'middle',
+        nameGap = 50,
+        nameTextStyle = list(
+          fontSize = 13,
+          align = 'center',
+          color = "black"
+        ),
+        type = "value",
+        gridIndex = 3
+      )
+    ),
+    tooltip = list(
+      trigger = 'axis'
+    ),
+    # legend = list(
+    #   data = c('Average age over time', 'Average above-ground biomass over time', 'Woody debris over time', 'Average below-ground biomass over time')
+    # ),
+    series = list(
+      list(
+        name = "Average age over time",
+        data = data$AverageAge,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 0,
+        yAxisIndex = 0
+      ),
+      list(
+        name = "Average above-ground biomass over time",
+        data = data$AverageB.g.m2.,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 1,
+        yAxisIndex = 1
+      ),
+      list(
+        name = "Woody debris over time",
+        data = data$WoodyDebris.kgDW.m2.,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 2,
+        yAxisIndex = 2
+      ),
+      list(
+        name = "Average below-ground biomass over time",
+        data = data$AverageBelowGround.g.m2.,
+        type = "line",
+        smooth = TRUE,
+        xAxisIndex = 3,
+        yAxisIndex = 3
+      )
+      
+    )
+  )
+  
+  return(chart)
+  
+}
