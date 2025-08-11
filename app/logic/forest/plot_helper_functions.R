@@ -98,3 +98,60 @@ plot_tree_species <- function(data_folder, res_file) {
     shiny$showNotification("Warning: Tree species file does not exist!", type = "error")
   }
 }
+
+#' @export
+make_x_axes <- function(time_vec) {
+  lapply(0:27, function(i) {
+    ax <- list(type = 'category',
+               data = time_vec,
+               gridIndex = i)
+    if (i >= 21) {                       # bottom row needs an axis title
+      ax$name           <- 'year'
+      ax$nameLocation   <- 'middle'
+      ax$nameGap        <- 30
+      ax$nameTextStyle  <- list(fontSize = 13,
+                                align    = 'center',
+                                color    = 'black')
+    }
+    ax
+  })
+}
+
+#' @export
+make_y_axes <- function() {
+  name_map <- c(
+    'AGBiomass (g/m^2)', rep(NA, 6),
+    'BGBiomass (g/m^2)', rep(NA, 6),
+    'Age (years)',       rep(NA, 6),
+    'Woody Debris (kgDW/m^2)', rep(NA, 6)
+  )
+
+  lapply(0:27, function(i) {
+    ax <- list(type = 'value', gridIndex = i)
+    if (!is.na(name_map[i + 1])) {
+      ax$name           <- name_map[i + 1]
+      ax$nameLocation   <- 'middle'
+      ax$nameGap        <- 50
+      ax$nameTextStyle  <- list(fontSize = 12,
+                                align    = 'center',
+                                color    = 'black')
+    }
+    ax
+  })
+}
+
+#' @export
+make_grids <- function() {
+  lefts <- c('4%', '18%', '32%', '46%', '60%', '74%', '88%')
+  tops  <- c('10%', '31%', '56%', '81%')
+  grids <- list()
+  for (t in tops) {
+    for (l in lefts) {
+      grids[[length(grids) + 1L]] <- list(left = l,
+                                          top  = t,
+                                          width  = '10%',
+                                          height = '12%')
+    }
+  }
+  grids
+}

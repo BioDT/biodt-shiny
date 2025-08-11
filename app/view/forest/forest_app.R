@@ -28,7 +28,7 @@ box::use(
     app /
       logic /
       forest /
-      plot_map_functions[
+      plot_helper_functions[
         plot_bird_species,
         plot_tree_species
       ]
