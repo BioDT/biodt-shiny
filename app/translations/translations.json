@@ -5473,6 +5473,40 @@
       "sl": "DEIMS.id",
       "bg": "DEIMS.id",
       "el": "DEIMS.id"
+    },
+    {
+      "en": "The Real-Time Bird Monitoring (RTBM) prototype Digital Twin (pDT) provides an interactive platform for visualizing and analyzing bird species distributions across Finland. Leveraging real-time and historical observation data, this dashboard enables researchers, conservationists, and enthusiasts to explore bird migration patterns, population trends, and species diversity with intuitive controls and dynamic visualizations.",
+      "cz": "",
+      "fi": "",
+      "it": "",
+      "nl": "",
+      "est": "",
+      "sv": "",
+      "de": "",
+      "no": "",
+      "da": "",
+      "es": "",
+      "pt": "",
+      "sl": "",
+      "bg": "",
+      "el": ""
+    },
+        {
+      "en": "Bird observation data are provided by national and international monitoring programs, including citizen science initiatives. For more details, see ",
+      "cz": "",
+      "fi": "",
+      "it": "",
+      "nl": "",
+      "est": "",
+      "sv": "",
+      "de": "",
+      "no": "",
+      "da": "",
+      "es": "",
+      "pt": "",
+      "sl": "",
+      "bg": "",
+      "el": ""
     }
   ]
 }
