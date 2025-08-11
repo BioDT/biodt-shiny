@@ -1,15 +1,16 @@
 # Load the libraries
 box::use(
-  # ggplot2,
   dplyr,
-  # tidyr,
-  #terra[rast, `values<-`, values, project, flip],
   terra,
   leaflet,
   stringr,
   utils,
   shiny,
-  echarty
+  echarty,
+  app /
+    logic /
+    forest /
+    landis_io[read_landis_params]
 )
 
 #' @export
@@ -19,7 +20,6 @@ plot_bird_species <- function(scenario,
                               prediction_folder
 ) {
   prediction_file <- file.path(prediction_folder, scenario, tick, paste0(bird_species, ".tif"))
-  # print(prediction_file)
   if (file.exists(prediction_file)) {
     species_rast <- terra$rast(prediction_file)
     leaflet$leafletProxy("map") |>
@@ -50,7 +50,6 @@ plot_tree_species <- function(data_folder, res_file) {
     raster_data <- terra$rast(
           simulation_file
         )
-        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
         
         ext <- terra$ext(raster_data)
         
@@ -61,12 +60,10 @@ plot_tree_species <- function(data_folder, res_file) {
         
         pal <- leaflet$colorNumeric(
           palette = "YlOrBr",
-          # domain = terra$values(raster_data),
           domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
           na.color = "transparent",
           reverse = TRUE
         )
-        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
         
         leaflet$leafletProxy("map") |>
           leaflet$removeImage("tree_species") |>
@@ -84,7 +81,6 @@ plot_tree_species <- function(data_folder, res_file) {
             position = "bottomright",
             pal = leaflet$colorNumeric(
               palette = "YlOrBr",
-              # domain = terra$values(raster_data),
               domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
               na.color = "transparent"
             ),
@@ -301,9 +297,9 @@ get_multichart <- function(experiment_data_file) {
   # locate & load cohort output
   cohorts_path <- file.path(experiment_data_file, "output", "TotalCohorts.txt")
 
-  file_path_year <- file.path(experiment_data_file, "PnET-succession.txt")
-  start_year   <- grep("^StartYear", readLines(file_path_year), value = TRUE) |>
-                    sub(".*?(\\d+).*", "\\1", x = _) |> as.numeric()
+  # read parameters via helper
+  params <- read_landis_params(experiment_data_file)
+  start_year <- params$start_year
 
   data <- utils::read.csv(cohorts_path)
   data$Time <- data$Time + start_year

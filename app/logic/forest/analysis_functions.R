@@ -11,6 +11,10 @@ box::use(
   app /
     logic /
     forest /
+    landis_io[read_landis_params],
+  app /
+    logic /
+    forest /
     plot_helper_functions[
       make_grids,
       make_x_axes,
@@ -57,10 +61,10 @@ get_data <- function(
       # zip_file <- paste0(data_folder, "/run_landis_", paste0(climate, "_", management), "_7141504")
       file_inside_zip <- file.path(data_folder, paste0(paste0(climate, "_", management), "/output/", "TotalCohorts.txt"))
 
-      # get simulation start year
-      lines <- readLines(file.path(data_folder, paste0(paste0(climate, "_", management)), "PnET-succession.txt"))
-      start_year_line <- grep("^StartYear", lines, value = TRUE)
-      start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
+      # get simulation parameters
+      params_dir <- file.path(data_folder, paste0(paste0(climate, "_", management)))
+      params <- read_landis_params(params_dir)
+      start_year <- params$start_year
 
       # Read the data if the file exists
       if (file.exists(file_inside_zip)) {
@@ -106,16 +110,11 @@ get_file_list <- function(
 
   data_file_list <- list.files(path = experiment_data, recursive = TRUE)
   
-  # get simulated years
-  lines <- readLines(file.path(experiment_data, "PnET-succession.txt"))
-  start_year_line <- grep("^StartYear", lines, value = TRUE)
-  start_year <- as.numeric(sub(".*?(\\d+).*", "\\1", start_year_line))
-  timestep_line <- grep("^Timestep", lines, value = TRUE)
-  timestep <- as.numeric(sub(".*?(\\d+).*", "\\1", timestep_line))
-  lines <- readLines(file.path(experiment_data, "scenario.txt"))
-  duration_line <- grep("^Duration", lines, value = TRUE)
-  duration <- as.numeric(sub(".*?(\\d+).*", "\\1", duration_line))
-  
+  # get simulated years via helper
+  params <- read_landis_params(experiment_data)
+  start_year <- params$start_year
+  timestep <- params$timestep
+  duration <- params$duration
   if (input$output == "Above-ground biomass") {
     # todo implement update in case of "all species"
     if (input$species == "All species") {

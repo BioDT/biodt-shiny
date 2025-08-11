@@ -352,6 +352,9 @@ forest_app_server <- function(id, app_selected) {
       ),
       ignoreInit = TRUE,
       {
+        if (is.null(input$bird_species) || identical(input$bird_species, "None")) {
+          return()
+        }
         plot_bird_species(
           scenario = basename(experiment_data_file()),
           bird_species = input$bird_species,
