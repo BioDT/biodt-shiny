@@ -31,7 +31,13 @@ box::use(
         plot_tree_species,
         get_multichart,
         get_figure
-      ]
+      ],
+      app /
+        logic /
+        forest /
+        landis_io[
+          read_landis_params
+        ]
 )
 
 #' @export
@@ -373,9 +379,10 @@ forest_app_server <- function(id, app_selected) {
         
         if(input$show_results){
           
+          params <- read_landis_params(experiment_data_file())
           climate_scenarios <- c("current", "4.5", "8.5")
           management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
-          years <- seq(0, 100, by = 10)
+          years <- seq(0, params$duration, by = params$timestep)
 
           combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
           plots <- get_figure(combined_data)

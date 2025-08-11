@@ -152,6 +152,16 @@ make_grids <- function() {
   grids
 }
 
+# helper: row labels on the left side of the chart
+make_row_titles <- function() {
+  list(
+    list(left = '1%', top = '16%', text = 'AGBiomass (g/m^2)', textStyle = list(fontSize = 13)),
+    list(left = '1%', top = '41%', text = 'BGBiomass (g/m^2)', textStyle = list(fontSize = 13)),
+    list(left = '1%', top = '66%', text = 'Age (years)',        textStyle = list(fontSize = 13)),
+    list(left = '1%', top = '91%', text = 'Woody Debris (kgDW/m^2)', textStyle = list(fontSize = 13))
+  )
+}
+
 #' @export
 make_series <- function(df) {
   mgmt      <- c("BAU","EXT10","EXT30","GTR30","NTLR","NTSR","SA")
@@ -244,6 +254,9 @@ get_figure <- function(
     )
 
   )
+
+  # append variable labels on the left side
+  chart$x$opts$title <- c(chart$x$opts$title, make_row_titles())
 
   time_vec <- as.character(combined_data[combined_data$Management == 'BAU' & combined_data$Climate == '4.5', 'Time'])
   chart$x$opts$xAxis <- make_x_axes(time_vec)
