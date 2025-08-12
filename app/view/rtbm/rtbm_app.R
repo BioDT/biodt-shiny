@@ -288,7 +288,8 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
       id = "sidebar",
       bird_spp_info = bird_spp_info,
       available_dates = available_dates,
-      summary_progress_info = summary_progress_info
+      summary_progress_info = summary_progress_info,
+      i18n
     )
 
     # --- Connect Sidebar Outputs to App Logic ---

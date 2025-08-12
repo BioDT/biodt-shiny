@@ -114,7 +114,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
 #'   - selected_view: The selected view.
 #'   - load_button_clicked: Reactive trigger for the load data button.
 #' @export
-rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_progress_info = reactive(NULL)) {
+rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_progress_info = reactive(NULL), i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -124,6 +124,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
     animation_speed_rv <- reactiveVal(1000) # Default speed
     animation_last_step <- reactiveVal(Sys.time()) # Track when the last step occurred
     status_msg <- reactiveVal("Select date range and species, then click Load Data.")
+    obs_found <- reactiveVal(" observation dates found.") # "dummy" reactive value; no other way how to include it in one of the status messages with i18n
 
     # --- Observers and Logic ---
 
@@ -164,12 +165,12 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
         req(available_dates())
         dates <- available_dates()
         if (length(dates) > 0) {
-          status_msg(paste0(length(dates), " observation dates found."))
+          status_msg(paste0(length(dates), i18n$t(obs_found())))
           update_date_slider(dates)
           # Set current date to the first available date in the new range
           current_date_rv(dates[1])
         } else {
-          status_msg("No data found for the selected date range.")
+          i18n$t(status_msg("No data found for the selected date range."))
           update_date_slider(NULL) # Clear slider
           current_date_rv(NULL)
         }
@@ -208,7 +209,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       output$playPauseButton <- renderUI({
         actionButton(
           inputId = ns("animateControl"),
-          label = if (animation_running_rv()) "Pause" else "Play",
+          label = ifelse(animation_running_rv(), i18n$t("Pause"), i18n$t("Play")),
           icon = if (animation_running_rv()) icon("pause") else icon("play"),
           class = "btn-primary btn-lg",
           width = "100%"
@@ -270,7 +271,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       } else {
         # Render empty UI or a message if no dates
         output$dateSlider <- renderUI({
-          p(class = "text-muted", "No observation dates available for selected range.")
+          p(class = "text-muted", i18n$t("No observation dates available for selected range."))
         })
       }
     }
@@ -280,7 +281,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       # Ensure this renders even when animation isn't running
       actionButton(
         inputId = ns("animateControl"),
-        label = if (animation_running_rv()) "Pause" else "Play",
+        label = ifelse(animation_running_rv(), i18n$t("Pause"), i18n$t("Play")),
         icon = if (animation_running_rv()) icon("pause") else icon("play"),
         class = "btn-primary btn-lg",
         width = "100%"
@@ -289,7 +290,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
 
     # Status Message Display
     output$statusMsg <- renderUI({
-      tags$p(class = "text-muted", status_msg())
+      tags$p(class = "text-muted", i18n$t(status_msg()))
     })
 
     # Render the selected date text
@@ -318,7 +319,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
             # Animation Delay Slider
             sliderInput(
               inputId = ns("speedControl"),
-              label = "Animation Delay (ms)",
+              label = i18n$t("Animation Delay (ms)"),
               min = 100,
               max = 2000,
               value = animation_speed_rv(), # Use reactive value for persistence
