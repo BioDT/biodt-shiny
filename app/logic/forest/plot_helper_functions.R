@@ -116,10 +116,10 @@ make_x_axes <- function(time_vec) {
 #' @export
 make_y_axes <- function() {
   name_map <- c(
-    'AGBiomass (g/m^2)', rep(NA, 6),
-    'BGBiomass (g/m^2)', rep(NA, 6),
-    'Age (years)',       rep(NA, 6),
-    'Woody Debris (kgDW/m^2)', rep(NA, 6)
+    'AGBiomass\n(g/m^2)', rep(NA, 6),
+    'BGBiomass\n(g/m^2)', rep(NA, 6),
+    'Age\n(years)',       rep(NA, 6),
+    'Woody Debris\n(kgDW/m^2)', rep(NA, 6)
   )
 
   lapply(0:27, function(i) {
@@ -138,14 +138,15 @@ make_y_axes <- function() {
 
 #' @export
 make_grids <- function() {
-  lefts <- c('4%', '18%', '32%', '46%', '60%', '74%', '88%')
+  #lefts <- c('4%', '18%', '32%', '46%', '60%', '74%', '88%')
+  lefts <- c('7%', '21%', '35%', '49%', '63%', '77%', '91%')
   tops  <- c('10%', '31%', '56%', '81%')
   grids <- list()
   for (t in tops) {
     for (l in lefts) {
       grids[[length(grids) + 1L]] <- list(left = l,
                                           top  = t,
-                                          width  = '10%',
+                                          width  = '8%',
                                           height = '12%')
     }
   }
@@ -155,10 +156,10 @@ make_grids <- function() {
 # helper: row labels on the left side of the chart
 make_row_titles <- function() {
   list(
-    list(left = '1%', top = '16%', text = 'AGBiomass (g/m^2)', textStyle = list(fontSize = 13)),
-    list(left = '1%', top = '41%', text = 'BGBiomass (g/m^2)', textStyle = list(fontSize = 13)),
-    list(left = '1%', top = '66%', text = 'Age (years)',        textStyle = list(fontSize = 13)),
-    list(left = '1%', top = '91%', text = 'Woody Debris (kgDW/m^2)', textStyle = list(fontSize = 13))
+    list(left = '1%', top = '16%', text = 'AGBiomass\n(g/m^2)', textStyle = list(fontSize = 13)),
+    list(left = '1%', top = '41%', text = 'BGBiomass\n(g/m^2)', textStyle = list(fontSize = 13)),
+    list(left = '1%', top = '66%', text = 'Age\n(years)',        textStyle = list(fontSize = 13)),
+    list(left = '1%', top = '91%', text = 'Woody Debris\n(kgDW/m^2)', textStyle = list(fontSize = 13))
   )
 }
 
@@ -173,15 +174,19 @@ make_series <- function(df) {
   climate_col <- c("4.5" = "red", "8.5" = "green", "current" = "blue")
 
   series <- list()
-  idx <- 0L
+  # map each series to the correct grid (4 rows x 7 cols => 28 grids, indices 0..27)
+  # rows correspond to variables; columns correspond to management regimes
   for (var in variables) {
-    for (cl in climate) {
-      for (m in mgmt) {
+    row <- match(var, variables) - 1L                   # 0..3
+    for (m in mgmt) {
+      col <- match(m, mgmt) - 1L                        # 0..6
+      grid_index <- row * 7L + col                      # 0..27
+      for (cl in climate) {
         series_item <- list(
           data        = df[df$Management == m & df$Climate == cl, var],
           type        = "line",
-          xAxisIndex  = idx %% 27,
-          yAxisIndex  = idx %% 27,
+          xAxisIndex  = grid_index,
+          yAxisIndex  = grid_index,
           smooth      = TRUE,
           color       = climate_col[[cl]]
         )
@@ -190,7 +195,6 @@ make_series <- function(df) {
           series_item$name <- cl
         }
         series[[length(series) + 1L]] <- series_item
-        idx <- idx + 1L
       }
     }
   }
@@ -256,7 +260,7 @@ get_figure <- function(
   )
 
   # append variable labels on the left side
-  chart$x$opts$title <- c(chart$x$opts$title, make_row_titles())
+  #chart$x$opts$title <- c(chart$x$opts$title, make_row_titles())
 
   time_vec <- as.character(combined_data[combined_data$Management == 'BAU' & combined_data$Climate == '4.5', 'Time'])
   chart$x$opts$xAxis <- make_x_axes(time_vec)

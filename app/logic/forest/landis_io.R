@@ -31,7 +31,6 @@ read_landis_params <- function(dir) {
     val <- stringr$str_extract(hit[1], "\\d+")
     as.integer(val)
   }
-
   succ_lines <- character(0)
   if (file.exists(succ_path)) {
     succ_lines <- tryCatch(readLines(succ_path, warn = FALSE), error = function(e) character(0))
