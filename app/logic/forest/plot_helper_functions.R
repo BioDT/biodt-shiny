@@ -96,11 +96,25 @@ plot_tree_species <- function(data_folder, res_file) {
 }
 
 #' @export
-make_x_axes <- function(time_vec) {
+make_x_axes <- function(df) {
+  # Build xAxis for each of the 28 grids independently, using the
+  # management column of the grid to select an appropriate time vector.
+  # Fallback to unique sorted Time if a specific filter yields empty data.
+  mgmt <- c("BAU","EXT10","EXT30","GTR30","NTLR","NTSR","SA")
   lapply(0:27, function(i) {
-    ax <- list(type = 'category',
-               data = time_vec,
-               gridIndex = i)
+    col <- i %% 7
+    # prefer climate 4.5; if missing, drop climate filter
+    tv <- df[df$Management == mgmt[col + 1] & df$Climate == '4.5', 'Time']
+    if (length(tv) == 0) {
+      tv <- df[df$Management == mgmt[col + 1], 'Time']
+    }
+    if (length(tv) == 0) {
+      tv <- sort(unique(df$Time))
+    }
+    # enforce numeric ascending order then to character
+    tv <- sort(unique(as.numeric(tv)))
+    tv <- as.character(tv)
+    ax <- list(type = 'category', data = tv, gridIndex = i)
     if (i >= 21) {                       # bottom row needs an axis title
       ax$name           <- 'year'
       ax$nameLocation   <- 'middle'
@@ -182,8 +196,16 @@ make_series <- function(df) {
       col <- match(m, mgmt) - 1L                        # 0..6
       grid_index <- row * 7L + col                      # 0..27
       for (cl in climate) {
+        # order series by Time ascending to match xAxis order
+        df_sub <- df[df$Management == m & df$Climate == cl, c('Time', var)]
+        if (nrow(df_sub) > 0) {
+          ord <- order(as.numeric(df_sub$Time))
+          yvals <- df_sub[[var]][ord]
+        } else {
+          yvals <- numeric(0)
+        }
         series_item <- list(
-          data        = df[df$Management == m & df$Climate == cl, var],
+          data        = yvals,
           type        = "line",
           xAxisIndex  = grid_index,
           yAxisIndex  = grid_index,
@@ -262,8 +284,7 @@ get_figure <- function(
   # append variable labels on the left side
   #chart$x$opts$title <- c(chart$x$opts$title, make_row_titles())
 
-  time_vec <- as.character(combined_data[combined_data$Management == 'BAU' & combined_data$Climate == '4.5', 'Time'])
-  chart$x$opts$xAxis <- make_x_axes(time_vec)
+  chart$x$opts$xAxis <- make_x_axes(combined_data)
   chart$x$opts$yAxis <- make_y_axes()
   chart$x$opts$grid  <- make_grids()
   chart$x$opts$series <- make_series(combined_data)
