@@ -243,7 +243,7 @@ rtbm_app_ui <- function(id, i18n) {
 #'
 #' @return A Shiny server function
 #' @export
-rtbm_app_server <- function(id, tab_selected) {
+rtbm_app_server <- function(id, tab_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -274,7 +274,7 @@ rtbm_app_server <- function(id, tab_selected) {
         loaded_border <- load_finland_border_geojson()
         if (is.null(loaded_border)) {
           showNotification(
-            "Warning: Finland border data could not be loaded. Map boundary features may be affected.",
+            i18n$t("Warning: Finland border data could not be loaded. Map boundary features may be affected."),
             type = "warning",
             duration = 10 # Show for 10 seconds
           )
@@ -369,7 +369,7 @@ rtbm_app_server <- function(id, tab_selected) {
             div(
               class = "alert alert-danger",
               role = "alert",
-              "Error: Please select a species for the map view."
+              i18n$t("Error: Please select a species for the map view.")
             )
           })
           return()

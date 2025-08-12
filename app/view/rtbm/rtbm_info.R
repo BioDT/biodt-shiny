@@ -5,7 +5,7 @@ box::use(
 )
 
 #' @export
-rtbm_info_ui <- function(id, i18n = NULL) {
+rtbm_info_ui <- function(id, i18n) {
   ns <- NS(id)
   fluidRow(
     class = "fluid-row",
@@ -17,7 +17,7 @@ rtbm_info_ui <- function(id, i18n = NULL) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "Real-Time Bird Monitoring Prototype Digital Twin (DT)"
+          i18n$t("Real-Time Bird Monitoring Prototype Digital Twin (DT)")
         ),
         tags$p(
           class = "pt-3 fw-bold",

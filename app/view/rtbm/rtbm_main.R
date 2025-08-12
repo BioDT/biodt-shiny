@@ -16,7 +16,7 @@ rtbm_ui <- function(id, i18n) {
     id = ns("tab"),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$t("Info"),
       value = "Info",
       icon = icon("circle-info"),
       rtbm_info_ui(
@@ -25,7 +25,7 @@ rtbm_ui <- function(id, i18n) {
       )
     ),
     nav_panel(
-      title = "RTBM App",
+      title = i18n$t("RTBM App"),
       value = "rtbm_app",
       icon = icon("tree"),
       rtbm_app_ui(
@@ -34,7 +34,7 @@ rtbm_ui <- function(id, i18n) {
       )
     ),
     nav_panel(
-      title = "Contributors",
+      title = i18n$t("Contributors"),
       value = "Contributors",
       icon = icon("tree"),
       rtbm_contributors_ui(
@@ -46,7 +46,7 @@ rtbm_ui <- function(id, i18n) {
 }
 
 #' @export
-rtbm_main_server <- function(id) {
+rtbm_main_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -68,7 +68,8 @@ rtbm_main_server <- function(id) {
 
     rtbm_app_server(
       "rtbm_app",
-      tab_selected = tab
+      tab_selected = tab,
+      i18n
     )
   })
 }

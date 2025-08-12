@@ -335,7 +335,7 @@ server <- function(id) {
     # Invasie Alien Species pDT ----
     ias_main_server("ias_main")
     # Real-time Bird Monitoring pDT ----
-    rtbm_main_server("rtbm_main")
+    rtbm_main_server("rtbm_main", i18n)
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
