@@ -71,7 +71,7 @@ grassland_main_server <- function(id) {
       }
     )
 
-    grassland_dynamics_server("grassland_app", tab_grassland_selected)
+    grassland_dynamics_server("grassland_app", tab_grassland_selected, i18n)
     grassland_info_server("grassland_info", session)
   })
 }

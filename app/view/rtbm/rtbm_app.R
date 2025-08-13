@@ -210,11 +210,11 @@ rtbm_app_ui <- function(id, i18n) {
     base_layout,
     # Add plot output for summary statistics
     card(
-      card_header("Summary Statistics"),
+      card_header(i18n$t("Summary Statistics")),
       card_body(
         radioButtons(
           inputId = ns("summary_plot_choice"),
-          label = "Choose Summary View:",
+          label = i18n$t("Choose Summary View:"),
           choices = c(
             "Activity Summary" = "overall",
             "Top 5 Species Rank Trends" = "rank",

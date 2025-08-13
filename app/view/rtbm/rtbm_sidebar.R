@@ -14,6 +14,7 @@ box::use(
     renderUI,
     req,
     selectInput,
+    updateSelectInput,
     sliderInput,
     updateSliderInput,
     uiOutput,
@@ -32,9 +33,11 @@ box::use(
 
   # Utilities
   lubridate[as_date],
+)
 
+box::use(
   # Local modules
-  app / logic / rtbm / utils[format_date_for_display]
+  app / logic / rtbm / utils[format_date_for_display],
 )
 
 #' RTBM Sidebar UI
@@ -53,7 +56,7 @@ rtbm_sidebar_ui <- function(id, i18n) {
       selectInput(
         inputId = ns("viewSelector"),
         label = i18n$t("Select View"),
-        choices = c(
+        choices = list(
           "Map" = "map",
           "Summary" = "summary"
         ),
@@ -127,6 +130,19 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
     obs_found <- reactiveVal(" observation dates found.") # "dummy" reactive value; no other way how to include it in one of the status messages with i18n
 
     # --- Observers and Logic ---
+
+    # Observe viewSelector due to language changes
+    observe({
+      updateSelectInput(
+        session,
+        "viewSelector",
+        label = i18n$t("Select View"),
+        choices = structure(
+          c("map", "summary"),
+          names = c(i18n$t("Map"), i18n$t("Summary"))
+        )
+      )
+    })
 
     # Always update species picker choices when bird_spp_info is available
     observeEvent(bird_spp_info(), {
