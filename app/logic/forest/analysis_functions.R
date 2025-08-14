@@ -1,7 +1,7 @@
 box::use(
   dplyr,
   # tidyr,
-  #terra[rast, `values<-`, values, project, flip],
+  # terra[rast, `values<-`, values, project, flip],
   stringr,
   utils,
   shiny,
@@ -46,19 +46,17 @@ convert_landis_output <- function(r_in, i18n) {
 
 #' @export
 get_data <- function(
-  climate_scenarios,
-  management_scenarios,
-  years,
-  data_folder,
-  i18n
-) {
+    climate_scenarios,
+    management_scenarios,
+    years,
+    data_folder,
+    i18n) {
   # Create an empty list to store the data
   all_data <- list()
 
   # Loop through each combination of climate and management scenarios
   for (climate in climate_scenarios) {
     for (management in management_scenarios) {
-
       # zip_file <- paste0(data_folder, "/run_landis_", paste0(climate, "_", management), "_7141504")
       file_inside_zip <- file.path(data_folder, paste0(paste0(climate, "_", management), "/output/", "TotalCohorts.txt"))
 
@@ -86,12 +84,11 @@ get_data <- function(
 
 #' @export
 get_file_list <- function(
-  inp_species,
-  inp_out,
-  data_folder,
-  experiment_data,
-  i18n
-) {
+    inp_species,
+    inp_out,
+    data_folder,
+    experiment_data,
+    i18n) {
   if (length(experiment_data) == 0) {
     shiny$showNotification(i18n$t("No files found matching the specified structure."), type = "error")
   } else if (length(experiment_data) > 1) {
@@ -110,7 +107,7 @@ get_file_list <- function(
     experiment <- stringr$str_replace(experiment, "/", "")
   }
   data_file_list <- list.files(path = experiment_data, recursive = TRUE)
-  
+
   # get simulated years via helper
   params <- read_landis_params(experiment_data)
   start_year <- params$start_year
@@ -231,11 +228,10 @@ get_file_list <- function(
 
 #' @export
 get_experiment_data_file <- function(
-  inp_clim,
-  inp_mng,
-  data_folder,
-  i18n
-) {
+    inp_clim,
+    inp_mng,
+    data_folder,
+    i18n) {
   # Scan for files with the specified structure
   pattern <- paste0("^.+_", climate, "_", inp_mng, "_.+\\$")
   experiment_data <- list.dirs(path = data_folder, full.names = TRUE, recursive = FALSE)
@@ -279,18 +275,18 @@ get_file_name <- function(inp_species, inp_out, res_folder, tick, i18n) {
     res_file <- paste0(res_folder, "AGE-AVG-", tick, ".tif")
   } else if ("Median age of all trees" %in% extract_translated_ass_array(inp_out)) {
     all_data <- list()
-
+  }
+}
 
 #' @export
-get_bird_species_list <- function(scenario, prediction_folder){
-  
+get_bird_species_list <- function(scenario, prediction_folder) {
   prediction_folder_selected <- file.path(prediction_folder, scenario)
 
   bird_species_list <- list.files(path = prediction_folder_selected, recursive = TRUE, full.names = FALSE) |>
-    basename() |> stringr$str_remove("\\.tif(\\.filepart)?$") |> unique() |> sort()
+    basename() |>
+    stringr$str_remove("\\.tif(\\.filepart)?$") |>
+    unique() |>
+    sort()
 
   return(bird_species_list)
 }
-
-
-#
