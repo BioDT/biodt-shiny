@@ -101,7 +101,7 @@ grassland_dynamics_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_server <- function(id, tab_grassland_selected) {
+grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -160,7 +160,8 @@ grassland_dynamics_server <- function(id, tab_grassland_selected) {
     grassland_dynamics_soil_datatable_server(
       "soil_data_table",
       soil_data_table,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
   })
 }

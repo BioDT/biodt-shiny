@@ -12,16 +12,15 @@ box::use(
 
 #' @export
 grassland_dynamics_soil_datatable_ui <- function(
-  id,
-  i18n
-) {
+    id,
+    i18n) {
   ns <- NS(id)
   card(
     id = ns("datatable"),
     class = "mx-md-3 card-shadow mb-2",
     card_header(
-        tags$div(
-          class = "d-flex justify-content-between align-items-center",
+      tags$div(
+        class = "d-flex justify-content-between align-items-center",
         tags$h2(
           class = "card_title",
           i18n$translate("Soil Data")
@@ -32,11 +31,11 @@ grassland_dynamics_soil_datatable_ui <- function(
     card_body(
       uiOutput(ns("soil_data_table_wrap"))
     )
-   )
+  )
 }
 
 #' @export
-grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassland_selected) {
+grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
@@ -63,10 +62,10 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
         HTML(icon_html),
         class = "primary-button",
         `aria-expanded` = tolower(as.character(show_soiltable())),
-        title = if (show_soiltable()) "Collapse soil data table" else "Expand soil data table",
+        title = ifelse(show_soiltable(), i18n$t("Collapse soil data table"), i18n$t("Expand soil data table"))
       )
     })
-    
+
     observeEvent(input$show_soildata, {
       show_soiltable(!show_soiltable())
     })
@@ -91,17 +90,15 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
       {
         w$show()
         req(div_table_wrap_tag)
-        output$soil_data_table <- renderDT(
-          {
-            datatable(
-              data_table,
-              class = paste('cell-border stripe compact'),
-              style = 'auto',
-              fillContainer = FALSE,
-              rownames = FALSE
-            )
-          },
-        )
+        output$soil_data_table <- renderDT({
+          datatable(
+            data_table,
+            class = paste("cell-border stripe compact"),
+            style = "auto",
+            fillContainer = FALSE,
+            rownames = FALSE
+          )
+        })
         w$hide()
       }
     )

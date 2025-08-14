@@ -1,7 +1,4 @@
-# /app/view/rtbm/rtbm_sidebar.R
-
 box::use(
-  # Shiny fundamentals and UI
   shiny[
     actionButton,
     dateRangeInput,
@@ -17,6 +14,7 @@ box::use(
     renderUI,
     req,
     selectInput,
+    updateSelectInput,
     sliderInput,
     updateSliderInput,
     uiOutput,
@@ -35,9 +33,11 @@ box::use(
 
   # Utilities
   lubridate[as_date],
+)
 
+box::use(
   # Local modules
-  app / logic / rtbm / utils[format_date_for_display]
+  app / logic / rtbm / utils[format_date_for_display],
 )
 
 #' RTBM Sidebar UI
@@ -46,7 +46,7 @@ box::use(
 #'
 #' @return A Shiny UI definition.
 #' @export
-rtbm_sidebar_ui <- function(id) {
+rtbm_sidebar_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(
@@ -55,8 +55,8 @@ rtbm_sidebar_ui <- function(id) {
       # View selector (always visible)
       selectInput(
         inputId = ns("viewSelector"),
-        label = "Select View",
-        choices = c(
+        label = i18n$t("Select View"),
+        choices = list(
           "Map" = "map",
           "Summary" = "summary"
         ),
@@ -65,7 +65,7 @@ rtbm_sidebar_ui <- function(id) {
       # Date range input (always visible)
       dateRangeInput(
         inputId = ns("dateRange"),
-        label = "Select Date Range",
+        label = i18n$t("Select Date Range"),
         start = Sys.Date() - 30,
         end = Sys.Date() - 1,
         min = "2025-01-16",
@@ -82,7 +82,7 @@ rtbm_sidebar_ui <- function(id) {
       shinyjs::hidden(
         pickerInput(
           inputId = ns("speciesPicker"),
-          label = "Select Bird Species",
+          label = i18n$t("Select Bird Species"),
           choices = NULL,
           options = list(`live-search` = TRUE)
         )
@@ -90,7 +90,7 @@ rtbm_sidebar_ui <- function(id) {
       # Add Load Data button here
       actionButton(
         inputId = ns("loadDataButton"),
-        label = "Load Data",
+        label = i18n$t("Load Data"),
         icon = icon("sync"),
         class = "btn btn-primary w-100 mt-3 mb-3" # Changed btn-success to btn-primary
       ),
@@ -117,7 +117,7 @@ rtbm_sidebar_ui <- function(id) {
 #'   - selected_view: The selected view.
 #'   - load_button_clicked: Reactive trigger for the load data button.
 #' @export
-rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_progress_info = reactive(NULL)) {
+rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_progress_info = reactive(NULL), i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -127,8 +127,22 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
     animation_speed_rv <- reactiveVal(1000) # Default speed
     animation_last_step <- reactiveVal(Sys.time()) # Track when the last step occurred
     status_msg <- reactiveVal("Select date range and species, then click Load Data.")
+    obs_found <- reactiveVal(" observation dates found.") # "dummy" reactive value; no other way how to include it in one of the status messages with i18n
 
     # --- Observers and Logic ---
+
+    # Observe viewSelector due to language changes
+    observe({
+      updateSelectInput(
+        session,
+        "viewSelector",
+        label = i18n$t("Select View"),
+        choices = structure(
+          c("map", "summary"),
+          names = c(i18n$t("Map"), i18n$t("Summary"))
+        )
+      )
+    })
 
     # Always update species picker choices when bird_spp_info is available
     observeEvent(bird_spp_info(), {
@@ -167,12 +181,12 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
         req(available_dates())
         dates <- available_dates()
         if (length(dates) > 0) {
-          status_msg(paste0(length(dates), " observation dates found."))
+          status_msg(paste0(length(dates), i18n$t(obs_found())))
           update_date_slider(dates)
           # Set current date to the first available date in the new range
           current_date_rv(dates[1])
         } else {
-          status_msg("No data found for the selected date range.")
+          i18n$t(status_msg("No data found for the selected date range."))
           update_date_slider(NULL) # Clear slider
           current_date_rv(NULL)
         }
@@ -211,7 +225,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       output$playPauseButton <- renderUI({
         actionButton(
           inputId = ns("animateControl"),
-          label = if (animation_running_rv()) "Pause" else "Play",
+          label = ifelse(animation_running_rv(), i18n$t("Pause"), i18n$t("Play")),
           icon = if (animation_running_rv()) icon("pause") else icon("play"),
           class = "btn-primary btn-lg",
           width = "100%"
@@ -273,7 +287,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       } else {
         # Render empty UI or a message if no dates
         output$dateSlider <- renderUI({
-          p(class = "text-muted", "No observation dates available for selected range.")
+          p(class = "text-muted", i18n$t("No observation dates available for selected range."))
         })
       }
     }
@@ -283,7 +297,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       # Ensure this renders even when animation isn't running
       actionButton(
         inputId = ns("animateControl"),
-        label = if (animation_running_rv()) "Pause" else "Play",
+        label = ifelse(animation_running_rv(), i18n$t("Pause"), i18n$t("Play")),
         icon = if (animation_running_rv()) icon("pause") else icon("play"),
         class = "btn-primary btn-lg",
         width = "100%"
@@ -292,7 +306,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
 
     # Status Message Display
     output$statusMsg <- renderUI({
-      tags$p(class = "text-muted", status_msg())
+      tags$p(class = "text-muted", i18n$t(status_msg()))
     })
 
     # Render the selected date text
@@ -321,7 +335,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
             # Animation Delay Slider
             sliderInput(
               inputId = ns("speedControl"),
-              label = "Animation Delay (ms)",
+              label = i18n$t("Animation Delay (ms)"),
               min = 100,
               max = 2000,
               value = animation_speed_rv(), # Use reactive value for persistence

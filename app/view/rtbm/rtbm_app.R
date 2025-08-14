@@ -184,10 +184,10 @@ rtbm_app_ui <- function(id, i18n) {
           # Card Header now includes collapse button directly
           div(
             class = "card-header d-flex justify-content-between align-items-center",
-            span("Bird Observation Controls")
+            span(i18n$t("Bird Observation Controls"))
           ),
           # Call Sidebar Module UI (contains card body)
-          rtbm_sidebar_ui(ns("sidebar"))
+          rtbm_sidebar_ui(ns("sidebar"), i18n)
         )
       ),
       # Map Column - will expand when sidebar collapses
@@ -210,11 +210,11 @@ rtbm_app_ui <- function(id, i18n) {
     base_layout,
     # Add plot output for summary statistics
     card(
-      card_header("Summary Statistics"),
+      card_header(i18n$t("Summary Statistics")),
       card_body(
         radioButtons(
           inputId = ns("summary_plot_choice"),
-          label = "Choose Summary View:",
+          label = i18n$t("Choose Summary View:"),
           choices = c(
             "Activity Summary" = "overall",
             "Top 5 Species Rank Trends" = "rank",
@@ -243,7 +243,7 @@ rtbm_app_ui <- function(id, i18n) {
 #'
 #' @return A Shiny server function
 #' @export
-rtbm_app_server <- function(id, tab_selected) {
+rtbm_app_server <- function(id, tab_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -274,7 +274,7 @@ rtbm_app_server <- function(id, tab_selected) {
         loaded_border <- load_finland_border_geojson()
         if (is.null(loaded_border)) {
           showNotification(
-            "Warning: Finland border data could not be loaded. Map boundary features may be affected.",
+            i18n$t("Warning: Finland border data could not be loaded. Map boundary features may be affected."),
             type = "warning",
             duration = 10 # Show for 10 seconds
           )
@@ -288,7 +288,8 @@ rtbm_app_server <- function(id, tab_selected) {
       id = "sidebar",
       bird_spp_info = bird_spp_info,
       available_dates = available_dates,
-      summary_progress_info = summary_progress_info
+      summary_progress_info = summary_progress_info,
+      i18n
     )
 
     # --- Connect Sidebar Outputs to App Logic ---
@@ -369,7 +370,7 @@ rtbm_app_server <- function(id, tab_selected) {
             div(
               class = "alert alert-danger",
               role = "alert",
-              "Error: Please select a species for the map view."
+              i18n$t("Error: Please select a species for the map view.")
             )
           })
           return()

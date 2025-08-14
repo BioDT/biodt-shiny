@@ -5,15 +5,14 @@ box::use(
 )
 
 box::use(
-  app/view/honeybee/honeybee_info[honeybee_info_ui, honeybee_info_server],
-  app/view/honeybee/honeybee_beekeeper[honeybee_beekeeper_ui, honeybee_beekeeper_server],
-  app/view/honeybee/beekeeper_contributors[bee_contributors_ui],
+  app / view / honeybee / honeybee_info[honeybee_info_ui, honeybee_info_server],
+  app / view / honeybee / honeybee_beekeeper[honeybee_beekeeper_ui, honeybee_beekeeper_server],
+  app / view / honeybee / beekeeper_contributors[bee_contributors_ui],
 )
 #' @export
 honeybee_ui <- function(id,
                         theme,
                         i18n) {
-
   ns <- NS(id)
   # tagList(
   navset_tab(
@@ -55,7 +54,7 @@ honeybee_ui <- function(id,
 
 #' @export
 honeybee_server <- function(id,
-                            session_dir) {
+                            session_dir, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 

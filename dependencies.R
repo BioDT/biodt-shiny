@@ -2,6 +2,7 @@
 library(arrow)
 library(cicerone)
 library(config)
+library(data.table)
 library(dplyr)
 library(DT)
 library(echarty)

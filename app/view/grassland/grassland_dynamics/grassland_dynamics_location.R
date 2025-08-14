@@ -5,36 +5,50 @@ box::use(
   ],
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
+  htmltools[as.tags, tags, HTML],
 )
 
 box::use(
-  app/logic/deimsid_coordinates[get_coords_deimsid],
+  app / logic / deimsid_coordinates[get_coords_deimsid],
 )
 
 #' @export
 grassland_dynamics_location_ui <- function(id, i18n) {
   ns <- NS(id)
+
+  choice_names <- c(
+    paste0(i18n$t("DEIMS.id")),
+    paste0(i18n$t("Latitude, Longitude"))
+  )
+
+  choice_values <- c(
+    "DEIMS.id",
+    "Lat, Long"
+  )
+
   card(
     class = "mt-2 me-md-3 card-shadow",
     id = ns("location_select"),
     full_screen = FALSE,
     card_header(
       tags$h2(
-        class="card_title",
-        i18n$translate("Location"))
+        class = "card_title",
+        i18n$translate("Location")
+      )
     ),
     card_body(
       radioButtons(
         inputId = ns("input_type"),
         label = i18n$translate("Choose location type:"),
-        choices = list("DEIMS.id", "Lat, Long"),
-        selected = "DEIMS.id"
+        choices = c(
+          "DEIMS.id" = i18n$t("DEIMS.id"),
+          "Lat, Long" = i18n$t("Latitude, Longitude")
+        )
       ),
       textInput(
         inputId = ns("deimsid"),
         "DEIMS.id",
         value = "102ae489-04e3-481d-97df-45905837dc1a"
-        # example: Elbe 858b9f78-889f-4acb-8a12-c3c2436d794c
       ),
       hidden(
         tags$div(
@@ -128,6 +142,6 @@ grassland_dynamics_location_server <- function(id) { # nolint
       }
     )
 
-    return(coordinates)
+    coordinates
   })
 }
