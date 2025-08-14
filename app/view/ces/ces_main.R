@@ -63,7 +63,7 @@ ces_ui <- function(id, i18n) {
 }
 
 #' @export
-ces_server <- function(id) {
+ces_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 

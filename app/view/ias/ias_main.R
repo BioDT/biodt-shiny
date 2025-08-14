@@ -45,7 +45,7 @@ ias_ui <- function(id, i18n) {
 }
 
 #' @export
-ias_main_server <- function(id) {
+ias_main_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 

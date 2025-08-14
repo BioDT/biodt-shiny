@@ -26,14 +26,6 @@ grassland_dynamics_location_ui <- function(id, i18n) {
     "Lat, Long"
   )
 
-  print("length(choice_names):::")
-  print(length(choice_names))
-  print("length(choice_values):::")
-  print(length(choice_values))
-  if (length(choice_names) != length(choice_values)) {
-    stop("`choiceNames` and `choiceValues` must have the same length.")
-  }
-
   card(
     class = "mt-2 me-md-3 card-shadow",
     id = ns("location_select"),
