@@ -92,8 +92,10 @@ get_file_list <- function(
 
   if (length(experiment_data) == 0) {
     shiny$showNotification("No files found matching the specified structure.", type = "error")
+    return(NULL)
   } else if (length(experiment_data) > 1) {
     shiny$showNotification("Multiple files found matching the specified structure.", type = "error")
+    return(NULL)
   } else if (length(experiment_data) != 1) {
     return(NULL)
   }
@@ -108,6 +110,11 @@ get_file_list <- function(
     experiment <- stringr$str_replace(experiment, "/", "")
   }
 
+  # Ensure the path is a directory we can read
+  if (!dir.exists(experiment_data)) {
+    shiny$showNotification(sprintf("Data directory not found: %s", experiment_data), type = "error")
+    return(NULL)
+  }
   data_file_list <- list.files(path = experiment_data, recursive = TRUE)
   
   # get simulated years via helper

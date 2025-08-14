@@ -218,6 +218,13 @@ forest_app_server <- function(id, app_selected) {
           data_folder,
           experiment_data
         )
+        # If selection failed, clear map layers and stop
+        if (is.null(input_selection)) {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeImage("tree_species") |>
+            leaflet$clearControls()
+          return(invisible(NULL))
+        }
         
         experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
@@ -277,6 +284,13 @@ forest_app_server <- function(id, app_selected) {
           data_folder,
           experiment_data_file()
         )
+        # If selection failed, clear map layers and stop
+        if (is.null(input_selection)) {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeImage("tree_species") |>
+            leaflet$clearControls()
+          return(invisible(NULL))
+        }
         
         # experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
@@ -343,6 +357,12 @@ forest_app_server <- function(id, app_selected) {
       ),
       ignoreInit = TRUE,
       {
+        # Validate experiment data directory before building chart
+        if (is.null(experiment_data_file()) || length(experiment_data_file()) == 0 ||
+            !dir.exists(experiment_data_file())) {
+          shiny$showNotification("Experiment data directory not found or invalid.", type = "error")
+          return(invisible(NULL))
+        }
         chart <- get_multichart(experiment_data_file())
         experiment_chart(chart)
         output$multichart <- echarty$ecs.render(
