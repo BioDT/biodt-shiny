@@ -84,8 +84,7 @@ get_data <- function(
 
 #' @export
 get_file_list <- function(
-    inp_species,
-    inp_out,
+    input,
     data_folder,
     experiment_data,
     i18n) {
@@ -128,13 +127,14 @@ get_file_list <- function(
     }
     if (input$species == "Birch (betulaSP)") {
       type <- "betulaSP"
-    } else if ("Pine (pinussyl)" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "Pine (pinussyl)") {
       type <- "pinussyl"
-    } else if ("Spruce (piceabbies)" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "Spruce (piceabbies)") {
       type <- "piceabies"
-    } else if ("Other trees (other)" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "Other trees (other)") {
       type <- "other"
     }
+
     res_folder <- paste0(experiment, "/output/agbiomass/", type)
     res_working_folder <- res_folder
 
@@ -144,7 +144,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Below-ground biomass") {
     res_folder <- paste0(experiment, "/output/BelowGroundBiom/")
     res_working_folder <- res_folder
 
@@ -153,7 +153,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Harvested biomass") {
     res_folder <- paste0(experiment, "/output/harvest/")
     res_working_folder <- res_folder
 
@@ -162,7 +162,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Woody Debris") {
     res_folder <- paste0(experiment, "/output/WoodyDebris/")
     res_working_folder <- res_folder
     res_file_list <- data_file_list[grep(
@@ -170,16 +170,16 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Max-age of selected species" %in% extract_translated_ass_array(inp_species)) {
-    if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {
+   } else if (input$output == "Max-age of selected species") {
+    if (input$species == "Birch (betulaSP)") {
       type <- "betulaSP"
-    } else if ("Pine (pinussyl)" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "Pine (pinussyl)") {
       type <- "pinussyl"
-    } else if ("Spruce (piceabbies)" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "Spruce (piceabbies)") {
       type <- "piceabies"
-    } else if ("All species" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "All species") {
       type <- "AllSppMaxAge"
-    } else if ("Other trees (other)" %in% extract_translated_ass_array(inp_species)) {
+    } else if (input$species == "Other trees (other)") {
       type <- "other"
     }
     res_folder <- paste0(experiment, "/output/max-age-selected-spp/")
@@ -195,7 +195,7 @@ get_file_list <- function(
     )]
 
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Average age of all trees)" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Average age of all trees") {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
 
@@ -204,7 +204,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-  } else if ("Median age of all trees" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Median age of all trees") {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
     print("res_working_folder:::")
@@ -236,12 +236,18 @@ get_file_list <- function(
 
 #' @export
 get_experiment_data_file <- function(
-    inp_clim,
-    inp_mng,
+    input,
     data_folder,
     i18n) {
+  if (input$climate == "Current climate") {
+    climate <- "current"
+  } else if (input$climate == "RCP4.5") {
+    climate <- "4.5"
+  } else if (input$climate == "RCP8.5") {
+    climate <- "8.5"
+  }
   # Scan for files with the specified structure
-  pattern <- paste0("^.+_", climate, "_", inp_mng, "_.+\\$")
+  pattern <- paste0("^.+_", climate, "_", input$management, "_.+\\$")
   experiment_data <- list.dirs(path = data_folder, full.names = TRUE, recursive = FALSE)
   experiment_data <- experiment_data[grepl(paste0(climate, "_", input$management), experiment_data)]
 
@@ -252,38 +258,34 @@ get_experiment_data_file <- function(
 
 
 #' @export
-get_file_name <- function(inp_species, inp_out, res_folder, tick, i18n) {
-  if ("Above-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+get_file_name <- function(input, res_folder, tick, i18n) {
+  if (input$output == "Above-ground biomass") {
     res_file <- paste0(res_folder, "/AGBiomass", tick, ".tif")
-  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Below-ground biomass") {
     res_file <- paste0(res_folder, "BGB", tick, ".tif")
-  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Harvested biomass") {
     res_file <- paste0(res_folder, "biomass-removed-", tick, ".tif")
-  } else if ("Below-ground biomass" %in% extract_translated_ass_array(inp_out)) {
+  } else if (input$output == "Woody Debris") {
     res_file <- paste0(res_folder, "WoodyDebris-", tick, ".tif")
-  } else if ("Max-age of selected species" %in% extract_translated_ass_array(inp_out)) {
-    if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {} else if (
-      "Max-age of selected species" %in% extract_translated_ass_array(inp_out)
-    ) {
-      if ("Birch (betulaSP)" %in% extract_translated_ass_array(inp_species)) {
-        type <- "betulaSP"
-      } else if ("Pine (pinussyl)" %in% extract_translated_ass_array(inp_species)) {
-        type <- "pinussyl"
-      } else if ("Spruce (piceabbies)" %in% extract_translated_ass_array(inp_species)) {
-        type <- "piceabies"
-      } else if ("All species" %in% extract_translated_ass_array(inp_species)) {
-        type <- "AllSppMaxAge"
-      } else if ("Other trees (other)" %in% extract_translated_ass_array(inp_species)) {
-        type <- "other"
-      }
-
-      res_file <- paste0(res_folder, type, "-", tick, ".tif")
+  } else if (input$output == "Max-age of selected species") {
+    if (input$species == "Birch (betulaSP)") {
+      type <- "betulaSP"
+    } else if (input$species == "Pine (pinussyl)") {
+      type <- "pinussyl"
+    } else if (input$species == "Spruce (piceabbies)") {
+      type <- "piceabies"
+    } else if (input$species == "All species") {
+      type <- "AllSppMaxAge"
+    } else if (input$species == "Other trees (other)") {
+      type <- "other"
     }
-  } else if ("Average age of all trees" %in% extract_translated_ass_array(inp_out)) {
+    res_file <- paste0(res_folder, type, "-", tick, ".tif")
+  } else if (input$output == "Average age of all trees") {
     res_file <- paste0(res_folder, "AGE-AVG-", tick, ".tif")
-  } else if ("Median age of all trees" %in% extract_translated_ass_array(inp_out)) {
-    all_data <- list()
+  } else if (input$output == "Median age of all trees") {
+    res_file <- paste0(res_folder, "AGE-MED-", tick, ".tif")
   }
+  return(res_file)
 }
 
 #' @export

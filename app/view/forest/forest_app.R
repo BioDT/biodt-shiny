@@ -210,7 +210,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        experiment_data <- get_experiment_data_file(input$climate, input$management, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder = data_folder)
 
         experiment_data_file(experiment_data)
 
@@ -233,13 +233,10 @@ forest_app_server <- function(id, app_selected, i18n) {
       ignoreInit = TRUE,
       {
         shiny$req(app_selected())
-
-        experiment_data <- get_experiment_data_file(input$climate, input$management, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder = data_folder)
 
         input_selection <- get_file_list(
-          input$species,
-          input$output$species,
-          input$output,
+          input,
           data_folder,
           experiment_data, # "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
           i18n
@@ -289,8 +286,7 @@ forest_app_server <- function(id, app_selected, i18n) {
             {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
-                input$species,
-                input$output,
+                input,
                 input_selection$res_folder,
                 value - start_year,
                 i18n
@@ -309,11 +305,10 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        experiment_data <- get_experiment_data_file(input, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder = data_folder)
 
         input_selection <- get_file_list(
-          input$species,
-          input$output,
+          input,
           data_folder,
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
           experiment_data_file(),
@@ -363,18 +358,10 @@ forest_app_server <- function(id, app_selected, i18n) {
             {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
-                input$species,
-                input$output,
+                input,
                 input_selection$res_folder,
                 value - start_year,
                 i18n
-              )
-              res_file_name <- get_file_name(
-                input$species,
-                input$output,
-                input_selection$res_folder,
-                i18n
-                # (value - start_year)
               )
               res_file(res_file_name)
             }
