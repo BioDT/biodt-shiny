@@ -304,7 +304,8 @@ server <- function(id) {
     # Info page ----
     mod_info_server(
       "info",
-      main_session = session
+      main_session = session,
+      i18n
     )
     # CWR pDT ----
     mod_cwr_server(
@@ -315,26 +316,30 @@ server <- function(id) {
     # Honeybee pDT ----
     honeybee_server(
       "honeybee_main",
-      session_dir
+      session_dir,
+      i18n
     )
     # Grassland pDT ----
     grassland_main_server(
-      "grassland_main"
+      "grassland_main",
+      i18n
     )
     # Forest pDT ----
     forest_main_server(
-      "forest_main"
+      "forest_main",
+      i18n
     )
     # Cultural Ecosystem Services pDT ----
     ces_server(
-      "ces_main"
+      "ces_main",
+      i18n
     )
     # Disease Outbreaks pDT ----
-    disease_outbreaks_main_server("disease_outbreaks_main", session_dir)
+    disease_outbreaks_main_server("disease_outbreaks_main", session_dir, i18n)
     # Invasie Alien Species pDT ----
-    ias_main_server("ias_main")
+    ias_main_server("ias_main", i18n)
     # Real-time Bird Monitoring pDT ----
-    rtbm_main_server("rtbm_main")
+    rtbm_main_server("rtbm_main", i18n)
 
     shiny$observeEvent(input$biodt_logo, {
       nav_select(
