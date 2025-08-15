@@ -20,12 +20,25 @@ box::use(
       get_file_list,
       get_file_name,
       get_data,
-      get_figure,
-      get_experiment_data_file
+      get_experiment_data_file,
+      get_bird_species_list
     ],
-  app / logic / extract_translated_strings_into_arr[extract_translated_ass_array],
+    app /
+      logic /
+      forest /
+      plot_helper_functions[
+        plot_bird_species,
+        plot_tree_species,
+        get_multichart,
+        get_figure
+      ],
+      app /
+        logic /
+        forest /
+        landis_io[
+          read_landis_params
+        ]
 )
-
 
 #' @export
 forest_app_ui <- function(id, i18n) {
@@ -75,6 +88,13 @@ forest_app_ui <- function(id, i18n) {
               )
             ),
           ),
+          shiny$selectInput(
+            ns("bird_species"),
+            "Select Bird Species:",
+            choices = c(
+              "None"
+            )
+          ),
           shiny$sliderInput(
             ns("res_file_slider"),
             i18n$t("Select year:"),
@@ -99,9 +119,6 @@ forest_app_ui <- function(id, i18n) {
         ns("multichart"),
         height = "400px",
       ),
-      leaflet$leafletOutput(ns("map")),
-      shiny$plotOutput(ns("plot"), height = "800px"),
-      shiny$uiOutput(ns("plot")),
       echarty$ecs.output(
         ns("plot"),
         # width = "100%",
@@ -115,7 +132,9 @@ forest_app_ui <- function(id, i18n) {
 forest_app_server <- function(id, app_selected, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    data_folder <- file.path(config$get("data_path"), "forest_bird")
+    # data_folder <- file.path(config$get("data_path"), "forest_bird")
+    data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
+    prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
     output$selection <- shiny$renderText({
       text <- paste(
         "Management Regime:",
@@ -162,6 +181,7 @@ forest_app_server <- function(id, app_selected, i18n) {
     res_working_folder <- shiny$reactiveVal(NULL)
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
+    start_sim_year <- shiny$reactiveVal(NULL)
 
     output$map <- NULL
 
@@ -190,9 +210,20 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        experiment_data <- get_experiment_data_file(input$climate, input$management, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder = data_folder)
 
         experiment_data_file(experiment_data)
+
+        bird_species_list <- get_bird_species_list(basename(experiment_data_file()), prediction_folder)
+        
+        shiny$updateSelectInput(
+          session,
+          "bird_species",
+          choices = c(
+            "None",
+            bird_species_list
+          )
+        )
       }
     )
 
@@ -202,25 +233,30 @@ forest_app_server <- function(id, app_selected, i18n) {
       ignoreInit = TRUE,
       {
         shiny$req(app_selected())
-
-        experiment_data <- get_experiment_data_file(input$climate, input$management, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder = data_folder)
 
         input_selection <- get_file_list(
-          input$species,
-          input$output$species,
-          input$output,
+          input,
           data_folder,
           experiment_data, # "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
           i18n
         )
-
+        # If selection failed, clear map layers and stop
+        if (is.null(input_selection)) {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeImage("tree_species") |>
+            leaflet$clearControls()
+          return(invisible(NULL))
+        }
+        
         experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
         timestep <- input_selection$timestep
         start_year <- input_selection$start_year
         # duration <- input_selection$duration
-        simulated_years <- start_year + res_file_list_tick
+        start_sim_year(start_year)
+        simulated_years <- res_file_list_tick + start_year
 
         if (length(simulated_years) > 0) {
           min_value <- min(simulated_years, na.rm = TRUE)
@@ -250,8 +286,7 @@ forest_app_server <- function(id, app_selected, i18n) {
             {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
-                input$species,
-                input$output,
+                input,
                 input_selection$res_folder,
                 value - start_year,
                 i18n
@@ -270,17 +305,23 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         shiny$req(app_selected())
 
-        experiment_data <- get_experiment_data_file(input, data_folder)
+        experiment_data <- get_experiment_data_file(input, data_folder = data_folder)
 
         input_selection <- get_file_list(
-          input$species,
-          input$output,
+          input,
           data_folder,
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
           experiment_data_file(),
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
         )
-
+        # If selection failed, clear map layers and stop
+        if (is.null(input_selection)) {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeImage("tree_species") |>
+            leaflet$clearControls()
+          return(invisible(NULL))
+        }
+        
         # experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
@@ -317,18 +358,10 @@ forest_app_server <- function(id, app_selected, i18n) {
             {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
-                input$species,
-                input$output,
+                input,
                 input_selection$res_folder,
                 value - start_year,
                 i18n
-              )
-              res_file_name <- get_file_name(
-                input$species,
-                input$output,
-                input_selection$res_folder,
-                i18n
-                # (value - start_year)
               )
               res_file(res_file_name)
             }
@@ -347,47 +380,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         shiny$req(res_file())
         # shiny$req(experiment_data_file())
 
-        raster_data <- terra$rast(
-          file.path(data_folder, res_file())
-        )
-        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
-
-        ext <- terra$ext(raster_data)
-
-        terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() |> print()
-        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite()) {
-          shiny$showNotification("Warning: Raster contains infinite values!", type = "error")
-        }
-
-        pal <- leaflet$colorNumeric(
-          palette = "YlOrBr",
-          # domain = terra$values(raster_data),
-          domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
-          na.color = "transparent",
-          reverse = TRUE
-        )
-        # raster_data <- terra$aggregate(raster_data, fact = 2, fun = mean)
-
-        leaflet$leafletProxy("map") |>
-          leaflet$clearImages() |>
-          leaflet$clearControls() |>
-          leaflet$addRasterImage(
-            raster_data,
-            opacity = 0.4,
-            colors = pal,
-            project = FALSE
-          ) |>
-          leaflet$addLegend(
-            position = "bottomright",
-            pal = leaflet$colorNumeric(
-              palette = "YlOrBr",
-              # domain = terra$values(raster_data),
-              domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
-              na.color = "transparent"
-            ),
-            values = terra$values(raster_data),
-            opacity = 0.4
-          )
+        plot_tree_species(data_folder, res_file())
       }
     )
 
@@ -398,11 +391,36 @@ forest_app_server <- function(id, app_selected, i18n) {
       ),
       ignoreInit = TRUE,
       {
-        chart <- get_multichart(experiment_data_file(), i18n)
-        chart <- get_multichart(experiment_data_file(), i18n)
+        # Validate experiment data directory before building chart
+        if (is.null(experiment_data_file()) || length(experiment_data_file()) == 0 ||
+            !dir.exists(experiment_data_file())) {
+          shiny$showNotification("Experiment data directory not found or invalid.", type = "error")
+          return(invisible(NULL))
+        }
+        chart <- get_multichart(experiment_data_file())
         experiment_chart(chart)
         output$multichart <- echarty$ecs.render(
           experiment_chart()
+        )
+      }
+    )
+
+    
+    # bird species update
+    shiny$observeEvent(
+      c(
+        input$res_file_slider, input$bird_species
+      ),
+      ignoreInit = TRUE,
+      {
+        if (is.null(input$bird_species) || identical(input$bird_species, "None")) {
+          return()
+        }
+        plot_bird_species(
+          scenario = basename(experiment_data_file()),
+          bird_species = input$bird_species,
+          tick = input$res_file_slider - start_sim_year(),
+          prediction_folder = prediction_folder
         )
       }
     )
@@ -413,11 +431,14 @@ forest_app_server <- function(id, app_selected, i18n) {
       c(app_selected(), input$show_results),
       {
         plots <- list()
+        
+        if(input$show_results){
+          
+          params <- read_landis_params(experiment_data_file())
 
-        if (input$show_results) {
           climate_scenarios <- c("current", "4.5", "8.5")
           management_scenarios <- c("BAU", "EXT10", "EXT30", "GTR30", "NTLR", "NTSR", "SA")
-          years <- seq(0, 100, by = 10)
+          years <- seq(0, params$duration, by = params$timestep)
 
           combined_data <- get_data(climate_scenarios, management_scenarios, years, data_folder)
           plots <- get_figure(combined_data)
