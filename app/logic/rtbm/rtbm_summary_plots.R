@@ -19,12 +19,12 @@ box::use(
 #'   'date' column and subsequent columns for each species count.
 #' @return A patchwork/ggplot object (combined plot).
 #' @export
-create_summary_plots <- function(summary_data) {
+create_summary_plots <- function(summary_data, i18n) {
   # Ensure date is in Date format and data is valid
   if (is.null(summary_data) || nrow(summary_data) == 0 || ncol(summary_data) < 2) {
     return(
       ggplot() +
-        labs(title = "No summary data available or data format incorrect") +
+        labs(title = i18n$t("No summary data available or data format incorrect")) +
         theme_bw()
     )
   }

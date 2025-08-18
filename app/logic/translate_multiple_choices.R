@@ -26,14 +26,21 @@ translate_multiple_choices <- function(
         )
       )
     }
+  } else if (which_type == "radio") {
+    updated_choices <- {
+      updateRadioButtons(
+        session,
+        input_id,
+        label = i18n$t(label),
+        choices = structure(
+          lapply(..., identity()),
+          names = list(lapply(names(...), i18n$t))
+        )
+      )
+    }
+  } else {
+    warning("Invalid type specified. Use 'select' (for selectInput) or 'radio' (for radioButtons).")
+    return(NULL)
   }
   updated_choices
-}
-
-
-test <- function(...) {
-  print(...)
-
-  res <- (...)
-  res
 }

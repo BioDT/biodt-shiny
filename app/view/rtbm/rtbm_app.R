@@ -44,7 +44,8 @@ box::use(
     checkboxInput,
     numericInput,
     helpText,
-    showNotification
+    showNotification,
+    updateRadioButtons
   ],
 
   # Base R functions needed
@@ -291,6 +292,19 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
       summary_progress_info = summary_progress_info,
       i18n
     )
+
+    # Before all bussines logic below happens, set up observe to translate 3 buttons in Summmary statistics
+    observe({
+      updateRadioButtons(
+        session,
+        inputId = ns("summary_plot_choice"),
+        label = i18n$t("Choose Summary View:"),
+        choices = structure(
+          c("overall", "rank", "table"),
+          names = c(i18n$t("Activity Summary"), i18n$t("Top 5 Species Rank Trends"), i18n$t("Top 5 Daily Species Counts"))
+        )
+      )
+    })
 
     # --- Connect Sidebar Outputs to App Logic ---
 
@@ -655,7 +669,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
       # Conditionally call the correct plotting function
       if (input$summary_plot_choice == "overall") {
         # For overall summary, plot layout is now fixed, no need to pass dates for layout
-        create_summary_plots(summary_data())
+        create_summary_plots(summary_data(), i18n)
       } else if (input$summary_plot_choice == "rank") {
         req(bird_spp_info()) # Ensure bird_spp_info is available for rank plot
         create_top_species_rank_plot(summary_data(), bird_spp_info())
