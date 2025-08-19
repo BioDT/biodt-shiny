@@ -485,7 +485,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
 
         # Wrap summary data loading with progress
         withProgress(
-          message = "Loading summary data",
+          message = i18n$t("Loading summary data"),
           value = 0,
           {
             # Isolate to prevent re-triggering from dependent reactives changing inside
@@ -676,7 +676,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
         create_summary_plots(summary_data(), i18n)
       } else if (input$summary_plot_choice == "rank") {
         req(bird_spp_info()) # Ensure bird_spp_info is available for rank plot
-        create_top_species_rank_plot(summary_data(), bird_spp_info())
+        create_top_species_rank_plot(summary_data(), bird_spp_info(), i18n)
       }
     })
 
@@ -693,7 +693,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
         options = list(pageLength = 10),
         rownames = FALSE,
         escape = -3,
-        colnames = c("Date", "Common name", "Scientific name", "Count")
+        colnames = c(i18n$t("Date"), i18n$t("Common name"), i18n$t("Scientific name"), i18n$t("Count"))
       )
     })
 

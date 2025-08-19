@@ -63,9 +63,9 @@ create_summary_plots <- function(summary_data, i18n) {
     common_x_scale +
     scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
     labs(
-      title = "Cumulative record",
+      title = i18n$t("Cumulative record"),
       x = NULL,
-      y = "Recordings / Count"
+      y = i18n$t("Recordings / Count")
     ) +
     common_theme
 
@@ -75,8 +75,8 @@ create_summary_plots <- function(summary_data, i18n) {
     common_x_scale +
     scale_y_continuous(labels = label_number(scale_cut = cut_short_scale())) +
     labs(
-      title = "Daily record",
-      x = "Date",
+      title = i18n$t("Daily Record"),
+      x = i18n$t("Date"),
       y = NULL
     ) +
     common_theme
@@ -86,7 +86,7 @@ create_summary_plots <- function(summary_data, i18n) {
     common_line_point +
     common_x_scale +
     labs(
-      title = "Species",
+      title = i18n$t("Species"),
       x = NULL,
       y = NULL
     ) +
@@ -109,12 +109,12 @@ create_summary_plots <- function(summary_data, i18n) {
 #'   Expected columns: 'join_key_scientific_name', 'common_name'.
 #' @return A ggplot object.
 #' @export
-create_top_species_rank_plot <- function(summary_data, bird_spp_info) {
+create_top_species_rank_plot <- function(summary_data, bird_spp_info, i18n) {
   # Ensure data is valid
   if (is.null(summary_data) || nrow(summary_data) == 0 || ncol(summary_data) < 2) {
     return(
       ggplot() +
-        labs(title = "No summary data available or data format incorrect") +
+        labs(title = i18n$t("No summary data available or data format incorrect")) +
         theme_bw()
     )
   }
@@ -122,7 +122,9 @@ create_top_species_rank_plot <- function(summary_data, bird_spp_info) {
   if (is.null(bird_spp_info) || !all(c("join_key_scientific_name", "common_name") %in% names(bird_spp_info))) {
     return(
       ggplot() +
-        labs(title = "Bird species information is missing required columns (join_key_scientific_name, common_name)") +
+        labs(
+          title = i18n$t("Bird species information is missing required columns (join_key_scientific_name, common_name)")
+        ) +
         theme_bw()
     )
   }
@@ -157,7 +159,7 @@ create_top_species_rank_plot <- function(summary_data, bird_spp_info) {
   if (nrow(rank_data) == 0) {
     return(
       ggplot() +
-        labs(title = "Not enough data to determine top 5 species ranks") +
+        labs(title = i18n$t("Not enough data to determine top 5 species ranks")) +
         theme_bw()
     )
   }
@@ -168,11 +170,11 @@ create_top_species_rank_plot <- function(summary_data, bird_spp_info) {
     geom_point(size = 3) +
     scale_y_reverse(breaks = 1:5) +
     scale_x_date(date_breaks = "2 days", date_labels = "%b %d") +
-    scale_color_discrete(name = "Bird Species") +
+    scale_color_discrete(name = i18n$t("Bird Species")) +
     labs(
-      title = "Top 5 most recorded species per day",
-      x = "Date",
-      y = "Count rank number"
+      title = i18n$t("Top 5 Species Rank Trends"),
+      x = i18n$t("Date"),
+      y = i18n$t("Count rank number")
     ) +
     theme_bw() +
     theme(legend.position = "bottom")
