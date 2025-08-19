@@ -159,6 +159,7 @@ box::use(
     rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
+  app / logic / translate_multiple_choices[translate_multiple_choices]
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -295,13 +296,16 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
 
     # Before all bussines logic below happens, set up observe to translate 3 buttons in Summmary statistics
     observe({
-      updateRadioButtons(
+      translate_multiple_choices(
         session,
-        inputId = ns("summary_plot_choice"),
-        label = i18n$t("Choose Summary View:"),
-        choices = structure(
-          c("overall", "rank", "table"),
-          names = c(i18n$t("Activity Summary"), i18n$t("Top 5 Species Rank Trends"), i18n$t("Top 5 Daily Species Counts"))
+        "radio",
+        input_id = "summary_plot_choice",
+        label = "Choose Summary View:",
+        i18n,
+        c(
+          "Activity Summary" = "overall",
+          "Top 5 Species Rank Trends" = "rank",
+          "Top 5 Daily Species Counts" = "table"
         )
       )
     })

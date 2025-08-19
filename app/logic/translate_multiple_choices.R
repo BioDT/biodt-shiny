@@ -8,6 +8,7 @@ translate_multiple_choices <- function(
     which_type = c("select", "radio"),
     input_id = inputId,
     label,
+    i18n,
     ...
     # TODO choices = c("createnew", "twolists", "namedlist", "factorslist", ?)
     # viz http://adv-r.had.co.nz/Functionals.html#functionals-fp or https://stackoverflow.com/questions/3505701/grouping-functions-tapply-by-aggregate-and-the-apply-family
@@ -21,8 +22,8 @@ translate_multiple_choices <- function(
         input_id,
         label = i18n$t(label),
         choices = structure(
-          lapply(..., identity()),
-          names = list(lapply(names(...), i18n$t))
+          lapply(..., identity),
+          names = lapply(names(...), i18n$t)
         )
       )
     }
@@ -33,8 +34,8 @@ translate_multiple_choices <- function(
         input_id,
         label = i18n$t(label),
         choices = structure(
-          lapply(..., identity()),
-          names = list(lapply(names(...), i18n$t))
+          lapply(..., identity),
+          names = lapply(names(...), i18n$t)
         )
       )
     }
