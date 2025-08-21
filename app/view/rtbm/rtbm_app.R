@@ -302,6 +302,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
         input_id = "summary_plot_choice",
         label = "Choose Summary View:",
         i18n,
+        choices_type = "namedlist",
         c(
           "Activity Summary" = "overall",
           "Top 5 Species Rank Trends" = "rank",

@@ -1,47 +1,66 @@
 box::use(
   shiny[updateSelectInput, updateRadioButtons],
+  shinyWidgets[updatePickerInput],
+  tidyr[tibble, drop_na],
 )
 
 #' @export
 translate_multiple_choices <- function(
     session = session,
-    which_type = c("select", "radio"),
+    which_type = c("select", "radio", "picker"),
     input_id = inputId,
     label,
     i18n,
-    ...
-    # TODO choices = c("createnew", "twolists", "namedlist", "factorslist", ?)
-    # viz http://adv-r.had.co.nz/Functionals.html#functionals-fp or https://stackoverflow.com/questions/3505701/grouping-functions-tapply-by-aggregate-and-the-apply-family
-    ) {
+    choices_type = c("singlelist", "namedlist"),
+    ...) {
   updated_choices <- NULL
 
-  if (which_type == "select") {
+  if (choices_type == "namedlist") {
+    # on input there's named list ----
+    if (which_type == "select") {
+      updated_choices <- {
+        updateSelectInput(
+          session,
+          input_id,
+          label = i18n$t(label),
+          choices = structure(
+            lapply(..., identity),
+            names = lapply(names(...), i18n$t)
+          )
+        )
+      }
+    } else if (which_type == "radio") {
+      updated_choices <- {
+        updateRadioButtons(
+          session,
+          input_id,
+          label = i18n$t(label),
+          choices = structure(
+            lapply(..., identity),
+            names = lapply(names(...), i18n$t)
+          )
+        )
+      }
+    } else {
+      warning("Invalid type specified. Use 'select' (for selectInput) or 'radio' (for radioButtons).")
+      return(NULL)
+    }
+  } else if (choices_type == "singlelist") {
+    # on input there's a list of single items => going through few transformations...  ----
+    tibbled_choices <- tibble(nms = (...), vals = (...))
+    dropped_nas <- drop_na(tibbled_choices, vals)
+
     updated_choices <- {
-      updateSelectInput(
+      updatePickerInput(
         session,
         input_id,
         label = i18n$t(label),
         choices = structure(
-          lapply(..., identity),
-          names = lapply(names(...), i18n$t)
+          lapply(dropped_nas$vals, identity),
+          names = lapply(dropped_nas$nms, i18n$t)
         )
       )
     }
-  } else if (which_type == "radio") {
-    updated_choices <- {
-      updateRadioButtons(
-        session,
-        input_id,
-        label = i18n$t(label),
-        choices = structure(
-          lapply(..., identity),
-          names = lapply(names(...), i18n$t)
-        )
-      )
-    }
-  } else {
-    warning("Invalid type specified. Use 'select' (for selectInput) or 'radio' (for radioButtons).")
-    return(NULL)
   }
   updated_choices
 }

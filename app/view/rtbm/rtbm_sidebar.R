@@ -38,6 +38,7 @@ box::use(
 box::use(
   # Local modules
   app / logic / rtbm / utils[format_date_for_display],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
 )
 
 #' RTBM Sidebar UI
@@ -156,12 +157,19 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
       } else {
         NULL
       }
+    })
 
-      updatePickerInput(
-        session = session,
-        inputId = "speciesPicker",
-        choices = choices,
-        selected = default_selection
+    observe({
+      req(bird_spp_info())
+      choices <- bird_spp_info()$common_name
+      translate_multiple_choices(
+        session,
+        "picker",
+        "speciesPicker",
+        label = "Select Bird Species",
+        i18n,
+        choices_type = "singlelist",
+        choices
       )
     })
 
