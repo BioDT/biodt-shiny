@@ -3486,23 +3486,6 @@
       "el": " (δεδομένα και μοντέλα); "
     },
     {
-      "en": " (pDT workflow & data server).",
-      "cz": " (workflow prototypu DT a datový server).",
-      "fi": " (pDT-työnkulku ja datapalvelin).",
-      "it": " (flusso di lavoro pDT e server dati).",
-      "nl": " (pDT-workflow en dataserver).",
-      "est": " (pDT töövoog ja andmeserver).",
-      "sv": " (pDT-arbetsflöde och dataserver).",
-      "de": " (pDT-Workflow und Datenserver).",
-      "no": " (pDT-arbeidsflyt og dataserver).",
-      "da": " (pDT-workflow og dataserver).",
-      "es": " (flujo de trabajo pDT y servidor de datos).",
-      "pt": " (fluxo de trabalho pDT e servidor de dados).",
-      "sl": " (pDT potek dela in podatkovni strežnik).",
-      "bg": " (pDT работен поток и сървър за данни).",
-      "el": " (ροή εργασίας pDT και διακομιστής δεδομένων)."
-    },
-    {
       "en": "Select pDT version:",
       "cz": "Zvolte verzi prototypu DT:",
       "fi": "Valitse pDT-versio:",
@@ -10199,6 +10182,40 @@
       "sl": "Rumeni strnad",
       "bg": "Жълта овесарка",
       "el": "Χρυσοτσίχλονο"
+    },
+    {
+      "en": "Citations: ",
+      "cz": "Citace: ",
+      "fi": "Viittaukset: ",
+      "it": "Citazioni: ",
+      "nl": "Citaten: ",
+      "est": "Tsitaadid: ",
+      "sv": "Citat: ",
+      "de": "Zitate: ",
+      "no": "Sitater: ",
+      "da": "Citater: ",
+      "es": "Citas: ",
+      "pt": "Citações: ",
+      "sl": "Citati: ",
+      "bg": "Цитати: ",
+      "el": "Παραπομπές: "
+    },
+    {
+      "en": "pDT workflow & data server: ",
+      "cz": "pDT workflow a datový server: ",
+      "fi": "pDT-työnkulku ja tietopalvelin: ",
+      "it": "Server di workflow e dati pDT: ",
+      "nl": "pDT workflow & dataserver: ",
+      "est": "pDT töövoog ja andmeserver: ",
+      "sv": "pDT arbetsflöde & dataserver: ",
+      "de": "pDT Workflow & Datenserver: ",
+      "no": "pDT arbeidsflyt og dataserver: ",
+      "da": "pDT workflow og dataserver: ",
+      "es": "Servidor de flujo de trabajo y datos pDT: ",
+      "pt": "Servidor de workflow e dados pDT: ",
+      "sl": "pDT potek dela in podatkovni strežnik: ",
+      "bg": "pDT работен процес и сървър за данни: ",
+      "el": "Διακομιστής ροής εργασίας και δεδομένων pDT: "
     }
   ]
 }
