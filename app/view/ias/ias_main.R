@@ -16,7 +16,7 @@ ias_ui <- function(id, i18n) {
     id = ns("tab"),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$t("Info"),
       value = "Info",
       icon = icon("circle-info"),
       ias_info_ui(
@@ -25,15 +25,16 @@ ias_ui <- function(id, i18n) {
       )
     ),
     nav_panel(
-      title = "IAS App",
+      title = i18n$t("IAS App"),
       value = "ias_app",
       icon = icon("tree"),
       ias_app_ui(
-        ns("ias_app")
+        ns("ias_app"),
+        i18n
       )
     ),
     nav_panel(
-      title = "Contributors",
+      title = i18n$t("Contributors"),
       value = "Contributors",
       icon = icon("tree"),
       ias_contributors_ui(
@@ -61,12 +62,14 @@ ias_main_server <- function(id, i18n) {
 
     ias_info_server(
       "ias_info",
-      session
+      session,
+      i18n
     )
 
     ias_app_server(
       "ias_app",
-      tab_selected = tab
+      tab_selected = tab,
+      i18n
     )
   })
 }

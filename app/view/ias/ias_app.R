@@ -82,7 +82,7 @@ box::use(
 )
 
 #' @export
-ias_app_ui <- function(id) {
+ias_app_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(
@@ -92,39 +92,33 @@ ias_app_ui <- function(id) {
         card(
           div(
             class = "sidebar-content",
-
             selectInput(
               inputId = ns("pdtVersion"),
-              label = "Select pDT version:",
+              label = i18n$t("Select pDT version:"),
               choices = NULL
             ),
-
             radioButtons(
               inputId = ns("dataMode"),
-              label = "Select data mode:",
+              label = i18n$t("Select data mode:"),
               choices = c("Projection", "Distribution"),
               selected = "Projection"
             ),
-
             conditionalPanel(
               condition = sprintf("input['%s'] == 'Projection'", ns("dataMode")),
               tagList(
                 pickerInput(
                   ns("habitat"),
-                  "Select habitat type:",
+                  i18n$t("Select habitat type:"),
                   choices = habitat_mapping,
                   selected = NULL
                 ),
-
                 radioButtons(
                   ns("timeFramePicker"),
                   "Select time frame:",
                   choices = c("Present", "Future"),
                   selected = NULL
                 ),
-
                 uiOutput(ns("dataTypeUI")),
-
                 conditionalPanel(
                   condition = sprintf("input['%s'] == 'Future'", ns("timeFramePicker")),
                   tagList(
@@ -133,7 +127,6 @@ ias_app_ui <- function(id) {
                       "Select time period:",
                       choices = c("2011-2040", "2041-2070", "2071-2100")
                     ),
-
                     div(
                       style = "display: flex; align-items: center;",
                       pickerInput(
@@ -151,7 +144,6 @@ ias_app_ui <- function(id) {
                         size = "xs"
                       )
                     ),
-
                     div(
                       style = "display: flex; align-items: center;",
                       pickerInput(
@@ -171,7 +163,6 @@ ias_app_ui <- function(id) {
                     )
                   )
                 ),
-
                 switchInput(
                   ns("showSpecies"),
                   label = "Species",
@@ -179,12 +170,10 @@ ias_app_ui <- function(id) {
                   offLabel = "OFF",
                   value = FALSE
                 ),
-
                 conditionalPanel(
                   condition = sprintf("input['%s'] == true", ns("showSpecies")),
                   uiOutput(ns("speciesInputUI"))
                 ),
-
                 sliderInput(
                   ns("valueRange"),
                   label = "Filter values between:",
@@ -195,50 +184,43 @@ ias_app_ui <- function(id) {
                 )
               )
             ),
-
             conditionalPanel(
               condition = sprintf("input['%s'] == 'Distribution'", ns("dataMode")),
               tagList(
                 pickerInput(
                   ns("habitatDist"),
-                  "Select habitat type:",
+                  i18n$t("Select habitat type:"),
                   choices = habitat_mapping,
                   selected = NULL
                 ),
-
                 switchInput(
                   ns("showSpeciesDist"),
-                  label = "Species",
+                  label = i18n$t("Species"),
                   onLabel = "ON",
                   offLabel = "OFF",
                   value = FALSE
                 ),
-
                 conditionalPanel(
                   condition = sprintf("input['%s'] == true", ns("showSpeciesDist")),
                   uiOutput(ns("speciesDistInputUI"))
                 ),
-
                 radioButtons(
                   inputId = ns("obsType"),
-                  label = "Observed data type:",
+                  label = i18n$t("Observed data type:"),
                   choices = c("Observed values" = "full", "Modeled values" = "model"),
                   selected = "full"
                 )
               )
             ),
-
             conditionalPanel(
               condition = sprintf("input['%s'] == 'Projection'", ns("dataMode")),
-              actionButton(ns("loadMap"), "Load map", icon = icon("globe-europe"), class = "btn-warning")
+              actionButton(ns("loadMap"), i18n$t("Load map"), icon = icon("globe-europe"), class = "btn-warning")
             ),
-
             conditionalPanel(
               condition = sprintf("input['%s'] == 'Distribution'", ns("dataMode")),
-              actionButton(ns("loadObserved"), "Load observed map", icon = icon("map"), class = "btn-warning")
+              actionButton(ns("loadObserved"), i18n$t("Load observed map"), icon = icon("map"), class = "btn-warning")
             ),
-
-            downloadButton(ns("downloadTif"), "Download TIFF File", class = "btn-danger")
+            downloadButton(ns("downloadTif"), i18n$t("Download TIFF File"), class = "btn-danger")
           )
         )
       ),
@@ -247,7 +229,7 @@ ias_app_ui <- function(id) {
         card(
           height = 650,
           full_screen = TRUE,
-          card_header("Map Viewer"),
+          card_header(i18n$t("Map Viewer")),
           card_body(
             leafletOutput(ns("rasterMap"), height = "100%"),
             absolutePanel(
@@ -282,7 +264,7 @@ ias_app_ui <- function(id) {
 }
 
 #' @export
-ias_app_server <- function(id, tab_selected) {
+ias_app_server <- function(id, tab_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -301,8 +283,7 @@ ias_app_server <- function(id, tab_selected) {
 
     # legend caption helper
     get_projection_legend_title <- function(dataType, species_on, species_selected) {
-      switch(
-        dataType,
+      switch(dataType,
         mean = if (species_on && !is.null(species_selected)) "Probability of occurrence" else "Level of invasion",
         sd = "Standard deviation",
         cov = "Coefficient of variation",
@@ -601,8 +582,7 @@ ias_app_server <- function(id, tab_selected) {
     filtered_summary <- eventReactive(input$loadMap, {
       req(predictions_summary())
       df <- predictions_summary()
-      field <- switch(
-        input$dataTypePicker,
+      field <- switch(input$dataTypePicker,
         mean = "tif_path_mean",
         sd = "tif_path_sd",
         cov = "tif_path_cov",
@@ -974,7 +954,12 @@ ias_app_server <- function(id, tab_selected) {
       filename = function() {
         if (input$dataMode == "Projection") {
           habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
-          data_type <- switch(input$dataTypePicker, mean = "Mean", sd = "SD", cov = "Uncertainty", anomaly = "Anomaly")
+          data_type <- switch(input$dataTypePicker,
+            mean = "Mean",
+            sd = "SD",
+            cov = "Uncertainty",
+            anomaly = "Anomaly"
+          )
 
           parts <- c("pDT-IAS", gsub(" ", "_", habitat), data_type, input$timeFramePicker)
 
@@ -998,7 +983,6 @@ ias_app_server <- function(id, tab_selected) {
 
         paste0(paste(parts, collapse = "_"), ".tif")
       },
-
       content = function(file) {
         if (input$dataMode == "Projection") {
           row <- filtered_summary()
@@ -1022,7 +1006,6 @@ ias_app_server <- function(id, tab_selected) {
           file.copy(from = file_url, to = file, overwrite = TRUE)
         }
       },
-
       contentType = "application/octet-stream"
     )
 
@@ -1033,8 +1016,7 @@ ias_app_server <- function(id, tab_selected) {
         req(input$habitat, input$dataTypePicker, input$timeFramePicker)
 
         habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
-        model_output <- switch(
-          input$dataTypePicker,
+        model_output <- switch(input$dataTypePicker,
           mean = "Mean",
           sd = "Standard Deviation",
           cov = "Coefficient of Variation",
