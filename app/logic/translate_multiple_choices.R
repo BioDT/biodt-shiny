@@ -50,16 +50,30 @@ translate_multiple_choices <- function(
     tibbled_choices <- tibble(nms = (...), vals = (...))
     dropped_nas <- drop_na(tibbled_choices, vals)
 
-    updated_choices <- {
-      updatePickerInput(
-        session,
-        input_id,
-        label = i18n$t(label),
-        choices = structure(
-          lapply(dropped_nas$vals, identity),
-          names = lapply(dropped_nas$nms, i18n$t)
+    if (which_type == "radio") {
+      updated_choices <- {
+        updateRadioButtons(
+          session,
+          input_id,
+          label = i18n$t(label),
+          choices = structure(
+            lapply(dropped_nas$vals, identity),
+            names = lapply(dropped_nas$nms, i18n$t)
+          )
         )
-      )
+      }
+    } else if (which_type == "picker") {
+      updated_choices <- {
+        updatePickerInput(
+          session,
+          input_id,
+          label = i18n$t(label),
+          choices = structure(
+            lapply(dropped_nas$vals, identity),
+            names = lapply(dropped_nas$nms, i18n$t)
+          )
+        )
+      }
     }
   }
   updated_choices

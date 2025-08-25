@@ -79,6 +79,7 @@ box::use(
       get_base_url,
       get_species_file_from_pa
     ],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
 )
 
 #' @export
@@ -114,7 +115,7 @@ ias_app_ui <- function(id, i18n) {
                 ),
                 radioButtons(
                   ns("timeFramePicker"),
-                  "Select time frame:",
+                  i18n$t("Select time frame:"),
                   choices = c("Present", "Future"),
                   selected = NULL
                 ),
@@ -124,7 +125,7 @@ ias_app_ui <- function(id, i18n) {
                   tagList(
                     radioButtons(
                       ns("timePeriodPicker"),
-                      "Select time period:",
+                      i18n$t("Select time period:"),
                       choices = c("2011-2040", "2041-2070", "2071-2100")
                     ),
                     div(
@@ -148,7 +149,7 @@ ias_app_ui <- function(id, i18n) {
                       style = "display: flex; align-items: center;",
                       pickerInput(
                         ns("climateScenarioPicker"),
-                        "Select climate scenario:",
+                        i18n$t("Select climate scenario:"),
                         choices = NULL,
                         selected = NULL,
                         multiple = FALSE
@@ -165,9 +166,9 @@ ias_app_ui <- function(id, i18n) {
                 ),
                 switchInput(
                   ns("showSpecies"),
-                  label = "Species",
-                  onLabel = "ON",
-                  offLabel = "OFF",
+                  label = i18n$t("Species"),
+                  onLabel = i18n$t("✔"),
+                  offLabel = i18n$t("✖"),
                   value = FALSE
                 ),
                 conditionalPanel(
@@ -176,7 +177,7 @@ ias_app_ui <- function(id, i18n) {
                 ),
                 sliderInput(
                   ns("valueRange"),
-                  label = "Filter values between:",
+                  label = i18n$t("Filter values between:"),
                   min = 0,
                   max = 10,
                   value = c(0, 10),
@@ -196,8 +197,8 @@ ias_app_ui <- function(id, i18n) {
                 switchInput(
                   ns("showSpeciesDist"),
                   label = i18n$t("Species"),
-                  onLabel = "ON",
-                  offLabel = "OFF",
+                  onLabel = i18n$t("✔"),
+                  offLabel = i18n$t("✖"),
                   value = FALSE
                 ),
                 conditionalPanel(
@@ -284,11 +285,11 @@ ias_app_server <- function(id, tab_selected, i18n) {
     # legend caption helper
     get_projection_legend_title <- function(dataType, species_on, species_selected) {
       switch(dataType,
-        mean = if (species_on && !is.null(species_selected)) "Probability of occurrence" else "Level of invasion",
-        sd = "Standard deviation",
-        cov = "Coefficient of variation",
-        anomaly = "Prediction anomaly",
-        "Raster value"
+        mean = if (species_on && !is.null(species_selected)) i18n$t("Probability of occurrence") else i18n$t("Level of invasion"),
+        sd = i18n$t("Standard deviation"),
+        cov = i18n$t("Coefficient of variation"),
+        anomaly = i18n$t("Prediction anomaly"),
+        i18n$t("Raster value")
       )
     }
 
@@ -302,6 +303,19 @@ ias_app_server <- function(id, tab_selected, i18n) {
     )
 
     selected_version <- reactiveVal(NULL)
+
+    # Before all bussines logic below happens, set up observe to translate 3 buttons in Summmary statistics
+    observe({
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "timeFramePicker",
+        label = "Select time frame:",
+        i18n,
+        choices_type = "singlelist",
+        c("Present", "Future")
+      )
+    })
 
     observe({
       req(available_versions())
@@ -326,19 +340,21 @@ ias_app_server <- function(id, tab_selected, i18n) {
       } else if (length(versions) >= 2 && check_valid_version(versions[2])) {
         selected_version(versions[2])
         shinyalert::shinyalert(
-          title = "Fallback to Previous Version",
-          text = paste("Version", try_version, "was invalid. Using fallback:", versions[2]),
+          title = i18n$t("Fallback to Previous Version"),
+          text = paste(i18n$t("Version "), try_version, i18n$t(" was invalid. Using fallback:"), versions[2]),
           type = "warning"
         )
       } else {
         selected_version(try_version)
         shinyalert::shinyalert(
-          title = "Warning",
-          text = paste("No valid data found in version", try_version),
+          title = i18n$t("Warning"),
+          text = paste(i18n$t("No valid data found in version"), try_version),
           type = "warning"
         )
       }
     })
+
+    # Observe set up to
 
     observeEvent(input$pdtVersion, {
       req(input$pdtVersion)
@@ -349,8 +365,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
         selected_version(version_to_try)
       } else {
         shinyalert::shinyalert(
-          title = "Version not fully deployed yet",
-          text = paste("No valid data found in pDT version", version_to_try),
+          title = i18n$t("Version not fully deployed yet"),
+          text = paste(i18n$t("No valid data found in pDT version"), version_to_try),
           type = "error"
         )
 
@@ -484,7 +500,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
       req(predictions_summary())
 
       climate_scenarios <- predictions_summary()$climate_scenario
-      climate_scenarios <- setdiff(unique(climate_scenarios), "Current")
+      climate_scenarios <- setdiff(unique(climate_scenarios), i18n$t("Current"))
 
       updatePickerInput(session, "climateScenarioPicker", choices = climate_scenarios, selected = climate_scenarios[1])
     })
@@ -512,7 +528,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
         choices = species_list,
         selected = NULL,
         multiple = FALSE,
-        options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
+        options = list(`live-search` = TRUE, `none-selected-text` = i18n$t("Select species")),
         choicesOpt = list(
           content = lapply(species_list, function(name) {
             HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
@@ -567,12 +583,17 @@ ias_app_server <- function(id, tab_selected, i18n) {
       )
 
       if (input$timeFramePicker == "Future") {
-        choices <- c(choices, "Prediction anomaly" = "anomaly")
+        choices <- c(
+          "Mean" = "mean",
+          "Uncertainty (standard deviation)" = "sd",
+          "Uncertainty (coefficient of variation)" = "cov",
+          "Prediction anomaly" = "anomaly"
+        )
       }
 
       radioButtons(
         inputId = ns("dataTypePicker"),
-        label = "Select model output type:",
+        label = i18n$t("Select model output type:"),
         choices = choices,
         selected = isolate(input$dataTypePicker %||% "mean")
       )
@@ -615,7 +636,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
             climate_model_folder[[input$climateModelPicker]]
           )
         } else {
-          "Current"
+          i18n$t("Current")
         }
         file_url <- paste0(
           get_base_url(selected_version()),
@@ -743,7 +764,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
     # explanation text for the climate model and climate scenario
     observeEvent(input$info_climate_models, {
       shinyalert(
-        title = "Climate Model Information",
+        title = i18n$t("Climate Model Information"),
         html = TRUE,
         size = "m",
         type = "info",
@@ -758,9 +779,9 @@ ias_app_server <- function(id, tab_selected, i18n) {
        </table>
        <p style='margin-top: 15px; font-weight: bold;'>
          <a href='https://chelsa-climate.org/wp-admin/download-page/CHELSA_tech_specification_V2.pdf'
-            target='_blank' style='text-decoration:none;'>
-           📄 CHELSA V2.1 Technical Specifications
-         </a>
+            target='_blank' style='text-decoration:none;'>",
+          i18n$t("📄 CHELSA V2.1 Technical Specifications"),
+          "</a>
        </p>"
         )
       )
@@ -768,24 +789,26 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
     observeEvent(input$info_climate_scenarios, {
       shinyalert(
-        title = "Climate Scenario Information",
+        title = i18n$t("Climate Scenario Information"),
         html = TRUE,
         size = "m",
         type = "info",
         text = HTML(
-          "<table style='width:100%; margin-bottom: 10px;'>
+          paste0(
+            "<table style='width:100%; margin-bottom: 10px;'>
          <tr><th>Scenario</th><th>Description</th></tr>
          <tr><td><b>ssp126</b></td><td>SSP1-RCP2.6 climate as simulated by the GCMs.</td></tr>
          <tr><td><b>ssp370</b></td><td>SSP3-RCP7 climate as simulated by the GCMs.</td></tr>
          <tr><td><b>ssp585</b></td><td>SSP5-RCP8.5 climate as simulated by the GCMs.</td></tr>
        </table>
-       <p style='margin-top: 15px;'>
-         More information on the scenarios can be found
-         <a href='https://www.dkrz.de/en/communication/climate-simulations/cmip6-en/the-ssp-scenarios'
-            target='_blank' style='font-weight:bold; text-decoration:none;'>
-           here
-         </a>.
-       </p>"
+       <p style='margin-top: 15px;'>",
+            i18n$t("More information on the scenarios can be found "),
+            "<a href='https://www.dkrz.de/en/communication/climate-simulations/cmip6-en/the-ssp-scenarios'
+        target='_blank' style='font-weight:bold; text-decoration:none;'>",
+            i18n$t("here"),
+            "</a>.
+          </p>"
+          )
         )
       )
     })
