@@ -116,7 +116,7 @@ ias_app_ui <- function(id, i18n) {
                 radioButtons(
                   ns("timeFramePicker"),
                   i18n$t("Select time frame:"),
-                  choices = c("Present", "Future"),
+                  choices = c(i18n$t("Present"), i18n$t("Future")),
                   selected = NULL
                 ),
                 uiOutput(ns("dataTypeUI")),
@@ -132,7 +132,7 @@ ias_app_ui <- function(id, i18n) {
                       style = "display: flex; align-items: center;",
                       pickerInput(
                         ns("climateModelPicker"),
-                        "Select climate model:",
+                        i18n$t("Select climate model:"),
                         choices = NULL,
                         selected = NULL,
                         multiple = FALSE
@@ -197,8 +197,8 @@ ias_app_ui <- function(id, i18n) {
                 switchInput(
                   ns("showSpeciesDist"),
                   label = i18n$t("Species"),
-                  onLabel = i18n$t("✔"),
-                  offLabel = i18n$t("✖"),
+                  onLabel = "✔",
+                  offLabel = "✖",
                   value = FALSE
                 ),
                 conditionalPanel(
@@ -270,6 +270,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
     ns <- session$ns
 
     available_versions <- reactiveVal(NULL)
+    choices_datatype <- reactiveVal(NULL)
 
     # climate model mapping
     climate_model_folder <- list(
@@ -304,7 +305,50 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
     selected_version <- reactiveVal(NULL)
 
-    # Before all bussines logic below happens, set up observe to translate 3 buttons in Summmary statistics
+    # translates radio buttons - data mode, selecting either Projection, or Distribution
+    observe({
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "dataMode",
+        label = "Select data mode:",
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = NULL,
+        c("Projection", "Distribution")
+      )
+    })
+
+    # translates radio buttons - type of observed data, selecting either Observed values, or Modeled values
+    observe({
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "obsType",
+        label = "Observed data type:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = NULL,
+        c("Observed values" = "full", "Modeled values" = "model")
+      )
+    })
+
+    # translates picker input, selecting a type of habitat
+    observe({
+      req(input$habitat)
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "habitat",
+        label = "Select habitat type:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = NULL,
+        habitat_mapping
+      )
+    })
+
+    # translates radio buttons, selecting either present, or future
     observe({
       translate_multiple_choices(
         session,
@@ -313,7 +357,23 @@ ias_app_server <- function(id, tab_selected, i18n) {
         label = "Select time frame:",
         i18n,
         choices_type = "singlelist",
+        selected_choice = NULL,
         c("Present", "Future")
+      )
+    })
+
+    # translates radio buttons, selecting output data type
+    observe({
+      req(choices_datatype())
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "dataTypePicker",
+        label = "Select model output type:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = NULL,
+        choices_datatype
       )
     })
 
@@ -355,7 +415,6 @@ ias_app_server <- function(id, tab_selected, i18n) {
     })
 
     # Observe set up to
-
     observeEvent(input$pdtVersion, {
       req(input$pdtVersion)
       version_to_try <- input$pdtVersion
@@ -474,7 +533,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
             predictions_summary(NULL)
             species_data(NULL)
             message("Error loading prediction summary: ", e$message)
-            showNotification("Error loading prediction summary file.", type = "error")
+            showNotification(i18n$t("Error loading prediction summary file."), type = "error")
           }
         )
       }
@@ -492,7 +551,19 @@ ias_app_server <- function(id, tab_selected, i18n) {
         setdiff(climate_models, "Ensemble")
       )
 
-      updatePickerInput(session, "climateModelPicker", choices = ordered_climate_models, selected = "Ensemble")
+      # updatePickerInput(session, "climateModelPicker", choices = ordered_climate_models, selected = "Ensemble")
+
+      # UPDATES and translates picker input, selecting a climate model
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "climateModelPicker",
+        label = "Select climate model:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = "Ensemble",
+        ordered_climate_models
+      )
     })
 
     # Update Climate Scenario picker
@@ -500,9 +571,21 @@ ias_app_server <- function(id, tab_selected, i18n) {
       req(predictions_summary())
 
       climate_scenarios <- predictions_summary()$climate_scenario
-      climate_scenarios <- setdiff(unique(climate_scenarios), i18n$t("Current"))
+      climate_scenarios <- setdiff(unique(climate_scenarios), "Current")
 
-      updatePickerInput(session, "climateScenarioPicker", choices = climate_scenarios, selected = climate_scenarios[1])
+      # updatePickerInput(session, "climateScenarioPicker", choices = climate_scenarios, selected = climate_scenarios[1])
+
+      # UPDATES and translates picker input, selecting a climate scenario
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "climateScenarioPicker",
+        label = "Select climate scenario:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = climate_scenarios[1],
+        climate_scenarios
+      )
     })
 
     # Update Time Period picker
@@ -524,7 +607,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
       shinyWidgets::pickerInput(
         inputId = ns("speciesNamePicker"),
-        label = "Select species:",
+        label = i18n$t("Select species:"),
         choices = species_list,
         selected = NULL,
         multiple = FALSE,
@@ -556,11 +639,11 @@ ias_app_server <- function(id, tab_selected, i18n) {
           species_list <- sort(unique(df$species_name))
           pickerInput(
             inputId = ns("speciesNamePickerDist"),
-            label = "Select species:",
+            label = i18n$t("Select species:"),
             choices = df$ias_id,
             selected = NULL,
             multiple = FALSE,
-            options = list(`live-search` = TRUE, `none-selected-text` = "Select species"),
+            options = list(`live-search` = TRUE, `none-selected-text` = i18n$t("Select species")),
             choicesOpt = list(
               content = lapply(species_list, function(name) {
                 HTML(paste0("<i>", htmltools::htmlEscape(name), "</i>"))
@@ -569,21 +652,21 @@ ias_app_server <- function(id, tab_selected, i18n) {
           )
         },
         error = function(e) {
-          showNotification("Unable to load species for the selected habitat in distribution mode.", type = "error")
+          showNotification(i18n$t("Unable to load species for the selected habitat in distribution mode."), type = "error")
           NULL
         }
       )
     })
 
     output$dataTypeUI <- renderUI({
-      choices <- c(
+      choices_datatype <- c(
         "Mean" = "mean",
         "Uncertainty (standard deviation)" = "sd",
         "Uncertainty (coefficient of variation)" = "cov"
       )
 
       if (input$timeFramePicker == "Future") {
-        choices <- c(
+        choices_datatype <- c(
           "Mean" = "mean",
           "Uncertainty (standard deviation)" = "sd",
           "Uncertainty (coefficient of variation)" = "cov",
@@ -594,7 +677,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
       radioButtons(
         inputId = ns("dataTypePicker"),
         label = i18n$t("Select model output type:"),
-        choices = choices,
+        choices = choices_datatype,
         selected = isolate(input$dataTypePicker %||% "mean")
       )
     })
@@ -636,7 +719,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
             climate_model_folder[[input$climateModelPicker]]
           )
         } else {
-          i18n$t("Current")
+          "Current"
         }
         file_url <- paste0(
           get_base_url(selected_version()),
@@ -725,13 +808,13 @@ ias_app_server <- function(id, tab_selected, i18n) {
         setView(lng = 10, lat = 50, zoom = 4) |>
         addEasyButton(easyButton(
           icon = "fa-house",
-          title = "Reset Zoom",
+          title = i18n$t("Reset Zoom"),
           onClick = JS("function(btn, map){ map.setView([50, 10], 4); }")
         )) |>
         addEasyButton(
           easyButton(
             icon = "fa-solid fa-fill-drip",
-            title = "Transparency Control",
+            title = i18n$t("Transparency Control"),
             onClick = JS(sprintf(
               "function(btn, map) {
       var panel = document.getElementById('%s');
@@ -895,8 +978,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
             addLegend(
               position = "bottomright",
               colors = pal_cols,
-              labels = c("Absent", "Present"),
-              title = "Presence / Absence",
+              labels = c(i18n$t("Absent"), i18n$t("Present")),
+              title = i18n$t("Presence / Absence"),
               opacity = 1
             )
         } else {
@@ -915,7 +998,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
             addLegend_decreasing(
               pal = vir_pal,
               values = full_range,
-              title = ifelse(input$obsType == "full", "Observed Distribution", "Modeled Distribution"),
+              title = ifelse(input$obsType == "full", i18n$t("Observed Distribution"), i18n$t("Modeled Distribution")),
               position = "bottomright",
               decreasing = TRUE
             )
@@ -945,8 +1028,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
           addLegend(
             position = "bottomright",
             colors = pal_cols,
-            labels = c("Absent", "Present"),
-            title = "Presence / Absence",
+            labels = c(i18n$t("Absent"), i18n$t("Present")),
+            title = i18n$t("Presence / Absence"),
             opacity = 1
           )
       } else {
@@ -965,7 +1048,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
           addLegend_decreasing(
             pal = vir_pal,
             values = full_range,
-            title = ifelse(input$obsType == "full", "Observed Distribution", "Modeled Distribution"),
+            title = ifelse(input$obsType == "full", i18n$t("Observed Distribution"), i18n$t("Modeled Distribution")),
             position = "bottomright",
             decreasing = TRUE
           )
@@ -1040,20 +1123,20 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
         habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
         model_output <- switch(input$dataTypePicker,
-          mean = "Mean",
-          sd = "Standard Deviation",
-          cov = "Coefficient of Variation",
-          anomaly = "Prediction Anomaly"
+          `mean` = "Mean",
+          `sd` = "Standard Deviation",
+          `cov` = "Coefficient of Variation",
+          `anomaly` = "Prediction Anomaly"
         )
 
         details <- tagList(
-          tags$strong("Habitat: "),
-          habitat,
+          tags$strong(i18n$t("Habitat: ")),
+          i18n$t(habitat),
           tags$span(" | "),
-          tags$strong("Model Output Type: "),
-          model_output,
+          tags$strong(i18n$t("Model Output Type: ")),
+          i18n$t(model_output),
           tags$span(" | "),
-          tags$strong("Time Frame: "),
+          tags$strong(i18n$t("Time Frame: ")),
           input$timeFramePicker
         )
 
@@ -1062,13 +1145,13 @@ ias_app_server <- function(id, tab_selected, i18n) {
           details <- tagList(
             details,
             tags$span(" | "),
-            tags$strong("Time Period: "),
+            tags$strong(i18n$t("Time Period: ")),
             input$timePeriodPicker,
             tags$span(" | "),
-            tags$strong("Climate Model: "),
+            tags$strong(i18n$t("Climate Model: ")),
             input$climateModelPicker,
             tags$span(" | "),
-            tags$strong("Climate Scenario: "),
+            tags$strong(i18n$t("Climate Scenario: ")),
             input$climateScenarioPicker
           )
         }
@@ -1077,7 +1160,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
           details <- tagList(
             details,
             tags$span(" | "),
-            tags$strong("Species: "),
+            tags$strong(i18n$t("Species: ")),
             input$speciesNamePicker
           )
         }
@@ -1090,18 +1173,18 @@ ias_app_server <- function(id, tab_selected, i18n) {
         obs_type <- if (input$obsType == "full") "Observed Values" else "Modeled Values"
 
         details <- tagList(
-          tags$strong("Habitat: "),
-          habitat,
+          tags$strong(i18n$t("Habitat: ")),
+          i18n$t(habitat),
           tags$span(" | "),
-          tags$strong("Observed Data Type: "),
-          obs_type
+          tags$strong(i18n$t("Observed Data Type: ")),
+          i18n$t(obs_type)
         )
 
         if (input$showSpeciesDist && !is.null(input$speciesNamePickerDist)) {
           details <- tagList(
             details,
             tags$span(" | "),
-            tags$strong("Species: "),
+            tags$strong(i18n$t("Species: ")),
             input$speciesNamePickerDist
           )
         }
