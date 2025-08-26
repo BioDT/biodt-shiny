@@ -1,6 +1,6 @@
 box::use(
   shiny[NS, column, tags, fluidRow, icon, actionButton, moduleServer, observeEvent],
-  bslib[nav_select]
+  bslib[nav_select],
 )
 
 #' @export
@@ -17,7 +17,7 @@ disease_info_ui <- function(id, i18n) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          "Disease Outbreak pDT"
+          i18n$translate("Disease Outbreak pDT")
         ),
         tags$p(
           class = "pt-3 fw-bold",
@@ -84,7 +84,7 @@ disease_info_ui <- function(id, i18n) {
         tags$img(
           class = "info-picture",
           src = "static/img/Alexis-Lours-Sus-scrofa-Linnaeus.gif",
-          alt = "Video of wild boar pack",
+          alt = i18n$translate("Video of wild boar pack"),
         ),
       )
     )

@@ -8,9 +8,9 @@ box::use(
 
 #' @export
 load_simulated_data <- function(
-  run_dir,
-  r_disease
-) {
+    run_dir,
+    r_disease,
+    i18n) {
   # Find all CSV files for grid data
   r_disease$infected_files <- list.files(
     file.path(run_dir, "epi_stat_outputs"),
@@ -103,7 +103,7 @@ load_simulated_data <- function(
   }
 
   shiny$showNotification(
-    "Results loaded",
+    i18n$t("Results loaded"),
     type = "message"
   )
 
@@ -120,7 +120,7 @@ load_simulated_data <- function(
 
   # If no secondary infection ticks found, show error
   if (length(r_disease$sec_inf_ticks) == 0) {
-    shiny$showNotification("No secondary infection data found", type = "error")
+    shiny$showNotification(i18n$t("No secondary infection data found"), type = "error")
   }
 
   # Initialize list to store secondary infection data

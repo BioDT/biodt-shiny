@@ -14,7 +14,6 @@ box::use(
     icon,
     actionButton,
     observeEvent,
-    showNotification
   ],
   bslib[nav_select],
 )

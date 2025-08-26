@@ -30,7 +30,9 @@ disease_app_ui <- function(id, i18n) {
         shiny$fileInput(
           ns("file"),
           i18n$translate("Upload a GeoTIFF file"),
-          accept = c(".tiff", ".tif")
+          accept = c(".tiff", ".tif"),
+          placeholder = "some_file.tif",
+          buttonLabel = i18n$translate("Browse...")
         ),
         disabled(shiny$actionButton(ns("run_command"), i18n$translate("Run model"))),
         shiny$verbatimTextOutput(ns("command_output")), # Display WSL command output
@@ -127,14 +129,15 @@ disease_app_server <- function(
           config$get("data_path") |>
             file.path("disease_outbreak", "Mosaic_final.tif")
         )
+        print(r_disease$tiff_raster)
       }
     )
 
     output$statusMsg <- shiny$renderUI({
-      shiny$div(
+      shiny$tags$div(
+        i18n$translate("Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon."),
         class = "alert alert-info",
-        role = "alert",
-        i18n$translate("Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon.")
+        role = "alert"
       )
     })
 
@@ -153,8 +156,19 @@ disease_app_server <- function(
       {
         shiny$req(r_disease$tiff_raster)
 
-        # Create a base leaflet map
-        map <- leaflet$leafletProxy("map") |>
+        layer_groups <- c(
+          "Input Map",
+          "Bounds",
+          "Fences",
+          "Release Point",
+          "Susceptible Grid",
+          "Infected Grid",
+          "Resistant Grid"
+        )
+
+        layer_groups_transl <-
+          # Create a base leaflet map
+          map <- leaflet$leafletProxy("map") |>
           leaflet$removeImage("Input Map") |>
           leaflet$addTiles() |>
           leaflet$addRasterImage(
@@ -226,10 +240,10 @@ disease_app_server <- function(
               group = "Bounds",
               layerId = "Bounds",
               output$statusMsg <- shiny$renderUI({
-                shiny$div(
+                shiny$tags$div(
+                  i18n$t("Area selected"),
                   class = "alert alert-info",
-                  role = "alert",
-                  "Area selected"
+                  role = "alert"
                 )
               })
             )
@@ -259,10 +273,10 @@ disease_app_server <- function(
               color = "#a20101",
               fillColor = "#a20101",
               output$statusMsg <- shiny$renderUI({
-                shiny$div(
+                shiny$tags$div(
+                  i18n$translate("Fences selected"),
                   class = "alert alert-info",
-                  role = "alert",
-                  "Fences selected"
+                  role = "alert"
                 )
               })
             )
@@ -297,10 +311,10 @@ disease_app_server <- function(
               group = "Release Point",
               layerId = "Release Point",
               output$statusMsg <- shiny$renderUI({
-                shiny$div(
+                shiny$tags$div(
+                  i18n$t("Releasing point selected"),
                   class = "alert alert-info",
-                  role = "alert",
-                  "Releasing point selected"
+                  role = "alert"
                 )
               })
             )
@@ -355,13 +369,13 @@ disease_app_server <- function(
         dir.create(r_disease$run_dir, recursive = TRUE)
 
         # Show a notification
-        shiny$showNotification("Modelling started.", type = "message")
+        shiny$showNotification(i18n$translate("Modelling started."), type = "message")
 
         output$statusMsg <- shiny$renderUI({
-          shiny$div(
+          shiny$tags$div(
+            i18n$translate("Please wait, modelling started"),
             class = "alert alert-info",
-            role = "alert",
-            "Please wait, modelling started"
+            role = "alert"
           )
         })
 
@@ -399,7 +413,7 @@ disease_app_server <- function(
             },
             error = function(e) {
               output$command_output <- shiny$renderPrint({
-                paste("Error executing WSL command:", e$message)
+                paste(i18n$t("Error executing WSL command:"), e$message)
               })
             }
           )
@@ -434,14 +448,15 @@ disease_app_server <- function(
 
         load_simulated_data(
           r_disease$run_dir,
-          r_disease
+          r_disease,
+          i18n
         )
 
         output$statusMsg <- shiny$renderUI({
-          shiny$div(
+          shiny$tags$div(
+            i18n$translate("Modelling successful"),
             class = "alert alert-info",
-            role = "alert",
-            "Modelling successfull"
+            role = "alert"
           )
         })
 
@@ -474,7 +489,7 @@ disease_app_server <- function(
         hist_data <- r_disease$sec_inf_data[[as.character(input$tick_slider)]]
         # Prepare data for secondary infection histogram
         output$histogram_plot <- ecs.render(
-          disease_histogram(hist_data)
+          disease_histogram(hist_data, i18n)
         )
         helper_susceptible <-
           r_disease$susceptible_data[[
@@ -589,7 +604,7 @@ disease_app_server <- function(
 
       if (file.exists(file_name)) {
         shiny$showNotification(
-          paste("The outputs are successfully exported to", file_name),
+          paste(i18n$t("The outputs are successfully exported to"), file_name),
           type = "message"
         )
       }
