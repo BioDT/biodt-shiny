@@ -29,16 +29,16 @@ disease_app_ui <- function(id, i18n) {
       shiny$sidebarPanel(
         shiny$fileInput(
           ns("file"),
-          "Upload a GeoTIFF file",
+          i18n$translate("Upload a GeoTIFF file"),
           accept = c(".tiff", ".tif")
         ),
-        disabled(shiny$actionButton(ns("run_command"), "Run model")),
+        disabled(shiny$actionButton(ns("run_command"), i18n$translate("Run model"))),
         shiny$verbatimTextOutput(ns("command_output")), # Display WSL command output
         shiny$hr(), # Add a horizontal line for visual separation
         hidden(
           shiny$sliderInput(
             ns("tick_slider"),
-            "Select Time Step:",
+            i18n$translate("Select Time Step:"),
             min = -1,
             max = 0, # This will be updated dynamically
             value = -1,
@@ -48,7 +48,7 @@ disease_app_ui <- function(id, i18n) {
         hidden(
           shiny$actionButton(
             ns("export_zip"),
-            "Export Outputs",
+            i18n$translate("Export Outputs"),
             icon = shiny$icon("file-zipper")
           )
         ),
@@ -65,12 +65,10 @@ disease_app_ui <- function(id, i18n) {
 }
 
 #' @export
-
 disease_app_server <- function(
-  id,
-  tab_disease_selected,
-  session_dir
-) {
+    id,
+    tab_disease_selected,
+    session_dir, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     # Define waiter ----
     msg <- waiter_text(message = shiny$tags$h3("Loading data...", style = "color: #414f2f;"))
@@ -136,7 +134,7 @@ disease_app_server <- function(
       shiny$div(
         class = "alert alert-info",
         role = "alert",
-        "Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon."
+        i18n$translate("Upload GeoTIFF file and select desired area by dragging a rectangle. Mark the release point by using marker and fence the area by using polygon.")
       )
     })
 

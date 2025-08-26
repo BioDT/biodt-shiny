@@ -2433,7 +2433,7 @@
     },
     {
       "en": "Disease Outbreak pDT",
-      "cz": "Prototyp digitálního dvojčete (pDT) 'Ohnisková nákaza'",
+      "cz": "Prototyp DT - Ohniska nákazy",
       "fi": "Tautipurkauksen pDT",
       "it": "pDT epidemia malattia",
       "nl": "Ziekte-uitbraak pDT",
@@ -2449,7 +2449,7 @@
       "el": "pDT έκρηξης ασθένειας"
     },
     {
-      "en": "The BioDT wild boar (Sus scrofa)-African swine fever (ASF) prototype digital twin (pDT)implements a stochastic, spatially- and temporally-explicit, and individually-baselandscape-level mechanistic model as a digital twin aimed at providing informed support for management decisions in response to the spread of African swine fever in European wild boar populations.",
+      "en": "The BioDT wild boar (Sus scrofa)-African swine fever (ASF) prototype digital twin (pDT) implements a stochastic, spatially- and temporally-explicit, and individually-based landscape-level mechanistic model as a digital twin aimed at providing informed support for management decisions in response to the spread of African swine fever in European wild boar populations.",
       "cz": "Prototyp digitálního dvojčete (pDT) Afrického moru divokých prasat (Sus scrofa) v rámci BioDT implementuje stochastický, prostorově a časově explicitní a mechanistický model základních úrovní krajiny, který je - jakožto digitální dvojče - zaměřen na poskytování informované podpory pro management řízení naších reakcí na šíření afrického moru mezi evropskými populacemi divokých prasat.",
       "fi": "BioDT villisian (Sus scrofa) - afrikkalaisen sikaruton (ASF) prototyypin digitaalinen kaksonen (pDT) toteuttaa stokastisen, spatiaalisesti ja temporaalisesti eksplisiittisen sekä yksilöpohjaisen maisematasoisena mekanistisen mallin digitaalisena kaksosena, joka pyrkii tarjoamaan tietoista tukea hallintapäätöksille vastauksena afrikkalaisen sikaruton leviämiseen eurooppalaisissa villisikapopulaatioissa.",
       "it": "Il prototipo di gemello digitale (pDT) del cinghiale (Sus scrofa) - peste suina africana (ASF) di BioDT implementa un modello meccanicistico stocastico, spazialmente e temporalmente esplicito, basato su individui a livello paesaggistico come gemello digitale mirato a fornire supporto informato per le decisioni di gestione in risposta alla diffusione della peste suina africana nelle popolazioni europee di cinghiali.",
