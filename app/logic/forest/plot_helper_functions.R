@@ -67,7 +67,7 @@ plot_tree_species <- function(data_folder, res_file) {
         
         leaflet$leafletProxy("map") |>
           leaflet$removeImage("tree_species") |>
-          leaflet$clearControls() |>
+          leaflet$removeControl("tree_legend") |>
           leaflet$addRasterImage(
             raster_data,
             opacity = 0.4,
@@ -85,7 +85,8 @@ plot_tree_species <- function(data_folder, res_file) {
               na.color = "transparent"
             ),
             values = terra$values(raster_data),
-            opacity = 0.4
+            opacity = 0.4,
+            layerId = "tree_legend"
           )
 
   } else {

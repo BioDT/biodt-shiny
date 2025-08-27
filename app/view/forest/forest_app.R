@@ -132,9 +132,8 @@ forest_app_ui <- function(id, i18n) {
 forest_app_server <- function(id, app_selected, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    # data_folder <- file.path(config$get("data_path"), "forest_bird")
-    data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
-    prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
+    data_folder <- file.path(config$get("data_path"), "forest_bird")
+    prediction_folder <- file.path(data_folder, "predictions")
     output$selection <- shiny$renderText({
       text <- paste(
         "Management Regime:",
@@ -194,6 +193,10 @@ forest_app_server <- function(id, app_selected, i18n) {
           leaflet$leaflet() |>
             leaflet$clearImages() |>
             leaflet$addTiles() |>
+            leaflet$addLayersControl(
+              overlayGroups = c("tree_species", "bird_species"),
+              options = leaflet$layersControlOptions(collapsed = FALSE)
+            ) |>
             leaflet$setView(
               lng = 24.545,
               lat = 60.192,
