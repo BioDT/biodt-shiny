@@ -11389,6 +11389,40 @@
       "sl": "Razi...",
       "bg": "Преглед...",
       "el": "Εξερεύνηση..."
+    },
+    {
+      "en": "Collapse soil data table",
+      "cz": "Sbalit tabulku půdních dat",
+      "fi": "Kollapsi maaperätietotaulu",
+      "it": "Riduci la tabella dei dati del suolo",
+      "nl": "Vouw de bodemdatatabel in",
+      "est": "Kokkulepitud pinnase andmete tabel",
+      "sv": "Kollapsa jorddata tabell",
+      "de": "Reduziere die Bodendaten Tabelle",
+      "no": "Kollapsa jorddata tabell",
+      "da": "Kollapsa jorddata tabell",
+      "es": "Colapsar tabla de datos del suelo",
+      "pt": "Colapsar tabela de dados do solo",
+      "sl": "Zruši tabelo podatkov o tleh",
+      "bg": "Сгъване на таблицата с данни за почвата",
+      "el": "Σύμπτυξη πίνακα δεδομένων εδάφους"
+    },
+    {
+      "en": "Expand soil data table",
+      "cz": "Rozbalit tabulku půdních dat",
+      "fi": "Laajenna maaperätietotaulu",
+      "it": "Espandi la tabella dei dati del suolo",
+      "nl": "Vouw de bodemdatatabel uit",
+      "est": "Laiendada pinnase andmete tabel",
+      "sv": "Expandera jorddata tabell",
+      "de": "Erweitere die Bodendaten Tabelle",
+      "no": "Utvid jorddata tabell",
+      "da": "Udvid jorddata tabell",
+      "es": "Expandir tabla de datos del suelo",
+      "pt": "Expandir tabela de dados do solo",
+      "sl": "Razširi tabelo podatkov o tleh",
+      "bg": "Разширяване на таблицата с данни за почвата",
+      "el": "Επέκταση πίνακα δεδομένων εδάφους"
     }
   ]
 }
