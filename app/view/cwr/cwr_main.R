@@ -113,7 +113,7 @@ mod_cwr_ui <- function(id, i18n) {
       id = ns("tab"),
       # Info ----
       nav_panel(
-        title = "Info",
+        title = i18n$translate("Info"),
         value = "Info",
         cwr_info_ui(ns("cwr_info"), i18n)
       ),
@@ -130,8 +130,8 @@ mod_cwr_ui <- function(id, i18n) {
             class = "ms-md-3 card-shadow",
             card_header(
               tags$h2(
-                class = "card_title",
-                "Input map"
+                i18n$translate("Input map"),
+                class = "card_title"
               )
             ),
             card_body(
@@ -149,14 +149,14 @@ mod_cwr_ui <- function(id, i18n) {
             class = "me-md-3 card-shadow",
             card_header(
               tags$h2(
-                class = "card_title",
-                "Crop and Crop Wild Relatives"
+                i18n$translate("Crop and Crop Wild Relatives"),
+                class = "card_title"
               )
             ),
             card_body(
               pickerInput(
                 ns("stress_var"),
-                "Select Stress Variable:",
+                i18n$translate("Select Stress Variable:"),
                 choices = c(
                   "None" = "None",
                   "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
@@ -169,7 +169,7 @@ mod_cwr_ui <- function(id, i18n) {
               hidden(
                 sliderInput(
                   ns("stress_range"),
-                  "Select Stress Range:",
+                  i18n$translate("Select Stress Range:"),
                   min = 0,
                   max = 1,
                   value = c(0, 1)
@@ -178,13 +178,13 @@ mod_cwr_ui <- function(id, i18n) {
               hidden(
                 checkboxInput(
                   ns("subset_suitability_map"),
-                  "Subset Stressor Map with Suitability Map",
+                  i18n$translate("Subset Stressor Map with Suitability Map"),
                   FALSE
                 )
               ),
               pickerInput(
                 ns("genus"),
-                label = "Choose Crop",
+                label = i18n$translate("Choose Crop"),
                 choices = list(""),
                 multiple = FALSE,
                 options = list(
@@ -195,7 +195,7 @@ mod_cwr_ui <- function(id, i18n) {
               ),
               pickerInput(
                 ns("species"),
-                label = "Choose Wild Relatives",
+                label = i18n$translate("Choose Wild Relatives"),
                 choices = list(""),
                 multiple = TRUE,
                 selected = c(""),
@@ -204,7 +204,7 @@ mod_cwr_ui <- function(id, i18n) {
                   `live-search` = TRUE,
                   container = "body",
                   maxOptions = 5,
-                  maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
+                  maxOptionsText = i18n$translate("Comparison is restricted to maximum of 5 species at once.")
                 )
               ),
               actionButton(
