@@ -387,9 +387,9 @@ forest_app_server <- function(id, app_selected, i18n) {
             step = timestep
           )
 
-          shinyjs$delay(
-            100,
-            {
+        #  shinyjs$delay(
+        #    100,
+        #    {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
                 input,
@@ -405,8 +405,8 @@ forest_app_server <- function(id, app_selected, i18n) {
               last_ok$species <- input$species
               last_ok$res_file_slider <- value
               last_ok$experiment_data_file <- experiment_data
-            }
-          )
+      #      }
+      #    )
         }
       }
     )
