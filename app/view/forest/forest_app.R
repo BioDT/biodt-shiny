@@ -181,6 +181,15 @@ forest_app_server <- function(id, app_selected, i18n) {
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
     start_sim_year <- shiny$reactiveVal(NULL)
+    # remember last valid selections to revert on invalid input combos
+    last_ok <- shiny$reactiveValues(
+      management = NULL,
+      climate = NULL,
+      output = NULL,
+      species = NULL,
+      res_file_slider = NULL,
+      experiment_data_file = NULL
+    )
 
     output$map <- NULL
 
@@ -244,11 +253,18 @@ forest_app_server <- function(id, app_selected, i18n) {
           experiment_data, # "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
           i18n
         )
-        # If selection failed, clear map layers and stop
+        # If selection failed, revert management/climate to last valid (keep current raster visible)
         if (is.null(input_selection)) {
-          leaflet$leafletProxy("map") |>
-            leaflet$removeImage("tree_species") |>
-            leaflet$clearControls()
+          # revert only if we have a stored valid state
+          if (!is.null(last_ok$management) && !is.null(last_ok$climate)) {
+            if (!identical(input$management, last_ok$management)) {
+              shiny$updateSelectInput(session, "management", selected = last_ok$management)
+            }
+            if (!identical(input$climate, last_ok$climate)) {
+              shiny$updateSelectInput(session, "climate", selected = last_ok$climate)
+            }
+            shiny$showNotification(i18n$t("Invalid combination. Reverted to last valid selection."), type = "warning")
+          }
           return(invisible(NULL))
         }
         
@@ -295,6 +311,13 @@ forest_app_server <- function(id, app_selected, i18n) {
                 i18n
               )
               res_file(res_file_name)
+              # store last valid state for revert baseline
+              last_ok$management <- input$management
+              last_ok$climate <- input$climate
+              last_ok$output <- input$output
+              last_ok$species <- input$species
+              last_ok$res_file_slider <- value
+              last_ok$experiment_data_file <- experiment_data
         #    }
         #  )
         }
@@ -317,11 +340,19 @@ forest_app_server <- function(id, app_selected, i18n) {
           experiment_data_file(),
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
         )
-        # If selection failed, clear map layers and stop
+        # If selection failed, revert the changed input(s) (keep current raster visible)
         if (is.null(input_selection)) {
-          leaflet$leafletProxy("map") |>
-            leaflet$removeImage("tree_species") |>
-            leaflet$clearControls()
+          # Determine which of output/species/slider changed vs last_ok and revert
+          if (!is.null(last_ok$output) && !identical(input$output, last_ok$output)) {
+            shiny$updateSelectInput(session, "output", selected = last_ok$output)
+          }
+          if (!is.null(last_ok$species) && !identical(input$species, last_ok$species)) {
+            shiny$updateSelectInput(session, "species", selected = last_ok$species)
+          }
+          if (!is.null(last_ok$res_file_slider) && !identical(input$res_file_slider, last_ok$res_file_slider)) {
+            shiny$updateSliderInput(session, "res_file_slider", value = last_ok$res_file_slider)
+          }
+          shiny$showNotification(i18n$t("Invalid selection. Reverted to last valid option."), type = "warning")
           return(invisible(NULL))
         }
         
@@ -367,6 +398,13 @@ forest_app_server <- function(id, app_selected, i18n) {
                 i18n
               )
               res_file(res_file_name)
+              # store last valid state
+              last_ok$management <- input$management
+              last_ok$climate <- input$climate
+              last_ok$output <- input$output
+              last_ok$species <- input$species
+              last_ok$res_file_slider <- value
+              last_ok$experiment_data_file <- experiment_data
             }
           )
         }
