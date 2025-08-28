@@ -284,9 +284,9 @@ forest_app_server <- function(id, app_selected, i18n) {
             step = timestep
           )
 
-          shinyjs$delay(
-            100,
-            {
+        #  shinyjs$delay(
+        #    100,
+        #    {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
                 input,
@@ -295,8 +295,8 @@ forest_app_server <- function(id, app_selected, i18n) {
                 i18n
               )
               res_file(res_file_name)
-            }
-          )
+        #    }
+        #  )
         }
       }
     )
@@ -417,6 +417,8 @@ forest_app_server <- function(id, app_selected, i18n) {
       ignoreInit = TRUE,
       {
         if (is.null(input$bird_species) || identical(input$bird_species, "None")) {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeImage("bird_species")
           return()
         }
         plot_bird_species(

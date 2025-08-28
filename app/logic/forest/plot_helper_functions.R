@@ -52,18 +52,26 @@ plot_tree_species <- function(data_folder, res_file) {
         )
         
         ext <- terra$ext(raster_data)
-        
-        terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() |> print()
-        if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite() ) {
-          shiny$showNotification("Warning: Raster contains infinite values!", type = "error")
+
+        # Use fast range computation without pulling all values into memory
+        mm <- terra$minmax(raster_data)  # returns c(min, max) for single-layer
+        rmin <- mm[1]
+        rmax <- mm[2]
+        if (!is.finite(rmax) || !is.finite(rmin)) {
+          shiny$showNotification("Warning: Raster contains non-finite range!", type = "error")
         }
-        
-        pal <- leaflet$colorNumeric(
+
+        pal_base <- leaflet$colorNumeric(
           palette = "YlOrBr",
-          domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
+          domain = c(rmin, rmax),
           na.color = "transparent",
           reverse = TRUE
         )
+        # Clamp to domain to prevent out-of-range warnings during coloring
+        pal <- function(x) {
+          x <- pmin(pmax(x, rmin), rmax)
+          pal_base(x)
+        }
         
         leaflet$leafletProxy("map") |>
           leaflet$removeImage("tree_species") |>
@@ -81,10 +89,10 @@ plot_tree_species <- function(data_folder, res_file) {
             position = "bottomright",
             pal = leaflet$colorNumeric(
               palette = "YlOrBr",
-              domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
+              domain = c(rmin, rmax),
               na.color = "transparent"
             ),
-            values = terra$values(raster_data),
+            values = c(rmin, rmax),
             opacity = 0.4,
             layerId = "tree_legend"
           )
