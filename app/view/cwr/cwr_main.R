@@ -52,7 +52,7 @@ box::use(
     logic /
     cwr /
     map_utils[update_leaflet_map],
-  app / logic / cwr / tolerance_plot[create_tolerance_plot],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
 )
 
 crop_table <-
@@ -98,10 +98,7 @@ crop_table <-
     "Tobacco" = "Nicotiana",
     "Tomato" = "Lycopersicon",
     "Tumeric" = "Curcumin",
-    "Taro" = "Colocasia",
     "Turnip" = "Brassica",
-    "Wheat" = "Triticum",
-    "Yam" = "Dioscorea",
     "Zucchini" = "Cucurbita"
   )
 crop_table <- crop_table[order(names(crop_table))]
