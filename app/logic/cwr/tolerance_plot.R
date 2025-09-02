@@ -13,13 +13,13 @@ box::use(
 #' @param stressor_range Range of stress values
 #' @export
 create_tolerance_plot <- function(
-  species,
-  genus,
-  stress_var,
-  stress_maps,
-  map_list,
-  stressor_range
-) {
+    species,
+    genus,
+    stress_var,
+    stress_maps,
+    map_list,
+    stressor_range,
+    i18n) {
   if (is.null(stress_var) || stress_var == "None") {
     return(NULL)
   }
@@ -52,18 +52,18 @@ create_tolerance_plot <- function(
 
   tolerance_plot <- ec.init()
   tolerance_plot$x$opts <- list(
-    title = list(text = "Tolerance analysis"),
+    title = list(text = i18n$t("Tolerance analysis")),
     grid = list(
       bottom = 90
     ),
     dataZoom = list(
-      list = (type = "slider")
+      list = (type <- "slider")
     ),
     tooltip = list(trigger = "axis"),
     xAxis = list(
       type = "category",
       boundaryGap = TRUE,
-      name = "Stressor value",
+      name = i18n$t("Stressor value"),
       nameLocation = "middle",
       nameGap = 25,
       nameTextStyle = list(fontWeight = "bolder"),
@@ -71,7 +71,7 @@ create_tolerance_plot <- function(
     ),
     yAxis = list(
       type = "value",
-      name = "Count",
+      name = i18n$t("Count"),
       boundaryGap = FALSE,
       nameLocation = "middle",
       nameGap = 40,

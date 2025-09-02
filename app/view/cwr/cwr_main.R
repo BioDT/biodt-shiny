@@ -53,6 +53,7 @@ box::use(
     cwr /
     map_utils[update_leaflet_map],
   app / logic / translate_multiple_choices[translate_multiple_choices],
+  app / logic / cwr / tolerance_plot[create_tolerance_plot],
 )
 
 crop_table <-
@@ -116,7 +117,7 @@ mod_cwr_ui <- function(id, i18n) {
       ),
       # Map -----
       nav_panel(
-        title = "Map",
+        title = i18n$t("Map"),
         value = "Map",
         layout_column_wrap(
           width = NULL,
@@ -206,7 +207,7 @@ mod_cwr_ui <- function(id, i18n) {
               ),
               actionButton(
                 ns("update"),
-                label = "Update map",
+                label = i18n$t("Update map"),
                 class = "btn-primary mt-3",
               )
             ),
@@ -398,7 +399,8 @@ mod_cwr_server <- function(id, i18n) {
           input$stress_var,
           r_cwr$stress_maps,
           r_cwr$map_list,
-          r_cwr$stressor_range
+          r_cwr$stressor_range,
+          i18n
         )
 
         w$hide()
