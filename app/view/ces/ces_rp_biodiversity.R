@@ -88,6 +88,7 @@ box::use(
       show_species
     ],
   app / logic / waiter[waiter_text],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
 )
 
 # UI function
@@ -118,19 +119,19 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ns("toggleSliders"),
                 HTML('<i class="fa-solid fa-person-hiking"></i>'),
                 class = "toggle-button",
-                title = "Hiker Settings"
+                title = i18n$t("Hiker Settings")
               ),
               actionButton(
                 ns("toggleSpecies"),
                 HTML('<i class="fa-solid fa-paw"></i>'),
                 class = "toggle-button",
-                title = "Species Occurence"
+                title = i18n$t("Species Occurrence")
               ),
               actionButton(
                 ns("toggleMaps"),
                 HTML('<i class="fa-solid fa-layer-group"></i>'),
                 class = "toggle-button",
-                title = "Map Layers"
+                title = i18n$t("Map Layers")
               ),
               # actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
             ),
@@ -142,16 +143,16 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ns("closeButton"),
                 class = "close-button",
                 HTML('<i class="fa-solid fa-x"></i>'),
-                title = "Close Sidebar"
+                title = i18n$t("Close Sidebar")
               ),
               # sliders content
               tags$div(
                 id = "slidersSidebar",
                 class = "d-none",
-                tags$h4("Recreation Potential"),
+                tags$h4(i18n$t("Recreation Potential")),
                 radioButtons(
                   inputId = ns("recreation_potential"),
-                  label = "Select recreationist type:",
+                  label = i18n$t("Select recreationist type:"),
                   selected = "Soft",
                   choices = list(
                     Soft = "Soft",
@@ -161,11 +162,11 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ),
                 tags$div(
                   class = "custom-slider",
-                  tags$h4("Recreation Potential Filter"),
-                  tags$p("Use the sliders below to filter the data:"),
+                  tags$h4(i18n$t("Recreation Potential Filter")),
+                  tags$p(i18n$t("Use the sliders below to filter the data:")),
                   sliderTextInput(
                     inputId = ns("recreation_potential_slider"),
-                    label = "Filter Recreation Potential:",
+                    label = i18n$t("Filter Recreation Potential:"),
                     choices = seq(0, 1, by = 0.1),
                     selected = 0.5, # c(0, 1),
                     grid = FALSE,
@@ -173,7 +174,7 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ),
                 actionButton(
                   inputId = ns("apply_filter_recre"),
-                  label = "Apply filter",
+                  label = i18n$t("Apply filter"),
                   class = "btn-primary"
                 ),
               ),
@@ -263,7 +264,7 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
 }
 
 # Server function
-ces_rp_biodiversity_server <- function(id, ces_selected) {
+ces_rp_biodiversity_server <- function(id, ces_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- file.path(config$get("data_path"), "ces")
@@ -436,6 +437,27 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         w$hide()
       }
     )
+
+    observe({
+      req(input$recreation_potential)
+
+      recreationist_types <- c(
+        "Soft" = "Soft",
+        "Hard" = "Hard",
+        "Empty" = "Empty"
+      )
+
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "recreation_potential",
+        label = "Select recreationist type:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$recreation_potential,
+        recreationist_types
+      )
+    })
 
     # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({

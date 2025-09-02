@@ -12171,6 +12171,23 @@
       "sl": "Ta digitalni dvojček je zasnovan za izboljšanje vašega razumevanja in upravljanja kulturnih ekosistemskih storitev. Te storitve zajemajo neopredmetene koristi, pridobljene iz narave, kot so rekreacija, turizem, intelektualna rast, duhovna izpolnitev, kontemplacija in estetsko uživanje. Z uporabo modela rekreacijskega potenciala ocenjujemo kulturne ekosistemske storitve pokrajine, medtem ko modeli razširjenosti vrst kvantificirajo vidik biotske raznovrstnosti.",
       "bg": "Този цифров двойник е проектиран да подобри разбирането и управлението ви на културните екосистемни услуги. Тези услуги обхващат нематериалните ползи от природата, като отдих, туризъм, интелектуален растеж, духовно удовлетворение, размисъл и естетическо удоволствие. Използвайки модел на рекреационен потенциал, оценяваме културните екосистемни услуги на ландшафта, докато моделите на разпространение на видовете квантифицират аспекта на биоразнообразието.",
       "el": "Αυτός ο ψηφιακός δίδυμος έχει σχεδιαστεί για να ενισχύσει την κατανόησή σας και τη διαχείριση των πολιτιστικών οικοσυστημικών υπηρεσιών. Αυτές οι υπηρεσίες περιλαμβάνουν τα άυλα οφέλη που προέρχονται από τη φύση, όπως η αναψυχή, ο τουρισμός, η πνευματική ανάπτυξη, η πνευματική εκπλήρωση, ο στοχασμός και η αισθητική απόλαυση. Χρησιμοποιώντας ένα μοντέλο αναψυχιακού δυναμικού, αξιολογούμε τις πολιτιστικές οικοσυστημικές υπηρεσίες του τοπίου, ενώ τα μοντέλα κατανομής ειδών ποσοτικοποιούν την πτυχή της βιοποικιλότητας."
+    },
+    {
+      "en": "Empty",
+      "cz": "Prázdný",
+      "fi": "Tyhjät",
+      "it": "Vuoto",
+      "nl": "Leeg",
+      "est": "Tühi",
+      "sv": "Tom",
+      "de": "Leer",
+      "no": "Tom",
+      "da": "Tom",
+      "es": "Vacío",
+      "pt": "Vazio",
+      "sl": "Prazno",
+      "bg": "Празно",
+      "el": "Κενό"
     }
   ]
 }
