@@ -12154,6 +12154,40 @@
       "sl": "Vrednost stresorja",
       "bg": "Стойност на стресора",
       "el": "Αξία στρεσογόνου παράγοντα"
+    },
+    {
+      "en": "Cowpea",
+      "cz": "Fazol chřestový",
+      "fi": "Lehmipapu",
+      "it": "Fagiolo dall'occhio",
+      "nl": "Zwartoogboon",
+      "est": "Lehmauba",
+      "sv": "Svartögd böna",
+      "de": "Augenbohne",
+      "no": "Svartøyeert",
+      "da": "Sortøjet bønne",
+      "es": "Caupí",
+      "pt": "Feijão-frade",
+      "sl": "Kitajski fižol",
+      "bg": "Лобия",
+      "el": "Μαυρομάτι"
+    },
+    {
+      "en": "Sweet Potato",
+      "cz": "Batáty",
+      "fi": "Bataatti",
+      "it": "Patata dolce",
+      "nl": "Zoete aardappel",
+      "est": "Maguskartul",
+      "sv": "Sötpotatis",
+      "de": "Süßkartoffel",
+      "no": "Søtpotet",
+      "da": "Sød kartoffel",
+      "es": "Boniato",
+      "pt": "Batata-doce",
+      "sl": "Sladki krompir",
+      "bg": "Сладък картоф",
+      "el": "Γλυκοπατάτα"
     }
   ]
 }

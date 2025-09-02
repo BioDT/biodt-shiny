@@ -262,6 +262,45 @@ mod_cwr_server <- function(id, i18n) {
     # Path to stored files (should be set for where the files are stored)
     cwr_path <- file.path(config$get("data_path"), "cwr")
 
+    # Species change translation ----
+    observe({
+      req(input$stress_var)
+
+      stress_var_choices <- c(
+        "None" = "None",
+        "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
+        "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
+        "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
+        "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
+      )
+
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "stress_var",
+        label = "Select Stress Variable:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$stress_var,
+        stress_var_choices
+      )
+    })
+
+    observe({
+      req(input$genus)
+
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "genus",
+        label = "Choose Crop",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$genus,
+        crop_table
+      )
+    })
+
     # Initialise maps when CWR selected
     observeEvent(
       input$tab,
