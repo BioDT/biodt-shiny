@@ -43,7 +43,7 @@ box::use(
 )
 
 #' @export
-ces_rp_ui <- function(id) {
+ces_rp_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(

@@ -48,7 +48,7 @@ box::use(
 )
 
 #' @export
-ces_biodiversity_ui <- function(id) {
+ces_biodiversity_ui <- function(id, i18n) {
   ns <- NS(id)
 
   tagList(
@@ -104,7 +104,7 @@ ces_biodiversity_ui <- function(id) {
           card_body(
             min_height = "1200px",
             p("Click on a species in the species list to show its distribution on the map"),
-            DTOutput(ns('sp_tbl'), height = 1200)
+            DTOutput(ns("sp_tbl"), height = 1200)
           )
         )
       )
@@ -296,14 +296,14 @@ ces_biodiversity_server <- function(id) {
           select(
             "Vernacular name" = common_name,
             "Scientific name" = sci_name,
-            #"Observation probability" = likelihood,
-            #"Recording priority" = priority,
+            # "Observation probability" = likelihood,
+            # "Recording priority" = priority,
             " " = image_url
           )
       },
       escape = FALSE,
-      selection = 'single',
-      class = 'compact'
+      selection = "single",
+      class = "compact"
     )
 
     # Observe row selection in the species table and update the map with the selected species raster

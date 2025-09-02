@@ -1327,23 +1327,6 @@
       "el": "Αναψυχή και βιοποικιλότητα"
     },
     {
-      "en": "Recreation potential",
-      "cz": "Rekreační možnosti",
-      "fi": "Virkistyspotentiaali",
-      "it": "Potenziale ricreativo",
-      "nl": "Recreatiepotentieel",
-      "est": "Puhkusepotentsiaal",
-      "sv": "Rekreationspotential",
-      "de": "Erholungspotential",
-      "no": "Rekreasjonspotensial",
-      "da": "Rekreationspotentiale",
-      "es": "Potencial recreativo",
-      "pt": "Potencial recreativo",
-      "sl": "Rekreacijski potencial",
-      "bg": "Рекреационен потенциал",
-      "el": "Δυναμικό αναψυχής"
-    },
-    {
       "en": "Biodiversity",
       "cz": "Biodiverzita",
       "fi": "Biodiversiteetti",
@@ -12188,6 +12171,23 @@
       "sl": "Sladki krompir",
       "bg": "Сладък картоф",
       "el": "Γλυκοπατάτα"
+    },
+    {
+      "en": "This digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment. Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect.",
+      "cz": "",
+      "fi": "",
+      "it": "",
+      "nl": "",
+      "est": "",
+      "sv": "",
+      "de": "",
+      "no": "",
+      "da": "",
+      "es": "",
+      "pt": "",
+      "sl": "",
+      "bg": "",
+      "el": ""
     }
   ]
 }

@@ -91,7 +91,7 @@ box::use(
 )
 
 # UI function
-ces_rp_biodiversity_ui <- function(id) {
+ces_rp_biodiversity_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     tags$head(
@@ -132,7 +132,7 @@ ces_rp_biodiversity_ui <- function(id) {
                 class = "toggle-button",
                 title = "Map Layers"
               ),
-              #actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
+              # actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
             ),
             # Single Sidebar
             tags$div(
@@ -167,7 +167,7 @@ ces_rp_biodiversity_ui <- function(id) {
                     inputId = ns("recreation_potential_slider"),
                     label = "Filter Recreation Potential:",
                     choices = seq(0, 1, by = 0.1),
-                    selected = 0.5, #c(0, 1),
+                    selected = 0.5, # c(0, 1),
                     grid = FALSE,
                   ),
                 ),
@@ -348,7 +348,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     # Logic for basic sidebar closing
     observeEvent(input$closeButton, {
-      runjs('App.toggleSidebar()')
+      runjs("App.toggleSidebar()")
     })
 
     # Only trigger when ces_selected() becomes TRUE (after which the value will not change).
@@ -578,9 +578,9 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         }
         if (species_selected() == FALSE) {
           runjs(paste0(
-            '
+            "
           species_checkbox_element.disabled = true
-        '
+        "
           ))
         }
       },
