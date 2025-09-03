@@ -66,7 +66,7 @@ ces_ui <- function(id, i18n) {
 }
 
 #' @export
-ces_server <- function(id, i18n) {
+ces_server <- function(id, i18n, language_change) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -94,7 +94,12 @@ ces_server <- function(id, i18n) {
     # Call downstream module servers only the first time
     ces_rp_server("ces_rp")
     ces_biodiversity_server("ces_biodiversity")
-    ces_rp_biodiversity_server("ces_rp_biodiversity", ces_selected = ces_selected, i18n)
+    ces_rp_biodiversity_server(
+      "ces_rp_biodiversity",
+      ces_selected = ces_selected,
+      i18n,
+      language_change
+    )
 
     ces_info_server("ces_info", session)
   })

@@ -295,10 +295,15 @@ server <- function(id) {
       biodt_theme = biodt_theme
     )
 
-    # Language change support see shiny.i18n
+    # Language change support see shiny.i18n ----
+    ## create a new reactive value to get ability to observe lang changes
+    language_change <- shiny$reactiveVal("en")
+    ## language selection itself + update the reactive value
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
       shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
+
+      language_change(input$selected_language)
     })
 
     # Info page ----
@@ -332,7 +337,8 @@ server <- function(id) {
     # Cultural Ecosystem Services pDT ----
     ces_server(
       "ces_main",
-      i18n
+      i18n,
+      language_change
     )
     # Disease Outbreaks pDT ----
     disease_outbreaks_main_server("disease_outbreaks_main", session_dir, i18n)

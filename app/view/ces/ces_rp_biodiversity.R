@@ -71,6 +71,7 @@ box::use(
     pickerOptions,
     awesomeCheckbox
   ],
+  shiny.i18n[update_lang],
   config,
 )
 
@@ -264,7 +265,7 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
 }
 
 # Server function
-ces_rp_biodiversity_server <- function(id, ces_selected, i18n) {
+ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- file.path(config$get("data_path"), "ces")
@@ -435,6 +436,25 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n) {
 
         print("First time CES opened")
         w$hide()
+      }
+    )
+
+    observeEvent(
+      {
+        language_change()
+        ces_selected()
+      },
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      {
+        update_lang(language_change())
+        runjs(paste0(
+          "
+            App.fixTooltip('", ns("toggleSliders"), "');
+            App.fixTooltip('", ns("toggleSpecies"), "');
+            App.fixTooltip('", ns("toggleMaps"), "');
+          "
+        ))
       }
     )
 

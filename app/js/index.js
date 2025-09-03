@@ -54,3 +54,16 @@ export function deactMaps() {
   const maps = document.getElementById('mapsSidebar');
   maps.classList.add('d-none');
 }
+
+export function fixTooltip(elId) {
+  const sidebarButton = document.getElementById(elId);
+  console.log('sidebarButton:::\n', sidebarButton.title);
+
+  const domParser = new DOMParser();
+  const spanHTML = domParser.parseFromString(sidebarButton.title, 'text/html');
+  console.log('spanHTML:::\n', spanHTML.title);
+
+  const tooltipOk = spanHTML.querySelector('.i18n').innerText;
+
+  sidebarButton.title = tooltipOk;
+}
