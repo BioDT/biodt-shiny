@@ -47,6 +47,18 @@ box::use(
   config,
 )
 
+box::use(
+  app / logic / translate_multiple_choices[translate_multiple_choices],
+)
+
+species_groups <- c(
+  "All biodiversity" = "all",
+  "Mammals" = "mammals",
+  "Birds" = "birds",
+  "Plants" = "plants",
+  "Insects" = "insects"
+)
+
 #' @export
 ces_biodiversity_ui <- function(id, i18n) {
   ns <- NS(id)
@@ -56,18 +68,12 @@ ces_biodiversity_ui <- function(id, i18n) {
       title = "biodiversity_controls",
       full_screen = FALSE,
       max_height = "550px",
-      card_title("Biodiversity"),
+      card_title(i18n$t("Biodiversity")),
       card_body(
         radioButtons(
           ns("radio_group_select"),
-          "Please select a species group from the list below:",
-          c(
-            "All biodiversity" = "all",
-            "Mammals" = "mammals",
-            "Birds" = "birds",
-            "Plants" = "plants",
-            "Insects" = "insects"
-          ),
+          i18n$t("Please select a species group from the list below:"),
+          species_groups,
           inline = TRUE,
           selected = character(0)
         )
@@ -80,15 +86,20 @@ ces_biodiversity_ui <- function(id, i18n) {
           title = "biodiversity_map",
           full_screen = TRUE,
           max_height = "650px",
-          card_title("Biodiversity mapping"),
+          card_title(i18n$t("Biodiversity mapping")),
           card_body(
             leafletOutput(ns("sp_map"), height = 600, width = "100%"),
             HTML(
-              '<p><span style="background-color: #FFFFCC; color: black;">Low biodiversity</span>
-             <span style="background-color: #A1DAB4;color: #A1DAB4;">----</span>
-             <span style="background-color: #41B6C4;color: #41B6C4;">----</span>
-             <span style="background-color: #2C7FB8;color: #2C7FB8;">----</span>
-             <span style="background-color: #253494; color: white;">High biodiversity</span></p>'
+              "<p>
+              <span style='background-color: #FFFFCC; color: black;'>",
+              i18n$t("Low biodiversity")[[2]][[1]],
+              "</span>
+              <span style='background-color: #A1DAB4;color: #A1DAB4;'>----</span>
+              <span style='background-color: #41B6C4;color: #41B6C4;'>----</span>
+              <span style='background-color: #2C7FB8;color: #2C7FB8;'>----</span>
+              <span style='background-color: #253494; color: white;'>",
+              i18n$t("High biodiversity")[[1]][[1]],
+              "</span></p>"
             ),
             textOutput(ns("selected_species"))
           )
@@ -100,10 +111,10 @@ ces_biodiversity_ui <- function(id, i18n) {
           title = "sdm_table",
           full_screen = TRUE,
           min_height = "800px",
-          card_title("Species list"),
+          card_title(i18n$t("Species list")),
           card_body(
             min_height = "1200px",
-            p("Click on a species in the species list to show its distribution on the map"),
+            p(i18n$t("Click on a species in the species list to show its distribution on the map")),
             DTOutput(ns("sp_tbl"), height = 1200)
           )
         )
@@ -114,7 +125,7 @@ ces_biodiversity_ui <- function(id, i18n) {
 
 
 #' @export
-ces_biodiversity_server <- function(id) {
+ces_biodiversity_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     msg <-
       waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
@@ -128,12 +139,26 @@ ces_biodiversity_server <- function(id) {
     ces_path <- file.path(config$get("data_path"), "ces")
     ns <- session$ns
 
+    # translates radio buttons - species_groups + all
+    observe({
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "radio_group_select",
+        label = "Please select a species group from the list below:",
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$radio_group_select,
+        species_groups
+      )
+    })
+
     # Load the species list if the file exists, otherwise show an error notification
     if (file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))) {
       cairngorms_sp_list <- read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
     } else {
       showNotification(
-        paste0("File missing: ", paste0(ces_path, "/cairngorms_sp_list.csv")),
+        paste0(i18n$t("File missing: "), paste0(ces_path, "/cairngorms_sp_list.csv")),
         type = "error",
         closeButton = TRUE,
         duration = NULL

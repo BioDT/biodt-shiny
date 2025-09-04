@@ -12188,6 +12188,57 @@
       "sl": "Prazno",
       "bg": "Празно",
       "el": "Κενό"
+    },
+    {
+      "en": "[rast] file does not exist",
+      "cz": "[rast] soubor neexistuje",
+      "fi": "[rast] tiedostoa ei ole",
+      "it": "[rast] file non esiste",
+      "nl": "[rast] bestand bestaat niet",
+      "est": "[rast] faili ei eksisteeri",
+      "sv": "[rast] filen finns inte",
+      "de": "[rast] Datei existiert nicht",
+      "no": "[rast] filen finnes ikke",
+      "da": "[rast] filen findes ikke",
+      "es": "[rast] el archivo no existe",
+      "pt": "[rast] o arquivo não existe",
+      "sl": "[rast] datoteka ne obstaja",
+      "bg": "[rast] файлът не съществува",
+      "el": "[rast] το αρχείο δεν υπάρχει"
+    },
+    {
+      "en": "File missing: ",
+      "cz": "Soubor chybí: ",
+      "fi": "Tiedosto puuttuu: ",
+      "it": "File mancante: ",
+      "nl": "Bestand ontbreekt: ",
+      "est": "Fail puudub: ",
+      "sv": "Fil saknas: ",
+      "de": "Datei fehlt: ",
+      "no": "Fil mangler: ",
+      "da": "Fil mangler: ",
+      "es": "Archivo faltante: ",
+      "pt": "Arquivo em falta: ",
+      "sl": "Datoteka manjka: ",
+      "bg": "Файлът липсва: ",
+      "el": "Αρχείο λείπει: "
+    },
+    {
+      "en": "Loading...",
+      "cz": "Načítání...",
+      "fi": "Lataaminen...",
+      "it": "Caricamento...",
+      "nl": "Laden...",
+      "est": "Laadimine...",
+      "sv": "Laddar...",
+      "de": "Laden...",
+      "no": "Laster...",
+      "da": "Indlæser...",
+      "es": "Cargando...",
+      "pt": "Carregando...",
+      "sl": "Nalagam...",
+      "bg": "Зареждане...",
+      "el": "Φόρτωση..."
     }
   ]
 }
