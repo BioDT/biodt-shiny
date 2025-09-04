@@ -90,16 +90,17 @@ ces_biodiversity_ui <- function(id, i18n) {
           card_body(
             leafletOutput(ns("sp_map"), height = 600, width = "100%"),
             HTML(
-              "<p>
-              <span style='background-color: #FFFFCC; color: black;'>",
-              i18n$t("Low biodiversity")[[2]][[1]],
+              "<p>",
+              "<span style='background-color: #FFFFCC; color: #000;'>",
+              i18n$t("Low biodiversity")[[3]][[1]],
               "</span>
               <span style='background-color: #A1DAB4;color: #A1DAB4;'>----</span>
               <span style='background-color: #41B6C4;color: #41B6C4;'>----</span>
               <span style='background-color: #2C7FB8;color: #2C7FB8;'>----</span>
-              <span style='background-color: #253494; color: white;'>",
-              i18n$t("High biodiversity")[[1]][[1]],
-              "</span></p>"
+              <span style='background-color: #253494; color: #FFF;'>",
+              i18n$t("High biodiversity")[[3]][[1]],
+              "</span>",
+              "</p>"
             ),
             textOutput(ns("selected_species"))
           )
@@ -108,7 +109,7 @@ ces_biodiversity_ui <- function(id, i18n) {
       column(
         12,
         card(
-          title = "sdm_table",
+          id = "sp_tbl_cardwrap",
           full_screen = TRUE,
           min_height = "800px",
           card_title(i18n$t("Species list")),
@@ -123,7 +124,6 @@ ces_biodiversity_ui <- function(id, i18n) {
   )
 }
 
-
 #' @export
 ces_biodiversity_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
@@ -134,10 +134,10 @@ ces_biodiversity_server <- function(id, i18n) {
       html = msg,
       color = "rgba(256,256,256,0.9)"
     )
+    ns <- session$ns
 
     # Define the path to the data directory
     ces_path <- file.path(config$get("data_path"), "ces")
-    ns <- session$ns
 
     # translates radio buttons - species_groups + all
     observe({
@@ -328,7 +328,17 @@ ces_biodiversity_server <- function(id, i18n) {
       },
       escape = FALSE,
       selection = "single",
-      class = "compact"
+      class = "compact",
+      options = list(
+        language = list(
+          search = "🔍",
+          zeroRecords = "∅",
+          loadingRecords = "⌛",
+          info = "[_START_; _END_] ⊂ max(_TOTAL_)",
+          lengthMenu = "_MENU_",
+          paginate = list("previous" = "⬅️", "next" = "➡️")
+        )
+      )
     )
 
     # Observe row selection in the species table and update the map with the selected species raster
@@ -351,7 +361,7 @@ ces_biodiversity_server <- function(id, i18n) {
         )
 
       output$selected_species <- renderText({
-        paste0("Species selected: ", selected_species$common_name)
+        paste0(i18n$t("Species selected: "), selected_species$common_name)
       })
     })
   })

@@ -12239,6 +12239,23 @@
       "sl": "Nalagam...",
       "bg": "Зареждане...",
       "el": "Φόρτωση..."
+    },
+    {
+      "en": "Species selected: ",
+      "cz": "Vybraný druh: ",
+      "fi": "Valittu laji: ",
+      "it": "Specie selezionata: ",
+      "nl": "Geselecteerde soort: ",
+      "est": "Valitud liik: ",
+      "sv": "Vald art: ",
+      "de": "Ausgewählte Art: ",
+      "no": "Valgt art: ",
+      "da": "Valgt art: ",
+      "es": "Especie seleccionada: ",
+      "pt": "Espécie selecionada: ",
+      "sl": "Izbrana vrsta: ",
+      "bg": "Избран вид: ",
+      "el": "Επιλεγμένο είδος: "
     }
   ]
 }

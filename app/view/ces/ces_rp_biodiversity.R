@@ -186,7 +186,7 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 tags$h4("Species Selection", class = "mt-3"),
                 pickerInput(
                   ns("species_group_selector"),
-                  "Select species group:",
+                  i18n$t("Select species group:"),
                   choices = c(
                     "All biodiversity" = "all",
                     "Mammals" = "mammals",
@@ -200,7 +200,7 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ),
                 pickerInput(
                   ns("species_selector"),
-                  "Select species:",
+                  i18n$t("Select species:"),
                   choices = NULL,
                   selected = NULL,
                   multiple = TRUE,
@@ -212,10 +212,10 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ),
                 tags$div(
                   class = "custom-slider",
-                  tags$h4("Species Occurrence", class = "mt-3"),
+                  tags$h4(i18n$t("Species Occurrence"), class = "mt-3"),
                   sliderTextInput(
                     inputId = ns("species_occurrence_slider"),
-                    label = "Filter Species Occurrence:",
+                    label = i18n$t("Filter Species Occurrence:"),
                     choices = seq(0, 1, by = 0.1),
                     selected = 0.5,
                     grid = FALSE,
@@ -223,13 +223,13 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
                 ),
                 actionButton(
                   inputId = ns("apply_filter_species"),
-                  label = "Apply filter",
+                  label = i18n$t("Apply filter"),
                   class = "btn-primary mb-3"
                 ),
                 disabled(
                   checkboxInput(
                     inputId = ns("species_occurence"),
-                    label = "Show Species Occurence",
+                    label = i18n$t("Show Species Occurence"),
                     value = TRUE,
                   )
                 ),
@@ -238,21 +238,21 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
               tags$div(
                 id = "mapsSidebar",
                 class = "d-none",
-                tags$h4("Base Map Layer", class = "mt-3"),
+                tags$h4(i18n$t("Base Map Layer"), class = "mt-3"),
                 radioButtons(
                   inputId = ns("map_base_layers"),
-                  label = "Choose base map:",
-                  choices = list(
+                  label = i18n$t("Choose base map:"),
+                  choices = c(
                     "Open Street Map",
                     "ESRI World Imagery",
                     "Open Topo Map"
                   ),
                   selected = "Open Street Map"
                 ),
-                tags$h4("Biodiversity Data", class = "mt-3"),
+                tags$h4(i18n$t("Biodiversity Data"), class = "mt-3"),
                 checkboxInput(
                   inputId = ns("biodiversity"),
-                  label = "Biodiversity Occurence Density Layer(GBIF)",
+                  label = i18n$t("Biodiversity Occurence Density Layer(GBIF)"),
                   value = FALSE
                 ),
               )
@@ -459,8 +459,6 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
     )
 
     observe({
-      req(input$recreation_potential)
-
       recreationist_types <- c(
         "Soft" = "Soft",
         "Hard" = "Hard",
