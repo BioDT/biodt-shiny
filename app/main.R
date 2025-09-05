@@ -260,7 +260,7 @@ ui <- function(id) {
         value = "acknowledgements",
         icon = shiny$icon("users-gear", `aria-hidden` = "true"),
         class = "container-fluid index-info",
-        mod_acknowledgements_ui("info")
+        mod_acknowledgements_ui("info", i18n)
       ),
       if (env_active == "dev") {
         nav_item(
