@@ -108,7 +108,7 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
     plot_type <- reactiveVal("bar")
 
     # LOCATION settings ----
-    coordinates <- grassland_dynamics_location_server("location")
+    coordinates <- grassland_dynamics_location_server("location", i18n)
 
     # the additional data are displayed as DATA TABLES below the main chart ----
     project_conf <- read_project_config(project_name = "project1")
