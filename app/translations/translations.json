@@ -12256,6 +12256,57 @@
       "sl": "Izbrana vrsta: ",
       "bg": "Избран вид: ",
       "el": "Επιλεγμένο είδος: "
+    },
+    {
+      "en": "Silt",
+      "cz": "Prachovec",
+      "fi": "Siltti",
+      "it": "Limo",
+      "nl": "Silt",
+      "est": "Liiv",
+      "sv": "Silt",
+      "de": "Schluff",
+      "no": "Silt",
+      "da": "Silt",
+      "es": "Limo",
+      "pt": "Silte",
+      "sl": "Melj",
+      "bg": "Прахова частица",
+      "el": "Ιλύς"
+    },
+    {
+      "en": "Clay",
+      "cz": "Jíl",
+      "fi": "Savi",
+      "it": "Argilla",
+      "nl": "Klei",
+      "est": "Savi",
+      "sv": "Lera",
+      "de": "Ton",
+      "no": "Leire",
+      "da": "Ler",
+      "es": "Arcilla",
+      "pt": "Argila",
+      "sl": "Glina",
+      "bg": "Глина",
+      "el": "Άργιλος"
+    },
+    {
+      "en": "Sand",
+      "cz": "Písek",
+      "fi": "Hiekka",
+      "it": "Sabbia",
+      "nl": "Zand",
+      "est": "Liiv",
+      "sv": "Sand",
+      "de": "Sand",
+      "no": "Sand",
+      "da": "Sand",
+      "es": "Arena",
+      "pt": "Areia",
+      "sl": "Pesek",
+      "bg": "Пясък",
+      "el": "Άμμος"
     }
   ]
 }
