@@ -153,7 +153,8 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
     grassland_dynamics_three_soil_types_server(
       "three_soil_types",
       soil_type_shares,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
 
     # Soil data table

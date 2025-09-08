@@ -10,9 +10,8 @@ box::use(
 
 #' @export
 grassland_dynamics_three_soil_types_ui <- function(
-  id,
-  i18n
-) {
+    id,
+    i18n) {
   ns <- NS(id)
   card(
     id = ns("three_soil_types"),
@@ -27,19 +26,19 @@ grassland_dynamics_three_soil_types_ui <- function(
       layout_columns(
         fill = FALSE,
         value_box(
-          title = textOutput(ns("silt")),
+          title = i18n$t(textOutput(ns("silt"))),
           value = textOutput(ns("silt_val")),
           showcase = icon("layer-group"),
           theme = "success"
         ),
         value_box(
-          title = textOutput(ns("clay")),
+          title = i18n$t(textOutput(ns("clay"))),
           value = textOutput(ns("clay_val")),
           showcase = icon("mug-saucer"),
           theme = "success"
         ),
         value_box(
-          title = textOutput(ns("sand")),
+          title = i18n$t(textOutput(ns("sand"))),
           value = textOutput(ns("sand_val")),
           showcase = icon("hourglass-half"),
           theme = "success"
@@ -51,10 +50,10 @@ grassland_dynamics_three_soil_types_ui <- function(
 
 #' @export
 grassland_dynamics_three_soil_types_server <- function(
-  id,
-  soil_type_shares,
-  tab_grassland_selected
-) {
+    id,
+    soil_type_shares,
+    tab_grassland_selected,
+    i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
