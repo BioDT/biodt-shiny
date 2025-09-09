@@ -446,7 +446,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
-        print("language_change():::\n")
+        print("language_change():::\n") # TODO
         print(language_change())
         update_lang(language_change())
         runjs(paste0(

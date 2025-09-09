@@ -118,8 +118,6 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
     mng_lat_lon_path <- get_lat_lon_name(mng_filename)
     mng_file_path <- get_file_path(type_of_input_file = "management", mng_lat_lon_path)
     mng_data_table <- read_management_data_table(mng_file_path)
-    # print("mng_data_table:::")
-    # print(n = 23, mng_data_table) # TODO - remove later
 
     # SOIL data table (optional - controled by checkbox) ----
     soil_filename <- get_soil_file_name(project_conf)
@@ -130,22 +128,24 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
     soil_type_shares <- read_soil_shares(soil_file_path)
 
     # MAP itself ----
-    grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected)
+    grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected, i18n)
 
     # Output plot ----
     grassland_dynamics_double_chart_server(
       "double_chart",
       plot_type,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
 
-    grassland_dynamics_double_chart_controls_server("controls", plot_type)
+    grassland_dynamics_double_chart_controls_server("controls", plot_type, i18n)
 
     # Management Actions Table - server module call ----
     grassland_dynamics_manage_datatable_server(
       "mngmnt_data_table",
       mng_data_table,
-      tab_grassland_selected
+      tab_grassland_selected,
+      i18n
     )
 
     # shares of 3 soil "types" (clay, sand and silt) above soil data table

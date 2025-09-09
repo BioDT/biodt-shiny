@@ -16,11 +16,10 @@ box::use(
 
 #' @export
 grassland_dynamics_double_chart_ui <- function(
-  id,
-  i18n,
-  plot_width = "100%",
-  plot_height = "1000px"
-) {
+    id,
+    i18n,
+    plot_width = "100%",
+    plot_height = "1000px") {
   ns <- NS(id)
   card(
     id = ns("multichart_wrap"),
@@ -59,7 +58,7 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected) {
+grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----

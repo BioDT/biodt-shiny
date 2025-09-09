@@ -3,7 +3,8 @@ box::use(
   bslib[card, card_header, card_body],
   waiter[Waiter],
   DT[DTOutput, renderDT, datatable],
-  dplyr[select]
+  dplyr[select],
+  htmlwidgets[JS],
 )
 
 box::use(
@@ -12,16 +13,15 @@ box::use(
 
 #' @export
 grassland_dynamics_manage_datatable_ui <- function(
-  id,
-  i18n
-) {
+    id,
+    i18n) {
   ns <- NS(id)
   card(
     id = ns("datatable"),
     class = "mx-md-3 card-shadow mb-2",
     card_header(
-        tags$div(
-          class = "d-flex justify-content-between align-items-center",
+      tags$div(
+        class = "d-flex justify-content-between align-items-center",
         tags$h2(
           class = "card_title",
           i18n$translate("Grassland Management Actions")
@@ -31,15 +31,15 @@ grassland_dynamics_manage_datatable_ui <- function(
       # checkboxInput(ns("show_mngmntdata"), "Show Management Data Table", value = FALSE, width = "200px")
     ),
     card_body(
-        uiOutput(
-          ns("mngmnt_data_table_wrap")
+      uiOutput(
+        ns("mngmnt_data_table_wrap")
       )
     )
   )
 }
 
 #' @export
-grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grassland_selected) {
+grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -53,15 +53,15 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
       html = msg,
       color = "rgba(256,256,256,0.9)",
     )
-    
+
     # Reactive toggle for showing table
     show_managementtable <- reactiveVal(FALSE)
-    
+
     div_table_wrap_tag <- tags$div(
-      id = "div_table_wrap",
+      id = "mngmnt_data_table_wrap",
       DTOutput(ns("mngmnt_data_table"))
     )
-    
+
     # Toggle button UI
     output$show_management_btn <- renderUI({
       icon_dir <- if (show_managementtable()) "up" else "down"
@@ -71,15 +71,15 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
         HTML(icon_html),
         class = "primary-button",
         `aria-expanded` = tolower(as.character(show_managementtable())),
-        title = if (show_managementtable()) "Collapse management actions table" else "Expand management actions table"
+        title = if (show_managementtable()) i18n$t("Collapse management actions table") else i18n$t("Expand management actions table")
       )
     })
-    
+
     # Toggle reactive state
     observeEvent(input$show_management, {
       show_managementtable(!show_managementtable())
     })
-    
+
     # Show or hide the datatable container
     observeEvent(show_managementtable(), ignoreInit = TRUE, {
       req(data_table_reactive())
@@ -91,7 +91,7 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
         output$mngmnt_data_table_wrap <- renderUI(NULL)
       }
     })
-    
+
     # Render DT on tab change
     observeEvent(tab_grassland_selected(), ignoreNULL = TRUE, ignoreInit = TRUE, {
       w$show()
@@ -106,11 +106,47 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
             scrollX = TRUE,
             paging = TRUE,
             searching = TRUE,
-            info = FALSE
+            info = FALSE,
+            language = list(
+              search = "🔍",
+              zeroRecords = "∅",
+              loadingRecords = "⌛",
+              info = "[_START_; _END_] ⊂ max(_TOTAL_)",
+              lengthMenu = "_MENU_",
+              paginate = list("previous" = "⬅️", "next" = "➡️")
+            )
           ),
-          class = paste('cell-border stripe compact'),
+          class = paste("cell-border stripe compact"),
           fillContainer = FALSE,
-          rownames = FALSE
+          rownames = FALSE,
+          callback = JS(paste0(
+            "
+            let th_cells = document.querySelectorAll('#mngmnt_data_table_wrap table thead tr th')
+
+            const tooltipInfo =
+              ['",
+            i18n$t("Date"), "', '",
+            i18n$t("Mow Height"), "', '",
+            i18n$t("Fertilizer"), "', '",
+            i18n$t("Irrigation"), "', '",
+            i18n$t("Seeds PFT1"), "', '",
+            i18n$t("Seeds PFT2"), "', '",
+            i18n$t("Seeds PFT3"), "', '",
+            i18n$t("Data source"),
+            "']
+
+            th_cells.forEach((el, idx) => {
+              let tooltipEl = document.createElement('i');
+              tooltipEl.setAttribute('class', 'fas fa-circle-info fa-fw')
+              tooltipEl.setAttribute('aria-label', 'circle-info icon')
+              tooltipEl.setAttribute('type', 'button');
+              tooltipEl.setAttribute('data-bs-toggle', 'popover');
+              tooltipEl.setAttribute('title', tooltipInfo[idx]);
+
+              th_cells[idx].appendChild(tooltipEl)
+            })
+          "
+          ))
         )
       )
       w$hide()
