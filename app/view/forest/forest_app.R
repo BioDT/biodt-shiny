@@ -23,21 +23,21 @@ box::use(
       get_experiment_data_file,
       get_bird_species_list
     ],
-    app /
-      logic /
-      forest /
-      plot_helper_functions[
-        plot_bird_species,
-        plot_tree_species,
-        get_multichart,
-        get_figure
-      ],
-      app /
-        logic /
-        forest /
-        landis_io[
-          read_landis_params
-        ]
+  app /
+    logic /
+    forest /
+    plot_helper_functions[
+      plot_bird_species,
+      plot_tree_species,
+      get_multichart,
+      get_figure
+    ],
+  app /
+    logic /
+    forest /
+    landis_io[
+      read_landis_params
+    ]
 )
 
 #' @export
@@ -215,7 +215,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         experiment_data_file(experiment_data)
 
         bird_species_list <- get_bird_species_list(basename(experiment_data_file()), prediction_folder)
-        
+
         shiny$updateSelectInput(
           session,
           "bird_species",
@@ -248,7 +248,7 @@ forest_app_server <- function(id, app_selected, i18n) {
             leaflet$clearControls()
           return(invisible(NULL))
         }
-        
+
         experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
@@ -312,7 +312,8 @@ forest_app_server <- function(id, app_selected, i18n) {
           data_folder,
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
           experiment_data_file(),
-          # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
+          # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504",
+          i18n
         )
         # If selection failed, clear map layers and stop
         if (is.null(input_selection)) {
@@ -321,7 +322,7 @@ forest_app_server <- function(id, app_selected, i18n) {
             leaflet$clearControls()
           return(invisible(NULL))
         }
-        
+
         # experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
@@ -393,7 +394,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         # Validate experiment data directory before building chart
         if (is.null(experiment_data_file()) || length(experiment_data_file()) == 0 ||
-            !dir.exists(experiment_data_file())) {
+          !dir.exists(experiment_data_file())) {
           shiny$showNotification("Experiment data directory not found or invalid.", type = "error")
           return(invisible(NULL))
         }
@@ -405,7 +406,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       }
     )
 
-    
+
     # bird species update
     shiny$observeEvent(
       c(
@@ -431,9 +432,8 @@ forest_app_server <- function(id, app_selected, i18n) {
       c(app_selected(), input$show_results),
       {
         plots <- list()
-        
-        if(input$show_results){
-          
+
+        if (input$show_results) {
           params <- read_landis_params(experiment_data_file())
 
           climate_scenarios <- c("current", "4.5", "8.5")

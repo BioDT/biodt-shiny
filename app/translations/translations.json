@@ -12596,6 +12596,57 @@
       "sl": "Linije - vse zagonov",
       "bg": "Линии - всички стартирания",
       "el": "Γραμμές - όλες οι εκτελέσεις"
+    },
+    {
+      "en": "No files found matching the specified structure.",
+      "cz": "Nebyly nalezeny žádné soubory odpovídající zadané struktuře.",
+      "fi": "Ei löytynyt tiedostoja, jotka vastaisivat määriteltyä rakennetta.",
+      "it": "Nessun file trovato che corrisponda alla struttura specificata.",
+      "nl": "Geen bestanden gevonden die overeenkomen met de opgegeven structuur.",
+      "est": "Ei leitud faile, mis vastaksid määratud struktuurile.",
+      "sv": "Inga filer hittades som matchar den angivna strukturen.",
+      "de": "Keine Dateien gefunden, die der angegebenen Struktur entsprechen.",
+      "no": "Ingen filer funnet som samsvarer med den angitte strukturen.",
+      "da": "Ingen filer fundet, der matcher den angivne struktur.",
+      "es": "No se encontraron archivos que coincidan con la estructura especificada.",
+      "pt": "Nenhum arquivo encontrado que corresponda à estrutura especificada.",
+      "sl": "Noben datotek ni bilo najdenih, ki bi ustrezale določeni strukturi.",
+      "bg": "Не бяха намерени файлове, които да отговарят на зададената структура.",
+      "el": "Δεν βρέθηκαν αρχεία που να ταιριάζουν με τη συγκεκριμένη δομή."
+    },
+    {
+      "en": "Multiple files found matching the specified structure.",
+      "cz": "Nalezeno více souborů odpovídajících zadané struktuře.",
+      "fi": "Useita tiedostoja löytyi, jotka vastaavat määriteltyä rakennetta.",
+      "it": "Trovati più file che corrispondono alla struttura specificata.",
+      "nl": "Meerdere bestanden gevonden die overeenkomen met de opgegeven structuur.",
+      "est": "Leiti mitu faili, mis vastavad määratud struktuurile.",
+      "sv": "Flera filer hittades die overeenkomen met de opgegeven structuur.",
+      "de": "Mehrere Dateien gefunden, die der angegebenen Struktur entsprechen.",
+      "no": "Flere filer funnet som samsvarer med den angitte strukturen.",
+      "da": "Flere filer fundet, der matcher den angivne struktur.",
+      "es": "Se encontraron varios archivos que coinciden con la estructura especificada.",
+      "pt": "Vários arquivos encontrados que correspondem à estrutura especificada.",
+      "sl": "Več datotek je bilo najdenih, ki ustrezajo določeni strukturi.",
+      "bg": "Намерени са няколко файла, които отговарят на зададената структура.",
+      "el": "Βρέθηκαν πολλά αρχεία που ταιριάζουν με τη συγκεκριμένη δομή."
+    },
+    {
+      "en": "Data directory not found: ",
+      "cz": "Adresář s daty nebyl nalezen: ",
+      "fi": "Tietohakemistoa ei löytynyt: ",
+      "it": "Directory dei dati non trovato: ",
+      "nl": "Gegevensmap niet gevonden: ",
+      "est": "Andmete katalooge ei leitud: ",
+      "sv": "Data katalogen hittades inte: ",
+      "de": "Datenverzeichnis nicht gefunden: ",
+      "no": "Datakatalog ikke funnet: ",
+      "da": "Datakatalog ikke fundet: ",
+      "es": "Directorio de datos no encontrado: ",
+      "pt": "Diretório de dados não encontrado: ",
+      "sl": "Katalog podatkov ni bil najden: ",
+      "bg": "Каталогът с данни не беше намерен: ",
+      "el": "Ο κατάλογος δεδομένων δεν βρέθηκε: "
     }
   ]
 }
