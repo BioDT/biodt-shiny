@@ -3,7 +3,8 @@ box::use(
   bslib[card, card_header, card_body],
   waiter[Waiter],
   DT[DTOutput, renderDT, datatable],
-  dplyr[select]
+  dplyr[select],
+  htmlwidgets[JS],
 )
 
 box::use(
@@ -29,7 +30,10 @@ grassland_dynamics_soil_datatable_ui <- function(
       ),
     ),
     card_body(
-      uiOutput(ns("soil_data_table_wrap"))
+      tags$div(
+        id = "soil_data_table_wrap",
+        uiOutput(ns("soil_data_table_wrap"))
+      )
     )
   )
 }
@@ -106,32 +110,31 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
                 paginate = list("previous" = "⬅️", "next" = "➡️")
               )
             ),
-            callback = JS(paste0("
-              let th_cells = document.querySelectorAll('#bee-lookup-table table thead tr th')
+            callback = JS(paste0(
+              "
+              let th_cells = document.querySelectorAll('#soil_data_table_wrap table thead tr th')
 
-              const tooltipInfo = [
-                'Layer',
-                'Field Capacity',
-                'Permanent Wilting Point',
-                'POR[V%]',
-                'KS[mm/d]'
-              ]
+              const tooltipInfo =
+                ['",
+              i18n$t("Layer"), "', '",
+              i18n$t("Field Capacity"), "', '",
+              i18n$t("Permanent Wilting Point"), "', '",
+              i18n$t("POR[V%]"), "', '",
+              i18n$t("KS[mm/d]"),
+              "']
 
               th_cells.forEach((el, idx) => {
-                if (idx == 0 || idx == 1) {
-                  return;
-                } else {
-                  let tooltipEl = document.createElement('i');
-                  tooltipEl.setAttribute('class', 'fas fa-circle-info fa-fw')
-                  tooltipEl.setAttribute('aria-label', 'circle-info icon')
-                  tooltipEl.setAttribute('type', 'button');
-                  tooltipEl.setAttribute('data-bs-toggle', 'popover');
-                  tooltipEl.setAttribute('title', tooltipInfo[idx - 2]);
+                let tooltipEl = document.createElement('i');
+                tooltipEl.setAttribute('class', 'fas fa-circle-info fa-fw')
+                tooltipEl.setAttribute('aria-label', 'circle-info icon')
+                tooltipEl.setAttribute('type', 'button');
+                tooltipEl.setAttribute('data-bs-toggle', 'popover');
+                tooltipEl.setAttribute('title', tooltipInfo[idx]);
 
-                  th_cells[idx].appendChild(tooltipEl)
-                }
+                th_cells[idx].appendChild(tooltipEl)
               })
-            "))
+            "
+            ))
           )
         })
         w$hide()
