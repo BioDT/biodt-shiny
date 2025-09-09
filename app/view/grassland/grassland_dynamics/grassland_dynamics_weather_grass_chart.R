@@ -27,8 +27,8 @@ grassland_dynamics_double_chart_ui <- function(
     full_screen = TRUE,
     card_header(
       tags$h2(
-        class = "card_title",
-        i18n$translate("Grassland Simulations & Weather")
+        i18n$translate("Grassland Simulations and Weather"),
+        class = "card_title"
       )
     ),
     card_body(
@@ -101,7 +101,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass,
               colors_for_weather = colors_for_weather,
-              grass_end_date = end_date
+              grass_end_date = end_date,
+              i18n
             )
           } else if (plot_type() == "line") {
             generate_chart_lines(
@@ -109,7 +110,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass_lighter,
               colors_for_weather = colors_for_weather,
-              grass_end_date = end_date
+              grass_end_date = end_date,
+              i18n
             )
           } else if (plot_type() == "line_mean") {
             generate_chart_lines_mean(
@@ -117,7 +119,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass,
               colors_for_weather = colors_for_weather,
-              grass_end_date = end_date
+              grass_end_date = end_date,
+              i18n
             )
           }
         })
