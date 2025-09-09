@@ -56,7 +56,6 @@ box::use(
     mean
   ],
   waiter[Waiter],
-  DT[renderDT, DTOutput],
   dplyr[mutate, select, arrange, left_join, desc, filter, pull],
   purrr[map_chr],
   cli[hash_md5],
@@ -447,6 +446,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
       ignoreInit = TRUE,
       ignoreNULL = TRUE,
       {
+        print("language_change():::\n")
+        print(language_change())
         update_lang(language_change())
         runjs(paste0(
           "
