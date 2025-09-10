@@ -46,20 +46,6 @@ translate_multiple_choices <- function(
           selected = selected_choice
         )
       }
-    } else if (which_type == "radio") {
-      updated_choices <- {
-        updateRadioButtons(
-          session,
-          input_id,
-          label = i18n$t(label),
-          inline = inline,
-          choices = structure(
-            lapply(..., identity),
-            names = lapply(names(...), i18n$t)
-          ),
-          selected = selected_choice
-        )
-      }
     } else if (which_type == "picker") {
       updated_choices <- {
         updatePickerInput(
@@ -111,6 +97,22 @@ translate_multiple_choices <- function(
           selected = selected_choice
         )
       }
+    } else if (which_type == "select") {
+      updated_choices <- {
+        updateSelectInput(
+          session,
+          input_id,
+          label = i18n$t(label),
+          choices = structure(
+            lapply(dropped_nas$vals, identity),
+            names = lapply(dropped_nas$nms, i18n$t)
+          ),
+          selected = selected_choice
+        )
+      }
+    } else {
+      warning("Invalid type specified. Use 'select' (for selectInput) or 'radio' (for radioButtons) or 'picker' (for pickerInput).")
+      return(NULL)
     }
   }
   updated_choices

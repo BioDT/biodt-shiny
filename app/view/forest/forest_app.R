@@ -37,7 +37,20 @@ box::use(
     forest /
     landis_io[
       read_landis_params
-    ]
+    ],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
+)
+
+climate_scenarios <- c("Current climate", "RCP4.5", "RCP8.5")
+
+output_types <- c(
+  "Above-ground biomass",
+  "Below-ground biomass",
+  "Harvested biomass",
+  "Woody Debris",
+  "Max-age of selected species",
+  "Average age of all trees",
+  "Median age of all trees"
 )
 
 #' @export
@@ -56,20 +69,12 @@ forest_app_ui <- function(id, i18n) {
           shiny$selectInput(
             ns("climate"),
             i18n$t("Select Climate Scenario:"),
-            choices = c("Current climate", "RCP4.5", "RCP8.5")
+            choices = climate_scenarios
           ),
           shiny$selectInput(
             ns("output"),
             i18n$t("Select Output Type:"),
-            choices = c(
-              "Above-ground biomass",
-              "Below-ground biomass",
-              "Harvested biomass",
-              "Woody Debris",
-              "Max-age of selected species",
-              "Average age of all trees",
-              "Median age of all trees"
-            )
+            choices = output_types
           ),
           shiny$conditionalPanel(
             condition = sprintf(
@@ -132,18 +137,23 @@ forest_app_ui <- function(id, i18n) {
 forest_app_server <- function(id, app_selected, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    # data_folder <- file.path(config$get("data_path"), "forest_bird")
-    data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
-    prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
+
+    data_folder <- file.path(config$get("data_path"), "forest_bird")
+    # data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
+    # prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
+    prediction_folder <- paste0(data_folder, "/predictions") # TODO fixme
+
+    data_folder <- paste0(data_folder, "/new") # TODO fixme
+
     output$selection <- shiny$renderText({
       text <- paste(
-        "Management Regime:",
+        i18n$t("Management Regime:"),
         input$management,
         "\n",
-        "Climate Scenario:",
+        i18n$t("Climate Scenario:"),
         input$climate,
         "\n",
-        "Output Type:",
+        i18n$t("Output Type:"),
         input$output
       )
 
@@ -154,27 +164,31 @@ forest_app_server <- function(id, app_selected, i18n) {
       text
     })
 
-    # shinInput & shinyRadiiobuttons dropdowns i18n solution, viz URL below ----
-    # https://github.com/Appsilon/shiny.i18n/issues/54#issuecomment-751792229
-    i18n_r <- shiny$reactive({
-      i18n
+    shiny$observe({
+      translate_multiple_choices(
+        session,
+        which_type = "select",
+        input_id = "climate",
+        label = "Select Climate Scenario:",
+        inline = FALSE,
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = input$climate,
+        climate_scenarios
+      )
     })
 
     shiny$observe({
-      shiny$updateSelectInput(
+      translate_multiple_choices(
         session,
-        "output",
-        choices = i18n_r()$t(
-          c(
-            "Above-ground biomass",
-            "Below-ground biomass",
-            "Harvested biomass",
-            "Woody Debris",
-            "Max-age of selected species",
-            "Average age of all trees",
-            "Median age of all trees"
-          )
-        )
+        which_type = "select",
+        input_id = "output",
+        label = "Select Output Type:",
+        inline = FALSE,
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = input$output,
+        output_types
       )
     })
 
