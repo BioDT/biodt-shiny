@@ -471,6 +471,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
         "radio",
         input_id = "recreation_potential",
         label = "Select recreationist type:",
+        inline = FALSE,
         i18n,
         choices_type = "namedlist",
         selected_choice = input$recreation_potential,

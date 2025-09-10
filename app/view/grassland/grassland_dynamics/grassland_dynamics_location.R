@@ -86,6 +86,7 @@ grassland_dynamics_location_server <- function(id, i18n) { # nolint
         "radio",
         input_id = "input_type",
         label = "Choose location type:",
+        inline = FALSE,
         i18n,
         choices_type = "namedlist",
         selected_choice = input$input_type,

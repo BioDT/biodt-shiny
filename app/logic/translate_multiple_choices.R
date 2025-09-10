@@ -10,6 +10,7 @@ translate_multiple_choices <- function(
     which_type = c("select", "radio", "picker"),
     input_id = inputId,
     label,
+    inline = FALSE,
     i18n,
     choices_type = c("singlelist", "namedlist"),
     selected_choice = NULL,
@@ -37,6 +38,7 @@ translate_multiple_choices <- function(
           session,
           input_id,
           label = i18n$t(label),
+          inline = inline,
           choices = structure(
             lapply(..., identity),
             names = lapply(names(...), i18n$t)
@@ -50,6 +52,7 @@ translate_multiple_choices <- function(
           session,
           input_id,
           label = i18n$t(label),
+          inline = inline,
           choices = structure(
             lapply(..., identity),
             names = lapply(names(...), i18n$t)
@@ -87,6 +90,7 @@ translate_multiple_choices <- function(
           session,
           input_id,
           label = i18n$t(label),
+          inline = inline,
           choices = structure(
             lapply(dropped_nas$vals, identity),
             names = lapply(dropped_nas$nms, i18n$t)

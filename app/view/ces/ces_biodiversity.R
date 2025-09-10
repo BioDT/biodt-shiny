@@ -146,6 +146,7 @@ ces_biodiversity_server <- function(id, i18n) {
         "radio",
         input_id = "radio_group_select",
         label = "Please select a species group from the list below:",
+        inline = TRUE,
         i18n,
         choices_type = "namedlist",
         selected_choice = input$radio_group_select,

@@ -301,6 +301,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
         "radio",
         input_id = "summary_plot_choice",
         label = "Choose Summary View:",
+        inline = TRUE,
         i18n,
         choices_type = "namedlist",
         selected_choice = NULL,

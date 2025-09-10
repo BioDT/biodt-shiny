@@ -167,6 +167,7 @@ rtbm_sidebar_server <- function(id, bird_spp_info, available_dates, summary_prog
         "picker",
         "speciesPicker",
         label = "Select Bird Species",
+        inline = FALSE,
         i18n,
         choices_type = "singlelist",
         selected_choice = NULL,

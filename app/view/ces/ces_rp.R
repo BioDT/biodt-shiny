@@ -97,6 +97,7 @@ ces_rp_server <- function(id, i18n) {
         "radio",
         input_id = "persona",
         label = "Please select a recreation potential persona from the list below:",
+        inline = FALSE,
         i18n,
         choices_type = "namedlist",
         selected_choice = input$persona,

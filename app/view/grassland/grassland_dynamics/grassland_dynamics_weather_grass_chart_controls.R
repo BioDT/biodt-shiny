@@ -47,6 +47,7 @@ grassland_dynamics_double_chart_controls_server <- function(id, plot_type, i18n)
         "radio",
         input_id = "line_or_bar",
         label = "PFT plot type:",
+        inline = FALSE,
         i18n,
         choices_type = "namedlist",
         selected_choice = input$line_or_bar,
