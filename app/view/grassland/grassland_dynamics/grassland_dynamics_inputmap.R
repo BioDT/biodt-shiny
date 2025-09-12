@@ -37,7 +37,7 @@ grassland_dynamics_inputmap_server <- function(id, coordinates, tab_grassland_se
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...",
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."),
       style = "color: #414f2f;"
     ))
     w <- Waiter$new(

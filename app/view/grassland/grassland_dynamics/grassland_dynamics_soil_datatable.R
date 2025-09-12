@@ -43,7 +43,7 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("datatable"),
       html = msg,

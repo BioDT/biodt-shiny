@@ -57,7 +57,7 @@ grassland_dynamics_three_soil_types_server <- function(
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("three_soil_types"),
       html = msg,

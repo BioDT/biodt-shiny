@@ -207,8 +207,6 @@ get_file_list <- function(
   } else if (input$output == "Median age of all trees") {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
-    print("res_working_folder:::")
-    print(res_working_folder)
 
     res_file_list <- data_file_list[grep(
       paste0("output/age-all-spp/", "AGE-MED-[0-9]+\\.tif$"),

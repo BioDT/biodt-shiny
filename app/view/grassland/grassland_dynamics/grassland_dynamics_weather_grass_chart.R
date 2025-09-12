@@ -62,7 +62,7 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("multichart_wrap"),
       html = msg,

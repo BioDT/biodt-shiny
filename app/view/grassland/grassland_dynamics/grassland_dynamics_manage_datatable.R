@@ -47,7 +47,7 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
     data_table_reactive(data_table)
 
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("mngmnt_data_table_wrap"),
       html = msg,

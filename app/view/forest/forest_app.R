@@ -95,9 +95,9 @@ forest_app_ui <- function(id, i18n) {
           ),
           shiny$selectInput(
             ns("bird_species"),
-            "Select Bird Species:",
+            label = i18n$t("Select Bird Species:"),
             choices = c(
-              "None"
+              i18n$t("None")
             )
           ),
           shiny$sliderInput(
@@ -234,7 +234,7 @@ forest_app_server <- function(id, app_selected, i18n) {
           session,
           "bird_species",
           choices = c(
-            "None",
+            i18n$t("None"),
             bird_species_list
           )
         )
@@ -395,7 +395,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         shiny$req(res_file())
         # shiny$req(experiment_data_file())
 
-        plot_tree_species(data_folder, res_file())
+        plot_tree_species(data_folder, res_file(), i18n)
       }
     )
 
@@ -412,7 +412,7 @@ forest_app_server <- function(id, app_selected, i18n) {
           shiny$showNotification("Experiment data directory not found or invalid.", type = "error")
           return(invisible(NULL))
         }
-        chart <- get_multichart(experiment_data_file())
+        chart <- get_multichart(experiment_data_file(), i18n)
         experiment_chart(chart)
         output$multichart <- echarty$ecs.render(
           experiment_chart()
@@ -435,7 +435,8 @@ forest_app_server <- function(id, app_selected, i18n) {
           scenario = basename(experiment_data_file()),
           bird_species = input$bird_species,
           tick = input$res_file_slider - start_sim_year(),
-          prediction_folder = prediction_folder
+          prediction_folder = prediction_folder,
+          i18n
         )
       }
     )
