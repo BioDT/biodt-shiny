@@ -53,6 +53,13 @@ output_types <- c(
   "Median age of all trees"
 )
 
+tree_species <- c(
+  "Birch (betulaSP)",
+  "Pine (pinussyl)",
+  "Spruce (piceabbies)",
+  "Other trees (other)"
+)
+
 #' @export
 forest_app_ui <- function(id, i18n) {
   ns <- shiny$NS(id)
@@ -85,12 +92,7 @@ forest_app_ui <- function(id, i18n) {
             shiny$selectInput(
               ns("species"),
               i18n$t("Select Species Type:"),
-              choices = c(
-                "Birch (betulaSP)",
-                "Pine (pinussyl)",
-                "Spruce (piceabbies)",
-                "Other trees (other)"
-              )
+              choices = tree_species
             ),
           ),
           shiny$selectInput(
@@ -189,6 +191,20 @@ forest_app_server <- function(id, app_selected, i18n) {
         choices_type = "singlelist",
         selected_choice = input$output,
         output_types
+      )
+    })
+
+    shiny$observe({
+      translate_multiple_choices(
+        session,
+        which_type = "select",
+        input_id = "species",
+        label = "Select Species Type:",
+        inline = FALSE,
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = input$species,
+        tree_species
       )
     })
 
