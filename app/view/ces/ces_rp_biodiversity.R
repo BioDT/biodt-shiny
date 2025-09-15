@@ -290,7 +290,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
 
     # Waiter for loading screens
     msg <- list(
-      waiter_text(message = tags$h3("Loading data...", style = "color: #414f2f;"))
+      waiter_text(message = tags$h3(i18n$t("Loading data..."), style = "color: #414f2f;"))
     )
     w <- Waiter$new(
       html = msg[[1]],

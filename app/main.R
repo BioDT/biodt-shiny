@@ -63,6 +63,25 @@ i18n <- Translator$new(
 )
 i18n$set_translation_language("en")
 
+# note! order is important here, it has to be the same as in the file app/translations/translations.json
+pairs_lang_flag <- list(
+  "🇬🇧" = "en",
+  "🇨🇿" = "cz",
+  "🇫🇮" = "fi",
+  "🇮🇹" = "it",
+  "🇳🇱" = "nl",
+  "🇪🇪" = "est",
+  "🇸🇪" = "sv",
+  "🇩🇪" = "de",
+  "🇳🇴" = "no",
+  "🇩🇰" = "da",
+  "🇪🇸" = "es",
+  "🇵🇹" = "pt",
+  "🇸🇮" = "sl",
+  "🇧🇬" = "bg",
+  "🇬🇷" = "el"
+)
+
 #' @export
 ui <- function(id) {
   ns <- shiny$NS(id)
@@ -264,13 +283,14 @@ ui <- function(id) {
       ),
       if (env_active == "dev") {
         nav_item(
+          style = "padding: 0; height: 30px;",
           shiny$selectInput(
             ns("selected_language"),
-            shiny$span(), # shiny$p(i18n$translate("Language:")),
-            choices = i18n$get_languages(),
+            label = NULL,
+            choices = pairs_lang_flag,
             selected = i18n$get_key_translation(),
             width = "75px"
-          )
+          ),
         )
       }
     )

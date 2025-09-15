@@ -73,13 +73,15 @@ honeybee_server <- function(id,
 
     honeybee_info_server(
       "honeybee_info",
-      session
+      session,
+      i18n
     )
 
     honeybee_beekeeper_server(
       "honeybee_beekeeper",
       session_dir,
-      beekeeper_selected
+      beekeeper_selected,
+      i18n
     )
   })
 }

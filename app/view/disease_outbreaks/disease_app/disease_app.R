@@ -73,7 +73,7 @@ disease_app_server <- function(
     session_dir, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     # Define waiter ----
-    msg <- waiter_text(message = shiny$tags$h3("Loading data...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = shiny$tags$h3(i18n$translate("Loading data..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       html = msg,
       color = "rgba(256,256,256,0.9)"

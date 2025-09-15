@@ -19,31 +19,25 @@ honeybee_info_ui <- function(id, i18n) {
           i18n$translate("Honeybee Prototype Digital Twin (DT)")
         ),
         tags$p(
+          i18n$translate("This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"),
           class = "pt-3 fw-bold",
-          i18n$translate(
-            "This prototype Digital Twin is in early access and intended for research purposes only. Do not use for decision-making or operational purposes!"
-          )
         ),
         tags$p(
-          class = "pt-3",
-          i18n$translate(
-            "The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE."
-          ), # nolint: line_length_linter.
+          i18n$translate("The HONEYBEE prototype Digital Twin (pDT) is based on the mechanistic simulation model BEEHAVE."), # nolint: line_length_linter.
           tags$a(
             "(Becher et al. 2014, https://doi.org/10.1111/1365-2664.12222)",
             href = "https://doi.org/10.1111/1365-2664.12222",
             target = "_blank"
-          )
+          ),
+          class = "pt-3",
         ),
         tags$p(
-          i18n$translate("Model descriptions of BEEHAVE and additional information can be found on"),
+          i18n$translate("Model descriptions of BEEHAVE and additional information can be found on "),
           tags$a("https://beehave-model.net/", href = "https://beehave-model.net/", target = "_blank"),
           "."
         ),
         tags$p(
-          i18n$translate(
-            "The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,"
-          ),
+          i18n$translate("The Honeybee prototype Digital Twin needs input on floral resources. As a demonstration example we use a land cover map provided by Preidl et al. (2020,"),
           tags$a(
             "https://doi.org/10.1594/PANGAEA.910837",
             href = "https://doi.org/10.1594/PANGAEA.910837",
@@ -52,9 +46,7 @@ honeybee_info_ui <- function(id, i18n) {
           ")."
         ),
         tags$p(
-          i18n$translate(
-            "Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd ("
-          ),
+          i18n$translate("Weather data are requested from the Deutscher Wetterdienst (DWD) using an API provided by the R package rdwd ("),
           tags$a(
             "https://cran.r-project.org/web/packages/rdwd/index.html",
             href = "https://cran.r-project.org/web/packages/rdwd/index.html",
@@ -96,7 +88,7 @@ honeybee_info_ui <- function(id, i18n) {
 
 
 #' @export
-honeybee_info_server <- function(id, main_session) {
+honeybee_info_server <- function(id, main_session, i18n) {
   moduleServer(id, function(input, output, session) {
     observeEvent(
       input$start,
