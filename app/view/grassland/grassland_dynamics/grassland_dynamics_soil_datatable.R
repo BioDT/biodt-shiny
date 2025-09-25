@@ -3,7 +3,8 @@ box::use(
   bslib[card, card_header, card_body],
   waiter[Waiter],
   DT[DTOutput, renderDT, datatable],
-  dplyr[select]
+  dplyr[select],
+  htmlwidgets[JS],
 )
 
 box::use(
@@ -29,7 +30,10 @@ grassland_dynamics_soil_datatable_ui <- function(
       ),
     ),
     card_body(
-      uiOutput(ns("soil_data_table_wrap"))
+      tags$div(
+        id = "soil_data_table_wrap",
+        uiOutput(ns("soil_data_table_wrap"))
+      )
     )
   )
 }
@@ -39,7 +43,7 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("datatable"),
       html = msg,
@@ -76,7 +80,6 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
         output$soil_data_table_wrap <- renderUI(NULL)
       }
       if (show_soiltable() == TRUE) {
-        print(div_table_wrap_tag)
         output$soil_data_table_wrap <- renderUI({
           div_table_wrap_tag
         })
@@ -96,7 +99,42 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
             class = paste("cell-border stripe compact"),
             style = "auto",
             fillContainer = FALSE,
-            rownames = FALSE
+            rownames = FALSE,
+            options = list(
+              language = list(
+                search = "🔍",
+                zeroRecords = "∅",
+                loadingRecords = "⌛",
+                info = "[_START_; _END_] ⊂ max(_TOTAL_)",
+                lengthMenu = "_MENU_",
+                paginate = list("previous" = "⬅️", "next" = "➡️")
+              )
+            ),
+            callback = JS(paste0(
+              "
+              let th_cells = document.querySelectorAll('#soil_data_table_wrap table thead tr th')
+
+              const tooltipInfo =
+                ['",
+              i18n$t("Layer"), "', '",
+              i18n$t("Field Capacity"), "', '",
+              i18n$t("Permanent Wilting Point"), "', '",
+              i18n$t("POR[V%]"), "', '",
+              i18n$t("KS[mm/d]"),
+              "']
+
+              th_cells.forEach((el, idx) => {
+                let tooltipEl = document.createElement('i');
+                tooltipEl.setAttribute('class', 'fas fa-circle-info fa-fw')
+                tooltipEl.setAttribute('aria-label', 'circle-info icon')
+                tooltipEl.setAttribute('type', 'button');
+                tooltipEl.setAttribute('data-bs-toggle', 'popover');
+                tooltipEl.setAttribute('title', tooltipInfo[idx]);
+
+                th_cells[idx].appendChild(tooltipEl)
+              })
+            "
+            ))
           )
         })
         w$hide()

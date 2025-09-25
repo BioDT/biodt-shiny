@@ -16,11 +16,10 @@ box::use(
 
 #' @export
 grassland_dynamics_double_chart_ui <- function(
-  id,
-  i18n,
-  plot_width = "100%",
-  plot_height = "1000px"
-) {
+    id,
+    i18n,
+    plot_width = "100%",
+    plot_height = "1000px") {
   ns <- NS(id)
   card(
     id = ns("multichart_wrap"),
@@ -28,8 +27,8 @@ grassland_dynamics_double_chart_ui <- function(
     full_screen = TRUE,
     card_header(
       tags$h2(
-        class = "card_title",
-        i18n$translate("Grassland Simulations & Weather")
+        i18n$translate("Grassland Simulations and Weather"),
+        class = "card_title"
       )
     ),
     card_body(
@@ -59,11 +58,11 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected) {
+grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("multichart_wrap"),
       html = msg,
@@ -102,7 +101,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass,
               colors_for_weather = colors_for_weather,
-              grass_end_date = end_date
+              grass_end_date = end_date,
+              i18n
             )
           } else if (plot_type() == "line") {
             generate_chart_lines(
@@ -110,7 +110,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass_lighter,
               colors_for_weather = colors_for_weather,
-              grass_end_date = end_date
+              grass_end_date = end_date,
+              i18n
             )
           } else if (plot_type() == "line_mean") {
             generate_chart_lines_mean(
@@ -118,7 +119,8 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
               filepath_weather = file_weather,
               colors_for_grass = colors_for_grass,
               colors_for_weather = colors_for_weather,
-              grass_end_date = end_date
+              grass_end_date = end_date,
+              i18n
             )
           }
         })

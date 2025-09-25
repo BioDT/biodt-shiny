@@ -77,12 +77,12 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected) {
+honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     # Define waiter ----
     msg <- list(
-      waiter_text(message = tags$h3("Loading data...", style = "color: #414f2f;")),
-      waiter_text(message = tags$h3("Computing Beehave simulation...", style = "color: #414f2f;"))
+      waiter_text(message = tags$h3(i18n$t("Loading data..."), style = "color: #414f2f;")),
+      waiter_text(message = tags$h3(i18n$t("Computing Beehave simulation..."), style = "color: #414f2f;"))
     )
 
     w <- Waiter$new(
@@ -134,14 +134,15 @@ honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected) {
       "beekeeper_map",
       leaflet_map = leaflet_map,
       experiment_list = experiment_list,
-      map
+      map,
+      i18n = i18n
     )
 
     # Parameters ----
     parameters <- honeybee_param_server("beekeeper_param")
 
     # Lookup table ----
-    lookup <- honeybee_lookup_server("beekeeper_lookup", lookup_table = lookup_table)
+    lookup <- honeybee_lookup_server("beekeeper_lookup", lookup_table = lookup_table, i18n)
 
     # Execution ----
     experiment_list <- beekeeper_runsimulation_server(
@@ -150,14 +151,16 @@ honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected) {
       lookup,
       parameters,
       map,
-      session_dir
+      session_dir,
+      i18n
     )
 
     # Plot ----
     beekeeper_plot_server(
       "beekeeper_plot",
       beekeeper_selected,
-      experiment_list
+      experiment_list,
+      i18n
     )
   })
 }

@@ -23,21 +23,41 @@ box::use(
       get_experiment_data_file,
       get_bird_species_list
     ],
-    app /
-      logic /
-      forest /
-      plot_helper_functions[
-        plot_bird_species,
-        plot_tree_species,
-        get_multichart,
-        get_figure
-      ],
-      app /
-        logic /
-        forest /
-        landis_io[
-          read_landis_params
-        ]
+  app /
+    logic /
+    forest /
+    plot_helper_functions[
+      plot_bird_species,
+      plot_tree_species,
+      get_multichart,
+      get_figure
+    ],
+  app /
+    logic /
+    forest /
+    landis_io[
+      read_landis_params
+    ],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
+)
+
+climate_scenarios <- c("Current climate", "RCP4.5", "RCP8.5")
+
+output_types <- c(
+  "Above-ground biomass",
+  "Below-ground biomass",
+  "Harvested biomass",
+  "Woody Debris",
+  "Max-age of selected species",
+  "Average age of all trees",
+  "Median age of all trees"
+)
+
+tree_species <- c(
+  "Birch (betulaSP)",
+  "Pine (pinussyl)",
+  "Spruce (piceabbies)",
+  "Other trees (other)"
 )
 
 #' @export
@@ -56,20 +76,12 @@ forest_app_ui <- function(id, i18n) {
           shiny$selectInput(
             ns("climate"),
             i18n$t("Select Climate Scenario:"),
-            choices = c("Current climate", "RCP4.5", "RCP8.5")
+            choices = climate_scenarios
           ),
           shiny$selectInput(
             ns("output"),
             i18n$t("Select Output Type:"),
-            choices = c(
-              "Above-ground biomass",
-              "Below-ground biomass",
-              "Harvested biomass",
-              "Woody Debris",
-              "Max-age of selected species",
-              "Average age of all trees",
-              "Median age of all trees"
-            )
+            choices = output_types
           ),
           shiny$conditionalPanel(
             condition = sprintf(
@@ -80,19 +92,14 @@ forest_app_ui <- function(id, i18n) {
             shiny$selectInput(
               ns("species"),
               i18n$t("Select Species Type:"),
-              choices = c(
-                "Birch (betulaSP)",
-                "Pine (pinussyl)",
-                "Spruce (piceabbies)",
-                "Other trees (other)"
-              )
+              choices = tree_species
             ),
           ),
           shiny$selectInput(
             ns("bird_species"),
-            "Select Bird Species:",
+            label = i18n$t("Select Bird Species:"),
             choices = c(
-              "None"
+              i18n$t("None")
             )
           ),
           shiny$sliderInput(
@@ -132,17 +139,19 @@ forest_app_ui <- function(id, i18n) {
 forest_app_server <- function(id, app_selected, i18n) {
   shiny$moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
     data_folder <- file.path(config$get("data_path"), "forest_bird")
     prediction_folder <- file.path(data_folder, "predictions")
+
     output$selection <- shiny$renderText({
       text <- paste(
-        "Management Regime:",
+        i18n$t("Management Regime:"),
         input$management,
         "\n",
-        "Climate Scenario:",
+        i18n$t("Climate Scenario:"),
         input$climate,
         "\n",
-        "Output Type:",
+        i18n$t("Output Type:"),
         input$output
       )
 
@@ -153,27 +162,45 @@ forest_app_server <- function(id, app_selected, i18n) {
       text
     })
 
-    # shinInput & shinyRadiiobuttons dropdowns i18n solution, viz URL below ----
-    # https://github.com/Appsilon/shiny.i18n/issues/54#issuecomment-751792229
-    i18n_r <- shiny$reactive({
-      i18n
+    shiny$observe({
+      translate_multiple_choices(
+        session,
+        which_type = "select",
+        input_id = "climate",
+        label = "Select Climate Scenario:",
+        inline = FALSE,
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = input$climate,
+        climate_scenarios
+      )
     })
 
     shiny$observe({
-      shiny$updateSelectInput(
+      translate_multiple_choices(
         session,
-        "output",
-        choices = i18n_r()$t(
-          c(
-            "Above-ground biomass",
-            "Below-ground biomass",
-            "Harvested biomass",
-            "Woody Debris",
-            "Max-age of selected species",
-            "Average age of all trees",
-            "Median age of all trees"
-          )
-        )
+        which_type = "select",
+        input_id = "output",
+        label = "Select Output Type:",
+        inline = FALSE,
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = input$output,
+        output_types
+      )
+    })
+
+    shiny$observe({
+      translate_multiple_choices(
+        session,
+        which_type = "select",
+        input_id = "species",
+        label = "Select Species Type:",
+        inline = FALSE,
+        i18n,
+        choices_type = "singlelist",
+        selected_choice = input$species,
+        tree_species
       )
     })
 
@@ -227,12 +254,12 @@ forest_app_server <- function(id, app_selected, i18n) {
         experiment_data_file(experiment_data)
 
         bird_species_list <- get_bird_species_list(basename(experiment_data_file()), prediction_folder)
-        
+
         shiny$updateSelectInput(
           session,
           "bird_species",
           choices = c(
-            "None",
+            i18n$t("None"),
             bird_species_list
           )
         )
@@ -267,7 +294,7 @@ forest_app_server <- function(id, app_selected, i18n) {
           }
           return(invisible(NULL))
         }
-        
+
         experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
@@ -338,7 +365,8 @@ forest_app_server <- function(id, app_selected, i18n) {
           data_folder,
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird"
           experiment_data_file(),
-          # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
+          # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504",
+          i18n
         )
         # If selection failed, revert the changed input(s) (keep current raster visible)
         if (is.null(input_selection)) {
@@ -355,7 +383,7 @@ forest_app_server <- function(id, app_selected, i18n) {
           shiny$showNotification(i18n$t("Invalid selection. Reverted to last valid option."), type = "warning")
           return(invisible(NULL))
         }
-        
+
         # experiment_data_file(experiment_data)
         res_working_folder(input_selection$res_working_folder)
         res_file_list_tick <- input_selection$res_file_list_tick
@@ -421,7 +449,7 @@ forest_app_server <- function(id, app_selected, i18n) {
         shiny$req(res_file())
         # shiny$req(experiment_data_file())
 
-        plot_tree_species(data_folder, res_file())
+        plot_tree_species(data_folder, res_file(), i18n)
       }
     )
 
@@ -434,11 +462,11 @@ forest_app_server <- function(id, app_selected, i18n) {
       {
         # Validate experiment data directory before building chart
         if (is.null(experiment_data_file()) || length(experiment_data_file()) == 0 ||
-            !dir.exists(experiment_data_file())) {
+          !dir.exists(experiment_data_file())) {
           shiny$showNotification("Experiment data directory not found or invalid.", type = "error")
           return(invisible(NULL))
         }
-        chart <- get_multichart(experiment_data_file())
+        chart <- get_multichart(experiment_data_file(), i18n)
         experiment_chart(chart)
         output$multichart <- echarty$ecs.render(
           experiment_chart()
@@ -446,7 +474,7 @@ forest_app_server <- function(id, app_selected, i18n) {
       }
     )
 
-    
+
     # bird species update
     shiny$observeEvent(
       c(
@@ -463,7 +491,8 @@ forest_app_server <- function(id, app_selected, i18n) {
           scenario = basename(experiment_data_file()),
           bird_species = input$bird_species,
           tick = input$res_file_slider - start_sim_year(),
-          prediction_folder = prediction_folder
+          prediction_folder = prediction_folder,
+          i18n
         )
       }
     )
@@ -474,9 +503,8 @@ forest_app_server <- function(id, app_selected, i18n) {
       c(app_selected(), input$show_results),
       {
         plots <- list()
-        
-        if(input$show_results){
-          
+
+        if (input$show_results) {
           params <- read_landis_params(experiment_data_file())
 
           climate_scenarios <- c("current", "4.5", "8.5")

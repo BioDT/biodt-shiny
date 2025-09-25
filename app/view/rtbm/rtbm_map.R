@@ -66,7 +66,6 @@ box::use(
 
 # Local modules
 box::use(
-  app / logic / rtbm / rtbm_data_handlers[load_bird_species_info],
   app / logic / rtbm / utils[format_date_for_display],
 )
 

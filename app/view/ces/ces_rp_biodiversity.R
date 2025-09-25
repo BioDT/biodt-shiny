@@ -56,7 +56,6 @@ box::use(
     mean
   ],
   waiter[Waiter],
-  DT[renderDT, DTOutput],
   dplyr[mutate, select, arrange, left_join, desc, filter, pull],
   purrr[map_chr],
   cli[hash_md5],
@@ -71,6 +70,7 @@ box::use(
     pickerOptions,
     awesomeCheckbox
   ],
+  shiny.i18n[update_lang],
   config,
 )
 
@@ -88,10 +88,11 @@ box::use(
       show_species
     ],
   app / logic / waiter[waiter_text],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
 )
 
 # UI function
-ces_rp_biodiversity_ui <- function(id) {
+ces_rp_biodiversity_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     tags$head(
@@ -108,7 +109,7 @@ ces_rp_biodiversity_ui <- function(id) {
           id = "biodiversity-page",
           title = "combined_map",
           full_screen = FALSE,
-          card_title("Recreation & Biodiversity Mapping"),
+          card_title(i18n$t("Recreation and Biodiversity Mapping")),
           card_body(
             leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
             tags$div(
@@ -118,21 +119,21 @@ ces_rp_biodiversity_ui <- function(id) {
                 ns("toggleSliders"),
                 HTML('<i class="fa-solid fa-person-hiking"></i>'),
                 class = "toggle-button",
-                title = "Hiker Settings"
+                title = i18n$t("Hiker Settings")
               ),
               actionButton(
                 ns("toggleSpecies"),
                 HTML('<i class="fa-solid fa-paw"></i>'),
                 class = "toggle-button",
-                title = "Species Occurence"
+                title = i18n$t("Species Occurrence")
               ),
               actionButton(
                 ns("toggleMaps"),
                 HTML('<i class="fa-solid fa-layer-group"></i>'),
                 class = "toggle-button",
-                title = "Map Layers"
+                title = i18n$t("Map Layers")
               ),
-              #actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
+              # actionButton(ns("toggleGrayscale"), HTML('<i class="fa-solid fa-droplet-slash"></i>'), class = "toggle-button", title = "Grayscale map")
             ),
             # Single Sidebar
             tags$div(
@@ -142,16 +143,16 @@ ces_rp_biodiversity_ui <- function(id) {
                 ns("closeButton"),
                 class = "close-button",
                 HTML('<i class="fa-solid fa-x"></i>'),
-                title = "Close Sidebar"
+                title = i18n$t("Close Sidebar")
               ),
               # sliders content
               tags$div(
                 id = "slidersSidebar",
                 class = "d-none",
-                tags$h4("Recreation Potential"),
+                tags$h4(i18n$t("Recreation Potential")),
                 radioButtons(
                   inputId = ns("recreation_potential"),
-                  label = "Select recreationist type:",
+                  label = i18n$t("Select recreationist type:"),
                   selected = "Soft",
                   choices = list(
                     Soft = "Soft",
@@ -161,19 +162,19 @@ ces_rp_biodiversity_ui <- function(id) {
                 ),
                 tags$div(
                   class = "custom-slider",
-                  tags$h4("Recreation Potential Filter"),
-                  tags$p("Use the sliders below to filter the data:"),
+                  tags$h4(i18n$t("Recreation Potential Filter")),
+                  tags$p(i18n$t("Use the sliders below to filter the data:")),
                   sliderTextInput(
                     inputId = ns("recreation_potential_slider"),
-                    label = "Filter Recreation Potential:",
+                    label = i18n$t("Filter Recreation Potential:"),
                     choices = seq(0, 1, by = 0.1),
-                    selected = 0.5, #c(0, 1),
+                    selected = 0.5, # c(0, 1),
                     grid = FALSE,
                   ),
                 ),
                 actionButton(
                   inputId = ns("apply_filter_recre"),
-                  label = "Apply filter",
+                  label = i18n$t("Apply filter"),
                   class = "btn-primary"
                 ),
               ),
@@ -184,7 +185,7 @@ ces_rp_biodiversity_ui <- function(id) {
                 tags$h4("Species Selection", class = "mt-3"),
                 pickerInput(
                   ns("species_group_selector"),
-                  "Select species group:",
+                  i18n$t("Select species group:"),
                   choices = c(
                     "All biodiversity" = "all",
                     "Mammals" = "mammals",
@@ -198,7 +199,7 @@ ces_rp_biodiversity_ui <- function(id) {
                 ),
                 pickerInput(
                   ns("species_selector"),
-                  "Select species:",
+                  i18n$t("Select species:"),
                   choices = NULL,
                   selected = NULL,
                   multiple = TRUE,
@@ -210,10 +211,10 @@ ces_rp_biodiversity_ui <- function(id) {
                 ),
                 tags$div(
                   class = "custom-slider",
-                  tags$h4("Species Occurrence", class = "mt-3"),
+                  tags$h4(i18n$t("Species Occurrence"), class = "mt-3"),
                   sliderTextInput(
                     inputId = ns("species_occurrence_slider"),
-                    label = "Filter Species Occurrence:",
+                    label = i18n$t("Filter Species Occurrence:"),
                     choices = seq(0, 1, by = 0.1),
                     selected = 0.5,
                     grid = FALSE,
@@ -221,13 +222,13 @@ ces_rp_biodiversity_ui <- function(id) {
                 ),
                 actionButton(
                   inputId = ns("apply_filter_species"),
-                  label = "Apply filter",
+                  label = i18n$t("Apply filter"),
                   class = "btn-primary mb-3"
                 ),
                 disabled(
                   checkboxInput(
                     inputId = ns("species_occurence"),
-                    label = "Show Species Occurence",
+                    label = i18n$t("Show Species Occurence"),
                     value = TRUE,
                   )
                 ),
@@ -236,21 +237,21 @@ ces_rp_biodiversity_ui <- function(id) {
               tags$div(
                 id = "mapsSidebar",
                 class = "d-none",
-                tags$h4("Base Map Layer", class = "mt-3"),
+                tags$h4(i18n$t("Base Map Layer"), class = "mt-3"),
                 radioButtons(
                   inputId = ns("map_base_layers"),
-                  label = "Choose base map:",
-                  choices = list(
+                  label = i18n$t("Choose base map:"),
+                  choices = c(
                     "Open Street Map",
                     "ESRI World Imagery",
                     "Open Topo Map"
                   ),
                   selected = "Open Street Map"
                 ),
-                tags$h4("Biodiversity Data", class = "mt-3"),
+                tags$h4(i18n$t("Biodiversity Data"), class = "mt-3"),
                 checkboxInput(
                   inputId = ns("biodiversity"),
-                  label = "Biodiversity Occurence Density Layer(GBIF)",
+                  label = i18n$t("Biodiversity Occurence Density Layer(GBIF)"),
                   value = FALSE
                 ),
               )
@@ -263,7 +264,7 @@ ces_rp_biodiversity_ui <- function(id) {
 }
 
 # Server function
-ces_rp_biodiversity_server <- function(id, ces_selected) {
+ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     ces_path <- file.path(config$get("data_path"), "ces")
@@ -289,7 +290,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     # Waiter for loading screens
     msg <- list(
-      waiter_text(message = tags$h3("Loading data...", style = "color: #414f2f;"))
+      waiter_text(message = tags$h3(i18n$t("Loading data..."), style = "color: #414f2f;"))
     )
     w <- Waiter$new(
       html = msg[[1]],
@@ -348,7 +349,7 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
 
     # Logic for basic sidebar closing
     observeEvent(input$closeButton, {
-      runjs('App.toggleSidebar()')
+      runjs("App.toggleSidebar()")
     })
 
     # Only trigger when ces_selected() becomes TRUE (after which the value will not change).
@@ -436,6 +437,45 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         w$hide()
       }
     )
+
+    observeEvent(
+      {
+        language_change()
+        ces_selected()
+      },
+      ignoreInit = TRUE,
+      ignoreNULL = TRUE,
+      {
+        runjs(paste0(
+          "
+            App.fixTooltip('", ns("toggleSliders"), "');
+            App.fixTooltip('", ns("toggleSpecies"), "');
+            App.fixTooltip('", ns("toggleMaps"), "');
+          "
+        ))
+        update_lang(language_change())
+      }
+    )
+
+    observe({
+      recreationist_types <- c(
+        "Soft" = "Soft",
+        "Hard" = "Hard",
+        "Empty" = "Empty"
+      )
+
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "recreation_potential",
+        label = "Select recreationist type:",
+        inline = FALSE,
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$recreation_potential,
+        recreationist_types
+      )
+    })
 
     # Render the map in leaflet
     output$combined_map_plot <- renderLeaflet({
@@ -578,9 +618,9 @@ ces_rp_biodiversity_server <- function(id, ces_selected) {
         }
         if (species_selected() == FALSE) {
           runjs(paste0(
-            '
+            "
           species_checkbox_element.disabled = true
-        '
+        "
           ))
         }
       },

@@ -41,7 +41,7 @@ forest_contributors_ui <- function(id, i18n) {
         tags$img(
           class = "info-picture",
           src = "static/img/forest/trees-975091_1280.jpg",
-          alt = "Forest. Image by Robert Balog from Pixabay",
+          alt = i18n$t("Forest. Image by Robert Balog from Pixabay")[[3]][[1]]
         )
       )
     )

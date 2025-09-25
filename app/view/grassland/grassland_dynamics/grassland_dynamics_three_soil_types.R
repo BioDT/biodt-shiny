@@ -10,9 +10,8 @@ box::use(
 
 #' @export
 grassland_dynamics_three_soil_types_ui <- function(
-  id,
-  i18n
-) {
+    id,
+    i18n) {
   ns <- NS(id)
   card(
     id = ns("three_soil_types"),
@@ -51,19 +50,20 @@ grassland_dynamics_three_soil_types_ui <- function(
 
 #' @export
 grassland_dynamics_three_soil_types_server <- function(
-  id,
-  soil_type_shares,
-  tab_grassland_selected
-) {
+    id,
+    soil_type_shares,
+    tab_grassland_selected,
+    i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
-    msg <- waiter_text(message = tags$h3("Loading...", style = "color: #414f2f;"))
+    msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
       id = ns("three_soil_types"),
       html = msg,
       color = "rgba(256,256,256,0.9)",
     )
+    soil_type_shares_reactive <- reactiveVal(list())
 
     observeEvent(
       tab_grassland_selected(),
@@ -71,17 +71,16 @@ grassland_dynamics_three_soil_types_server <- function(
       ignoreInit = TRUE,
       {
         w$show()
-        soil_type_shares_reactive <- reactiveVal()
         soil_type_shares_reactive(soil_type_shares)
 
         output$silt <- renderText({
-          names(soil_type_shares_reactive())[1]
+          i18n$t(names(soil_type_shares_reactive())[1])
         })
         output$clay <- renderText({
-          names(soil_type_shares_reactive())[2]
+          i18n$t(names(soil_type_shares_reactive())[2])
         })
         output$sand <- renderText({
-          names(soil_type_shares_reactive())[3]
+          i18n$t(names(soil_type_shares_reactive())[3])
         })
 
         output$silt_val <- renderText(soil_type_shares_reactive()[[1]])

@@ -24,7 +24,7 @@ read_plot_data <- function(input_filepath) {
 
 #' @export
 honeybee_beekeeper_plot <- function(input_filepath = NULL,
-                                    input = NULL) {
+                                    input = NULL, i18n = i18n) {
   if (is.null(input)) {
     print("reading data")
     input <- read_csv(input_filepath,
@@ -43,7 +43,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
     preset = FALSE,
     xAxis = list(
       type = "category",
-      name = "Date",
+      name = i18n$t("Date"),
       nameGap = 0,
       nameLocation = "center",
       nameTextStyle = list(
@@ -58,7 +58,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         type = "value",
         min = 0,
         max = max(input$`Honey (kg)`) + 5,
-        name = "Honey (kg)",
+        name = i18n$t("Honey (kg)"),
         nameTextStyle = list(fontSize = 15)
       ),
       list(
@@ -66,13 +66,13 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         min = 0,
         max = 24,
         show = FALSE,
-        name = "Day hours for collecting"
+        name = i18n$t("Day hours for collecting")
       ),
       list(
         type = "value",
         min = 0,
         max = max(input$`TotalIHbees + TotalForagers` + 100),
-        name = "Bees count",
+        name = i18n$t("Bees count"),
         nameTextStyle = list(fontSize = 15)
       )
     ),
@@ -87,12 +87,12 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         color = "#009E73",
         itemStyle = list(opacity = 0.3),
         barWidth = "100%",
-        name = "Collection hours"
+        name = i18n$t("Collection hours")
       ),
       list(
         type = "line",
         showSymbol = FALSE,
-        name = "Honey (kg)",
+        name = i18n$t("Honey (kg)"),
         lineStyle = list(width = 3),
         color = "#E69F00",
         data = ec.data(
@@ -112,7 +112,7 @@ honeybee_beekeeper_plot <- function(input_filepath = NULL,
         yAxisIndex = 3,
         lineStyle = list(width = 3),
         color = "#0072B2",
-        name = "Bees Count"
+        name = i18n$t("Bees Count")
       )
     ),
     tooltip = list(

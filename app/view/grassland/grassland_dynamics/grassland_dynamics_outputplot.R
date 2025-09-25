@@ -13,12 +13,13 @@ grassland_dynamics_outputplot_ui <- function(id, i18n) { # nolint
     full_screen = TRUE,
     card_header(
       tags$h2(
-        class = "card_title",
-        i18n$translate("Model Output"))
+        i18n$translate("Model Output"),
+        class = "card_title"
+      )
     ),
     card_body(
       layout_column_wrap(
-        width = 1/3,
+        width = 1 / 3,
         selectInput(
           ns("output_list"),
           label = i18n$translate("Choose output dataset"),
@@ -49,6 +50,5 @@ grassland_dynamics_outputplot_ui <- function(id, i18n) { # nolint
 grassland_dynamics_outputplot_server <- function(id) { # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
   })
 }

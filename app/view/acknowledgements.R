@@ -4,7 +4,7 @@ box::use(
 )
 
 #' @export
-mod_acknowledgements_ui <- function(id) {
+mod_acknowledgements_ui <- function(id, i18n) {
   ns <- NS(id)
   tags$div(
     class = "column",
@@ -15,23 +15,17 @@ mod_acknowledgements_ui <- function(id) {
         class = "mt-2 mx-md-3 card-shadow",
         card_header(
           tags$h2(
-            class = "card_title",
-            "Acknowledgements"
+            i18n$translate("Acknowledgements"),
+            class = "card_title"
           ),
         ),
         card_body(
           id = ns("acknowledgement"),
           tags$div(
             class = "row d-flex justify-content-between",
-            tags$p("This project has received funding from the European Union's Horizon Europe
-              research and innovation programme under grant agreement No 101057437
-              (BioDT project, https://doi.org/10.3030/101057437)."),
-            tags$p("We acknowledge the EuroHPC Joint Undertaking and CSC - IT Center for Science,
-              Finland for awarding this project access to the EuroHPC supercomputer LUMI, hosted
-              by CSC – IT Center for Science and the LUMI consortium, through Development Access
-              calls."),
-            tags$p("Additionally, we wish to acknowledge CSC - IT Center for Science for Rahti
-              and Pouta services."),
+            tags$p(i18n$translate("This project has received funding from the European Union's Horizon Europe research and innovation programme under grant agreement No. 101057437 (BioDT project, https://doi.org/10.3030/101057437).")),
+            tags$p(i18n$translate("We acknowledge the EuroHPC Joint Undertaking and CSC - IT Center for Science, Finland, for awarding this project access to the EuroHPC supercomputer LUMI, hosted by CSC – IT Center for Science and the LUMI consortium, through Development Access calls.")),
+            tags$p(i18n$translate("Additionally, we wish to acknowledge CSC - IT Center for Science for Rahti and Pouta services.")),
           )
         )
       ),
@@ -40,8 +34,8 @@ mod_acknowledgements_ui <- function(id) {
         class = "mt-2 mx-md-3 card-shadow",
         card_header(
           tags$h2(
-            class = "card_title",
-            "Credits"
+            i18n$t("Credits"),
+            class = "card_title"
           ),
         ),
         card_body(
@@ -49,41 +43,36 @@ mod_acknowledgements_ui <- function(id) {
           tags$div(
             class = "row d-flex justify-content-between acknowledgement-card",
             tags$p(
-              "Credits to the main development contributors of the shiny web app",
-              tags$br(), "The contributors for the pDTs are listed on the pDT pages"
-            ),
-            tags$ul(
-              tags$style("
+              i18n$t("Credits to the main development contributors of the Shiny web app:")
+            )
+          ),
+          tags$ul(
+            tags$style("
             .acknowledgement-card ul li {
               margin-bottom: 10px;
               margin-left: 20px;
             }
           "),
-              tags$li("Tomáš Martinovič, IT4Innovations, VSB - Technical University of Ostrava"),
-              tags$li("Ondrej Salamon, IT4Innovations, VSB - Technical University of Ostrava"),
-              tags$li("Kata Sara-aho, CSC - IT Center for Science"),
-              tags$li("Allan Souza, University of Helsinki"),
-              tags$li("Simon Rolph, UK Centre for Ecology & Hydrology"),
-              tags$li("Dylan Carbone, UK Centre for Ecology & Hydrology"),
-              tags$li("Zhenggang Gao, KTH Royal Institute of Technology")
-            )
-          ),
-          tags$div(
-            tags$p("You can report issues for the shiny web app on ", tags$a(
-              "Github", icon("github"),
-              href = "https://github.com/BioDT/biodt-shiny/issues",
-              target = "_blank"
-            )),
+            tags$li("Tomáš Martinovič, IT4Innovations, VSB - Technical University of Ostrava"),
+            tags$li("Ondřej Salamon, IT4Innovations, VSB - Technical University of Ostrava"),
+            tags$li("Kata Sara-aho, CSC - IT Center for Science"),
+            tags$li("Allan Souza, University of Helsinki"),
+            tags$li("Simon Rolph, UK Centre for Ecology & Hydrology"),
+            tags$li("Dylan Carbone, UK Centre for Ecology & Hydrology"),
+            tags$li("Zhenggang Gao, KTH Royal Institute of Technology")
           )
+        ),
+        tags$p(
+          i18n$t("Contributors to a specific prototype Digital Twin are listed on the pDTs' page.")
+        ),
+        tags$div(
+          tags$p(i18n$t("You can report issues for the Shiny web app on "), tags$a(
+            "Github", icon("github"),
+            href = "https://github.com/BioDT/biodt-shiny/issues",
+            target = "_blank"
+          ), ".")
         )
       )
     )
   )
-}
-
-#' @export
-mod_acknowledgements_server <- function(id, r) {
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-  })
 }

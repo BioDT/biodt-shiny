@@ -89,10 +89,10 @@ get_file_list <- function(
     experiment_data,
     i18n) {
   if (length(experiment_data) == 0) {
-    shiny$showNotification("No files found matching the specified structure.", type = "error")
+    shiny$showNotification(i18n$t("No files found matching the specified structure."), type = "error")
     return(NULL)
   } else if (length(experiment_data) > 1) {
-    shiny$showNotification("Multiple files found matching the specified structure.", type = "error")
+    shiny$showNotification(i18n$t("Multiple files found matching the specified structure."), type = "error")
     return(NULL)
   } else if (length(experiment_data) != 1) {
     return(NULL)
@@ -110,7 +110,7 @@ get_file_list <- function(
 
   # Ensure the path is a directory we can read
   if (!dir.exists(experiment_data)) {
-    shiny$showNotification(sprintf("Data directory not found: %s", experiment_data), type = "error")
+    shiny$showNotification(paste0(i18n$t("Data directory not found: "), sprintf("%s", experiment_data)), type = "error")
     return(NULL)
   }
   data_file_list <- list.files(path = experiment_data, recursive = TRUE)
@@ -170,7 +170,7 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
-   } else if (input$output == "Max-age of selected species") {
+  } else if (input$output == "Max-age of selected species") {
     if (input$species == "Birch (betulaSP)") {
       type <- "betulaSP"
     } else if (input$species == "Pine (pinussyl)") {
@@ -207,8 +207,6 @@ get_file_list <- function(
   } else if (input$output == "Median age of all trees") {
     res_folder <- paste0(experiment, "/output/age-all-spp/")
     res_working_folder <- res_folder
-    print("res_working_folder:::")
-    print(res_working_folder)
 
     res_file_list <- data_file_list[grep(
       paste0("output/age-all-spp/", "AGE-MED-[0-9]+\\.tif$"),

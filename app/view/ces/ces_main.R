@@ -18,7 +18,7 @@ ces_ui <- function(id, i18n) {
     id = ns("tab"),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$t("Info"),
       value = "Info",
       icon = icon("circle-info"),
       ces_info_ui(
@@ -27,31 +27,34 @@ ces_ui <- function(id, i18n) {
       )
     ),
     nav_panel(
-      title = "Recreation & Biodiversity",
+      title = i18n$t("Recreation and Biodiversity"),
       value = "CES",
       icon = icon("tree"),
       ces_rp_biodiversity_ui(
-        ns("ces_rp_biodiversity")
+        ns("ces_rp_biodiversity"),
+        i18n
       )
     ),
     nav_panel(
-      title = "Recreation potential",
+      title = i18n$t("Recreation Potential"),
       value = "Recreation potential",
       icon = icon("person-walking"),
       ces_rp_ui(
-        ns("ces_rp")
+        ns("ces_rp"),
+        i18n
       )
     ),
     nav_panel(
-      title = "Biodiversity",
+      title = i18n$t("Biodiversity"),
       value = "Biodiversity",
       icon = icon("tree"),
       ces_biodiversity_ui(
-        ns("ces_biodiversity")
+        ns("ces_biodiversity"),
+        i18n
       )
     ),
     nav_panel(
-      title = "Contributors",
+      title = i18n$t("Contributors"),
       value = "Contributors",
       icon = icon("sitemap"),
       ces_contributors_ui(
@@ -63,7 +66,7 @@ ces_ui <- function(id, i18n) {
 }
 
 #' @export
-ces_server <- function(id, i18n) {
+ces_server <- function(id, i18n, language_change) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -89,9 +92,14 @@ ces_server <- function(id, i18n) {
     )
 
     # Call downstream module servers only the first time
-    ces_rp_server("ces_rp")
-    ces_biodiversity_server("ces_biodiversity")
-    ces_rp_biodiversity_server("ces_rp_biodiversity", ces_selected = ces_selected)
+    ces_rp_server("ces_rp", i18n)
+    ces_biodiversity_server("ces_biodiversity", i18n)
+    ces_rp_biodiversity_server(
+      "ces_rp_biodiversity",
+      ces_selected = ces_selected,
+      i18n,
+      language_change
+    )
 
     ces_info_server("ces_info", session)
   })

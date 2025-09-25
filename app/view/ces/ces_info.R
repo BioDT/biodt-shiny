@@ -1,5 +1,5 @@
 box::use(
-  shiny[moduleServer, NS, tagList, div, column, tags, fluidRow, icon, actionButton, observeEvent, showNotification],
+  shiny[moduleServer, NS, column, tags, fluidRow, icon, actionButton, observeEvent],
   bslib[nav_select],
 )
 
@@ -16,8 +16,10 @@ ces_info_ui <- function(id, i18n) {
       tags$div(
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
-          class = "greeting display-4 font-weight-bold",
-          "Cultural Ecosystem Services Prototype Digital Twin"
+          i18n$translate(
+            "Cultural Ecosystem Services Prototype Digital Twin"
+          ),
+          class = "greeting display-4 font-weight-bold"
         ),
         tags$p(
           class = "pt-3 fw-bold",
@@ -26,11 +28,10 @@ ces_info_ui <- function(id, i18n) {
           )
         ),
         tags$p(
-          "This digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment.
-  Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect."
+          i18n$t("This digital twin is designed to enhance your understanding and management of cultural ecosystem services. These services encompass the intangible benefits derived from nature, such as recreation, tourism, intellectual growth, spiritual fulfillment, contemplation, and aesthetic enjoyment. Using a recreation potential model, we assess the cultural ecosystem services of the landscape, while species distribution models quantify the biodiversity aspect.")
         ),
         tags$p(
-          "The pDT is described in ",
+          i18n$t("The pDT is described in "),
           tags$a(
             "Rolph S, Andrews C, Carbone D, Lopez Gordillo J, Martinovič T, Oostervink N, Pleiter D, Sara-aho K, Watkins J, Wohner C, Bolton W, Dick J (2024) Prototype Digital Twin: Recreation and biodiversity cultural ecosystem services. Research Ideas and Outcomes 10: e125450. https://doi.org/10.3897/rio.10.e125450",
             href = "https://doi.org/10.3897/rio.10.e125450",
@@ -39,12 +40,12 @@ ces_info_ui <- function(id, i18n) {
           "."
         ),
         tags$p(
-          "Biodiversity data is accessed from Global Biodiversity Information Facility (GBIF)",
+          i18n$t("Biodiversity data is accessed from Global Biodiversity Information Facility (GBIF)"),
           tags$a("https://www.gbif.org/", href = "https://www.gbif.org/", target = "_blank"),
           "."
         ),
         tags$p(
-          "Source code and scripts of the pDT can be found at ",
+          i18n$t("Source code and scripts of the pDT can be found at "),
           tags$a(icon("github"), "https://github.com/BioDT", href = "https://github.com/BioDT", target = "_blank"),
           "."
         ),
@@ -68,7 +69,7 @@ ces_info_ui <- function(id, i18n) {
         tags$img(
           class = "info-picture",
           src = "static/img/ces/2048px-Cairngorms_National_Park_road_(Unsplash).jpg",
-          alt = "Cairnforms National Park",
+          alt = i18n$t("Cairngorms National Park"),
         )
       )
     )

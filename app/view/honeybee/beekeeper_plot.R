@@ -28,14 +28,14 @@ box::use(
 
 #' @export
 beekeeper_plot_ui <- function(
-  id,
-  i18n,
-  card_header = "Output plot",
-  title = "output_plot",
-  plot_width = "100%",
-  plot_height = "500px"
-  # custom_code = NULL
-) {
+    id,
+    i18n,
+    card_header = "Output plot",
+    title = "output_plot",
+    plot_width = "100%",
+    plot_height = "500px"
+    # custom_code = NULL
+    ) {
   ns <- NS(id)
   tagList(
     card(
@@ -46,7 +46,7 @@ beekeeper_plot_ui <- function(
       card_header(
         tags$h2(
           class = "card_title",
-          card_header
+          i18n$t(card_header)
         )
       ),
       tags$div(
@@ -55,7 +55,7 @@ beekeeper_plot_ui <- function(
           class = "col-10",
           selectInput(
             ns("experiment"),
-            label = "Choose experiment:",
+            label = i18n$t("Choose experiment:"),
             choices = c(
               Example = file.path(config$get("data_path"), "honeybee", "output_example", "Result_table_original.csv")
             )
@@ -67,7 +67,7 @@ beekeeper_plot_ui <- function(
           downloadButton(
             class = "",
             ns("download_data"),
-            label = "Download plot data",
+            label = i18n$t("Download plot data"),
             # style = "max-width: 200px"
           )
         )
@@ -83,10 +83,10 @@ beekeeper_plot_ui <- function(
 
 #' @export
 beekeeper_plot_server <- function(
-  id,
-  beekeeper_selected,
-  experiment_list
-) {
+    id,
+    beekeeper_selected,
+    experiment_list,
+    i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -94,7 +94,7 @@ beekeeper_plot_server <- function(
     plot_data <- reactiveVal()
 
     msg <- waiter_text(
-      message = tags$h3("Updating plot...", style = "color: #414f2f;")
+      message = tags$h3(i18n$t("Updating plot..."), style = "color: #414f2f;")
     )
 
     w <- Waiter$new(
@@ -115,7 +115,8 @@ beekeeper_plot_server <- function(
         plot_data()
 
       honeybee_beekeeper_plot(
-        input = plot_data()
+        input = plot_data(),
+        i18n = i18n
       ) |>
         plot()
       w$hide()
@@ -160,7 +161,8 @@ beekeeper_plot_server <- function(
           plot_data()
 
         honeybee_beekeeper_plot(
-          input = plot_data()
+          input = plot_data(),
+          i18n = i18n
         ) |>
           plot()
 

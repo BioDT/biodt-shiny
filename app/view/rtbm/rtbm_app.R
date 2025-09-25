@@ -44,7 +44,8 @@ box::use(
     checkboxInput,
     numericInput,
     helpText,
-    showNotification
+    showNotification,
+    updateRadioButtons
   ],
 
   # Base R functions needed
@@ -158,6 +159,13 @@ box::use(
     rtbm_summary_plots[create_summary_plots, create_top_species_rank_plot, create_top_species_table_data],
   app / view / rtbm / rtbm_map[map_module_ui, map_module_server],
   app / view / rtbm / rtbm_sidebar[rtbm_sidebar_ui, rtbm_sidebar_server],
+  app / logic / translate_multiple_choices[translate_multiple_choices]
+)
+
+summary_plot_options <- c(
+  "Activity Summary" = "overall",
+  "Top 5 Species Rank Trends" = "rank",
+  "Top 5 Daily Species Counts" = "table"
 )
 
 #' Real-time Bird Monitoring UI Module
@@ -215,11 +223,7 @@ rtbm_app_ui <- function(id, i18n) {
         radioButtons(
           inputId = ns("summary_plot_choice"),
           label = i18n$t("Choose Summary View:"),
-          choices = c(
-            "Activity Summary" = "overall",
-            "Top 5 Species Rank Trends" = "rank",
-            "Top 5 Daily Species Counts" = "table"
-          ),
+          choices = summary_plot_options,
           selected = "overall",
           inline = TRUE
         ),
@@ -291,6 +295,21 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
       summary_progress_info = summary_progress_info,
       i18n
     )
+
+    # Before all bussines logic below happens, set up observe to translate 3 buttons in Summmary statistics
+    observe({
+      translate_multiple_choices(
+        session,
+        "radio",
+        input_id = "summary_plot_choice",
+        label = "Choose Summary View:",
+        inline = TRUE,
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = NULL,
+        summary_plot_options
+      )
+    })
 
     # --- Connect Sidebar Outputs to App Logic ---
 
@@ -395,33 +414,33 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
         # Update status message for loading
         output$statusMsg <- renderUI({
           div(
+            i18n$t("Loading map data... This may take a few moments."),
             class = "alert alert-info",
-            role = "alert",
-            "Loading map data... This may take a few moments."
+            role = "alert"
           )
         })
 
         # Load species observation data (parquet files)
         result <- NULL
         withProgress(
-          message = "Processing map data",
+          message = i18n$t("Processing map data"),
           value = 0,
           {
-            incProgress(0.2, detail = "Fetching observation data")
+            incProgress(0.2, detail = i18n$t("Fetching observation data"))
             result <- load_parquet_data(
               scientific_name = scientific_name_val,
               start_date = start_date,
               end_date = end_date
             )
-            incProgress(0.3, detail = "Processing observations")
+            incProgress(0.3, detail = i18n$t("Processing observations"))
 
             # Handle no data scenario
             if (is.null(result$data) || nrow(result$data) == 0 || length(result$dates) == 0) {
               output$statusMsg <- renderUI({
                 div(
+                  i18n$t("No map data available for the selected species and date range."),
                   class = "alert alert-warning",
-                  role = "alert",
-                  "No map data available for the selected species and date range."
+                  role = "alert"
                 )
               })
               available_dates(NULL)
@@ -446,7 +465,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
               div(
                 class = "alert alert-success",
                 role = "alert",
-                paste0("Loaded map data for ", length(result$dates), " dates.")
+                paste0(i18n$t("Loaded map data for "), length(result$dates), i18n$t(" dates."))
               )
             })
 
@@ -467,7 +486,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
 
         # Wrap summary data loading with progress
         withProgress(
-          message = "Loading summary data",
+          message = i18n$t("Loading summary data"),
           value = 0,
           {
             # Isolate to prevent re-triggering from dependent reactives changing inside
@@ -523,7 +542,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
                 ))
               }
 
-              incProgress(0.1, detail = "Analyzing data requirements")
+              incProgress(0.1, detail = i18n$t("Analyzing data requirements"))
 
               data_before <- NULL
               if (!is.null(dates_to_fetch_before)) {
@@ -555,7 +574,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
                 )
               }
 
-              incProgress(0.85, detail = "Processing and combining data")
+              incProgress(0.85, detail = i18n$t("Processing and combining data"))
 
               # --- Combine data --- #
               # Ensure current_store is a tibble, even if it was NULL or not yet set properly.
@@ -607,7 +626,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
                 message("Updated summary store is empty. Resetting loaded range.")
               }
 
-              incProgress(0.95, detail = "Filtering data for display")
+              incProgress(0.95, detail = i18n$t("Filtering data for display"))
 
               # --- Filter data for display --- #
               if (nrow(updated_store) > 0) {
@@ -637,9 +656,9 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
         print(paste("Load Data clicked for unknown view:", selected_view))
         output$statusMsg <- renderUI({
           div(
+            paste(i18n$t("Unknown view selected: "), selected_view),
             class = "alert alert-warning",
-            role = "alert",
-            paste("Unknown view selected:", selected_view)
+            role = "alert"
           )
         })
       }
@@ -655,10 +674,10 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
       # Conditionally call the correct plotting function
       if (input$summary_plot_choice == "overall") {
         # For overall summary, plot layout is now fixed, no need to pass dates for layout
-        create_summary_plots(summary_data())
+        create_summary_plots(summary_data(), i18n)
       } else if (input$summary_plot_choice == "rank") {
         req(bird_spp_info()) # Ensure bird_spp_info is available for rank plot
-        create_top_species_rank_plot(summary_data(), bird_spp_info())
+        create_top_species_rank_plot(summary_data(), bird_spp_info(), i18n)
       }
     })
 
@@ -672,10 +691,24 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
 
       datatable(
         table_data,
-        options = list(pageLength = 10),
         rownames = FALSE,
         escape = -3,
-        colnames = c("Date", "Common name", "Scientific name", "Count")
+        colnames = c(i18n$t("Date"), i18n$t("Common name"), i18n$t("Scientific name"), i18n$t("Count")),
+        options = list(
+          pageLength = 10,
+          scrollX = TRUE,
+          paging = TRUE,
+          searching = TRUE,
+          info = FALSE,
+          language = list(
+            search = "🔍",
+            zeroRecords = "∅",
+            loadingRecords = "⌛",
+            info = "[_START_; _END_] ⊂ max(_TOTAL_)",
+            lengthMenu = "_MENU_",
+            paginate = list("previous" = "⬅️", "next" = "➡️")
+          )
+        )
       )
     })
 

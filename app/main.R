@@ -63,6 +63,25 @@ i18n <- Translator$new(
 )
 i18n$set_translation_language("en")
 
+# note! order is important here, it has to be the same as in the file app/translations/translations.json
+pairs_lang_flag <- list(
+  "🇬🇧" = "en",
+  "🇨🇿" = "cz",
+  "🇫🇮" = "fi",
+  "🇮🇹" = "it",
+  "🇳🇱" = "nl",
+  "🇪🇪" = "est",
+  "🇸🇪" = "sv",
+  "🇩🇪" = "de",
+  "🇳🇴" = "no",
+  "🇩🇰" = "da",
+  "🇪🇸" = "es",
+  "🇵🇹" = "pt",
+  "🇸🇮" = "sl",
+  "🇧🇬" = "bg",
+  "🇬🇷" = "el"
+)
+
 #' @export
 ui <- function(id) {
   ns <- shiny$NS(id)
@@ -260,17 +279,18 @@ ui <- function(id) {
         value = "acknowledgements",
         icon = shiny$icon("users-gear", `aria-hidden` = "true"),
         class = "container-fluid index-info",
-        mod_acknowledgements_ui("info")
+        mod_acknowledgements_ui("info", i18n)
       ),
       if (env_active == "dev") {
         nav_item(
+          style = "padding: 0; height: 30px;",
           shiny$selectInput(
             ns("selected_language"),
-            shiny$span(), # shiny$p(i18n$translate("Language:")),
-            choices = i18n$get_languages(),
+            label = NULL,
+            choices = pairs_lang_flag,
             selected = i18n$get_key_translation(),
             width = "75px"
-          )
+          ),
         )
       }
     )
@@ -295,10 +315,15 @@ server <- function(id) {
       biodt_theme = biodt_theme
     )
 
-    # Language change support see shiny.i18n
+    # Language change support see shiny.i18n ----
+    ## create a new reactive value to get ability to observe lang changes
+    language_change <- shiny$reactiveVal("en")
+    ## language selection itself + update the reactive value
     shiny$observeEvent(input$selected_language, {
       update_lang(input$selected_language)
       shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
+
+      language_change(input$selected_language)
     })
 
     # Info page ----
@@ -332,7 +357,8 @@ server <- function(id) {
     # Cultural Ecosystem Services pDT ----
     ces_server(
       "ces_main",
-      i18n
+      i18n,
+      language_change
     )
     # Disease Outbreaks pDT ----
     disease_outbreaks_main_server("disease_outbreaks_main", session_dir, i18n)

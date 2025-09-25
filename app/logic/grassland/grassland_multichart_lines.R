@@ -12,12 +12,12 @@ box::use(
 # create CHART with lines for ALL PFTs ----
 #' @export
 generate_chart_lines <- function(
-  filepaths_grass,
-  filepath_weather,
-  colors_for_grass,
-  colors_for_weather,
-  grass_end_date
-) {
+    filepaths_grass,
+    filepath_weather,
+    colors_for_grass,
+    colors_for_weather,
+    grass_end_date,
+    i18n) {
   simulations <- NULL
 
   for (i in 1:length(filepaths_grass)) {
@@ -54,50 +54,50 @@ generate_chart_lines <- function(
       tooltip = list(
         trigger = "axis",
         formatter = JS(
-          "
+          paste0("
           function (param) {
-            return '<strong>DATE: ' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 0 - PFT 0 - grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 0 - PFT 1 - forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 0 - PFT 2 - legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #0').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 1 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 1 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 1 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #1').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 2 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #2').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 2 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #2').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 2 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #2').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 3 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #3').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 3 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #3').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 3 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #3').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 4 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #4').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 4 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #4').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 4 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #4').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 5 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #5').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 5 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #5').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 5 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #5').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 6 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #6').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 6 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #6').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 6 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #6').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 7 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #7').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 7 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #7').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 7 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #7').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 8 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #8').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 8 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #8').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 8 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #8').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 9 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #9').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 9 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #9').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 9 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #9').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>File nr. 10 - PFT 0 -  grasses - ' + param.find(item => item.seriesName ==  'PFT 0 file #10').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>File nr. 10 - PFT 1 -  forbs - ' + param.find(item => item.seriesName ==  'PFT 1 file #10').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>File nr. 10 - PFT 2 -  legumes - ' + param.find(item => item.seriesName ==  'PFT 2 file #10').value +
+            return '<strong>' + '", i18n$t("DATE: "), "' + param[0].name + '</strong><hr size=1 style=\"margin: 6px 0\">' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 0 - PFT 0 - grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 0 - PFT 1 - forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 0 - PFT 2 - legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #0').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 1 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 1 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 1 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #1').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 2 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #2').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 2 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #2').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 2 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #2').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 3 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #3').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 3 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #3').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 3 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #3').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 4 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #4').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 4 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #4').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 4 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #4').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 5 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #5').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 5 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #5').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 5 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #5').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 6 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #6').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 6 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #6').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 6 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #6').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 7 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #7').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 7 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #7').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 7 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #7').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 8 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #8').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 8 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #8').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 8 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #8').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 9 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #9').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 9 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #9').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 9 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #9').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #73eb9b\"></i>' + '", i18n$t("File nr. 10 - PFT 0 -  grasses - "), "' + param.find(item => item.seriesName ==  'PFT 0 file #10').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #e28bb7\"></i>' + '", i18n$t("File nr. 10 - PFT 1 -  forbs - "), "' + param.find(item => item.seriesName ==  'PFT 1 file #10').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #998be2\"></i>' + '", i18n$t("File nr. 10 - PFT 2 -  legumes - "), "' + param.find(item => item.seriesName ==  'PFT 2 file #10').value +
               '<hr size=1 style=\"margin: 4px 0\">' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>Precipitation [mm]: ' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #ae4d18\"></i>Temperature [degC]: ' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #956618\"></i>Temperature Daylight [degC]: ' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #108039\"></i>PAR [µmolm-2s-1]: ' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<br />' +
-              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>PET [mm]: ' + param.find(item => item.seriesName ==  'PET[mm]').value
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #0072B2\"></i>' + '", i18n$t("Precipitation [mm]: "), "' + param.find(item => item.seriesName ==  'Precipitation[mm]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #ae4d18\"></i>' + '", i18n$t("Temperature [degC]: "), "' + param.find(item => item.seriesName ==  'Temperature[degC]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #956618\"></i>' + '", i18n$t("Temperature Daylight [degC]: "), "' + param.find(item => item.seriesName ==  'Temperature_Daylight[degC]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #108039\"></i>' + '", i18n$t("PAR [µmolm-2s-1]: "), "' + param.find(item => item.seriesName ==  'PAR[µmolm-2s-1]').value + '<br />' +
+              '<i class=\"fa fa-circle\" aria-hidden=\"true\" style=\"color: #56B4E9\"></i>' + '", i18n$t("PET [mm]: "), "' + param.find(item => item.seriesName ==  'PET[mm]').value
           }
-        "
+        ")
         ),
         axisPointer = list(
           type = "cross"
@@ -106,14 +106,14 @@ generate_chart_lines <- function(
         borderColor = "#ccc",
         padding = 10,
         textStyle = list(color = "#000"),
-        backgroundColor = 'rgba(255, 255, 255, 0.8)',
+        backgroundColor = "rgba(255, 255, 255, 0.8)",
         position = JS(
           "
           function (pos, params, el, elRect, size) {
             var obj = {}
 
             obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
-            
+
             if (pos[1] < (size.viewSize[1]/2)) {
               obj['top'] = 5
             } else {
@@ -235,7 +235,7 @@ generate_chart_lines <- function(
       ),
       yAxis = list(
         list(
-          name = "Fraction",
+          name = i18n$t("Fraction"),
           type = "value",
           boundaryGap = FALSE,
           nameLocation = "middle",
@@ -250,7 +250,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "Precipitation [mm]",
+          name = i18n$t("Precipitation [mm]"),
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -273,7 +273,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "Temperature [degC] & \nTemp. Daylight [degC]",
+          name = i18n$t("Temperature [degC] & \nTemp. Daylight [degC]"),
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -296,7 +296,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "PAR [µmolm-2s-1]",
+          name = i18n$t("PAR [µmolm-2s-1]"),
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),
@@ -319,7 +319,7 @@ generate_chart_lines <- function(
           )
         ),
         list(
-          name = "PET [mm]",
+          name = i18n$t("PET [mm]"),
           nameLocation = "middle",
           nameGap = 40,
           nameTextStyle = list(fontWeight = "bolder"),

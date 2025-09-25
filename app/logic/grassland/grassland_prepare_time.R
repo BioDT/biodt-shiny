@@ -1,12 +1,11 @@
 box::use(
   readr[read_delim],
-  dplyr[pull]
+  dplyr[pull],
 )
 
 #' @export
 get_time <- function(
-  file
-) {
+    file) {
   time <- read_delim(
     file = file,
     skip = 0,

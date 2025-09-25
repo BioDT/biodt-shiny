@@ -30,17 +30,9 @@ disease_contributors_ui <- function(id, i18n) {
         tags$img(
           class = "info-picture",
           src = "static/img/Alexis-Lours-Sus-scrofa-Linnaeus.gif",
-          alt = "Video of wild boar pack",
+          alt = i18n$translate("Video of wild boar pack")
         )
       )
     )
   )
-}
-
-#' @export
-disease_contributors_server <- function(id, r) {
-  # nolint
-  moduleServer(id, function(input, output, session) {
-    ns <- session$ns
-  })
 }

@@ -52,6 +52,7 @@ box::use(
     logic /
     cwr /
     map_utils[update_leaflet_map],
+  app / logic / translate_multiple_choices[translate_multiple_choices],
   app / logic / cwr / tolerance_plot[create_tolerance_plot],
 )
 
@@ -98,10 +99,7 @@ crop_table <-
     "Tobacco" = "Nicotiana",
     "Tomato" = "Lycopersicon",
     "Tumeric" = "Curcumin",
-    "Taro" = "Colocasia",
     "Turnip" = "Brassica",
-    "Wheat" = "Triticum",
-    "Yam" = "Dioscorea",
     "Zucchini" = "Cucurbita"
   )
 crop_table <- crop_table[order(names(crop_table))]
@@ -113,13 +111,13 @@ mod_cwr_ui <- function(id, i18n) {
       id = ns("tab"),
       # Info ----
       nav_panel(
-        title = "Info",
+        title = i18n$translate("Info"),
         value = "Info",
         cwr_info_ui(ns("cwr_info"), i18n)
       ),
       # Map -----
       nav_panel(
-        title = "Map",
+        title = i18n$t("Map"),
         value = "Map",
         layout_column_wrap(
           width = NULL,
@@ -130,8 +128,8 @@ mod_cwr_ui <- function(id, i18n) {
             class = "ms-md-3 card-shadow",
             card_header(
               tags$h2(
-                class = "card_title",
-                "Input map"
+                i18n$translate("Input map"),
+                class = "card_title"
               )
             ),
             card_body(
@@ -149,14 +147,14 @@ mod_cwr_ui <- function(id, i18n) {
             class = "me-md-3 card-shadow",
             card_header(
               tags$h2(
-                class = "card_title",
-                "Crop and Crop Wild Relatives"
+                i18n$translate("Crop and Crop Wild Relatives"),
+                class = "card_title"
               )
             ),
             card_body(
               pickerInput(
                 ns("stress_var"),
-                "Select Stress Variable:",
+                i18n$translate("Select Stress Variable:"),
                 choices = c(
                   "None" = "None",
                   "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
@@ -169,7 +167,7 @@ mod_cwr_ui <- function(id, i18n) {
               hidden(
                 sliderInput(
                   ns("stress_range"),
-                  "Select Stress Range:",
+                  i18n$translate("Select Stress Range:"),
                   min = 0,
                   max = 1,
                   value = c(0, 1)
@@ -178,13 +176,13 @@ mod_cwr_ui <- function(id, i18n) {
               hidden(
                 checkboxInput(
                   ns("subset_suitability_map"),
-                  "Subset Stressor Map with Suitability Map",
+                  i18n$translate("Subset Stressor Map with Suitability Map"),
                   FALSE
                 )
               ),
               pickerInput(
                 ns("genus"),
-                label = "Choose Crop",
+                label = i18n$translate("Choose Crop"),
                 choices = list(""),
                 multiple = FALSE,
                 options = list(
@@ -195,7 +193,7 @@ mod_cwr_ui <- function(id, i18n) {
               ),
               pickerInput(
                 ns("species"),
-                label = "Choose Wild Relatives",
+                label = i18n$translate("Choose Wild Relatives"),
                 choices = list(""),
                 multiple = TRUE,
                 selected = c(""),
@@ -204,12 +202,12 @@ mod_cwr_ui <- function(id, i18n) {
                   `live-search` = TRUE,
                   container = "body",
                   maxOptions = 5,
-                  maxOptionsText = "Comparison is restricted to maximum of 5 species at once."
+                  maxOptionsText = i18n$translate("Comparison is restricted to maximum of 5 species at once.")
                 )
               ),
               actionButton(
                 ns("update"),
-                label = "Update map",
+                label = i18n$t("Update map"),
                 class = "btn-primary mt-3",
               )
             ),
@@ -234,7 +232,7 @@ mod_cwr_server <- function(id, i18n) {
 
     msg <-
       waiter_text(
-        message = tags$h3("Loading...", style = "color: #414f2f;")
+        message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;")
       )
 
     w <- Waiter$new(
@@ -263,6 +261,47 @@ mod_cwr_server <- function(id, i18n) {
 
     # Path to stored files (should be set for where the files are stored)
     cwr_path <- file.path(config$get("data_path"), "cwr")
+
+    # Species change translation ----
+    observe({
+      req(input$stress_var)
+
+      stress_var_choices <- c(
+        "None" = "None",
+        "Annual Temperature" = "resampled_wc2.1_2.5m_bio_1.tif",
+        "Wettest Quarter Temperature" = "resampled_wc2.1_2.5m_bio_8.tif",
+        "Precipitation" = "resampled_wc2.1_2.5m_bio_12.tif",
+        "Wettest Quarter Precipitation" = "resampled_wc2.1_2.5m_bio_13.tif"
+      )
+
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "stress_var",
+        label = "Select Stress Variable:",
+        inline = FALSE,
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$stress_var,
+        stress_var_choices
+      )
+    })
+
+    observe({
+      req(input$genus)
+
+      translate_multiple_choices(
+        session,
+        "picker",
+        input_id = "genus",
+        label = "Choose Crop",
+        inline = FALSE,
+        i18n,
+        choices_type = "namedlist",
+        selected_choice = input$genus,
+        crop_table
+      )
+    })
 
     # Initialise maps when CWR selected
     observeEvent(
@@ -401,7 +440,8 @@ mod_cwr_server <- function(id, i18n) {
           input$stress_var,
           r_cwr$stress_maps,
           r_cwr$map_list,
-          r_cwr$stressor_range
+          r_cwr$stressor_range,
+          i18n
         )
 
         w$hide()

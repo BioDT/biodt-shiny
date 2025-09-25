@@ -17,7 +17,7 @@ disease_outbreaks_main_ui <- function(id, i18n) {
     # Info Page ---
     nav_panel(
       title = i18n$translate("Info"),
-      value = "Info (called from 1st navpanel in disease_outbreaks_main.R)",
+      value = "Info",
       icon = icon("circle-info"),
       disease_info_ui(
         ns("disease_info"),
@@ -61,7 +61,7 @@ disease_outbreaks_main_server <- function(id, session_dir, i18n) {
       }
     )
 
-    disease_app_server("disease_app", tab_disease_selected, session_dir)
+    disease_app_server("disease_app", tab_disease_selected, session_dir, i18n)
 
     disease_info_server("disease_info", session)
   })

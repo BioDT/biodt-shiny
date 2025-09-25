@@ -4,8 +4,8 @@ box::use(
 
 #' @export
 disease_histogram <- function(
-  hist_data
-) {
+    hist_data,
+    i18n) {
   series_list <- list()
   for (column in names(hist_data)) {
     series_list[[length(series_list) + 1]] <- list(
@@ -18,7 +18,7 @@ disease_histogram <- function(
   chart <- ec.init()
   chart$x$opts <-
     list(
-      title = list(text = "Secondary infection data"),
+      title = list(text = i18n$t("Secondary infection data")),
       tooltip = list(
         trigger = "axis"
       ),
@@ -26,7 +26,7 @@ disease_histogram <- function(
       xAxis = list(
         type = "category",
         boundaryGap = TRUE,
-        name = "Number of Secondary Infections",
+        name = i18n$t("Number of Secondary Infections"),
         nameLocation = "middle",
         nameGap = 40,
         nameTextStyle = list(fontWeight = "bolder"),
@@ -35,7 +35,7 @@ disease_histogram <- function(
       yAxis = list(
         type = "value",
         boundaryGap = FALSE,
-        name = "Frequency",
+        name = i18n$t("Frequency"),
         nameLocation = "middle",
         nameGap = 25,
         nameTextStyle = list(fontWeight = "bolder"),
