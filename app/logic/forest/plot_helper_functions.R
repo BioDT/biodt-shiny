@@ -46,48 +46,56 @@ plot_tree_species <- function(data_folder, res_file, i18n) {
 
   if (file.exists(simulation_file)) {
     raster_data <- terra$rast(
+
       simulation_file
     )
 
     ext <- terra$ext(raster_data)
 
-    terra$values(raster_data) |>
-      max(na.rm = TRUE) |>
-      is.infinite() |>
-      print()
-    if (terra$values(raster_data) |> max(na.rm = TRUE) |> is.infinite()) {
-      shiny$showNotification(i18n$t("Warning: Raster contains infinite values!"), type = "error")
+    # Use fast range computation without pulling all values into memory
+    mm <- terra$minmax(raster_data)  # returns c(min, max) for single-layer
+    rmin <- mm[1]
+    rmax <- mm[2]
+    if (!is.finite(rmax) || !is.finite(rmin)) {
+      shiny$showNotification(i18n$t("Warning: Raster contains non-finite range!"), type = "error")
     }
 
-    pal <- leaflet$colorNumeric(
-      palette = "YlOrBr",
-      domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
-      na.color = "transparent",
-      reverse = TRUE
-    )
-
-    leaflet$leafletProxy("map") |>
-      leaflet$removeImage("tree_species") |>
-      leaflet$clearControls() |>
-      leaflet$addRasterImage(
-        raster_data,
-        opacity = 0.4,
-        colors = pal,
-        project = FALSE,
-        layerId = "tree_species",
-        group = "tree_species",
-        options = leaflet$tileOptions(zIndex = 1)
-      ) |>
-      leaflet$addLegend(
-        position = "bottomright",
-        pal = leaflet$colorNumeric(
+         pal_base <- leaflet$colorNumeric(
           palette = "YlOrBr",
-          domain = terra$values(raster_data)[is.finite(terra$values(raster_data))],
-          na.color = "transparent"
-        ),
-        values = terra$values(raster_data),
-        opacity = 0.4
-      )
+          domain = c(rmin, rmax),
+          na.color = "transparent",
+          reverse = TRUE
+        )
+        # Clamp to domain to prevent out-of-range warnings during coloring
+        pal <- function(x) {
+          x <- pmin(pmax(x, rmin), rmax)
+          pal_base(x)
+        }
+        
+        leaflet$leafletProxy("map") |>
+          leaflet$removeImage("tree_species") |>
+          leaflet$removeControl("tree_legend") |>
+          leaflet$addRasterImage(
+            raster_data,
+            opacity = 0.4,
+            colors = pal,
+            project = FALSE,
+            layerId = "tree_species",
+            group = "tree_species",
+            options = leaflet$tileOptions(zIndex = 1)
+          ) |>
+          leaflet$addLegend(
+            position = "bottomright",
+            pal = leaflet$colorNumeric(
+              palette = "YlOrBr",
+              domain = c(rmin, rmax),
+              na.color = "transparent"
+            ),
+            values = c(rmin, rmax),
+            opacity = 0.4,
+            layerId = "tree_legend"
+          )
+
   } else {
     leaflet$leafletProxy("map") |>
       leaflet$removeImage("tree_species")

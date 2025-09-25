@@ -141,11 +141,7 @@ forest_app_server <- function(id, app_selected, i18n) {
     ns <- session$ns
 
     data_folder <- file.path(config$get("data_path"), "forest_bird")
-    # data_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/new"
-    # prediction_folder <- "C:/Users/radek/Documents/IT4I_projects/BioDT/forest_resave/predictions"
-    prediction_folder <- paste0(data_folder, "/predictions") # TODO fixme
-
-    data_folder <- paste0(data_folder, "/new") # TODO fixme
+    prediction_folder <- file.path(data_folder, "predictions")
 
     output$selection <- shiny$renderText({
       text <- paste(
@@ -212,6 +208,15 @@ forest_app_server <- function(id, app_selected, i18n) {
     res_file <- shiny$reactiveVal(NULL)
     experiment_data_file <- shiny$reactiveVal(NULL)
     start_sim_year <- shiny$reactiveVal(NULL)
+    # remember last valid selections to revert on invalid input combos
+    last_ok <- shiny$reactiveValues(
+      management = NULL,
+      climate = NULL,
+      output = NULL,
+      species = NULL,
+      res_file_slider = NULL,
+      experiment_data_file = NULL
+    )
 
     output$map <- NULL
 
@@ -224,6 +229,10 @@ forest_app_server <- function(id, app_selected, i18n) {
           leaflet$leaflet() |>
             leaflet$clearImages() |>
             leaflet$addTiles() |>
+            leaflet$addLayersControl(
+              overlayGroups = c("tree_species", "bird_species"),
+              options = leaflet$layersControlOptions(collapsed = FALSE)
+            ) |>
             leaflet$setView(
               lng = 24.545,
               lat = 60.192,
@@ -271,11 +280,18 @@ forest_app_server <- function(id, app_selected, i18n) {
           experiment_data, # "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504"
           i18n
         )
-        # If selection failed, clear map layers and stop
+        # If selection failed, revert management/climate to last valid (keep current raster visible)
         if (is.null(input_selection)) {
-          leaflet$leafletProxy("map") |>
-            leaflet$removeImage("tree_species") |>
-            leaflet$clearControls()
+          # revert only if we have a stored valid state
+          if (!is.null(last_ok$management) && !is.null(last_ok$climate)) {
+            if (!identical(input$management, last_ok$management)) {
+              shiny$updateSelectInput(session, "management", selected = last_ok$management)
+            }
+            if (!identical(input$climate, last_ok$climate)) {
+              shiny$updateSelectInput(session, "climate", selected = last_ok$climate)
+            }
+            shiny$showNotification(i18n$t("Invalid combination. Reverted to last valid selection."), type = "warning")
+          }
           return(invisible(NULL))
         }
 
@@ -311,9 +327,9 @@ forest_app_server <- function(id, app_selected, i18n) {
             step = timestep
           )
 
-          shinyjs$delay(
-            100,
-            {
+        #  shinyjs$delay(
+        #    100,
+        #    {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
                 input,
@@ -322,8 +338,15 @@ forest_app_server <- function(id, app_selected, i18n) {
                 i18n
               )
               res_file(res_file_name)
-            }
-          )
+              # store last valid state for revert baseline
+              last_ok$management <- input$management
+              last_ok$climate <- input$climate
+              last_ok$output <- input$output
+              last_ok$species <- input$species
+              last_ok$res_file_slider <- value
+              last_ok$experiment_data_file <- experiment_data
+        #    }
+        #  )
         }
       }
     )
@@ -345,11 +368,19 @@ forest_app_server <- function(id, app_selected, i18n) {
           # OK "/home/osalamon/WORK/biodt-shiny/app/data/forest_bird/run_landis_current_BAU_7141504",
           i18n
         )
-        # If selection failed, clear map layers and stop
+        # If selection failed, revert the changed input(s) (keep current raster visible)
         if (is.null(input_selection)) {
-          leaflet$leafletProxy("map") |>
-            leaflet$removeImage("tree_species") |>
-            leaflet$clearControls()
+          # Determine which of output/species/slider changed vs last_ok and revert
+          if (!is.null(last_ok$output) && !identical(input$output, last_ok$output)) {
+            shiny$updateSelectInput(session, "output", selected = last_ok$output)
+          }
+          if (!is.null(last_ok$species) && !identical(input$species, last_ok$species)) {
+            shiny$updateSelectInput(session, "species", selected = last_ok$species)
+          }
+          if (!is.null(last_ok$res_file_slider) && !identical(input$res_file_slider, last_ok$res_file_slider)) {
+            shiny$updateSliderInput(session, "res_file_slider", value = last_ok$res_file_slider)
+          }
+          shiny$showNotification(i18n$t("Invalid selection. Reverted to last valid option."), type = "warning")
           return(invisible(NULL))
         }
 
@@ -384,9 +415,9 @@ forest_app_server <- function(id, app_selected, i18n) {
             step = timestep
           )
 
-          shinyjs$delay(
-            100,
-            {
+        #  shinyjs$delay(
+        #    100,
+        #    {
               # Update res_file based on the slider value (file names starts from 0)
               res_file_name <- get_file_name(
                 input,
@@ -395,8 +426,15 @@ forest_app_server <- function(id, app_selected, i18n) {
                 i18n
               )
               res_file(res_file_name)
-            }
-          )
+              # store last valid state
+              last_ok$management <- input$management
+              last_ok$climate <- input$climate
+              last_ok$output <- input$output
+              last_ok$species <- input$species
+              last_ok$res_file_slider <- value
+              last_ok$experiment_data_file <- experiment_data
+      #      }
+      #    )
         }
       }
     )
@@ -445,6 +483,8 @@ forest_app_server <- function(id, app_selected, i18n) {
       ignoreInit = TRUE,
       {
         if (is.null(input$bird_species) || identical(input$bird_species, "None")) {
+          leaflet$leafletProxy("map") |>
+            leaflet$removeImage("bird_species")
           return()
         }
         plot_bird_species(
