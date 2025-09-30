@@ -4,11 +4,10 @@ box::use(
 )
 
 #' @export
-honeybee_param_ui <- function(id, theme, i18n) {
+honeybee_param_ui <- function(id, i18n) {
   ns <- NS(id)
   # tagList(
   bootstrapPage(
-    theme = theme,
     card(
       class = "me-md-3 card-shadow overflow-hidden",
       title = "params_simulation",
@@ -86,7 +85,7 @@ honeybee_param_ui <- function(id, theme, i18n) {
 }
 
 #' @export
-honeybee_param_server <- function(id) {
+honeybee_param_server <- function(id, i18n) {
   moduleServer(id, function(input, output, session) {
     out <- reactiveVal()
     ## Update MAX of sliderInput "N_INITIAL_MITES_INFECTED" ----

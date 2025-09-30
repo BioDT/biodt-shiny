@@ -11,7 +11,6 @@ box::use(
 )
 #' @export
 honeybee_ui <- function(id,
-                        theme,
                         i18n) {
   ns <- NS(id)
   # tagList(
@@ -34,7 +33,6 @@ honeybee_ui <- function(id,
       icon = icon("forumbee"),
       honeybee_beekeeper_ui(
         ns("honeybee_beekeeper"),
-        theme,
         i18n
       )
     ),
