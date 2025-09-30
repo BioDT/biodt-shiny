@@ -94,7 +94,7 @@ honeybee_lookup_server <- function(id,
           } else {
             let tooltipEl = document.createElement('i');
             tooltipEl.setAttribute('class', 'fas fa-circle-info fa-fw')
-            tooltipEl.setAttribute('aria-label", "circle-info icon')
+            tooltipEl.setAttribute('aria-label', 'circle-info icon')
             tooltipEl.setAttribute('type', 'button');
             tooltipEl.setAttribute('data-bs-toggle', 'popover');
             tooltipEl.setAttribute('title', tooltipInfo[idx - 2]);

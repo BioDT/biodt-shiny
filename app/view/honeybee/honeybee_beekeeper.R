@@ -36,7 +36,7 @@ box::use(
 )
 
 #' @export
-honeybee_beekeeper_ui <- function(id, theme, i18n) {
+honeybee_beekeeper_ui <- function(id, i18n) {
   ns <- NS(id)
   tagList(
     tags$div(
@@ -56,7 +56,6 @@ honeybee_beekeeper_ui <- function(id, theme, i18n) {
         ),
         honeybee_param_ui(
           ns("beekeeper_param"),
-          theme,
           i18n
         )
       ),
@@ -139,7 +138,7 @@ honeybee_beekeeper_server <- function(id, session_dir, beekeeper_selected, i18n)
     )
 
     # Parameters ----
-    parameters <- honeybee_param_server("beekeeper_param")
+    parameters <- honeybee_param_server("beekeeper_param", i18n)
 
     # Lookup table ----
     lookup <- honeybee_lookup_server("beekeeper_lookup", lookup_table = lookup_table, i18n)

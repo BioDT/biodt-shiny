@@ -242,7 +242,6 @@ ui <- function(id) {
           class = "p-0",
           honeybee_ui(
             ns("honeybee_main"),
-            theme = biodt_theme,
             i18n
           )
         ),
