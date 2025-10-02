@@ -76,7 +76,7 @@ honeybee_lookup_server <- function(id,
       class = c("hover", "compact"),
       callback = JS(paste0(
         "
-        let th_cells = document.querySelectorAll('#bee-lookup-table table thead tr th')
+        let th_cells = document.querySelectorAll('#bee-lookup-table table thead tr th');
 
         const tooltipInfo = ['",
         i18n$t("Amount of pollen g/m^2 per day"), "', '",
@@ -86,7 +86,7 @@ honeybee_lookup_server <- function(id,
         i18n$t("Minimum time in seconds a bee needs to harvest pollen resources during one flight"), "', '",
         i18n$t("Calendar day when resources become available"), "', '",
         i18n$t("Calendar day until resources are available"), "'
-        ]
+        ];
 
         th_cells.forEach((el, idx) => {
           if (idx == 0 || idx == 1) {

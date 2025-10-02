@@ -57,11 +57,9 @@ export function deactMaps() {
 
 export function fixTooltip(elId) {
   const sidebarButton = document.getElementById(elId);
-  console.log('sidebarButton:::\n', sidebarButton.title);
 
   const domParser = new DOMParser();
   const spanHTML = domParser.parseFromString(sidebarButton.title, 'text/html');
-  console.log('spanHTML:::\n', spanHTML.title);
 
   const tooltipOk = spanHTML.querySelector('.i18n').innerText;
 

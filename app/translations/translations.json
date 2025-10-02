@@ -13910,7 +13910,7 @@
       "en": "Minimum time in seconds a bee needs to harvest nectar resources during one flight",
       "cz": "Minimální čas v sekundách, který včela potřebuje k získání zdrojů nektaru během jednoho letu",
       "fi": "Vähimmäisaika sekunteina, jonka mehiläinen tarvitsee nektarivarojen keruuseen yhden lennon aikana",
-      "it": "Tempo minimo in secondi di cui un'ape ha bisogno per raccogliere risorse di nettare durante un volo",
+      "it": "Tempo minimo in secondi di cui un\\'ape ha bisogno per raccogliere risorse di nettare durante un volo",
       "nl": "Minimale tijd in seconden die een bij nodig heeft om nectarbronnen te verzamelen tijdens één vlucht",
       "est": "Minimaalne aeg sekundites, mida mesilane vajab nektari ressursside kogumiseks ühe lennu jooksul",
       "sv": "Minimitid i sekunder som ett bi behöver för att samla nektarresurser under en flygning",
@@ -13927,7 +13927,7 @@
       "en": "Minimum time in seconds a bee needs to harvest pollen resources during one flight",
       "cz": "Minimální čas v sekundách, který včela potřebuje k získání zdrojů pylu během jednoho letu",
       "fi": "Vähimmäisaika sekunteina, jonka mehiläinen tarvitsee siitepölyvarojen keruuseen yhden lennon aikana",
-      "it": "Tempo minimo in secondi di cui un'ape ha bisogno per raccogliere risorse di polline durante un volo",
+      "it": "Tempo minimo in secondi di cui un\\'ape ha bisogno per raccogliere risorse di polline durante un volo",
       "nl": "Minimale tijd in seconden die een bij nodig heeft om stuifmeelbronnen te verzamelen tijdens één vlucht",
       "est": "Minimaalne aeg sekundites, mida mesilane vajab õietolmu ressursside kogumiseks ühe lennu jooksul",
       "sv": "Minimitid i sekunder som ett bi behöver för att samla pollenresurser under en flygning",
@@ -13972,7 +13972,24 @@
       "pt": "Dia do calendário até que os recursos estejam disponíveis",
       "sl": "Koledarski dan dokler so viri dostopni",
       "bg": "Календарен ден докато ресурсите са достъпни",
-      "el": "Ημερολογιακή ημέρα μέχρι να είναι διαθέσιμοι οι πόροι"
-    }
-  ]
+			"el": "Ημερολογιακή ημέρα μέχρι να είναι διαθέσιμοι οι πόροι"
+		},
+		{
+			"en": ") or the best guesses.",
+			"cz": ") nebo nejlepší odhady.",
+			"fi": ") tai parhaat arvaukset.",
+			"it": ") o le migliori supposizioni.",
+			"nl": ") of beste gissingen.",
+			"est": ") või parimad oletused.",
+			"sv": ") eller bästa gissningar.",
+			"de": ") oder beste Vermutungen.",
+			"no": ") eller beste gjetninger.",
+			"da": ") eller bedste gæt.",
+			"es": ") o las mejores conjeturas.",
+			"pt": ") ou as melhores suposições.",
+			"sl": ") ali najboljše ugibanja.",
+			"bg": ") или най-добри предположения.",
+			"el": ") ή οι καλύτερες εικασίες."
+		}
+	]
 }

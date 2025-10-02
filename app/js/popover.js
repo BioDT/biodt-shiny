@@ -1,3 +1,4 @@
+/* eslint-disable */
 // popovers.js
 $(document).ready(() => {
   const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
