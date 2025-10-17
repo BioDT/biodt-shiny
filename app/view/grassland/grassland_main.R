@@ -54,7 +54,7 @@ grassland_main_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_main_server <- function(id, i18n) {
+grassland_main_server <- function(id, session_dir, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -71,7 +71,7 @@ grassland_main_server <- function(id, i18n) {
       }
     )
 
-    grassland_dynamics_server("grassland_app", tab_grassland_selected, i18n)
+    grassland_dynamics_server("grassland_app", tab_grassland_selected, session_dir, i18n)
     grassland_info_server("grassland_info", session)
   })
 }

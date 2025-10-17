@@ -346,6 +346,7 @@ server <- function(id) {
     # Grassland pDT ----
     grassland_main_server(
       "grassland_main",
+      session_dir,
       i18n
     )
     # Forest pDT ----

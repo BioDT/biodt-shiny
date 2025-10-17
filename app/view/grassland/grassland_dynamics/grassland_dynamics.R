@@ -101,14 +101,14 @@ grassland_dynamics_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_server <- function(id, tab_grassland_selected, i18n) {
+grassland_dynamics_server <- function(id, tab_grassland_selected, session_dir, i18n) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
     plot_type <- reactiveVal("bar")
 
     # LOCATION settings ----
-    coordinates <- grassland_dynamics_location_server("location", i18n)
+    coordinates <- grassland_dynamics_location_server("location", i18n, session_dir)
 
     # the additional data are displayed as DATA TABLES below the main chart ----
     project_conf <- read_project_config(project_name = "project1")

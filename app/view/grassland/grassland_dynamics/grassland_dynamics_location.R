@@ -22,6 +22,8 @@ box::use(
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
   htmltools[as.tags, tags, HTML],
+  purrr[is_empty],
+  config,
 )
 
 box::use(
@@ -105,15 +107,34 @@ grassland_dynamics_location_ui <- function(id, i18n) {
         label = i18n$translate("Update Map Location"),
         class = "btn-primary"
       ),
+      tags$hr(),
+      tags$h3(
+        class = "mt-3",
+        i18n$translate("Run simulation")
+      ),
+      actionButton(
+        inputId = ns("run_simulation"),
+        label = i18n$translate("Run simulation"),
+        class = "btn-secondary btn-lg",
+        style = "width: 100%;"
+      ),
     )
   )
 }
 
 #' @export
-grassland_dynamics_location_server <- function(id, i18n) {
+grassland_dynamics_location_server <- function(id, i18n, session_dir) {
   # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # Prepare directory for results ----
+    # Making a grassland dir in the shared folder
+    temp_dir <- session_dir |>
+      file.path("grassland")
+
+    # Counter for simulation runs
+    counter <- reactiveVal(0)
 
     # translates radio buttons - choosing an input type of location ----
     observe({
@@ -269,6 +290,35 @@ grassland_dynamics_location_server <- function(id, i18n) {
             )
           }
         }
+      }
+    )
+
+    # Run simulation button ----
+    observeEvent(
+      input$run_simulation,
+      {
+        # Check data ----
+        req(input$lat, input$lng, input$start_year, input$end_year)
+
+        counter(counter() + 1)
+
+        # Prepare folder structure ----
+        if (!dir.exists(temp_dir)) {
+          dir.create(temp_dir, recursive = TRUE)
+        }
+
+        run_dir <- file.path(
+          temp_dir,
+          Sys.time() |> format(format = "%Y-%m-%d_%H-%M-%S")
+        )
+        dir.create(run_dir, recursive = TRUE)
+
+        print(paste("Created simulation directory:", run_dir))
+        print(paste("Simulation run number:", counter()))
+        print(paste("Latitude:", input$lat, "Longitude:", input$lng))
+        print(paste("Year range:", input$start_year, "-", input$end_year))
+
+        # TODO: Add simulation logic here in next steps
       }
     )
 
