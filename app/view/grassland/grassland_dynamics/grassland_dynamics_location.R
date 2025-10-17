@@ -1,7 +1,23 @@
 box::use(
-  shiny[ # nolint
-    reactiveVal, renderText, verbatimTextOutput, NS, actionButton, radioButtons,
-    textInput, numericInput, observeEvent, tags, moduleServer, observe
+  shiny[
+    # nolint
+    reactiveVal,
+    renderText,
+    verbatimTextOutput,
+    NS,
+    actionButton,
+    radioButtons,
+    textInput,
+    numericInput,
+    observeEvent,
+    tags,
+    moduleServer,
+    observe,
+    updateNumericInput,
+    req,
+    debounce,
+    reactive,
+    showNotification
   ],
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
@@ -65,6 +81,25 @@ grassland_dynamics_location_ui <- function(id, i18n) {
           ns("deimsidinfo")
         )
       ),
+      layout_column_wrap(
+        width = 1 / 2,
+        numericInput(
+          ns("start_year"),
+          label = i18n$translate("Start Year"),
+          value = 2000,
+          min = 1900,
+          max = as.numeric(format(Sys.Date(), "%Y")) - 2,
+          step = 1
+        ),
+        numericInput(
+          ns("end_year"),
+          label = i18n$translate("End Year"),
+          value = as.numeric(format(Sys.Date(), "%Y")) - 1,
+          min = 1901,
+          max = as.numeric(format(Sys.Date(), "%Y")) - 1,
+          step = 1
+        )
+      ),
       actionButton(
         inputId = ns("update_map_location"),
         label = i18n$translate("Update Map Location"),
@@ -75,7 +110,8 @@ grassland_dynamics_location_ui <- function(id, i18n) {
 }
 
 #' @export
-grassland_dynamics_location_server <- function(id, i18n) { # nolint
+grassland_dynamics_location_server <- function(id, i18n) {
+  # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -95,6 +131,84 @@ grassland_dynamics_location_server <- function(id, i18n) { # nolint
           "DEIMS.id" = "DEIMS.id"
         )
       )
+    })
+
+    # Debounced year inputs to allow users time to type ----
+    start_year_debounced <- debounce(reactive(input$start_year), 2000)
+    end_year_debounced <- debounce(reactive(input$end_year), 2000)
+
+    # Validates year inputs to ensure start_year < end_year ----
+    observeEvent(start_year_debounced(), {
+      req(input$start_year, input$end_year)
+      current_year <- as.numeric(format(Sys.Date(), "%Y"))
+      max_year <- current_year - 1
+
+      if (input$start_year >= input$end_year) {
+        new_value <- input$end_year - 1
+        updateNumericInput(
+          session,
+          "start_year",
+          value = new_value,
+          max = max_year
+        )
+        showNotification(
+          paste0(
+            i18n$translate("Start year adjusted to"),
+            " ",
+            new_value,
+            " ",
+            i18n$translate("(must be less than end year)")
+          ),
+          type = "warning",
+          duration = 4
+        )
+      }
+    })
+
+    observeEvent(end_year_debounced(), {
+      req(input$start_year, input$end_year)
+      current_year <- as.numeric(format(Sys.Date(), "%Y"))
+      max_year <- current_year - 1
+
+      if (input$end_year <= input$start_year) {
+        new_value <- input$start_year + 1
+        updateNumericInput(
+          session,
+          "end_year",
+          value = new_value,
+          max = max_year
+        )
+        showNotification(
+          paste0(
+            i18n$translate("End year adjusted to"),
+            " ",
+            new_value,
+            " ",
+            i18n$translate("(must be greater than start year)")
+          ),
+          type = "warning",
+          duration = 4
+        )
+      } else if (input$end_year > max_year) {
+        # Ensure end_year does not exceed previous year
+        updateNumericInput(
+          session,
+          "end_year",
+          value = max_year,
+          max = max_year
+        )
+        showNotification(
+          paste0(
+            i18n$translate("End year adjusted to"),
+            " ",
+            max_year,
+            " ",
+            i18n$translate("(maximum allowed year)")
+          ),
+          type = "warning",
+          duration = 4
+        )
+      }
     })
 
     # Makes visible type of location input in UI (deims vs lat/lng) ----
@@ -146,7 +260,11 @@ grassland_dynamics_location_server <- function(id, i18n) { # nolint
           if (is.numeric(coords_outtext$lng) & is.numeric(coords_outtext$lat)) {
             output$deimsidinfo <- renderText(
               paste0(
-                i18n$translate("Found coordinates:"), "\nlng = ", coords_outtext$lng, ", lat = ", coords_outtext$lat
+                i18n$translate("Found coordinates:"),
+                "\nlng = ",
+                coords_outtext$lng,
+                ", lat = ",
+                coords_outtext$lat
               )
             )
           }
