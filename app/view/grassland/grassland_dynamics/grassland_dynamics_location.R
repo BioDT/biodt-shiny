@@ -88,7 +88,7 @@ grassland_dynamics_location_ui <- function(id, i18n) {
         numericInput(
           ns("start_year"),
           label = i18n$translate("Start Year"),
-          value = 2000,
+          value = as.numeric(format(Sys.Date(), "%Y")) - 2,
           min = 1900,
           max = as.numeric(format(Sys.Date(), "%Y")) - 2,
           step = 1
@@ -319,6 +319,53 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
         print(paste("Year range:", input$start_year, "-", input$end_year))
 
         # TODO: Add simulation logic here in next steps
+        # Run workflow ----
+        print("Starting the workflow execution.")
+
+        run_id <- counter()
+
+        if (config$get("executor") == "docker") {
+          host_base_path <- config$get("host_base_path")
+          if (!is.null(host_base_path)) {
+            mount_dir <- str_replace(run_dir, temp_dir, host_base_path)
+          } else {
+            mount_dir <- run_dir
+          }
+
+          docker_call <- paste0(
+            'docker run -v "',
+            mount_dir,
+            '":"/output"',
+            " -e LAT=",
+            input$lat,
+            " -e LON=",
+            input$lng,
+            " -e startYear=",
+            input$start_year,
+            " -e endYear=",
+            input$end_year,
+            " -e DEIMS=",
+            input$deimsid,
+            " -e CDSAPI_URL=",
+            config$get("cdsapi_url"),
+            " -e CDSAPI_KEY=",
+            config$get("cdsapi_key"),
+            ' --entrypoint /bin/bash',
+            ' grassmind-simulation',
+            ' -c "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"'
+          )
+          print(paste("Executing Docker command:", docker_call))
+          system(docker_call)
+        } else if (config$get("executor") == "k8s") {
+          data_subpath <- stringr::str_remove(
+            run_dir,
+            paste0(config$get("base_path"), "/")
+          )
+          # Call k8s workflow here
+        } else {
+          stop("Invalid executor type: ", config$get("executor"))
+        }
+        print("Workflow execution completed.")
       }
     )
 
