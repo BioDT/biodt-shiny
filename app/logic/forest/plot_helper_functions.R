@@ -43,62 +43,71 @@ plot_bird_species <- function(scenario,
 #' @export
 plot_tree_species <- function(data_folder, res_file, i18n) {
   simulation_file <- file.path(data_folder, res_file)
-
+  
   if (file.exists(simulation_file)) {
-    raster_data <- terra$rast(
+    raster_data <- terra$rast(simulation_file)
 
-      simulation_file
-    )
-
-    ext <- terra$ext(raster_data)
-
-    # Use fast range computation without pulling all values into memory
-    mm <- terra$minmax(raster_data)  # returns c(min, max) for single-layer
-    rmin <- mm[1]
-    rmax <- mm[2]
-    if (!is.finite(rmax) || !is.finite(rmin)) {
-      shiny$showNotification(i18n$t("Warning: Raster contains non-finite range!"), type = "error")
+    # Ensure there are any values at all (handles multi-layer rasters too)
+    if (!any(terra$hasValues(raster_data))) {
+      leaflet$leafletProxy("map") |>
+        leaflet$removeImage("tree_species") |>
+        leaflet$removeControl("tree_legend")
+      shiny$showNotification("Warning: Tree species raster has no data (all NA).", type = "error")
+      return(invisible(NULL))
     }
 
-         pal_base <- leaflet$colorNumeric(
-          palette = "YlOrBr",
-          domain = c(rmin, rmax),
-          na.color = "transparent",
-          reverse = TRUE
-        )
-        # Clamp to domain to prevent out-of-range warnings during coloring
-        pal <- function(x) {
-          x <- pmin(pmax(x, rmin), rmax)
-          pal_base(x)
-        }
-        
-        leaflet$leafletProxy("map") |>
-          leaflet$removeImage("tree_species") |>
-          leaflet$removeControl("tree_legend") |>
-          leaflet$addRasterImage(
-            raster_data,
-            opacity = 0.4,
-            colors = pal,
-            project = FALSE,
-            layerId = "tree_species",
-            group = "tree_species",
-            options = leaflet$tileOptions(zIndex = 1)
-          ) |>
-          leaflet$addLegend(
-            position = "bottomright",
-            pal = leaflet$colorNumeric(
-              palette = "YlOrBr",
-              domain = c(rmin, rmax),
-              na.color = "transparent"
-            ),
-            values = c(rmin, rmax),
-            opacity = 0.4,
-            layerId = "tree_legend"
-          )
+    # Robust global min/max across all layers
+    mm <- terra$minmax(raster_data)               # 2 x nlyr matrix
+    rmin <- suppressWarnings(min(mm[1, ], na.rm = TRUE))
+    rmax <- suppressWarnings(max(mm[2, ], na.rm = TRUE))
+
+    # Validate range
+    if (!is.finite(rmin) || !is.finite(rmax)) {
+      leaflet$leafletProxy("map") |>
+        leaflet$removeImage("tree_species") |>
+        leaflet$removeControl("tree_legend")
+      shiny$showNotification(i18n$t("Warning: Raster contains non-finite range!"), type = "error")
+      return(invisible(NULL))
+    }
+    # Avoid zero-width domain (flat rasters)
+    if (rmin == rmax) {
+      eps  <- if (rmin == 0) 1 else abs(rmin) * 0.01
+      rmin <- rmin - eps
+      rmax <- rmax + eps
+    }
+
+    pal_base <- leaflet$colorNumeric(
+      palette  = "YlOrBr",
+      domain   = c(rmin, rmax),
+      na.color = "transparent",
+      reverse  = TRUE
+    )
+    pal <- function(x) pal_base(pmin(pmax(x, rmin), rmax))
+
+    leaflet$leafletProxy("map") |>
+      leaflet$removeImage("tree_species") |>
+      leaflet$removeControl("tree_legend") |>
+      leaflet$addRasterImage(
+        raster_data,
+        opacity = 0.4,
+        colors = pal,
+        project = FALSE,
+        layerId = "tree_species",
+        group = "tree_species",
+        options = leaflet$tileOptions(zIndex = 1)
+      ) |>
+      leaflet$addLegend(
+        position = "bottomright",
+        pal = pal_base,
+        values = c(rmin, rmax),
+        opacity = 0.4,
+        layerId = "tree_legend"
+      )
 
   } else {
     leaflet$leafletProxy("map") |>
-      leaflet$removeImage("tree_species")
+      leaflet$removeImage("tree_species") |>
+      leaflet$removeControl("tree_legend")
     shiny$showNotification(i18n$t("Warning: Tree species file does not exist!"), type = "error")
   }
 }
