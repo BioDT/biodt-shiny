@@ -1,5 +1,5 @@
 box::use(
-  readr[read_delim],
+  readr[read_delim, cols_only, col_date, col_integer, col_double],
   utils[str]
 )
 
@@ -7,12 +7,12 @@ box::use(
 #' @export
 read_grass_simulations <- function(
   filename,
-  column_types = list(
-    Date = "D",
-    DayCount = "i",
-    PFT = "i",
-    Fraction = "d",
-    NumberPlants = "i"
+  column_types = cols_only(
+    Date = col_date(format = ""),
+    DayCount = col_integer(),
+    PFT = col_integer(),
+    Fraction = col_double(),
+    NumberPlants = col_integer()
   ),
   plot_type,
   colors,
@@ -26,7 +26,8 @@ read_grass_simulations <- function(
     delim = "\t",
     escape_double = FALSE,
     col_names = TRUE,
-    col_types = column_types
+    col_types = column_types,
+    show_col_types = FALSE
   )
 
   series_list <- list()

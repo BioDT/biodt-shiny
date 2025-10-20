@@ -1,5 +1,5 @@
 box::use(
-  shiny[NS, tagList, moduleServer, column, fixedRow, reactiveVal, observeEvent, tags],
+  shiny[NS, tagList, moduleServer, column, fixedRow, reactiveVal, reactive, observeEvent, tags, req],
   bslib[layout_column_wrap],
   htmltools[css],
 )
@@ -56,16 +56,7 @@ box::use(
   app /
     logic /
     grassland /
-    grassland_soil_management_data_load[
-      read_project_config,
-      get_soil_file_name,
-      get_management_file_name,
-      get_lat_lon_name,
-      get_file_path,
-      read_soil_data_table,
-      read_soil_shares,
-      read_management_data_table
-    ],
+    grassland_load_simulation_data[load_grassland_simulation_data],
   app /
     view /
     grassland /
@@ -108,32 +99,30 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, session_dir, i
     plot_type <- reactiveVal("bar")
 
     # LOCATION settings ----
-    coordinates <- grassland_dynamics_location_server("location", i18n, session_dir)
+    # Returns reactive list with: lat, lon, available_runs
+    location_data <- grassland_dynamics_location_server("location", i18n, session_dir)
 
-    # the additional data are displayed as DATA TABLES below the main chart ----
-    project_conf <- read_project_config(project_name = "project1")
+    # Create reactive to extract coordinates for the map
+    coordinates <- reactive({
+      list(
+        lat = location_data$lat(),
+        lng = location_data$lon() # Note: map update function expects 'lng' not 'lon'
+      )
+    })
 
-    # MANAGEMENT table - data load ----
-    mng_filename <- get_management_file_name(project_conf)
-    mng_lat_lon_path <- get_lat_lon_name(mng_filename)
-    mng_file_path <- get_file_path(type_of_input_file = "management", mng_lat_lon_path)
-    mng_data_table <- read_management_data_table(mng_file_path)
-
-    # SOIL data table (optional - controled by checkbox) ----
-    soil_filename <- get_soil_file_name(project_conf)
-    soil_lat_lon_path <- get_lat_lon_name(soil_filename)
-    soil_file_path <- get_file_path("soil", soil_lat_lon_path)
-    soil_data_table <- read_soil_data_table(soil_file_path)
-
-    soil_type_shares <- read_soil_shares(soil_file_path)
+    # Shared reactive for currently loaded simulation data ----
+    current_simulation_data <- reactiveVal(NULL)
 
     # MAP itself ----
     grassland_dynamics_inputmap_server("inputmap", coordinates, tab_grassland_selected, i18n)
 
     # Output plot ----
+    # Pass available_runs and current_simulation_data to chart module
     grassland_dynamics_double_chart_server(
       "double_chart",
       plot_type,
+      location_data$available_runs,
+      current_simulation_data,
       tab_grassland_selected,
       i18n
     )
@@ -141,6 +130,15 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, session_dir, i
     grassland_dynamics_double_chart_controls_server("controls", plot_type, i18n)
 
     # Management Actions Table - server module call ----
+    # Extract management data from current simulation
+    mng_data_table <- reactive({
+      sim_data <- current_simulation_data()
+      if (is.null(sim_data)) {
+        return(NULL)
+      }
+      sim_data$management_data
+    })
+
     grassland_dynamics_manage_datatable_server(
       "mngmnt_data_table",
       mng_data_table,
@@ -150,6 +148,14 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, session_dir, i
 
     # shares of 3 soil "types" (clay, sand and silt) above soil data table
     # to make it easier for users only 2 digits are retained in the UI
+    soil_type_shares <- reactive({
+      sim_data <- current_simulation_data()
+      if (is.null(sim_data)) {
+        return(NULL)
+      }
+      sim_data$soil_shares
+    })
+
     grassland_dynamics_three_soil_types_server(
       "three_soil_types",
       soil_type_shares,
@@ -158,6 +164,14 @@ grassland_dynamics_server <- function(id, tab_grassland_selected, session_dir, i
     )
 
     # Soil data table
+    soil_data_table <- reactive({
+      sim_data <- current_simulation_data()
+      if (is.null(sim_data)) {
+        return(NULL)
+      }
+      sim_data$soil_data
+    })
+
     grassland_dynamics_soil_datatable_server(
       "soil_data_table",
       soil_data_table,

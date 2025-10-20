@@ -13,8 +13,9 @@ box::use(
 
 #' @export
 grassland_dynamics_manage_datatable_ui <- function(
-    id,
-    i18n) {
+  id,
+  i18n
+) {
   ns <- NS(id)
   card(
     id = ns("datatable"),
@@ -43,8 +44,9 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    data_table_reactive <- reactiveVal()
-    data_table_reactive(data_table)
+    # data_table is already a reactive, no need to wrap it
+    # data_table_reactive <- reactiveVal()
+    # data_table_reactive(data_table)
 
     # Define waiter ----
     msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
@@ -71,7 +73,11 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
         HTML(icon_html),
         class = "primary-button",
         `aria-expanded` = tolower(as.character(show_managementtable())),
-        title = if (show_managementtable()) i18n$t("Collapse management actions table") else i18n$t("Expand management actions table")
+        title = if (show_managementtable()) {
+          i18n$t("Collapse management actions table")
+        } else {
+          i18n$t("Expand management actions table")
+        }
       )
     })
 
@@ -82,7 +88,7 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
 
     # Show or hide the datatable container
     observeEvent(show_managementtable(), ignoreInit = TRUE, {
-      req(data_table_reactive())
+      req(data_table())
       if (show_managementtable()) {
         output$mngmnt_data_table_wrap <- renderUI({
           div_table_wrap_tag
@@ -95,10 +101,10 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
     # Render DT on tab change
     observeEvent(tab_grassland_selected(), ignoreNULL = TRUE, ignoreInit = TRUE, {
       w$show()
-      req(data_table_reactive())
+      req(data_table())
       output$mngmnt_data_table <- renderDT(
         datatable(
-          data_table_reactive(),
+          data_table(),
           editable = list(target = "cell", disable = list(columns = c(0, 1, 2, 3, 4, 5, 6))),
           selection = "none",
           style = "auto",
@@ -125,13 +131,20 @@ grassland_dynamics_manage_datatable_server <- function(id, data_table, tab_grass
 
             const tooltipInfo =
               ['",
-            i18n$t("Date"), "', '",
-            i18n$t("Mow Height"), "', '",
-            i18n$t("Fertilizer"), "', '",
-            i18n$t("Irrigation"), "', '",
-            i18n$t("Seeds PFT1"), "', '",
-            i18n$t("Seeds PFT2"), "', '",
-            i18n$t("Seeds PFT3"), "', '",
+            i18n$t("Date"),
+            "', '",
+            i18n$t("Mow Height"),
+            "', '",
+            i18n$t("Fertilizer"),
+            "', '",
+            i18n$t("Irrigation"),
+            "', '",
+            i18n$t("Seeds PFT1"),
+            "', '",
+            i18n$t("Seeds PFT2"),
+            "', '",
+            i18n$t("Seeds PFT3"),
+            "', '",
             i18n$t("Data source"),
             "']
 

@@ -13,8 +13,9 @@ box::use(
 
 #' @export
 grassland_dynamics_soil_datatable_ui <- function(
-    id,
-    i18n) {
+  id,
+  i18n
+) {
   ns <- NS(id)
   card(
     id = ns("datatable"),
@@ -75,7 +76,7 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
     })
 
     observeEvent(show_soiltable(), ignoreInit = TRUE, {
-      req(data_table)
+      req(data_table())
       if (show_soiltable() == FALSE) {
         output$soil_data_table_wrap <- renderUI(NULL)
       }
@@ -93,9 +94,10 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
       {
         w$show()
         req(div_table_wrap_tag)
+        req(data_table())
         output$soil_data_table <- renderDT({
           datatable(
-            data_table,
+            data_table(),
             class = paste("cell-border stripe compact"),
             style = "auto",
             fillContainer = FALSE,
@@ -116,10 +118,14 @@ grassland_dynamics_soil_datatable_server <- function(id, data_table, tab_grassla
 
               const tooltipInfo =
                 ['",
-              i18n$t("Layer"), "', '",
-              i18n$t("Field Capacity"), "', '",
-              i18n$t("Permanent Wilting Point"), "', '",
-              i18n$t("POR[V%]"), "', '",
+              i18n$t("Layer"),
+              "', '",
+              i18n$t("Field Capacity"),
+              "', '",
+              i18n$t("Permanent Wilting Point"),
+              "', '",
+              i18n$t("POR[V%]"),
+              "', '",
               i18n$t("KS[mm/d]"),
               "']
 

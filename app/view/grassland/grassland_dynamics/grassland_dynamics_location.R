@@ -13,16 +13,16 @@ box::use(
     tags,
     moduleServer,
     observe,
-    updateNumericInput,
-    req,
-    debounce,
     reactive,
-    showNotification
+    req,
+    updateNumericInput,
+    showNotification,
+    debounce
   ],
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
   htmltools[as.tags, tags, HTML],
-  purrr[is_empty],
+  stringr[str_replace],
   config,
 )
 
@@ -83,6 +83,16 @@ grassland_dynamics_location_ui <- function(id, i18n) {
           ns("deimsidinfo")
         )
       ),
+      actionButton(
+        inputId = ns("update_map_location"),
+        label = i18n$translate("Update Map Location"),
+        class = "btn-primary"
+      ),
+      tags$hr(),
+      tags$h3(
+        class = "mt-3",
+        i18n$translate("Run simulation")
+      ),
       layout_column_wrap(
         width = 1 / 2,
         numericInput(
@@ -100,17 +110,7 @@ grassland_dynamics_location_ui <- function(id, i18n) {
           min = 1901,
           max = as.numeric(format(Sys.Date(), "%Y")) - 1,
           step = 1
-        )
-      ),
-      actionButton(
-        inputId = ns("update_map_location"),
-        label = i18n$translate("Update Map Location"),
-        class = "btn-primary"
-      ),
-      tags$hr(),
-      tags$h3(
-        class = "mt-3",
-        i18n$translate("Run simulation")
+        ),
       ),
       actionButton(
         inputId = ns("run_simulation"),
@@ -127,14 +127,6 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
   # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
-    # Prepare directory for results ----
-    # Making a grassland dir in the shared folder
-    temp_dir <- session_dir |>
-      file.path("grassland")
-
-    # Counter for simulation runs
-    counter <- reactiveVal(0)
 
     # translates radio buttons - choosing an input type of location ----
     observe({
@@ -254,6 +246,17 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
     # happens, grassland_update_map function (in logic dir) is called
     coordinates <- reactiveVal()
 
+    # Track available simulation runs
+    available_runs <- reactiveVal(list())
+
+    # Prepare directory for results ----
+    # Making a grassland dir in the shared folder
+    temp_dir <- session_dir |>
+      file.path("grassland")
+
+    # Counter for simulation runs
+    counter <- reactiveVal(0)
+
     observeEvent(
       input$update_map_location,
       ignoreInit = TRUE,
@@ -318,7 +321,6 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
         print(paste("Latitude:", input$lat, "Longitude:", input$lng))
         print(paste("Year range:", input$start_year, "-", input$end_year))
 
-        # TODO: Add simulation logic here in next steps
         # Run workflow ----
         print("Starting the workflow execution.")
 
@@ -366,9 +368,46 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
           stop("Invalid executor type: ", config$get("executor"))
         }
         print("Workflow execution completed.")
+
+        # Add to available runs list
+        run_id_key <- paste0("run_", counter())
+        run_meta <- list(
+          run_number = counter(),
+          run_dir = run_dir,
+          lat = input$lat,
+          lon = input$lng,
+          start_year = input$start_year,
+          end_year = input$end_year,
+          timestamp = Sys.time(),
+          label = paste0(
+            "Run ",
+            counter(),
+            " (",
+            format(Sys.time(), "%H:%M:%S"),
+            ")"
+          )
+        )
+
+        # Update available runs
+        runs <- available_runs()
+        runs[[run_id_key]] <- run_meta
+        available_runs(runs)
+
+        print(paste("Added run to available_runs list:", run_id_key))
       }
     )
 
-    coordinates
+    # Return reactive accessors for lat, lon, and available_runs
+    list(
+      lat = reactive({
+        coords <- coordinates()
+        if (!is.null(coords)) coords$lat else NULL
+      }),
+      lon = reactive({
+        coords <- coordinates()
+        if (!is.null(coords)) coords$lng else NULL # Note: using 'lng' from coordinates
+      }),
+      available_runs = available_runs
+    )
   })
 }

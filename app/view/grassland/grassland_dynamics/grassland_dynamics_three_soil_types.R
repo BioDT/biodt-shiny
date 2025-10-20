@@ -10,8 +10,9 @@ box::use(
 
 #' @export
 grassland_dynamics_three_soil_types_ui <- function(
-    id,
-    i18n) {
+  id,
+  i18n
+) {
   ns <- NS(id)
   card(
     id = ns("three_soil_types"),
@@ -50,10 +51,11 @@ grassland_dynamics_three_soil_types_ui <- function(
 
 #' @export
 grassland_dynamics_three_soil_types_server <- function(
-    id,
-    soil_type_shares,
-    tab_grassland_selected,
-    i18n) {
+  id,
+  soil_type_shares,
+  tab_grassland_selected,
+  i18n
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Define waiter ----
@@ -63,7 +65,6 @@ grassland_dynamics_three_soil_types_server <- function(
       html = msg,
       color = "rgba(256,256,256,0.9)",
     )
-    soil_type_shares_reactive <- reactiveVal(list())
 
     observeEvent(
       tab_grassland_selected(),
@@ -71,21 +72,42 @@ grassland_dynamics_three_soil_types_server <- function(
       ignoreInit = TRUE,
       {
         w$show()
-        soil_type_shares_reactive(soil_type_shares)
 
-        output$silt <- renderText({
-          i18n$t(names(soil_type_shares_reactive())[1])
-        })
-        output$clay <- renderText({
-          i18n$t(names(soil_type_shares_reactive())[2])
-        })
-        output$sand <- renderText({
-          i18n$t(names(soil_type_shares_reactive())[3])
-        })
+        # Get current soil shares from reactive
+        shares <- soil_type_shares()
 
-        output$silt_val <- renderText(soil_type_shares_reactive()[[1]])
-        output$clay_val <- renderText(soil_type_shares_reactive()[[2]])
-        output$sand_val <- renderText(soil_type_shares_reactive()[[3]])
+        # Check if we have valid data
+        if (!is.null(shares) && is.list(shares) && length(shares) >= 3) {
+          output$silt <- renderText({
+            i18n$t(names(shares)[1])
+          })
+          output$clay <- renderText({
+            i18n$t(names(shares)[2])
+          })
+          output$sand <- renderText({
+            i18n$t(names(shares)[3])
+          })
+
+          output$silt_val <- renderText(as.character(shares[[1]]))
+          output$clay_val <- renderText(as.character(shares[[2]]))
+          output$sand_val <- renderText(as.character(shares[[3]]))
+        } else {
+          # Show placeholder when no data
+          output$silt <- renderText({
+            i18n$t("Silt")
+          })
+          output$clay <- renderText({
+            i18n$t("Clay")
+          })
+          output$sand <- renderText({
+            i18n$t("Sand")
+          })
+
+          output$silt_val <- renderText("--")
+          output$clay_val <- renderText("--")
+          output$sand_val <- renderText("--")
+        }
+
         w$hide()
       }
     )

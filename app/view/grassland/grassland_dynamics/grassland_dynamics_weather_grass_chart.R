@@ -1,25 +1,35 @@
 box::use(
-  shiny[NS, moduleServer, tags, reactive, observeEvent, selectInput, actionButton],
+  shiny[NS, moduleServer, tags, reactive, observeEvent, selectInput, actionButton, updateSelectInput, req, reactiveVal],
   bslib[card, card_header, card_body, layout_column_wrap],
   echarty[ecs.output, ecs.render],
   waiter[Waiter],
-  shinyjs[disabled],
   config,
+  stats[setNames],
 )
 
 box::use(
   app / logic / grassland / grassland_multichart_lines[generate_chart_lines],
   app / logic / grassland / grassland_multichart_bars_stack[generate_chart_bars_mean],
   app / logic / grassland / grassland_multichart_lines_mean[generate_chart_lines_mean],
+  app / logic / grassland / grassland_load_simulation_data[load_grassland_simulation_data],
+  app /
+    logic /
+    grassland /
+    grassland_multichart_from_data[
+      generate_chart_bars_mean_from_data,
+      generate_chart_lines_from_data,
+      generate_chart_lines_mean_from_data
+    ],
   app / logic / waiter[waiter_text],
 )
 
 #' @export
 grassland_dynamics_double_chart_ui <- function(
-    id,
-    i18n,
-    plot_width = "100%",
-    plot_height = "1000px") {
+  id,
+  i18n,
+  plot_width = "100%",
+  plot_height = "1000px"
+) {
   ns <- NS(id)
   card(
     id = ns("multichart_wrap"),
@@ -38,14 +48,12 @@ grassland_dynamics_double_chart_ui <- function(
         selectInput(
           ns("output_list"),
           label = i18n$translate("Choose output dataset"),
-          choices = NULL
+          choices = c("Default (project1)" = "default")
         ),
-        disabled(
-          actionButton(
-            ns("update_output"),
-            label = i18n$translate("Show results"),
-            class = "mt-auto"
-          )
+        actionButton(
+          ns("update_output"),
+          label = i18n$translate("Show results"),
+          class = "mt-auto"
         )
       ),
       ecs.output(
@@ -58,9 +66,17 @@ grassland_dynamics_double_chart_ui <- function(
 }
 
 #' @export
-grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_selected, i18n) {
+grassland_dynamics_double_chart_server <- function(
+  id,
+  plot_type,
+  available_runs,
+  current_simulation_data,
+  tab_grassland_selected,
+  i18n
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
     # Define waiter ----
     msg <- waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
     w <- Waiter$new(
@@ -69,66 +85,262 @@ grassland_dynamics_double_chart_server <- function(id, plot_type, tab_grassland_
       color = "rgba(256,256,256,0.9)",
     )
 
+    # Track previous run count to detect new runs
+    previous_run_count <- reactiveVal(0)
+
+    # Update dropdown choices when available_runs changes ----
+    observeEvent(available_runs(), {
+      runs <- available_runs()
+
+      if (length(runs) > 0) {
+        # Build choices list with default + simulation runs
+        choices <- c("Default (project1)" = "default")
+        for (run_id in names(runs)) {
+          run_meta <- runs[[run_id]]
+          choices <- c(choices, setNames(run_id, run_meta$label))
+        }
+
+        # Store the most recent run ID for auto-load
+        most_recent_run <- names(runs)[length(runs)]
+
+        updateSelectInput(
+          session,
+          "output_list",
+          choices = choices,
+          selected = most_recent_run # Select most recent run
+        )
+
+        # Auto-load if this is a NEW run (not initial load)
+        if (length(runs) > previous_run_count() && previous_run_count() > 0) {
+          print(paste("New run detected! Count went from", previous_run_count(), "to", length(runs)))
+          print(paste("Auto-loading run:", most_recent_run))
+
+          # Small delay to ensure dropdown is updated
+          shiny::invalidateLater(300)
+        }
+
+        previous_run_count(length(runs))
+      }
+    })
+
+    # Load data when button is clicked OR when available_runs changes (new run) ----
+    observeEvent(
+      {
+        input$update_output
+        available_runs()
+      },
+      ignoreInit = TRUE, # Don't trigger on initial reactive setup
+      {
+        req(input$output_list)
+
+        w$show()
+
+        selected_run <- input$output_list
+
+        print(paste("Loading data for:", selected_run))
+
+        if (selected_run == "default") {
+          # Load default "Example" data using unified loader
+          # Base directory is app/data/grassland/ with scenarios/ and simulations/ subdirs
+          default_data <- load_grassland_simulation_data(
+            run_dir = file.path(config$get("data_path"), "grassland"),
+            lat = 51.3919,
+            lon = 11.8787,
+            start_year = 2013,
+            end_year = 2015,
+            run_number = 0
+          )
+
+          # Check if data loaded successfully
+          if (is.null(default_data$grass_output) || is.null(default_data$weather_data)) {
+            print("Warning: Failed to load default project1 data")
+            w$hide()
+            return()
+          }
+
+          # Update shared simulation data for data tables
+          current_simulation_data(default_data)
+
+          # Debug: print what we're passing
+          print(paste("Number of grass files:", length(default_data$metadata$grass_files)))
+          print(paste("Weather file:", default_data$metadata$weather_file))
+          print(paste("End date:", default_data$metadata$grass_end_date))
+          print(paste("End date class:", class(default_data$metadata$grass_end_date)))
+
+          # Generate charts using original functions with file paths
+          colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
+          colors_for_grass_lighter <- c("#73eb9b", "#e28bb7", "#998be2")
+          colors_for_weather <- c("#0072B2", "#ae4d18", "#956618", "#108039", "#56B4E9")
+
+          chart_reactive <- reactive({
+            if (plot_type() == "bar") {
+              generate_chart_bars_mean(
+                filepaths_grass = default_data$metadata$grass_files,
+                filepath_weather = default_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = default_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            } else if (plot_type() == "line") {
+              generate_chart_lines(
+                filepaths_grass = default_data$metadata$grass_files,
+                filepath_weather = default_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass_lighter,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = default_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            } else if (plot_type() == "line_mean") {
+              generate_chart_lines_mean(
+                filepaths_grass = default_data$metadata$grass_files,
+                filepath_weather = default_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = default_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            }
+          })
+
+          output$multichart <- ecs.render(chart_reactive())
+        } else {
+          # Load simulation run data using unified loader
+          runs <- available_runs()
+          run_meta <- runs[[selected_run]]
+
+          req(run_meta)
+
+          # Load all simulation data
+          sim_data <- load_grassland_simulation_data(
+            run_dir = run_meta$run_dir,
+            lat = run_meta$lat,
+            lon = run_meta$lon,
+            start_year = run_meta$start_year,
+            end_year = run_meta$end_year,
+            run_number = run_meta$run_number
+          )
+
+          # Check if data loaded successfully
+          if (is.null(sim_data$grass_output) || is.null(sim_data$weather_data)) {
+            print("Warning: Failed to load complete simulation data")
+            w$hide()
+            return()
+          }
+
+          print(paste("Loaded simulation data for run:", selected_run))
+          print(paste("Grass output rows:", nrow(sim_data$grass_output)))
+          print(paste("Weather data series:", length(sim_data$weather_data)))
+
+          # Update shared simulation data for data tables
+          current_simulation_data(sim_data)
+
+          # Generate chart using original functions with file paths
+          colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
+          colors_for_grass_lighter <- c("#73eb9b", "#e28bb7", "#998be2")
+          colors_for_weather <- c("#0072B2", "#ae4d18", "#956618", "#108039", "#56B4E9")
+
+          chart_reactive <- reactive({
+            if (plot_type() == "bar") {
+              generate_chart_bars_mean(
+                filepaths_grass = sim_data$metadata$grass_files,
+                filepath_weather = sim_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = sim_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            } else if (plot_type() == "line") {
+              generate_chart_lines(
+                filepaths_grass = sim_data$metadata$grass_files,
+                filepath_weather = sim_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass_lighter,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = sim_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            } else if (plot_type() == "line_mean") {
+              generate_chart_lines_mean(
+                filepaths_grass = sim_data$metadata$grass_files,
+                filepath_weather = sim_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = sim_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            }
+          })
+
+          output$multichart <- ecs.render(chart_reactive())
+        }
+
+        w$hide()
+      }
+    )
+
+    # Initial load on tab selection ----
     observeEvent(
       tab_grassland_selected(),
       ignoreNULL = TRUE,
       ignoreInit = TRUE,
       {
-        w$show()
+        # Trigger initial load with default data
+        if (input$output_list == "default") {
+          w$show()
 
-        files_grass <- list.files(
-          file.path(config$get("data_path"), "grassland", "simulations", "project1", "output"),
-          full.names = TRUE
-        )
-        file_weather <- file.path(
-          config$get("data_path"),
-          "grassland",
-          "scenarios",
-          "lat51.391900_lon11.878700",
-          "weather",
-          "lat51.391900_lon11.878700__2013-01-01_2023-12-31__weather.txt"
-        )
+          # Load default "Example" data using unified loader
+          default_data <- load_grassland_simulation_data(
+            run_dir = file.path(config$get("data_path"), "grassland"),
+            lat = 51.3919,
+            lon = 11.8787,
+            start_year = 2013,
+            end_year = 2015,
+            run_number = 0
+          )
 
-        colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
-        colors_for_grass_lighter <- c("#73eb9b", "#e28bb7", "#998be2")
-        colors_for_weather <- c("#0072B2", "#ae4d18", "#956618", "#108039", "#56B4E9")
-        end_date <- "2015-12-31"
+          # Update shared simulation data
+          current_simulation_data(default_data)
 
-        chart_reactive <- reactive({
-          if (plot_type() == "bar") {
-            generate_chart_bars_mean(
-              filepaths_grass = files_grass,
-              filepath_weather = file_weather,
-              colors_for_grass = colors_for_grass,
-              colors_for_weather = colors_for_weather,
-              grass_end_date = end_date,
-              i18n
-            )
-          } else if (plot_type() == "line") {
-            generate_chart_lines(
-              filepaths_grass = files_grass,
-              filepath_weather = file_weather,
-              colors_for_grass = colors_for_grass_lighter,
-              colors_for_weather = colors_for_weather,
-              grass_end_date = end_date,
-              i18n
-            )
-          } else if (plot_type() == "line_mean") {
-            generate_chart_lines_mean(
-              filepaths_grass = files_grass,
-              filepath_weather = file_weather,
-              colors_for_grass = colors_for_grass,
-              colors_for_weather = colors_for_weather,
-              grass_end_date = end_date,
-              i18n
-            )
-          }
-        })
+          colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
+          colors_for_grass_lighter <- c("#73eb9b", "#e28bb7", "#998be2")
+          colors_for_weather <- c("#0072B2", "#ae4d18", "#956618", "#108039", "#56B4E9")
 
-        output$multichart <- ecs.render(
-          chart_reactive()
-        )
-        w$hide()
+          chart_reactive <- reactive({
+            if (plot_type() == "bar") {
+              generate_chart_bars_mean(
+                filepaths_grass = default_data$metadata$grass_files,
+                filepath_weather = default_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = default_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            } else if (plot_type() == "line") {
+              generate_chart_lines(
+                filepaths_grass = default_data$metadata$grass_files,
+                filepath_weather = default_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass_lighter,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = default_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            } else if (plot_type() == "line_mean") {
+              generate_chart_lines_mean(
+                filepaths_grass = default_data$metadata$grass_files,
+                filepath_weather = default_data$metadata$weather_file,
+                colors_for_grass = colors_for_grass,
+                colors_for_weather = colors_for_weather,
+                grass_end_date = default_data$metadata$grass_end_date,
+                i18n = i18n
+              )
+            }
+          })
+
+          output$multichart <- ecs.render(
+            chart_reactive()
+          )
+          w$hide()
+        }
       }
     )
   })

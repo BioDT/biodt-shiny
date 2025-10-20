@@ -5,7 +5,8 @@ box::use(
 
 #' @export
 get_time <- function(
-    file) {
+  file
+) {
   time <- read_delim(
     file = file,
     skip = 0,
@@ -22,5 +23,7 @@ get_time <- function(
     )
   ) |>
     pull(Date) |>
-    unique()
+    unique() |>
+    as.character() |>
+    as.list()
 }
