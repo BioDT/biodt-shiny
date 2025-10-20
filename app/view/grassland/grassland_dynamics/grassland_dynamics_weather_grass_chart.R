@@ -12,14 +12,6 @@ box::use(
   app / logic / grassland / grassland_multichart_bars_stack[generate_chart_bars_mean],
   app / logic / grassland / grassland_multichart_lines_mean[generate_chart_lines_mean],
   app / logic / grassland / grassland_load_simulation_data[load_grassland_simulation_data],
-  app /
-    logic /
-    grassland /
-    grassland_multichart_from_data[
-      generate_chart_bars_mean_from_data,
-      generate_chart_lines_from_data,
-      generate_chart_lines_mean_from_data
-    ],
   app / logic / waiter[waiter_text],
 )
 
