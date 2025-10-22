@@ -17,19 +17,22 @@ box::use(
     req,
     updateNumericInput,
     showNotification,
-    debounce
+    debounce,
+    tagList
   ],
   bslib[card, card_header, card_body, layout_column_wrap],
   shinyjs[toggle, hidden],
   htmltools[as.tags, tags, HTML],
   stringr[str_replace],
   config,
+  waiter[Waiter],
 )
 
 box::use(
   app / logic / deimsid_coordinates[get_coords_deimsid],
   app / logic / translate_multiple_choices[translate_multiple_choices],
   app / logic / grassland / k8s[create_and_wait_k8s_job],
+  app / logic / waiter[waiter_text],
 )
 
 #' @export
@@ -128,6 +131,24 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
   # nolint
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    # Define waiter ----
+    msg <- waiter_text(
+      message = tagList(
+        tags$h3(i18n$translate("Computing grassland simulation..."), style = "color: #414f2f;"),
+        tags$br(),
+        tags$h4(i18n$translate("This operation takes some time."), style = "color: #414f2f;"),
+        tags$h4(
+          i18n$translate("Please do not close the tab during this time. You can browse other tabs."),
+          style = "color: #414f2f;"
+        )
+      ),
+    )
+
+    w <- Waiter$new(
+      html = msg,
+      color = "rgba(256,256,256,0.9)"
+    )
 
     # translates radio buttons - choosing an input type of location ----
     observe({
@@ -301,6 +322,9 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
     observeEvent(
       input$run_simulation,
       {
+        # Start waiter ----
+        w$show()
+
         # Check data ----
         req(input$lat, input$lng, input$start_year, input$end_year)
 
@@ -327,50 +351,50 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
 
         run_id <- counter()
 
-        if (config$get("executor") == "docker") {
-          host_base_path <- config$get("host_base_path")
-          if (!is.null(host_base_path)) {
-            mount_dir <- str_replace(run_dir, temp_dir, host_base_path)
-          } else {
-            mount_dir <- run_dir
-          }
+        tryCatch(
+          {
+            if (config$get("executor") == "docker") {
+              host_base_path <- config$get("host_base_path")
+              if (!is.null(host_base_path)) {
+                mount_dir <- str_replace(run_dir, temp_dir, host_base_path)
+              } else {
+                mount_dir <- run_dir
+              }
 
-          docker_call <- paste0(
-            'docker run -v "',
-            mount_dir,
-            '":"/output"',
-            " -e LAT=",
-            input$lat,
-            " -e LON=",
-            input$lng,
-            " -e startYear=",
-            input$start_year,
-            " -e endYear=",
-            input$end_year,
-            " -e DEIMS=",
-            input$deimsid,
-            " -e CDSAPI_URL=",
-            config$get("cdsapi_url"),
-            " -e CDSAPI_KEY=",
-            config$get("cdsapi_key"),
-            ' --entrypoint /bin/bash',
-            ' grassmind-simulation',
-            ' -c "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"'
-          )
-          print(paste("Executing Docker command:", docker_call))
-          system(docker_call)
-        } else if (config$get("executor") == "k8s") {
-          data_subpath <- stringr::str_remove(
-            run_dir,
-            paste0(config$get("base_path"), "/")
-          )
+              docker_call <- paste0(
+                'docker run -v "',
+                mount_dir,
+                '":"/output"',
+                " -e LAT=",
+                input$lat,
+                " -e LON=",
+                input$lng,
+                " -e startYear=",
+                input$start_year,
+                " -e endYear=",
+                input$end_year,
+                " -e DEIMS=",
+                input$deimsid,
+                " -e CDSAPI_URL=",
+                config$get("cdsapi_url"),
+                " -e CDSAPI_KEY=",
+                config$get("cdsapi_key"),
+                ' --entrypoint /bin/bash',
+                ' grassmind-simulation',
+                ' -c "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"'
+              )
+              print(paste("Executing Docker command:", docker_call))
+              system(docker_call)
+            } else if (config$get("executor") == "k8s") {
+              data_subpath <- stringr::str_remove(
+                run_dir,
+                paste0(config$get("base_path"), "/")
+              )
 
-          print(paste("Executing Kubernetes job for run_id:", run_id))
-          print(paste("Data subpath:", data_subpath))
+              print(paste("Executing Kubernetes job for run_id:", run_id))
+              print(paste("Data subpath:", data_subpath))
 
-          # Call k8s workflow
-          tryCatch(
-            {
+              # Call k8s workflow
               create_and_wait_k8s_job(
                 data_subpath = data_subpath,
                 run_id = run_id,
@@ -383,22 +407,24 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
                 cdsapi_key = config$get("cdsapi_key")
               )
               print("Kubernetes job completed successfully.")
-            },
-            error = function(e) {
-              error_msg <- paste("Kubernetes job failed:", e$message)
-              print(error_msg)
-              showNotification(
-                error_msg,
-                type = "error",
-                duration = 10
-              )
-              stop(error_msg)
+            } else {
+              stop("Invalid executor type: ", config$get("executor"))
             }
-          )
-        } else {
-          stop("Invalid executor type: ", config$get("executor"))
-        }
-        print("Workflow execution completed.")
+            print("Workflow execution completed.")
+          },
+          error = function(e) {
+            error_msg <- paste("Simulation failed:", e$message)
+            print(error_msg)
+            showNotification(
+              error_msg,
+              type = "error",
+              duration = 10
+            )
+            # Hide waiter on error
+            w$hide()
+            stop(error_msg)
+          }
+        )
 
         # Add to available runs list
         run_id_key <- paste0("run_", counter())
@@ -425,6 +451,9 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
         available_runs(runs)
 
         print(paste("Added run to available_runs list:", run_id_key))
+
+        # Hide waiter ----
+        w$hide()
       }
     )
 
