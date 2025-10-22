@@ -56,7 +56,6 @@ rtbm_main_server <- function(id, i18n) {
       input$tab,
       ignoreInit = TRUE,
       {
-        print(input$tab)
         tab(input$tab)
       }
     )

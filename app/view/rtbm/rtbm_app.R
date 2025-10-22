@@ -316,6 +316,7 @@ rtbm_app_server <- function(id, tab_selected, i18n) {
     # React to date range changes from sidebar to update available_dates
     observeEvent(
       sidebar_returns$date_range(),
+      ignoreInit = TRUE,
       {
         req(sidebar_returns$date_range())
         start_date <- sidebar_returns$date_range()[1]

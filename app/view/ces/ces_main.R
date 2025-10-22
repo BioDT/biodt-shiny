@@ -77,13 +77,12 @@ ces_server <- function(id, i18n, language_change) {
       input$tab,
       ignoreInit = TRUE,
       {
-        print(input$tab)
         # Check if the tab matches any of the specified tabs
         if (
           !ces_selected() &&
             (input$tab == "CES")
           # || input$tab == "Recreation potential" ||
-          # input$tab == "Biodiversity"
+          # || input$tab == "Biodiversity"
         ) {
           # Set ces_selected to TRUE if it's not already TRUE
           ces_selected(TRUE)

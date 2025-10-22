@@ -58,13 +58,11 @@ forest_main_server <- function(id, i18n) {
     observeEvent(
       input$tab,
       {
-        print(input$tab)
         if (input$tab == "App") {
           app_selected(TRUE)
         } else {
           app_selected(FALSE)
         }
-        print(app_selected())
       }
     )
 
