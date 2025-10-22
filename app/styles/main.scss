@@ -578,3 +578,54 @@
     overflow-y: auto;
   }
 }
+
+/* Translation warning banner */
+.translation-banner {
+  position: relative;
+  width: 100%;
+  background-color: #fff3cd;
+  border-bottom: 2px solid #ffc107;
+  padding: 12px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  .translation-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .translation-banner-icon {
+    color: #dc3545;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .translation-banner-text {
+    flex: 1;
+    color: #856404;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+  
+  .translation-banner-close {
+    background-color: #414f2f;
+    border: none;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+    
+    &:hover {
+      background-color: #556b2f;
+    }
+  }
+}

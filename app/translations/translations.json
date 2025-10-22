@@ -14109,6 +14109,40 @@
 			"sl": ") ali najboljše ugibanja.",
 			"bg": ") или най-добри предположения.",
 			"el": ") ή οι καλύτερες εικασίες."
+		},
+		{
+			"en": "Translations are AI-generated and have not been validated by native speakers.",
+			"cz": "Překlady jsou generovány AI a nebyly ověřeny rodilými mluvčími.",
+			"fi": "Käännökset ovat tekoälyn tuottamia, eivätkä äidinkieliset puhujat ole vahvistaneet niitä.",
+			"it": "Le traduzioni sono generate dall'IA e non sono state validate da madrelingua.",
+			"nl": "Vertalingen zijn AI-gegenereerd en niet gevalideerd door moedertaalsprekers.",
+			"est": "Tõlked on AI poolt loodud ja neid ei ole emakeelsed kõnelejad kinnitanud.",
+			"sv": "Översättningar är AI-genererade och har inte validerats av modersmålstalare.",
+			"de": "Übersetzungen sind KI-generiert und wurden nicht von Muttersprachlern validiert.",
+			"no": "Oversettelser er AI-genererte og har ikke blitt validert av morsmålsbrukere.",
+			"da": "Oversættelser er AI-genererede og er ikke blevet valideret af modersmålstalende.",
+			"es": "Las traducciones son generadas por IA y no han sido validadas por hablantes nativos.",
+			"pt": "As traduções são geradas por IA e não foram validadas por falantes nativos.",
+			"sl": "Prevodi so ustvarjeni z AI in niso bili potrjeni s strani maternih govorcev.",
+			"bg": "Преводите са генерирани от AI и не са валидирани от родни говорители.",
+			"el": "Οι μεταφράσεις δημιουργούνται από AI και δεν έχουν επικυρωθεί από μητρικούς ομιλητές."
+		},
+		{
+			"en": "Dismiss",
+			"cz": "Zavřít",
+			"fi": "Sulje",
+			"it": "Chiudi",
+			"nl": "Sluiten",
+			"est": "Sulge",
+			"sv": "Stäng",
+			"de": "Schließen",
+			"no": "Lukk",
+			"da": "Luk",
+			"es": "Cerrar",
+			"pt": "Fechar",
+			"sl": "Zapri",
+			"bg": "Затвори",
+			"el": "Κλείσιμο"
 		}
 	]
 }

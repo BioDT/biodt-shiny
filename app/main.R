@@ -107,6 +107,36 @@ ui <- function(id) {
       color = "rgba(256,256,256,0.9)"
     ),
     includeScript("app/js/popover.js"),
+    includeScript("app/js/translation-banner.js"),
+    # Translation warning banner ----
+    shiny$tags$div(
+      id = "translation-warning-banner",
+      class = "translation-banner",
+      style = "display: none;",
+      shiny$tags$div(
+        class = "translation-banner-content",
+        shiny$tags$span(
+          class = "translation-banner-icon",
+          shiny$icon("triangle-exclamation")
+        ),
+        shiny$tags$span(
+          id = ns("translation-banner-text"),
+          class = "translation-banner-text",
+          paste0(
+            "⚠️ ",
+            i18n$translate(
+              "Translations are AI-generated and have not been validated by native speakers. We are working on solution for community translation."
+            )
+          )
+        ),
+        shiny$tags$button(
+          id = ns("translation-banner-dismiss"),
+          class = "translation-banner-close",
+          onclick = "dismissTranslationBanner()",
+          i18n$translate("Dismiss")
+        )
+      )
+    ),
     # Body ----
     # Main navbar----
     page_navbar(
@@ -280,18 +310,16 @@ ui <- function(id) {
         class = "container-fluid index-info",
         mod_acknowledgements_ui("info", i18n)
       ),
-      if (env_active == "dev") {
-        nav_item(
-          style = "padding: 0; height: 30px;",
-          shiny$selectInput(
-            ns("selected_language"),
-            label = NULL,
-            choices = pairs_lang_flag,
-            selected = i18n$get_key_translation(),
-            width = "75px"
-          ),
-        )
-      }
+      nav_item(
+        style = "padding: 0; height: 30px;",
+        shiny$selectInput(
+          ns("selected_language"),
+          label = NULL,
+          choices = pairs_lang_flag,
+          selected = i18n$get_key_translation(),
+          width = "75px"
+        ),
+      )
     )
   )
 }
@@ -323,6 +351,22 @@ server <- function(id) {
       shinyjs::runjs(sprintf("document.documentElement.lang = '%s';", input$selected_language))
 
       language_change(input$selected_language)
+
+      # Update banner text with translated content
+      banner_text <- paste0(
+        "⚠️ ",
+        i18n$translate("Translations are AI-generated and have not been validated by native speakers.")
+      )
+      dismiss_text <- i18n$translate("Dismiss")
+      shinyjs::html("translation-banner-text", banner_text)
+      shinyjs::html("translation-banner-dismiss", dismiss_text)
+
+      # Show translation banner for non-English languages
+      if (input$selected_language != "en") {
+        shinyjs::runjs("showTranslationBanner();")
+      } else {
+        shinyjs::runjs("hideTranslationBanner();")
+      }
     })
 
     # Info page ----
