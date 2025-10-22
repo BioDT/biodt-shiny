@@ -29,6 +29,7 @@ box::use(
 box::use(
   app / logic / deimsid_coordinates[get_coords_deimsid],
   app / logic / translate_multiple_choices[translate_multiple_choices],
+  app / logic / grassland / k8s[create_and_wait_k8s_job],
 )
 
 #' @export
@@ -363,7 +364,37 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
             run_dir,
             paste0(config$get("base_path"), "/")
           )
-          # Call k8s workflow here
+
+          print(paste("Executing Kubernetes job for run_id:", run_id))
+          print(paste("Data subpath:", data_subpath))
+
+          # Call k8s workflow
+          tryCatch(
+            {
+              create_and_wait_k8s_job(
+                data_subpath = data_subpath,
+                run_id = run_id,
+                lat = input$lat,
+                lon = input$lng,
+                start_year = input$start_year,
+                end_year = input$end_year,
+                deimsid = input$deimsid,
+                cdsapi_url = config$get("cdsapi_url"),
+                cdsapi_key = config$get("cdsapi_key")
+              )
+              print("Kubernetes job completed successfully.")
+            },
+            error = function(e) {
+              error_msg <- paste("Kubernetes job failed:", e$message)
+              print(error_msg)
+              showNotification(
+                error_msg,
+                type = "error",
+                duration = 10
+              )
+              stop(error_msg)
+            }
+          )
         } else {
           stop("Invalid executor type: ", config$get("executor"))
         }
