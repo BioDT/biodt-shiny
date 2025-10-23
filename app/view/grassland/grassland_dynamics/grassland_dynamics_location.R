@@ -269,7 +269,18 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
     coordinates <- reactiveVal()
 
     # Track available simulation runs
-    available_runs <- reactiveVal(list())
+    # Initialize with default run
+    available_runs <- reactiveVal(list(
+      default = list(
+        run_dir = file.path(config$get("data_path"), "grassland"),
+        lat = 51.3919,
+        lon = 11.8787,
+        start_year = 2018,
+        end_year = 2024,
+        run_number = 0,
+        label = "Default (Halle, Germany 2018-2024)"
+      )
+    ))
 
     # Prepare directory for results ----
     # Making a grassland dir in the shared folder
