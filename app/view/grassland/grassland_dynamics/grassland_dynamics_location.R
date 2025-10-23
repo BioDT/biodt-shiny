@@ -391,7 +391,7 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
                 " -e CDSAPI_KEY=",
                 config$get("cdsapi_key"),
                 ' --entrypoint /bin/bash',
-                ' grassmind-simulation',
+                ' ghcr.io/biodt/uc-grassland',
                 ' -c "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"'
               )
 
