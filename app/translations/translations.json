@@ -14143,6 +14143,57 @@
 			"sl": "Zapri",
 			"bg": "Затвори",
 			"el": "Κλείσιμο"
+		},
+		{
+			"en": "Download results",
+			"cz": "Stáhnout výsledky",
+			"fi": "Lataa tulokset",
+			"it": "Scarica i risultati",
+			"nl": "Download resultaten",
+			"est": "Laadi tulemused alla",
+			"sv": "Ladda ner resultat",
+			"de": "Ergebnisse herunterladen",
+			"no": "Last ned resultater",
+			"da": "Download resultater",
+			"es": "Descargar resultados",
+			"pt": "Baixar resultados",
+			"sl": "Prenesi rezultate",
+			"bg": "Изтегли резултати",
+			"el": "Λήψη αποτελεσμάτων"
+		},
+		{
+			"en": "Error: No files found",
+			"cz": "Chyba: Žádné soubory nenalezeny",
+			"fi": "Virhe: Tiedostoja ei löytynyt",
+			"it": "Errore: Nessun file trovato",
+			"nl": "Fout: Geen bestanden gevonden",
+			"est": "Viga: Faile ei leitud",
+			"sv": "Fel: Inga filer hittades",
+			"de": "Fehler: Keine Dateien gefunden",
+			"no": "Feil: Ingen filer funnet",
+			"da": "Fejl: Ingen filer fundet",
+			"es": "Error: No se encontraron archivos",
+			"pt": "Erro: Nenhum arquivo encontrado",
+			"sl": "Napaka: Nobene datoteke niso bile najdene",
+			"bg": "Грешка: Не са намерени файлове",
+			"el": "Σφάλμα: Δεν βρέθηκαν αρχεία"
+		},
+		{
+			"en": "Please report this issue on ",
+			"cz": "Prosím nahlaste tento problém na ",
+			"fi": "Ilmoita tästä ongelmasta osoitteessa ",
+			"it": "Si prega di segnalare questo problema su ",
+			"nl": "Meld dit probleem op ",
+			"est": "Palun teata sellest probleemist aadressil ",
+			"sv": "Rapportera detta problem på ",
+			"de": "Bitte melden Sie dieses Problem auf ",
+			"no": "Vennligst rapporter dette problemet på ",
+			"da": "Venligst rapporter dette problem på ",
+			"es": "Por favor, informe de este problema en ",
+			"pt": "Por favor, relate este problema em ",
+			"sl": "Prosimo, prijavite to težavo na ",
+			"bg": "Моля, докладвайте този проблем на ",
+			"el": "Παρακαλούμε αναφέρετε αυτό το πρόβλημα στο "
 		}
 	]
 }

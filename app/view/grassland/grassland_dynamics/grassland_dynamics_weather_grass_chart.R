@@ -1,10 +1,26 @@
 box::use(
-  shiny[NS, moduleServer, tags, reactive, observeEvent, selectInput, actionButton, updateSelectInput, req, reactiveVal],
+  shiny[
+    NS,
+    moduleServer,
+    tags,
+    reactive,
+    observeEvent,
+    selectInput,
+    actionButton,
+    updateSelectInput,
+    req,
+    reactiveVal,
+    downloadHandler,
+    downloadButton,
+    showNotification,
+    icon
+  ],
   bslib[card, card_header, card_body, layout_column_wrap],
   echarty[ecs.output, ecs.render],
   waiter[Waiter],
   config,
   stats[setNames],
+  zip[zip],
 )
 
 box::use(
@@ -36,7 +52,7 @@ grassland_dynamics_double_chart_ui <- function(
     card_body(
       style = "min-width: 900px !important; overflow-x: scroll;",
       layout_column_wrap(
-        width = 1 / 2,
+        width = 1 / 3,
         selectInput(
           ns("output_list"),
           label = i18n$translate("Choose output dataset"),
@@ -45,6 +61,11 @@ grassland_dynamics_double_chart_ui <- function(
         actionButton(
           ns("update_output"),
           label = i18n$translate("Show results"),
+          class = "mt-auto"
+        ),
+        downloadButton(
+          ns("download_results"),
+          label = i18n$translate("Download results"),
           class = "mt-auto"
         )
       ),
@@ -247,6 +268,73 @@ grassland_dynamics_double_chart_server <- function(
         }
 
         w$hide()
+      }
+    )
+
+    # Download handler for results ----
+    output$download_results <- downloadHandler(
+      filename = function() {
+        selected_run <- input$output_list
+        if (selected_run == "default") {
+          paste0("grassland_default_results_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".zip")
+        } else {
+          runs <- available_runs()
+          run_meta <- runs[[selected_run]]
+          paste0("grassland_run_", run_meta$run_number, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".zip")
+        }
+      },
+      content = function(file) {
+        # Show waiter while preparing download
+        w$show()
+
+        tryCatch(
+          {
+            selected_run <- input$output_list
+
+            # Determine the directory to zip
+            if (selected_run == "default") {
+              dir_to_zip <- file.path(config$get("data_path"), "grassland")
+            } else {
+              runs <- available_runs()
+              run_meta <- runs[[selected_run]]
+              dir_to_zip <- run_meta$run_dir
+            }
+
+            # Create zip file
+            files_to_zip <- list.files(dir_to_zip, recursive = TRUE)
+
+            if (length(files_to_zip) > 0) {
+              zip::zip(
+                zipfile = file,
+                files = files_to_zip,
+                root = dir_to_zip
+              )
+            } else {
+              # Show error notification if no files found
+              showNotification(
+                ui = tags$div(
+                  tags$strong(i18n$t("Error: No files found")),
+                  tags$br(),
+                  i18n$t("Please report this issue on "),
+                  tags$a(
+                    "Github",
+                    icon("github"),
+                    href = "https://github.com/BioDT/biodt-shiny/issues",
+                    target = "_blank"
+                  ),
+                  "."
+                ),
+                type = "error",
+                duration = 10
+              )
+              # Create empty zip to prevent download error
+              file.create(file)
+            }
+          },
+          finally = {
+            w$hide()
+          }
+        )
       }
     )
 
