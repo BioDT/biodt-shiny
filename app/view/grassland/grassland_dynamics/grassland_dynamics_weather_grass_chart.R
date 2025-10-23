@@ -77,59 +77,51 @@ grassland_dynamics_double_chart_server <- function(
       color = "rgba(256,256,256,0.9)",
     )
 
-    # Track previous run count to detect new runs
-    previous_run_count <- reactiveVal(0)
-
     # Update dropdown choices when available_runs changes ----
-    observeEvent(available_runs(), {
-      runs <- available_runs()
+    observeEvent(
+      available_runs(),
+      priority = 1000,
+      {
+        runs <- available_runs()
 
-      if (length(runs) > 0) {
-        # Build choices list with default + simulation runs
-        choices <- c("Default (project1)" = "default")
-        for (run_id in names(runs)) {
-          run_meta <- runs[[run_id]]
-          choices <- c(choices, setNames(run_id, run_meta$label))
+        if (length(runs) > 0) {
+          # Build choices list with default + simulation runs
+          choices <- c("Default (project1)" = "default")
+          for (run_id in names(runs)) {
+            run_meta <- runs[[run_id]]
+            choices <- c(choices, setNames(run_id, run_meta$label))
+          }
+
+          # Store the most recent run ID for auto-load
+          most_recent_run <- names(runs)[length(runs)]
+
+          # Update selectInput choices
+          updateSelectInput(
+            session,
+            "output_list",
+            choices = choices,
+            selected = most_recent_run # Select most recent run
+          )
         }
-
-        # Store the most recent run ID for auto-load
-        most_recent_run <- names(runs)[length(runs)]
-
-        updateSelectInput(
-          session,
-          "output_list",
-          choices = choices,
-          selected = most_recent_run # Select most recent run
-        )
-
-        # Auto-load if this is a NEW run (not initial load)
-        if (length(runs) > previous_run_count() && previous_run_count() > 0) {
-          print(paste("New run detected! Count went from", previous_run_count(), "to", length(runs)))
-          print(paste("Auto-loading run:", most_recent_run))
-
-          # Small delay to ensure dropdown is updated
-          shiny::invalidateLater(300)
-        }
-
-        previous_run_count(length(runs))
       }
+    )
+
+    update_data <- reactive({
+      input$update_output
+      input$output_list
     })
 
-    # Load data when button is clicked OR when available_runs changes (new run) ----
+    # Load data when button is clicked OR when auto_load_trigger changes ----
     observeEvent(
       {
-        input$update_output
-        available_runs()
+        update_data()
       },
       ignoreInit = TRUE, # Don't trigger on initial reactive setup
       {
         req(input$output_list)
-
         w$show()
 
         selected_run <- input$output_list
-
-        print(paste("Loading data for:", selected_run))
 
         if (selected_run == "default") {
           # Load default "Example" data using unified loader
@@ -145,19 +137,12 @@ grassland_dynamics_double_chart_server <- function(
 
           # Check if data loaded successfully
           if (is.null(default_data$grass_output) || is.null(default_data$weather_data)) {
-            print("Warning: Failed to load default project1 data")
             w$hide()
             return()
           }
 
           # Update shared simulation data for data tables
           current_simulation_data(default_data)
-
-          # Debug: print what we're passing
-          print(paste("Number of grass files:", length(default_data$metadata$grass_files)))
-          print(paste("Weather file:", default_data$metadata$weather_file))
-          print(paste("End date:", default_data$metadata$grass_end_date))
-          print(paste("End date class:", class(default_data$metadata$grass_end_date)))
 
           # Generate charts using original functions with file paths
           colors_for_grass <- c("#18A547", "#AF2C6E", "#422CAF")
@@ -215,14 +200,9 @@ grassland_dynamics_double_chart_server <- function(
 
           # Check if data loaded successfully
           if (is.null(sim_data$grass_output) || is.null(sim_data$weather_data)) {
-            print("Warning: Failed to load complete simulation data")
             w$hide()
             return()
           }
-
-          print(paste("Loaded simulation data for run:", selected_run))
-          print(paste("Grass output rows:", nrow(sim_data$grass_output)))
-          print(paste("Weather data series:", length(sim_data$weather_data)))
 
           # Update shared simulation data for data tables
           current_simulation_data(sim_data)
