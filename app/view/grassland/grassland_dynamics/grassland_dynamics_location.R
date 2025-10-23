@@ -394,7 +394,7 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
                 ' grassmind-simulation',
                 ' -c "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"'
               )
-              print(paste("Executing Docker command:", docker_call))
+
               system(docker_call)
             } else if (config$get("executor") == "k8s") {
               data_subpath <- stringr::str_remove(
