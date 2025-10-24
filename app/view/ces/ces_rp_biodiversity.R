@@ -376,62 +376,97 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
           alpha = 0.8
         ))
 
-        species_files_list(list.files(paste0(ces_path, "/sdms"), full.names = TRUE))
+        species_files_list(
+          if (dir.exists(paste0(ces_path, "/sdms"))) {
+            list.files(paste0(ces_path, "/sdms"), full.names = TRUE)
+          } else {
+            character(0)
+          }
+        )
+
+        # Load SDM files list
         species_ids_list(
-          list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
-            purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
-        )
-        cairngorms_species_list_full(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
-        # Load key files
-        key_files_list <- list(
-          cairngorms_sp_list = read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")),
-          files_and_ids = data.frame(
-            files = list.files(paste0(ces_path, "/sdms"), full.names = TRUE),
-            ids = list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
+          if (dir.exists(paste0(ces_path, "/sdms"))) {
+            list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
               purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
-          ),
-          hard_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif")),
-          soft_rec = terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
+          } else {
+            character(0)
+          }
         )
 
-        key_files(key_files_list)
+        # Load species list if file exists
+        if (file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))) {
+          cairngorms_species_list_full(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
 
-        soft_rec_vals <- terra::values(key_files()$soft_rec)
-        soft_rec_filtered <- ifelse(
-          soft_rec_vals >= input$recreation_potential_slider,
-          soft_rec_vals,
-          NA
-        )
+          # Load key files
+          key_files_list <- list(
+            cairngorms_sp_list = read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")),
+            files_and_ids = data.frame(
+              files = if (dir.exists(paste0(ces_path, "/sdms"))) {
+                list.files(paste0(ces_path, "/sdms"), full.names = TRUE)
+              } else {
+                character(0)
+              },
+              ids = if (dir.exists(paste0(ces_path, "/sdms"))) {
+                list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
+                  purrr::map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
+              } else {
+                character(0)
+              }
+            ),
+            hard_rec = if (file.exists(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))) {
+              terra::rast(paste0(ces_path, "/RP_maps/rec_hard_new.tif"))
+            } else {
+              NULL
+            },
+            soft_rec = if (file.exists(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))) {
+              terra::rast(paste0(ces_path, "/RP_maps/rec_soft_new.tif"))
+            } else {
+              NULL
+            }
+          )
 
-        # duplicate the raster adn replace with the hard and soft recreation values
-        soft_rec_filtered_raster <- key_files()$soft_rec
-        terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
+          key_files(key_files_list)
 
-        rec_pot_map_plot <- ces_leaflet_map(
-          recre_palette = recreation_pal,
-          biodiversity_palette = biodiversity_pal,
-          rec_opacity = recreation_alpha,
-          soft_rec_filt = soft_rec_filtered_raster
-        )
+          if (!is.null(key_files()$soft_rec)) {
+            soft_rec_vals <- terra::values(key_files()$soft_rec)
+            soft_rec_filtered <- ifelse(
+              soft_rec_vals >= input$recreation_potential_slider,
+              soft_rec_vals,
+              NA
+            )
 
-        rec_pot_map(rec_pot_map_plot)
+            # duplicate the raster and replace with the hard and soft recreation values
+            soft_rec_filtered_raster <- key_files()$soft_rec
+            terra::values(soft_rec_filtered_raster) <- soft_rec_filtered
 
-        # pre-load Cairngorms's list of species
-        species_include(
-          cairngorms_species_list_full() |>
-            mutate(in_group = (cairngorms_species_list_full() |> pull("all")))
-        )
+            rec_pot_map_plot <- ces_leaflet_map(
+              recre_palette = recreation_pal,
+              biodiversity_palette = biodiversity_pal,
+              rec_opacity = recreation_alpha,
+              soft_rec_filt = soft_rec_filtered_raster
+            )
 
-        # make species_selector combobox button disable on CES init
-        runjs(paste0(
+            rec_pot_map(rec_pot_map_plot)
+          }
+
+          # pre-load Cairngorms's list of species
+          species_include(
+            cairngorms_species_list_full() |>
+              mutate(in_group = (cairngorms_species_list_full() |> pull("all")))
+          )
+
+          # make species_selector combobox button disable on CES init
+          runjs(paste0(
+            '
+            let species_selector = document.getElementById("',
+            ns("species_selector"),
+            '")
+            let species_selector_btn = species_selector.nextElementSibling
+            species_selector_btn.disabled = true
           '
-          let species_selector = document.getElementById("',
-          ns("species_selector"),
-          '")
-          let species_selector_btn = species_selector.nextElementSibling
-          species_selector_btn.disabled = true
-        '
-        ))
+          ))
+        }
 
         print("First time CES opened")
         w$hide()
@@ -448,9 +483,15 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
       {
         runjs(paste0(
           "
-            App.fixTooltip('", ns("toggleSliders"), "');
-            App.fixTooltip('", ns("toggleSpecies"), "');
-            App.fixTooltip('", ns("toggleMaps"), "');
+            App.fixTooltip('",
+          ns("toggleSliders"),
+          "');
+            App.fixTooltip('",
+          ns("toggleSpecies"),
+          "');
+            App.fixTooltip('",
+          ns("toggleMaps"),
+          "');
           "
         ))
         update_lang(language_change())

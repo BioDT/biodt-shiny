@@ -9,6 +9,7 @@ box::use(
     textOutput,
     observeEvent,
     reactive,
+    reactiveVal,
     renderText,
     observe,
     req,
@@ -125,7 +126,7 @@ ces_biodiversity_ui <- function(id, i18n) {
 }
 
 #' @export
-ces_biodiversity_server <- function(id, i18n) {
+ces_biodiversity_server <- function(id, ces_selected, i18n) {
   moduleServer(id, function(input, output, session) {
     msg <-
       waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
@@ -154,63 +155,90 @@ ces_biodiversity_server <- function(id, i18n) {
       )
     })
 
-    # Load the species list if the file exists, otherwise show an error notification
-    if (file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))) {
-      cairngorms_sp_list <- read.csv(paste0(ces_path, "/cairngorms_sp_list.csv"))
-    } else {
-      showNotification(
-        paste0(i18n$t("File missing: "), paste0(ces_path, "/cairngorms_sp_list.csv")),
-        type = "error",
-        closeButton = TRUE,
-        duration = NULL
-      )
-    }
+    # Initialize species list as reactiveVal
+    cairngorms_sp_list <- reactiveVal(NULL)
+
+    # Load the species list when CES tab is opened
+    observeEvent(ces_selected(), {
+      if (ces_selected() && is.null(cairngorms_sp_list())) {
+        if (file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))) {
+          cairngorms_sp_list(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
+        } else {
+          showNotification(
+            paste0(i18n$t("File missing: "), paste0(ces_path, "/cairngorms_sp_list.csv")),
+            type = "error",
+            closeButton = TRUE,
+            duration = NULL
+          )
+        }
+      }
+    })
 
     # List all SDM (Species Distribution Models) files and extract taxon IDs from filenames
-    all_sdm_files <- list.files(paste0(ces_path, "/sdms"), full.names = TRUE)
-    taxon_ids_from_file_names <- list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
-      map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
+    all_sdm_files <- reactive({
+      if (!dir.exists(paste0(ces_path, "/sdms"))) {
+        return(character(0))
+      }
+      list.files(paste0(ces_path, "/sdms"), full.names = TRUE)
+    })
+
+    taxon_ids_from_file_names <- reactive({
+      if (!dir.exists(paste0(ces_path, "/sdms"))) {
+        return(character(0))
+      }
+      list.files(paste0(ces_path, "/sdms"), full.names = FALSE) |>
+        map_chr(~ gsub("prediction_(\\d+)_.*", "\\1", .x))
+    })
 
     # Combine files and their corresponding taxon IDs into a data frame
-    files_and_ids <- data.frame(files = all_sdm_files, ids = taxon_ids_from_file_names)
+    files_and_ids <- reactive({
+      data.frame(files = all_sdm_files(), ids = taxon_ids_from_file_names())
+    })
 
     # Reactive expression to filter selected species based on user input
     selected_species <- reactive({
       req(input$radio_group_select)
-      cairngorms_sp_list[cairngorms_sp_list[, input$radio_group_select] == TRUE, ]
+      sp_list <- cairngorms_sp_list()
+      req(sp_list)
+      sp_list[sp_list[, input$radio_group_select] == TRUE, ]
     })
 
     # Reactive expression to get the bounding box from the map input
-    bounding_box <- reactive({
-      # bounds <- input$sp_map_bounds
-      # req(bounds)
-      # ext(c(bounds$west, bounds$east, bounds$south, bounds$north)) |>
-      #   as.polygons(crs = "+proj=longlat")
+    bounding_box <-
       ext(c(-4.5, -2.5, 56, 57.5)) |>
-        as.polygons(crs = "+proj=longlat")
-    })
+      as.polygons(crs = "+proj=longlat")
 
     # Reactive expression to load and filter SDM rasters based on selected species
     sdm_rasts <- reactive({
+      req(selected_species())
       ids <- selected_species()$speciesKey
-      sdm_files <- files_and_ids$files[files_and_ids$ids %in% ids]
+      files_data <- files_and_ids()
+      sdm_files <- files_data$files[files_data$ids %in% ids]
+      if (length(sdm_files) == 0) {
+        return(NULL)
+      }
       sdm_rasts <- rast(sdm_files)[[names(rast(sdm_files)) == "constrained"]]
-      names(sdm_rasts) <- files_and_ids$ids[files_and_ids$ids %in% ids]
+      names(sdm_rasts) <- files_data$ids[files_data$ids %in% ids]
       sdm_rasts
     })
 
     # Reactive expression to load and filter gap rasters based on selected species
     gap_rasts <- reactive({
+      req(selected_species())
       ids <- selected_species()$speciesKey
-      sdm_files <- files_and_ids$files[files_and_ids$ids %in% ids]
+      files_data <- files_and_ids()
+      sdm_files <- files_data$files[files_data$ids %in% ids]
+      if (length(sdm_files) == 0) {
+        return(NULL)
+      }
       gap_rasts <- rast(sdm_files)[[names(rast(sdm_files)) == "suitable_unrecorded"]]
-      names(gap_rasts) <- files_and_ids$ids[files_and_ids$ids %in% ids]
+      names(gap_rasts) <- files_data$ids[files_data$ids %in% ids]
       gap_rasts
     })
 
     # Reactive expression to compute the total SDM raster by averaging and filtering values
     sdm_rast_total <- reactive({
-      req(input$radio_group_select)
+      req(sdm_rasts())
 
       rast_out <- app(sdm_rasts(), mean)
       rast_out <- ifel(rast_out < 0.1, NA, rast_out)
@@ -220,8 +248,8 @@ ces_biodiversity_server <- function(id, i18n) {
 
     # Reactive expression to arrange species based on the maximum priority of gap rasters
     species_gap_arranged <- reactive({
-      req(input$radio_group_select)
-      gap_rasts_used <- gap_rasts() |> crop(bounding_box())
+      req(input$radio_group_select, gap_rasts())
+      gap_rasts_used <- gap_rasts() |> crop(bounding_box)
 
       out <- data.frame(speciesKey = as.integer(names(gap_rasts_used)))
 
@@ -235,8 +263,8 @@ ces_biodiversity_server <- function(id, i18n) {
 
     # Reactive expression to arrange species based on the mean probability of SDM rasters and join additional data
     species_arranged <- reactive({
-      req(input$radio_group_select)
-      sdm_rasts_used <- sdm_rasts() |> crop(bounding_box())
+      req(input$radio_group_select, cairngorms_sp_list(), species_gap_arranged())
+      sdm_rasts_used <- sdm_rasts() |> crop(bounding_box)
 
       mean_prob_values <- rep(0, dim(sdm_rasts_used)[3])
       for (i in 1:(dim(sdm_rasts_used)[3])) {
@@ -248,7 +276,7 @@ ces_biodiversity_server <- function(id, i18n) {
         mean_prob = mean_prob_values
       ) |>
         arrange(desc(mean_prob)) |>
-        left_join(cairngorms_sp_list, by = "speciesKey") |>
+        left_join(cairngorms_sp_list(), by = "speciesKey") |>
         left_join(species_gap_arranged(), by = "speciesKey")
 
       out
@@ -280,20 +308,34 @@ ces_biodiversity_server <- function(id, i18n) {
     })
 
     # Observe changes in the selected species group and update the map with the total SDM raster
-    observe({
-      req(input$radio_group_select)
-      w$show()
-      leafletProxy(ns("sp_map")) |>
-        clearGroup("Biodiversity hotspots") |>
-        addRasterImage(
-          sdm_rast_total(),
-          group = "Biodiversity hotspots",
-          opacity = 0.6,
-          colors = "YlGnBu",
-          options = tileOptions(zIndex = 1000)
+    observeEvent(
+      input$radio_group_select,
+      ignoreInit = TRUE,
+      {
+        req(input$radio_group_select)
+        w$show()
+
+        tryCatch(
+          {
+            sdm_total <- sdm_rast_total()
+            req(sdm_total)
+
+            leafletProxy(ns("sp_map")) |>
+              clearGroup("Biodiversity hotspots") |>
+              addRasterImage(
+                sdm_total,
+                group = "Biodiversity hotspots",
+                opacity = 0.6,
+                colors = "YlGnBu",
+                options = tileOptions(zIndex = 1000)
+              )
+          },
+          finally = {
+            w$hide()
+          }
         )
-      w$hide()
-    })
+      }
+    )
 
     # Render the species table with additional columns for likelihood and priority
     output$sp_tbl <- renderDT(
@@ -343,7 +385,8 @@ ces_biodiversity_server <- function(id, i18n) {
     )
 
     # Observe row selection in the species table and update the map with the selected species raster
-    observeEvent(input$sp_tbl_rows_selected, {
+    observeEvent(input$sp_tbl_rows_selected, ignoreInit = TRUE, {
+      req(input$sp_tbl_rows_selected)
       selected_species <- species_arranged()[input$sp_tbl_rows_selected, ]
       sp_ids_selected <- selected_species$speciesKey
       rast_to_add <- sdm_rasts()[[as.character(sp_ids_selected)]]

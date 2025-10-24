@@ -92,7 +92,7 @@ ces_server <- function(id, i18n, language_change) {
 
     # Call downstream module servers only the first time
     ces_rp_server("ces_rp", i18n)
-    ces_biodiversity_server("ces_biodiversity", i18n)
+    ces_biodiversity_server("ces_biodiversity", ces_selected, i18n)
     ces_rp_biodiversity_server(
       "ces_rp_biodiversity",
       ces_selected = ces_selected,
