@@ -192,7 +192,7 @@ create_and_wait_k8s_job <- function(data_subpath, run_id) {
       print("Beehave job deleted successfully.")
     },
     error = function(e) {
-      print("Failed to delete Beehave job: ", e$message)
+      print(paste("Failed to delete Beehave job: ", e$message))
     }
   )
 

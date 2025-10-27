@@ -146,7 +146,7 @@ create_and_wait_k8s_job <- function(
             line <- resp_stream_lines(con, lines = 1, warn = FALSE)
           },
           error = function(e) {
-            print("Error reading stream: ", e$message)
+            print(paste("Error reading stream: ", e$message))
             Sys.sleep(0.1)
             next
           }
@@ -205,7 +205,7 @@ create_and_wait_k8s_job <- function(
       print("Grassland simulation job deleted successfully.")
     },
     error = function(e) {
-      print("Failed to delete grassland simulation job: ", e$message)
+      print(paste("Failed to delete grassland simulation job: ", e$message))
     }
   )
 
