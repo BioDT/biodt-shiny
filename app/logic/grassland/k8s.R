@@ -56,7 +56,7 @@ create_and_wait_k8s_job <- function(
           containers = list(
             list(
               name = "grassland",
-              image = "grassmind-simulation:latest",
+              image = "ghcr.io/biodt/uc-grassland:latest",
               command = list("/bin/bash", "-c", "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"),
               env = list(
                 list(name = "LAT", value = as.character(lat)),
