@@ -134,7 +134,7 @@ create_and_wait_k8s_job <- function(data_subpath, run_id, area, release_coord, f
         tryCatch({
           line <- resp_stream_lines(con, lines = 1, warn = FALSE)
         }, error = function(e) {
-          print("Error reading stream: ", e$message)
+          print(paste("Error reading stream: ", e$message))
           Sys.sleep(0.1)
           next
         })
@@ -192,7 +192,7 @@ create_and_wait_k8s_job <- function(data_subpath, run_id, area, release_coord, f
       print("Disease outbreak job deleted successfully.")
     },
     error = function(e) {
-      print("Failed to delete disease outbreak job: ", e$message)
+      print(paste("Failed to delete disease outbreak job: ", e$message))
     }
   )
 
