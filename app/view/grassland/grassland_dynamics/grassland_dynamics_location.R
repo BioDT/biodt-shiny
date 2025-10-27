@@ -390,6 +390,10 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
                 config$get("cdsapi_url"),
                 " -e CDSAPI_KEY=",
                 config$get("cdsapi_key"),
+                " -e HDA_USER=",
+                config$get("hda_user"),
+                " -e HDA_PASSWORD=",
+                config$get("hda_password"),
                 ' --entrypoint /bin/bash',
                 ' ghcr.io/biodt/uc-grassland',
                 ' -c "cd /uc-grassland-model && ./run_pipeline_uc_grassland.sh"'
@@ -415,7 +419,9 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
                 end_year = input$end_year,
                 deimsid = input$deimsid,
                 cdsapi_url = config$get("cdsapi_url"),
-                cdsapi_key = config$get("cdsapi_key")
+                cdsapi_key = config$get("cdsapi_key"),
+                hda_user = config$get("hda_user"),
+                hda_password = config$get("hda_password")
               )
               print("Kubernetes job completed successfully.")
             } else {

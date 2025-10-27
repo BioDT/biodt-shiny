@@ -6,6 +6,8 @@ default:
   transl_file: !expr file.path(getwd(), "app", "translations", "translations.json")
   cdsapi_url: https://cds.climate.copernicus.eu/api
   cdsapi_key: !expr Sys.getenv("CDSAPI_KEY")
+  hda_user: !expr Sys.getenv("HDA_USER")
+  hda_password: !expr Sys.getenv("HDA_PASSWORD")
   executor: "docker"
 
 dev:
@@ -18,6 +20,8 @@ local_docker:
   transl_file: !expr Sys.getenv("TRANSL_FILE")
   cdsapi_url: !expr Sys.getenv("CDSAPI_URL")
   cdsapi_key: !expr Sys.getenv("CDSAPI_KEY")
+  hda_user: !expr Sys.getenv("HDA_USER")
+  hda_password: !expr Sys.getenv("HDA_PASSWORD")
   executor: "docker"
 
 prod:
@@ -26,6 +30,8 @@ prod:
   transl_file: !expr Sys.getenv("TRANSL_FILE")
   cdsapi_url: !expr Sys.getenv("CDSAPI_URL")
   cdsapi_key: !expr Sys.getenv("CDSAPI_KEY")
+  hda_user: !expr Sys.getenv("HDA_USER")
+  hda_password: !expr Sys.getenv("HDA_PASSWORD")
   executor: "docker"
 
 k8s:
@@ -38,4 +44,6 @@ k8s:
   transl_file: !expr Sys.getenv("TRANSL_FILE")
   cdsapi_url: !expr Sys.getenv("CDSAPI_URL")
   cdsapi_key: !expr Sys.getenv("CDSAPI_KEY")
+  hda_user: !expr Sys.getenv("HDA_USER")
+  hda_password: !expr Sys.getenv("HDA_PASSWORD")
   executor: "k8s"

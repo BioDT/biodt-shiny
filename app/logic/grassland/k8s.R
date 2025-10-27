@@ -24,7 +24,9 @@ create_and_wait_k8s_job <- function(
   end_year,
   deimsid,
   cdsapi_url,
-  cdsapi_key
+  cdsapi_key,
+  hda_user,
+  hda_password
 ) {
   # Get the service account token
   token <- Sys.getenv("KUBERNETES_API_TOKEN", "")
@@ -65,7 +67,9 @@ create_and_wait_k8s_job <- function(
                 list(name = "endYear", value = as.character(end_year)),
                 list(name = "DEIMS", value = as.character(deimsid)),
                 list(name = "CDSAPI_URL", value = as.character(cdsapi_url)),
-                list(name = "CDSAPI_KEY", value = as.character(cdsapi_key))
+                list(name = "CDSAPI_KEY", value = as.character(cdsapi_key)),
+                list(name = "HDA_USER", value = as.character(hda_user)),
+                list(name = "HDA_PASSWORD", value = as.character(hda_password))
               ),
               resources = list(
                 limits = list(cpu = "2", memory = "4Gi"),
