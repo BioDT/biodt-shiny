@@ -141,14 +141,13 @@ create_and_wait_k8s_job <- function(
         # properly, (only the first line is parsed) so we need to use a non-blocking connection
         # and an active waiting loop to check if there is any data available.
         # TODO: Submit an issue to the httr2 package, or switch to old httr package.
+        line <- character(0)
         tryCatch(
           {
             line <- resp_stream_lines(con, lines = 1, warn = FALSE)
           },
           error = function(e) {
             print(paste("Error reading stream: ", e$message))
-            Sys.sleep(0.1)
-            next
           }
         )
         if (length(line) == 0) {
