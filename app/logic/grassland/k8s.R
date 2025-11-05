@@ -8,6 +8,7 @@ box::use(
     req_method,
     req_options,
     req_perform_connection,
+    req_timeout,
     resp_check_status,
     resp_stream_lines
   ],
@@ -134,7 +135,8 @@ create_and_wait_k8s_job <- function(
         req_headers("Authorization" = paste("Bearer", token)) |>
         req_method("GET") |>
         req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE) |>
-        req_perform_connection(blocking = FALSE, verbosity = NULL)
+        req_perform_connection(blocking = FALSE, verbosity = NULL) |>
+        req_timeout(3600) # 1 hour timeout
 
       while (TRUE) {
         # For some reason, the blocking connection (or the stream) in httr2 is not working
@@ -148,6 +150,7 @@ create_and_wait_k8s_job <- function(
           },
           error = function(e) {
             print(paste("Error reading stream: ", e$message))
+            line <- character(0)
           }
         )
         if (length(line) == 0) {
