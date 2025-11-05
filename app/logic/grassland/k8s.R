@@ -129,26 +129,14 @@ create_and_wait_k8s_job <- function(
   )
 
   # Set up streaming GET request
-  connection_established <- FALSE
-  con <- NULL
-  
   tryCatch(
     {
-      # Helper function to establish connection
-      establish_connection <- function() {
-        print("Establishing connection to k8s watch endpoint...")
-        con <- request(watch_url) |>
-          req_headers("Authorization" = paste("Bearer", token)) |>
-          req_method("GET") |>
-          req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE) |>
-          req_timeout(3600) |>
-          req_perform_connection(blocking = FALSE, verbosity = NULL)
-        return(con)
-      }
-      
-      # Establish initial connection
-      con <- establish_connection()
-      connection_established <- TRUE
+      con <- request(watch_url) |>
+        req_headers("Authorization" = paste("Bearer", token)) |>
+        req_method("GET") |>
+        req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE, low_speed_time = 3600, low_speed_limit = 0, timeout_ms = 3600000) |>
+        req_timeout(3600) |>
+        req_perform_connection(blocking = FALSE, verbosity = NULL)
 
       while (TRUE) {
         # For some reason, the blocking connection (or the stream) in httr2 is not working
@@ -156,41 +144,15 @@ create_and_wait_k8s_job <- function(
         # and an active waiting loop to check if there is any data available.
         # TODO: Submit an issue to the httr2 package, or switch to old httr package.
         line <- character(0)
-        connection_needs_restart <- FALSE
         tryCatch(
           {
             line <- resp_stream_lines(con, lines = 1, warn = FALSE)
           },
           error = function(e) {
-            error_msg <- e$message
-            print(paste("Error reading stream: ", error_msg))
-            
-            # Check if this is the k8s 600 second hard timeout error
-            if (grepl("Timeout was reached.*Operation too slow", error_msg, ignore.case = TRUE)) {
-              print("K8s 600 second timeout detected. Restarting connection...")
-              # Close current connection
-              tryCatch({
-                close(con)
-              }, error = function(close_err) {
-                print(paste("Error closing connection: ", close_err$message))
-              })
-              
-              # Restart connection
-              connection_needs_restart <- TRUE
-            } else {
-              line <- character(0)
-            }
+            print(paste("Error reading stream: ", e$message))
+            line <- character(0)
           }
         )
-        
-        # Restart the connection if needed
-        if (connection_needs_restart) {
-          Sys.sleep(0.5)  # Brief pause before reconnecting
-          con <- establish_connection()
-          print("Connection restarted. Continuing watch...")
-          next
-        }
-        
         if (length(line) == 0) {
           Sys.sleep(0.1)
           next
@@ -223,14 +185,7 @@ create_and_wait_k8s_job <- function(
       }
     }
   )
-  
-  if (connection_established && !is.null(con)) {
-    tryCatch({
-      close(con)
-    }, error = function(e) {
-      print(paste("Error closing connection: ", e$message))
-    })
-  }
+  close(con)
   print("Successfully stopped the watch.")
 
   # Delete the job
