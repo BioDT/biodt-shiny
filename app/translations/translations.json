@@ -1055,6 +1055,23 @@
       "el": "Υπολογισμός προσομοίωσης Beehave..."
     },
     {
+      "en": "Computing grassland simulation...",
+      "cz": "Výpočet simulace pastvin...",
+      "fi": "Lasketaan niittyjen simulaatiota...",
+      "it": "Calcolo simulazione praterie...",
+      "nl": "Grasland-simulatie berekenen...",
+      "est": "Rohumaade simulatsiooni arvutamine...",
+      "sv": "Beräknar gräsmarks-simulering...",
+      "de": "Grünland-Simulation wird berechnet...",
+      "no": "Beregner grasmark-simulering...",
+      "da": "Beregner græsmarks-simulering...",
+      "es": "Calculando simulación de pastizales...",
+      "pt": "Calculando simulação de pastagens...",
+      "sl": "Računanje simulacije travišč...",
+      "bg": "Изчисляване на симулация на пасища...",
+      "el": "Υπολογισμός προσομοίωσης λιβαδιών..."
+    },
+    {
       "en": "This operation takes some time.",
       "cz": "Chvíli strpení, tato operace může chvíli trvat.",
       "fi": "Tämä toiminto kestää jonkin aikaa.",

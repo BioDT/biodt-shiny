@@ -62,33 +62,16 @@ beekeeper_runsimulation_ui <- function(id, i18n) {
 
 #' @export
 beekeeper_runsimulation_server <- function(
-    id,
-    coordinates,
-    lookup,
-    parameters,
-    landuse_map,
-    session_dir,
-    i18n) {
+  id,
+  coordinates,
+  lookup,
+  parameters,
+  landuse_map,
+  session_dir,
+  i18n
+) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    # Define waiter ----
-    msg <- waiter_text(
-      message = tagList(
-        tags$h3(i18n$t("Computing Beehave simulation..."), style = "color: #414f2f;"),
-        tags$br(),
-        tags$h4(i18n$t("This operation takes some time."), style = "color: #414f2f;"),
-        tags$h4(i18n$t("You can expect it to run for 2 to 4 minutes."), style = "color: #414f2f;"),
-        tags$h4(
-          i18n$t("Please do not close the tab during this time. You can browse other tabs."),
-          style = "color: #414f2f;"
-        )
-      ),
-    )
-
-    w <- Waiter$new(
-      html = msg,
-      color = "rgba(256,256,256,0.9)"
-    )
 
     # Prepare directory for results ----
     # Non-persistent data solution
@@ -125,6 +108,25 @@ beekeeper_runsimulation_server <- function(
     observeEvent(
       input$run_simulation,
       {
+        # Define waiter with current translations ----
+        msg <- waiter_text(
+          message = tagList(
+            tags$h3(i18n$t("Computing Beehave simulation..."), style = "color: #414f2f;"),
+            tags$br(),
+            tags$h4(i18n$t("This operation takes some time."), style = "color: #414f2f;"),
+            tags$h4(i18n$t("You can expect it to run for 2 to 4 minutes."), style = "color: #414f2f;"),
+            tags$h4(
+              i18n$t("Please do not close the tab during this time. You can browse other tabs."),
+              style = "color: #414f2f;"
+            )
+          ),
+        )
+
+        w <- Waiter$new(
+          html = msg,
+          color = "rgba(256,256,256,0.9)"
+        )
+
         # Start waiter ----
         w$show()
 

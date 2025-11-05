@@ -132,24 +132,6 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Define waiter ----
-    msg <- waiter_text(
-      message = tagList(
-        tags$h3(i18n$translate("Computing grassland simulation..."), style = "color: #414f2f;"),
-        tags$br(),
-        tags$h4(i18n$translate("This operation takes some time."), style = "color: #414f2f;"),
-        tags$h4(
-          i18n$translate("Please do not close the tab during this time. You can browse other tabs."),
-          style = "color: #414f2f;"
-        )
-      ),
-    )
-
-    w <- Waiter$new(
-      html = msg,
-      color = "rgba(256,256,256,0.9)"
-    )
-
     # translates radio buttons - choosing an input type of location ----
     observe({
       translate_multiple_choices(
@@ -333,6 +315,24 @@ grassland_dynamics_location_server <- function(id, i18n, session_dir) {
     observeEvent(
       input$run_simulation,
       {
+        # Create waiter with current translations ----
+        msg <- waiter_text(
+          message = tagList(
+            tags$h3(i18n$translate("Computing grassland simulation..."), style = "color: #414f2f;"),
+            tags$br(),
+            tags$h4(i18n$translate("This operation takes some time."), style = "color: #414f2f;"),
+            tags$h4(
+              i18n$translate("Please do not close the tab during this time. You can browse other tabs."),
+              style = "color: #414f2f;"
+            )
+          ),
+        )
+
+        w <- Waiter$new(
+          html = msg,
+          color = "rgba(256,256,256,0.9)"
+        )
+
         # Start waiter ----
         w$show()
 
