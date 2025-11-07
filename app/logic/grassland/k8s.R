@@ -8,6 +8,7 @@ box::use(
     req_method,
     req_options,
     req_perform_connection,
+    req_timeout,
     resp_check_status,
     resp_stream_lines
   ],
@@ -133,7 +134,8 @@ create_and_wait_k8s_job <- function(
       con <- request(watch_url) |>
         req_headers("Authorization" = paste("Bearer", token)) |>
         req_method("GET") |>
-        req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE) |>
+        req_options(ssl_verifypeer = FALSE, ssl_verifyhost = FALSE, low_speed_time = 3600, low_speed_limit = 0, timeout_ms = 3600000) |>
+        req_timeout(3600) |>
         req_perform_connection(blocking = FALSE, verbosity = NULL)
 
       while (TRUE) {
@@ -148,6 +150,7 @@ create_and_wait_k8s_job <- function(
           },
           error = function(e) {
             print(paste("Error reading stream: ", e$message))
+            line <- character(0)
           }
         )
         if (length(line) == 0) {
