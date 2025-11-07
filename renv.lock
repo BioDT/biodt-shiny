@@ -179,7 +179,7 @@
     },
     "arrow": {
       "Package": "arrow",
-      "Version": "19.0.1.1",
+      "Version": "21.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
