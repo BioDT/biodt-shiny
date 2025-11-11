@@ -151,11 +151,13 @@ ui <- function(id) {
         ),
       ),
       id = ns("navbar"),
+      navbar_options = list(
+        bg = "#fff",
+        # must be true
+        collapsible = TRUE
+      ),
       theme = biodt_theme,
-      bg = "#fff",
       fillable = TRUE,
-      # must be true
-      collapsible = TRUE,
       fluid = TRUE,
       ## Info - main menu item ----
       nav_panel(
