@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.5.0",
+    "Version": "4.5.2",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -197,7 +197,7 @@
         "utils",
         "vctrs"
       ],
-      "Hash": "96d6db49e9dd0dec85a6a0844dd0f5fe"
+      "Hash": "7ca05d976bba8ad683ef71b3e434b51e"
     },
     "askpass": {
       "Package": "askpass",
@@ -498,6 +498,17 @@
         "R"
       ],
       "Hash": "e4f9e10b18f453a1b7eaf38247dad4fe"
+    },
+    "data.table": {
+      "Package": "data.table",
+      "Version": "1.17.8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "methods"
+      ],
+      "Hash": "1d991cd6160fa7b1fdbd3689034cbd15"
     },
     "data.tree": {
       "Package": "data.tree",
