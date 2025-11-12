@@ -22,20 +22,61 @@ plot_bird_species <- function(scenario,
   prediction_file <- file.path(prediction_folder, scenario, tick, paste0(bird_species, ".tif"))
   if (file.exists(prediction_file)) {
     species_rast <- terra$rast(prediction_file)
+    
+    # Get min/max values for the color palette
+    mm <- terra$minmax(species_rast)
+    rmin <- suppressWarnings(min(mm[1, ], na.rm = TRUE))
+    rmax <- suppressWarnings(max(mm[2, ], na.rm = TRUE))
+    
+    # Validate range
+    if (!is.finite(rmin) || !is.finite(rmax)) {
+      leaflet$leafletProxy("map") |>
+        leaflet$removeImage("bird_species") |>
+        leaflet$removeControl("bird_legend")
+      shiny$showNotification(i18n$t("Warning: Bird species raster contains non-finite range!"), type = "error")
+      return(invisible(NULL))
+    }
+    
+    # Avoid zero-width domain (flat rasters)
+    if (rmin == rmax) {
+      eps  <- if (rmin == 0) 1 else abs(rmin) * 0.01
+      rmin <- rmin - eps
+      rmax <- rmax + eps
+    }
+    
+    # Create color palette
+    pal_base <- leaflet$colorNumeric(
+      palette  = "viridis",
+      domain   = c(rmin, rmax),
+      na.color = "transparent"
+    )
+    pal <- function(x) pal_base(pmin(pmax(x, rmin), rmax))
+    
     leaflet$leafletProxy("map") |>
       leaflet$removeImage("bird_species") |>
+      leaflet$removeControl("bird_legend") |>
       leaflet$addRasterImage(
         species_rast,
         opacity = 0.3,
-        colors = "viridis",
+        colors = pal,
         project = FALSE,
         layerId = "bird_species",
         group = "bird_species",
         options = leaflet$tileOptions(zIndex = 2)
+      ) |>
+      leaflet$addLegend(
+        position = "bottomleft",
+        pal = pal_base,
+        values = c(rmin, rmax),
+        opacity = 0.3,
+      #  title = bird_species,
+        title = "bird occurrence probability",
+        layerId = "bird_legend"
       )
   } else {
     leaflet$leafletProxy("map") |>
-      leaflet$removeImage("bird_species")
+      leaflet$removeImage("bird_species") |>
+      leaflet$removeControl("bird_legend")
     shiny$showNotification(i18n$t("Warning: Bird species file does not exist!"), type = "error")
   }
 }
