@@ -71,7 +71,14 @@ get_data <- function(
         data$Climate <- climate
         data$Management <- management
         data$Time <- data$Time + start_year
-        all_data[[paste(climate, management, sep = "_")]] <- data
+        
+        # Filter data to only show years from 2025 onwards
+        data <- data[data$Time >= 2025, ]
+        
+        # Only add to list if data remains after filtering
+        if (nrow(data) > 0) {
+          all_data[[paste(climate, management, sep = "_")]] <- data
+        }
       }
     }
   }
@@ -217,6 +224,13 @@ get_file_list <- function(
       data_file_list
     )]
     res_file_list_tick <- as.integer(stringr$str_extract(res_file_list, "[0-9]+(?=[^0-9]*$)"))
+  }
+
+  # Filter ticks to only include years >= 2025
+  if (length(res_file_list_tick) > 0) {
+    simulated_years <- res_file_list_tick + start_year
+    valid_indices <- which(simulated_years >= 2025)
+    res_file_list_tick <- res_file_list_tick[valid_indices]
   }
 
   all_files_in_dir_out <- list(

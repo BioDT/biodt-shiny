@@ -305,7 +305,8 @@ forest_app_server <- function(id, app_selected, i18n) {
         simulated_years <- res_file_list_tick + start_year
 
         if (length(simulated_years) > 0) {
-          min_value <- min(simulated_years, na.rm = TRUE)
+          #min_value <- min(simulated_years, na.rm = TRUE)
+          min_value <- 2025
           max_value <- max(simulated_years, na.rm = TRUE)
 
           # Get the current value of the slider

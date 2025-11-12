@@ -374,9 +374,13 @@ get_multichart <- function(experiment_data_file, i18n) {
   # read parameters via helper
   params <- read_landis_params(experiment_data_file)
   start_year <- params$start_year
-
+  
   data <- utils::read.csv(cohorts_path)
   data$Time <- data$Time + start_year
+  
+  # Filter data to only show years from 2025 onwards
+  data <- data[data$Time >= 2025, ]
+
 
   # build chart
   chart <- echarty$ec.init()
