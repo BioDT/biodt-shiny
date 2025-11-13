@@ -46,7 +46,8 @@ plot_bird_species <- function(scenario,
     
     # Create color palette
     pal_base <- leaflet$colorNumeric(
-      palette  = "viridis",
+      #palette  = "viridis",
+      palette  = "YlGnBu",
       domain   = c(rmin, rmax),
       na.color = "transparent"
     )
