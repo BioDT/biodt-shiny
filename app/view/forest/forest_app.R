@@ -230,7 +230,7 @@ forest_app_server <- function(id, app_selected, i18n) {
             leaflet$clearImages() |>
             leaflet$addTiles() |>
             leaflet$addLayersControl(
-              overlayGroups = c("tree_species", "bird_species"),
+              overlayGroups = c("Tree species", "Bird species"),
               options = leaflet$layersControlOptions(collapsed = FALSE)
             ) |>
             leaflet$setView(

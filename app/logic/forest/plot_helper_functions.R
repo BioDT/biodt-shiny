@@ -61,7 +61,7 @@ plot_bird_species <- function(scenario,
         colors = pal,
         project = FALSE,
         layerId = "bird_species",
-        group = "bird_species",
+        group = "Bird species",
         options = leaflet$tileOptions(zIndex = 2)
       ) |>
       leaflet$addLegend(
@@ -70,7 +70,7 @@ plot_bird_species <- function(scenario,
         values = c(rmin, rmax),
         opacity = 0.3,
       #  title = bird_species,
-        title = "bird occurrence probability",
+      #  title = "bird occurrence probability",
         layerId = "bird_legend"
       )
   } else {
@@ -134,7 +134,7 @@ plot_tree_species <- function(data_folder, res_file, i18n) {
         colors = pal,
         project = FALSE,
         layerId = "tree_species",
-        group = "tree_species",
+        group = "Tree species",
         options = leaflet$tileOptions(zIndex = 1)
       ) |>
       leaflet$addLegend(
