@@ -252,6 +252,10 @@
   right: 300px; /* Adjust this value based on sidebar width */
 }
 
+.button-container.moved-persona {
+  right: 400px; /* Adjust this value based on sidebar_persona width */
+}
+
 .toggle-button {
   background: #414f2f;
   color: #fff;
@@ -317,6 +321,16 @@
 .sidebar.active {
   right: 0; /* Show sidebar */
   display: block;
+}
+
+.sidebar_persona {
+  width: 400px;
+  right: -400px; /* Initially hidden off-screen */
+  overflow-y: auto; /* Only show scrollbar when content exceeds height */
+}
+
+.sidebar_persona.active {
+  right: 0;
 }
 
 .close-button {
@@ -628,4 +642,24 @@
       background-color: #556b2f;
     }
   }
+}
+
+/* Sweet alert overrides for better visibility */
+.swal2-small-text .swal2-html-container {
+  font-size: 1.2rem !important;
+}
+
+.swal2-small-title {
+  font-size: 1.5rem !important;
+  padding: 0;
+}
+
+.swal2-small-text .swal2-icon {
+  transform: scale(0.5) !important;
+  margin: 0.5rem auto !important;
+}
+
+.swal2-small-text .swal2-confirm {
+  font-size: 1rem !important;
+  padding: 0.5rem 1.5rem !important;
 }

@@ -9,6 +9,7 @@ box::use(
   app / view / ces / ces_contributors[ces_contributors_ui, ces_contributors_server],
   app / view / ces / ces_biodiversity[ces_biodiversity_ui, ces_biodiversity_server],
   app / view / ces / ces_rp_biodiversity[ces_rp_biodiversity_ui, ces_rp_biodiversity_server],
+  app / view / ces / ces_persona[ces_persona_ui, ces_persona_server],
 )
 
 #' @export
@@ -32,6 +33,15 @@ ces_ui <- function(id, i18n) {
       icon = icon("tree"),
       ces_rp_biodiversity_ui(
         ns("ces_rp_biodiversity"),
+        i18n
+      )
+    ),
+    nav_panel(
+      title = i18n$t("Personalised Recreation"),
+      value = "CES",
+      icon = icon("tree"),
+      ces_persona_ui(
+        ns("ces_persona"),
         i18n
       )
     ),
@@ -95,6 +105,13 @@ ces_server <- function(id, i18n, language_change) {
     ces_biodiversity_server("ces_biodiversity", ces_selected, i18n)
     ces_rp_biodiversity_server(
       "ces_rp_biodiversity",
+      ces_selected = ces_selected,
+      i18n,
+      language_change
+    )
+
+    ces_persona_server(
+      "ces_persona",
       ces_selected = ces_selected,
       i18n,
       language_change

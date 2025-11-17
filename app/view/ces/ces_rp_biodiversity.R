@@ -103,18 +103,22 @@ ces_rp_biodiversity_ui <- function(id, i18n) {
       ),
     ),
     fluidRow(
+      style = "height: calc(100vh - 150px); min-height: 800px; margin : 0; padding: 0;",
       column(
         12, # Enlarge the map to full width
+        style = "height: 100%;",
         card(
           id = "biodiversity-page",
           title = "combined_map",
           full_screen = FALSE,
+          height = "100%",
           card_title(i18n$t("Recreation and Biodiversity Mapping")),
           card_body(
-            leafletOutput(ns("combined_map_plot"), height = 800, width = "100%"),
+            style = "height: calc(100% - 60px);",
+            leafletOutput(ns("combined_map_plot"), height = "100%", width = "100%"),
             tags$div(
               class = "button-container",
-              id = "openSidebar",
+              id = ns("button_container"),
               actionButton(
                 ns("toggleSliders"),
                 HTML('<i class="fa-solid fa-person-hiking"></i>'),
@@ -444,7 +448,8 @@ ces_rp_biodiversity_server <- function(id, ces_selected, i18n, language_change) 
               recre_palette = recreation_pal,
               biodiversity_palette = biodiversity_pal,
               rec_opacity = recreation_alpha,
-              soft_rec_filt = soft_rec_filtered_raster
+              soft_rec_filt = soft_rec_filtered_raster,
+              button_container_id = ns("button_container")
             )
 
             rec_pot_map(rec_pot_map_plot)

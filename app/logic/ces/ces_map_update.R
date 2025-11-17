@@ -1,5 +1,22 @@
 box::use(
-  leaflet[leaflet, leafletProxy, leafletOptions, addTiles, addProviderTiles, setView, addLegend, hideGroup, clearGroup, showGroup, labelFormat, addRasterImage, tileOptions, providers, providerTileOptions, addControl],
+  leaflet[
+    leaflet,
+    leafletProxy,
+    leafletOptions,
+    addTiles,
+    addProviderTiles,
+    setView,
+    addLegend,
+    hideGroup,
+    clearGroup,
+    showGroup,
+    labelFormat,
+    addRasterImage,
+    tileOptions,
+    providers,
+    providerTileOptions,
+    addControl
+  ],
 )
 
 #' @export
@@ -49,8 +66,15 @@ update_recreation <- function(
   # print(input_raster)
   # print(!is.na(input_raster))
   if (!is.null(input_raster)) {
-  leafletProxy(map_id) |>
-    addRasterImage(input_raster, group = "RP", project = FALSE, colors = recreation_palette(), options = tileOptions(zIndex = 999), opacity = 0.5)
+    leafletProxy(map_id) |>
+      addRasterImage(
+        input_raster,
+        group = "RP",
+        project = FALSE,
+        colors = recreation_palette(),
+        options = tileOptions(zIndex = 999),
+        opacity = 0.5
+      )
   }
   # # if (recreation_selection == "Soft"){
   #   leafletProxy(map_id) |>
@@ -70,19 +94,17 @@ update_base_layers <- function(layer_selected, map_id) {
 
   if (layer_selected == "Open Street Map") {
     leafletProxy(map_id) |>
-      addTiles(layerId = "osm", group = "baseLayer")
+      addTiles(layerId = "osm", group = "baseLayer", options = tileOptions(zIndex = 1))
   }
 
   if (layer_selected == "ESRI World Imagery") {
     leafletProxy(map_id) |>
-      addProviderTiles(providers$Esri.WorldImagery, group = "baseLayer")
-      # addProviderTiles(providers$Esri.WorldImagery, providerTileOptions(zIndex = -1000), group = "ESRI World Imagery")
+      addProviderTiles(providers$Esri.WorldImagery, group = "baseLayer", options = tileOptions(zIndex = 1))
   }
 
   if (layer_selected == "Open Topo Map") {
     leafletProxy(map_id) |>
-      addProviderTiles(providers$OpenTopoMap, group = "baseLayer")
-      # addProviderTiles(providers$OpenTopoMap, providerTileOptions(zIndex = -1000), group = "Open Topo Map")
+      addProviderTiles(providers$OpenTopoMap, group = "baseLayer", options = tileOptions(zIndex = 1))
   }
 }
 
@@ -98,7 +120,8 @@ update_species_biodiversity <- function(diversity_species_selected, map_id) {
       addTiles(
         urlTemplate = "https://api.gbif.org/v2/map/occurrence/density/{z}/{x}/{y}@1x.png?style=orange.marker&bin=hex",
         attribution = "GBIF",
-        group = "biodiversity"
+        group = "biodiversity",
+        options = tileOptions(zIndex = 500)
       )
   }
 }

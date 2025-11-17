@@ -67,6 +67,9 @@ RUN apt-get update -qy && \
         && \
     apt-get clean
 
+# Install uc-ces-recreation package since renv has not captured it
+# This may be due to the fact, it is missing main branch
+RUN Rscript -e 'renv::install("biodt/uc-ces-recreation")'
 # Entrypoint script
 # COPY run_shiny.sh /biodt/run_shiny.sh
 # RUN chmod a+x /biodt/run_shiny.sh
