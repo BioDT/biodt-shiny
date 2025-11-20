@@ -58,7 +58,7 @@ plot_bird_species <- function(scenario,
       leaflet$removeControl("bird_legend") |>
       leaflet$addRasterImage(
         species_rast,
-        opacity = 0.3,
+        opacity = 0.6,
         colors = pal,
         project = FALSE,
         layerId = "bird_species",
