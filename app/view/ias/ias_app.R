@@ -285,8 +285,13 @@ ias_app_server <- function(id, tab_selected, i18n) {
 
     # legend caption helper
     get_projection_legend_title <- function(dataType, species_on, species_selected) {
-      switch(dataType,
-        mean = if (species_on && !is.null(species_selected)) i18n$t("Probability of occurrence") else i18n$t("Level of invasion"),
+      switch(
+        dataType,
+        mean = if (species_on && !is.null(species_selected)) {
+          i18n$t("Probability of occurrence")
+        } else {
+          i18n$t("Level of invasion")
+        },
         sd = i18n$t("Standard deviation"),
         cov = i18n$t("Coefficient of variation"),
         anomaly = i18n$t("Prediction anomaly"),
@@ -298,7 +303,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
     observeEvent(
       tab_selected(),
       {
-        req(tab_selected() == "ias_app")
+        req(tab_selected())
+        print("Loading available pDT versions...")
         available_versions(get_available_versions())
       }
     )
@@ -456,7 +462,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
         tab_selected()
       },
       {
-        req(input$pdtVersion, input$habitat, tab_selected() == "IAS App")
+        req(input$pdtVersion, input$habitat, tab_selected())
 
         file_url <- paste0(
           get_base_url(selected_version()),
@@ -556,20 +562,20 @@ ias_app_server <- function(id, tab_selected, i18n) {
         setdiff(climate_models, "Ensemble")
       )
 
-      # updatePickerInput(session, "climateModelPicker", choices = ordered_climate_models, selected = "Ensemble")
+      updatePickerInput(session, "climateModelPicker", choices = ordered_climate_models, selected = "Ensemble")
 
       # UPDATES and translates picker input, selecting a climate model
-      translate_multiple_choices(
-        session,
-        "picker",
-        input_id = "climateModelPicker",
-        label = "Select climate model:",
-        inline = FALSE,
-        i18n,
-        choices_type = "namedlist",
-        selected_choice = "Ensemble",
-        ordered_climate_models
-      )
+      # translate_multiple_choices(
+      #   session,
+      #   "picker",
+      #   input_id = "climateModelPicker",
+      #   label = "Select climate model:",
+      #   inline = FALSE,
+      #   i18n,
+      #   choices_type = "namedlist",
+      #   selected_choice = "Ensemble",
+      #   ordered_climate_models
+      # )
     })
 
     # Update Climate Scenario picker
@@ -579,20 +585,20 @@ ias_app_server <- function(id, tab_selected, i18n) {
       climate_scenarios <- predictions_summary()$climate_scenario
       climate_scenarios <- setdiff(unique(climate_scenarios), "Current")
 
-      # updatePickerInput(session, "climateScenarioPicker", choices = climate_scenarios, selected = climate_scenarios[1])
+      updatePickerInput(session, "climateScenarioPicker", choices = climate_scenarios, selected = climate_scenarios[1])
 
       # UPDATES and translates picker input, selecting a climate scenario
-      translate_multiple_choices(
-        session,
-        "picker",
-        input_id = "climateScenarioPicker",
-        label = "Select climate scenario:",
-        inline = FALSE,
-        i18n,
-        choices_type = "namedlist",
-        selected_choice = climate_scenarios[1],
-        climate_scenarios
-      )
+      # translate_multiple_choices(
+      #   session,
+      #   "picker",
+      #   input_id = "climateScenarioPicker",
+      #   label = "Select climate scenario:",
+      #   inline = FALSE,
+      #   i18n,
+      #   choices_type = "namedlist",
+      #   selected_choice = climate_scenarios[1],
+      #   climate_scenarios
+      # )
     })
 
     # Update Time Period picker
@@ -659,7 +665,10 @@ ias_app_server <- function(id, tab_selected, i18n) {
           )
         },
         error = function(e) {
-          showNotification(i18n$t("Unable to load species for the selected habitat in distribution mode."), type = "error")
+          showNotification(
+            i18n$t("Unable to load species for the selected habitat in distribution mode."),
+            type = "error"
+          )
           NULL
         }
       )
@@ -693,7 +702,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
     filtered_summary <- eventReactive(input$loadMap, {
       req(predictions_summary())
       df <- predictions_summary()
-      field <- switch(input$dataTypePicker,
+      field <- switch(
+        input$dataTypePicker,
         mean = "tif_path_mean",
         sd = "tif_path_sd",
         cov = "tif_path_cov",
@@ -1067,12 +1077,7 @@ ias_app_server <- function(id, tab_selected, i18n) {
       filename = function() {
         if (input$dataMode == "Projection") {
           habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
-          data_type <- switch(input$dataTypePicker,
-            mean = "Mean",
-            sd = "SD",
-            cov = "Uncertainty",
-            anomaly = "Anomaly"
-          )
+          data_type <- switch(input$dataTypePicker, mean = "Mean", sd = "SD", cov = "Uncertainty", anomaly = "Anomaly")
 
           parts <- c("pDT-IAS", gsub(" ", "_", habitat), data_type, input$timeFramePicker)
 
@@ -1129,7 +1134,8 @@ ias_app_server <- function(id, tab_selected, i18n) {
         req(input$habitat, input$dataTypePicker, input$timeFramePicker)
 
         habitat <- names(habitat_mapping)[habitat_mapping == input$habitat]
-        model_output <- switch(input$dataTypePicker,
+        model_output <- switch(
+          input$dataTypePicker,
           `mean` = "Mean",
           `sd` = "Standard Deviation",
           `cov` = "Coefficient of Variation",

@@ -36,7 +36,7 @@ box::use(
       disease_outbreaks_main_server
     ],
   app / view / cwr / cwr_main[mod_cwr_server, mod_cwr_ui],
-  app / view / ias / ias_main[ias_ui, ias_main_server],
+  app / view / ias / ias_main[ias_main_ui, ias_main_server],
   app / view / rtbm / rtbm_main[rtbm_ui, rtbm_main_server],
   app / view / forest / forest_main[forest_main_ui, forest_main_server]
 )
@@ -98,6 +98,7 @@ ui <- function(id) {
       usei18n(i18n),
       includeScript("app/js/tab-index.js"),
       includeScript("app/js/tab-switcher.js"),
+      includeScript("app/js/ias-tab-fix.js"),
     ),
     waiterShowOnLoad(
       html = spin_loaders(
@@ -300,7 +301,7 @@ ui <- function(id) {
           title = i18n$translate("Invasive Alien Species"),
           value = "ias",
           class = "p-0",
-          ias_ui(ns("ias_main"), i18n)
+          ias_main_ui(ns("ias_main"), i18n)
         ),
       ),
       nav_spacer(),
