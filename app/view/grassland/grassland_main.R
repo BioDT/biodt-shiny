@@ -20,10 +20,10 @@ box::use(
 grassland_main_ui <- function(id, i18n) {
   ns <- NS(id)
   navset_tab(
-    id = (ns("tab")),
+    id = ns("tab"),
     # Info Page ---
     nav_panel(
-      title = "Info",
+      title = i18n$translate("Info"),
       value = "Info",
       icon = icon("circle-info"),
       grassland_info_ui(
