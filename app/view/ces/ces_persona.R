@@ -147,6 +147,12 @@ ces_persona_ui <- function(id, i18n) {
               class = "button-container",
               id = ns("button_container"),
               actionButton(
+                ns("toggleInfo"),
+                HTML('<i class="fa-solid fa-circle-info"></i>'),
+                class = "toggle-button",
+                title = i18n$t("Info")
+              ),
+              actionButton(
                 ns("toggleSliders"),
                 HTML('<i class="fa-solid fa-person-hiking"></i>'),
                 class = "toggle-button",
@@ -241,6 +247,59 @@ ces_persona_ui <- function(id, i18n) {
                   ),
                   selected = "none"
                 )
+              ),
+              # info content
+              tags$div(
+                id = ns("infoSidebar"),
+                class = "d-none",
+                tags$h4(i18n$t("How to Use Persona Mapping"), class = "mt-3"),
+                tags$div(
+                  class = "info-content",
+                  tags$h5(HTML('<i class="fa-solid fa-1"></i> Define Your Area')),
+                  tags$p(
+                    "Click the square button (■) on the map to activate the drawing tool. Draw a rectangle by clicking and dragging to select the area where you want to compute recreational potential."
+                  ),
+                  tags$h5(HTML('<i class="fa-solid fa-2"></i> Customize Your Persona')),
+                  tags$p("Open the Persona Settings (hiker icon) to customize preferences:"),
+                  tags$ul(
+                    tags$li(
+                      tags$strong("Load Preset:"),
+                      " Select from predefined recreationist types (e.g., Mountain Biker, Bird Watcher)"
+                    ),
+                    tags$li(tags$strong("Custom Settings:"), " Adjust sliders in four categories:"),
+                    tags$ul(
+                      tags$li(tags$strong("Landscape:"), " Preferences for terrain and land cover types"),
+                      tags$li(tags$strong("Natural Features:"), " Importance of natural elements"),
+                      tags$li(tags$strong("Infrastructure:"), " Proximity to facilities and access points"),
+                      tags$li(tags$strong("Water:"), " Preferences related to water features")
+                    ),
+                    tags$li(tags$strong("Save/Upload:"), " Save your custom persona or upload a previously saved one")
+                  ),
+                  tags$h5(HTML('<i class="fa-solid fa-3"></i> Compute Recreational Potential')),
+                  tags$p(
+                    "Once you've drawn your area and set your persona preferences, click the",
+                    tags$strong(HTML('Compute Recreation (<i class="fa-solid fa-rotate-right"></i>)')),
+                    "button. The system will calculate recreational potential based on your preferences and display the results on the map."
+                  ),
+                  tags$h5(HTML('<i class="fa-solid fa-4"></i> Explore Results')),
+                  tags$p("Use the Map Layers panel (layer icon) to:"),
+                  tags$ul(
+                    tags$li(
+                      tags$strong("Base Map:"),
+                      " Switch between Street, Topographical, Satellite, or Greyscale views"
+                    ),
+                    tags$li(
+                      tags$strong("Overlay Layers:"),
+                      " Toggle visibility of individual component layers or the final Recreational Potential layer"
+                    )
+                  ),
+                  tags$p(
+                    class = "text-muted mt-3",
+                    tags$em(
+                      "Tip: Darker the recreational potential values indicate areas better suited to your specified recreationist profile."
+                    )
+                  )
+                )
               )
             )
           )
@@ -301,6 +360,9 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
     var mapsContent = document.getElementById("',
           ns("mapsSidebar"),
           '");
+    var infoContent = document.getElementById("',
+          ns("infoSidebar"),
+          '");
     
     if (window.activeSection_persona === "sliders") {
       sidebar.classList.remove("active");
@@ -312,6 +374,7 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
       slidersContent.classList.remove("d-none");
       slidersContent.classList.add("d-block");
       mapsContent.classList.add("d-none");
+      infoContent.classList.add("d-none");
       window.activeSection_persona = "sliders";
     }
   '
@@ -336,6 +399,9 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
     var mapsContent = document.getElementById("',
           ns("mapsSidebar"),
           '");
+    var infoContent = document.getElementById("',
+          ns("infoSidebar"),
+          '");
     
     if (window.activeSection_persona === "maps") {
       sidebar.classList.remove("active");
@@ -347,7 +413,47 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
       slidersContent.classList.add("d-none");
       mapsContent.classList.remove("d-none");
       mapsContent.classList.add("d-block");
+      infoContent.classList.add("d-none");
       window.activeSection_persona = "maps";
+    }
+  '
+        )
+      )
+    })
+
+    # Logic for handling the Info button click
+    observeEvent(input$toggleInfo, {
+      runjs(
+        paste0(
+          '
+    var sidebar = document.getElementById("',
+          ns("sidebar_persona"),
+          '");
+    var buttonContainer = document.getElementById("',
+          ns("button_container"),
+          '");
+    var slidersContent = document.getElementById("',
+          ns("slidersSidebar"),
+          '");
+    var mapsContent = document.getElementById("',
+          ns("mapsSidebar"),
+          '");
+    var infoContent = document.getElementById("',
+          ns("infoSidebar"),
+          '");
+    
+    if (window.activeSection_persona === "info") {
+      sidebar.classList.remove("active");
+      buttonContainer.classList.remove("moved-persona");
+      window.activeSection_persona = null;
+    } else {
+      sidebar.classList.add("active");
+      buttonContainer.classList.add("moved-persona");
+      slidersContent.classList.add("d-none");
+      mapsContent.classList.add("d-none");
+      infoContent.classList.remove("d-none");
+      infoContent.classList.add("d-block");
+      window.activeSection_persona = "info";
     }
   '
         )
@@ -459,6 +565,9 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
           "');
             App.fixTooltip('",
           ns("toggleMaps"),
+          "');
+            App.fixTooltip('",
+          ns("toggleInfo"),
           "');
           "
         ))
