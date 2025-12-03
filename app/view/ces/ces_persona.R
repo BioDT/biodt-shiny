@@ -35,7 +35,8 @@ box::use(
     downloadButton,
     modalButton,
     downloadHandler,
-    fileInput
+    fileInput,
+    updateRadioButtons
   ],
   bslib[card, nav_select, card_title, card_body],
   leaflet[
@@ -225,6 +226,20 @@ ces_persona_ui <- function(id, i18n) {
                     "Greyscale" = "Esri.WorldGrayCanvas"
                   ),
                   selected = "Esri.WorldStreetMap"
+                ),
+                tags$h4(i18n$t("Overlay Layers"), class = "mt-3"),
+                radioButtons(
+                  inputId = ns("overlay_layers"),
+                  label = i18n$t("Choose overlay layer:"),
+                  choices = c(
+                    "None" = "none",
+                    "Landscape & Land Cover" = "Landscape & Land Cover",
+                    "Natural Features" = "Natural Features",
+                    "Infrastructure" = "Infrastructure",
+                    "Water" = "Water",
+                    "Recreational Potential" = "Recreational Potential"
+                  ),
+                  selected = "none"
                 )
               )
             )
@@ -251,6 +266,7 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
     bbox_orig <- reactiveVal()
     df_persona <- reactiveVal()
     current_persona <- reactiveVal()
+    computed_layers <- reactiveVal(NULL)
 
     # Reactive variable for displaying info to user
     userInfoText <- reactiveVal("")
@@ -477,6 +493,42 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
       ignoreInit = TRUE
     )
 
+    # Observe event for overlay layer changes
+    observeEvent(
+      input$overlay_layers,
+      {
+        req(input$overlay_layers)
+
+        # Only proceed if layers have been computed (unless selecting "none")
+        if (input$overlay_layers != "none") {
+          req(computed_layers())
+        }
+        print(paste0("Overlay layer changed to: ", input$overlay_layers))
+        # Get all possible overlay layer names
+        all_layers <- c(
+          "Landscape & Land Cover",
+          "Natural Features",
+          "Infrastructure",
+          "Water",
+          "Recreational Potential"
+        )
+
+        proxy <- leafletProxy(ns("combined_map_plot"))
+
+        # Hide all overlay layers first
+        for (layer in all_layers) {
+          proxy <- proxy |> hideGroup(layer)
+        }
+
+        # Show the selected layer if not "none"
+        if (input$overlay_layers != "none") {
+          print(paste0("Showing overlay layer: ", input$overlay_layers))
+          proxy |> showGroup(input$overlay_layers)
+        }
+      },
+      ignoreInit = TRUE
+    )
+
     # Observe event for "Apply filters" button
     observeEvent(
       ignoreInit = TRUE,
@@ -613,16 +665,23 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
           return()
         }
 
+        # Store the computed layers
+        computed_layers(output$result)
+
         # Create a proxy for the rendered leaflet map and pass it to update_map
+        # Hide layers initially so radio button controls visibility
         tryCatch(
           {
             leafletProxy(ns("combined_map_plot")) |>
-              update_map(output$result, pal = recreation_pal())
+              update_map(output$result, pal = recreation_pal(), hide_after_add = TRUE)
           },
           error = function(e) {
             showNotification(paste0("Map update failed: ", conditionMessage(e)), type = "error")
           }
         )
+
+        # Show Recreation layer by default after computation
+        updateRadioButtons(session, "overlay_layers", selected = "Recreational Potential")
       },
       ignoreInit = TRUE
     )

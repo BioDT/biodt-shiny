@@ -35,7 +35,12 @@ get_base_layers <- function() {
 
 addBaseLayers <- function(map, base_layers) {
   for (layer in base_layers) {
-    map <- addProviderTiles(map, layer, group = layer) |>
+    map <- addProviderTiles(
+      map,
+      layer,
+      group = layer,
+      options = list(zIndex = 1)
+    ) |>
       hideGroup(layer)
   }
   return(map)
@@ -234,8 +239,9 @@ setup_map <- function(pal = NULL, button_container_id = "button_container", ns =
 ##' @param layers A named list of raster-like objects (length 5 expected).
 ##' @param opacity Numeric opacity for raster layers (0-1).
 ##' @param clear_existing If TRUE, attempt to clear any existing overlay groups with the same names.
+##' @param hide_after_add If TRUE, hide all layers after adding them (default FALSE for backward compatibility).
 ##' @return A leaflet map (or proxy) with the new overlay layers and a layers control.
-update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal = "Spectral") {
+update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal = "Spectral", hide_after_add = FALSE) {
   # Expect a leafletProxy object
   if (is.null(layers) || length(layers) == 0) {
     return(proxy)
@@ -259,8 +265,9 @@ update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal 
   if ("FIPS_I" %in% names(layers)) {
     names(layers)[names(layers) == "FIPS_I"] <- "Infrastructure"
   }
-
-  # Clear existing groups if requested (best-effort)
+  if ("Recreational_Potential" %in% names(layers)) {
+    names(layers)[names(layers) == "Recreational_Potential"] <- "Recreational Potential"
+  } # Clear existing groups if requested (best-effort)
   if (clear_existing) {
     for (g in names(layers)) {
       tryCatch(
@@ -285,14 +292,16 @@ update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal 
             lyr,
             opacity = opacity,
             group = nm,
-            colors = pal
+            colors = pal,
+            options = list(zIndex = 400)
           )
         } else {
           addRasterImage(
             proxy,
             lyr,
             opacity = opacity,
-            group = nm
+            group = nm,
+            options = list(zIndex = 400)
           )
         }
       },
@@ -300,6 +309,13 @@ update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal 
         proxy
       }
     )
+  }
+
+  # Hide all layers if requested
+  if (hide_after_add) {
+    for (nm in names(layers)) {
+      proxy <- proxy |> hideGroup(nm)
+    }
   }
 
   return(proxy)
