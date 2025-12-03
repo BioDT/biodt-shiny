@@ -60,7 +60,7 @@ setup_map <- function(pal = NULL, button_container_id = "button_container", ns =
     map <- map |>
       addLegend(
         title = "Values",
-        position = "bottomright",
+        position = "bottomleft",
         values = c(0, 1),
         pal = pal
       )
@@ -192,7 +192,7 @@ setup_map <- function(pal = NULL, button_container_id = "button_container", ns =
         // Custom recreation compute button
         L.Control.ComputeRecreationControl = L.Control.extend({
           onAdd: function(map) {
-            var btn = L.DomUtil.create('button', 'btn btn-default action-button shiny-bound-input');
+            var btn = L.DomUtil.create('button', 'btn btn-default action-button toggle-button shiny-bound-input');
             btn.title = 'Compute Recreation';
             btn.id = '",
         if (!is.null(ns)) paste0(ns("compute_recreation")) else "compute_recreation",
