@@ -255,48 +255,76 @@ ces_persona_ui <- function(id, i18n) {
                 tags$h4(i18n$t("How to Use Persona Mapping"), class = "mt-3"),
                 tags$div(
                   class = "info-content",
-                  tags$h5(HTML('<i class="fa-solid fa-1"></i> Define Your Area')),
+                  tags$h5(HTML(paste0('<i class="fa-solid fa-1"></i> ', i18n$t("Define Your Area")))),
                   tags$p(
-                    "Click the square button (■) on the map to activate the drawing tool. Draw a rectangle by clicking and dragging to select the area where you want to compute recreational potential."
+                    i18n$t(
+                      "Click the square button (■) on the map to activate the drawing tool. Draw a rectangle by clicking and dragging to select the area where you want to compute recreational potential."
+                    )
                   ),
-                  tags$h5(HTML('<i class="fa-solid fa-2"></i> Customize Your Persona')),
-                  tags$p("Open the Persona Settings (hiker icon) to customize preferences:"),
+                  tags$h5(HTML(paste0('<i class="fa-solid fa-2"></i> ', i18n$t("Customize Your Persona")))),
+                  tags$p(i18n$t("Open the Persona Settings (hiker icon) to customize preferences:")),
                   tags$ul(
                     tags$li(
-                      tags$strong("Load Preset:"),
-                      " Select from predefined recreationist types (e.g., Mountain Biker, Bird Watcher)"
+                      tags$strong(i18n$t("Load Preset:")),
+                      " ",
+                      i18n$t("Select from predefined recreationist types (e.g., Mountain Biker, Bird Watcher)")
                     ),
-                    tags$li(tags$strong("Custom Settings:"), " Adjust sliders in four categories:"),
+                    tags$li(tags$strong(i18n$t("Custom Settings:")), " ", i18n$t("Adjust sliders in four categories:")),
                     tags$ul(
-                      tags$li(tags$strong("Landscape:"), " Preferences for terrain and land cover types"),
-                      tags$li(tags$strong("Natural Features:"), " Importance of natural elements"),
-                      tags$li(tags$strong("Infrastructure:"), " Proximity to facilities and access points"),
-                      tags$li(tags$strong("Water:"), " Preferences related to water features")
+                      tags$li(
+                        tags$strong(i18n$t("Landscape:")),
+                        " ",
+                        i18n$t("Preferences for terrain and land cover types")
+                      ),
+                      tags$li(tags$strong(i18n$t("Natural Features:")), " ", i18n$t("Importance of natural elements")),
+                      tags$li(
+                        tags$strong(i18n$t("Infrastructure:")),
+                        " ",
+                        i18n$t("Proximity to facilities and access points")
+                      ),
+                      tags$li(tags$strong(i18n$t("Water:")), " ", i18n$t("Preferences related to water features"))
                     ),
-                    tags$li(tags$strong("Save/Upload:"), " Save your custom persona or upload a previously saved one")
+                    tags$li(
+                      tags$strong(i18n$t("Save/Upload:")),
+                      " ",
+                      i18n$t("Save your custom persona or upload a previously saved one")
+                    )
                   ),
-                  tags$h5(HTML('<i class="fa-solid fa-3"></i> Compute Recreational Potential')),
+                  tags$h5(HTML(paste0('<i class="fa-solid fa-3"></i> ', i18n$t("Compute Recreational Potential")))),
                   tags$p(
-                    "Once you've drawn your area and set your persona preferences, click the",
-                    tags$strong(HTML('Compute Recreation (<i class="fa-solid fa-rotate-right"></i>)')),
-                    "button. The system will calculate recreational potential based on your preferences and display the results on the map."
+                    i18n$t("Once you've drawn your area and set your persona preferences, click the"),
+                    " ",
+                    tags$strong(HTML(paste0(
+                      i18n$t("Compute Recreation"),
+                      ' (<i class="fa-solid fa-rotate-right"></i>)'
+                    ))),
+                    " ",
+                    i18n$t(
+                      "button. The system will calculate recreational potential based on your preferences and display the results on the map."
+                    )
                   ),
-                  tags$h5(HTML('<i class="fa-solid fa-4"></i> Explore Results')),
-                  tags$p("Use the Map Layers panel (layer icon) to:"),
+                  tags$h5(HTML(paste0('<i class="fa-solid fa-4"></i> ', i18n$t("Explore Results")))),
+                  tags$p(i18n$t("Use the Map Layers panel (layer icon) to:")),
                   tags$ul(
                     tags$li(
-                      tags$strong("Base Map:"),
-                      " Switch between Street, Topographical, Satellite, or Greyscale views"
+                      tags$strong(i18n$t("Base Map:")),
+                      " ",
+                      i18n$t("Switch between Street, Topographical, Satellite, or Greyscale views")
                     ),
                     tags$li(
-                      tags$strong("Overlay Layers:"),
-                      " Toggle visibility of individual component layers or the final Recreational Potential layer"
+                      tags$strong(i18n$t("Overlay Layers:")),
+                      " ",
+                      i18n$t(
+                        "Toggle visibility of individual component layers or the final Recreational Potential layer"
+                      )
                     )
                   ),
                   tags$p(
                     class = "text-muted mt-3",
                     tags$em(
-                      "Tip: Darker the recreational potential values indicate areas better suited to your specified recreationist profile."
+                      i18n$t(
+                        "Tip: Darker the recreational potential values indicate areas better suited to your specified recreationist profile."
+                      )
                     )
                   )
                 )
