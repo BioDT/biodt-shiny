@@ -189,18 +189,6 @@ ces_persona_ui <- function(id, i18n) {
                   choices = list("")
                 ),
                 actionButton(ns("load_persona"), "Load Persona"),
-                # tags$div(
-                #   class = "custom-slider",
-                #   tags$h4(i18n$t("Recreation Potential Filter")),
-                #   tags$p(i18n$t("Use the sliders below to filter the data:")),
-                #   sliderTextInput(
-                #     inputId = ns("recreation_potential_slider"),
-                #     label = i18n$t("Filter Recreation Potential:"),
-                #     choices = seq(0, 1, by = 0.1),
-                #     selected = 0.5, # c(0, 1),
-                #     grid = FALSE,
-                #   ),
-                # ),
                 # actionButton(
                 #   inputId = ns("apply_filter_recre"),
                 #   label = i18n$t("Apply filter"),
@@ -246,7 +234,27 @@ ces_persona_ui <- function(id, i18n) {
                     "Recreational Potential" = "Recreational Potential"
                   ),
                   selected = "none"
-                )
+                ),
+                tags$h5(i18n$t("Layer Opacity"), class = "mt-3"),
+                sliderTextInput(
+                  inputId = ns("overlay_opacity"),
+                  label = i18n$t("Adjust overlay opacity:"),
+                  choices = seq(0, 1, by = 0.1),
+                  selected = 0.8,
+                  grid = FALSE
+                ),
+                tags$div(
+                  class = "custom-slider",
+                  tags$h4(i18n$t("Recreation Potential Filter")),
+                  tags$p(i18n$t("Use the sliders below to filter the data:")),
+                  sliderTextInput(
+                    inputId = ns("recreation_potential_filter_slider"),
+                    label = i18n$t("Filter Recreation Potential:"),
+                    choices = seq(0, 1, by = 0.1),
+                    selected = 0.3, # c(0, 1),
+                    grid = FALSE,
+                  ),
+                ),
               ),
               # info content
               tags$div(
@@ -666,6 +674,37 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
       ignoreInit = TRUE
     )
 
+    # Observe event for opacity slider changes
+    observeEvent(
+      {
+        input$overlay_opacity
+        input$recreation_potential_filter_slider
+      },
+      {
+        req(input$overlay_opacity)
+        req(computed_layers())
+
+        w$show()
+        # Update all layers with new opacity using leafletProxy
+        leafletProxy(ns("combined_map_plot")) |>
+          update_map(
+            computed_layers(),
+            pal = recreation_pal(),
+            opacity = as.numeric(input$overlay_opacity),
+            hide_after_add = TRUE,
+            filter_threshold = as.numeric(input$recreation_potential_filter_slider)
+          )
+
+        # Restore the current overlay selection
+        if (!is.null(input$overlay_layers) && input$overlay_layers != "none") {
+          leafletProxy(ns("combined_map_plot")) |>
+            showGroup(input$overlay_layers)
+        }
+        w$hide()
+      },
+      ignoreInit = TRUE
+    )
+
     # Observe event for "Apply filters" button
     observeEvent(
       ignoreInit = TRUE,
@@ -810,7 +849,12 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
         tryCatch(
           {
             leafletProxy(ns("combined_map_plot")) |>
-              update_map(output$result, pal = recreation_pal(), hide_after_add = TRUE)
+              update_map(
+                output$result,
+                pal = recreation_pal(),
+                hide_after_add = TRUE,
+                filter_threshold = as.numeric(input$recreation_potential_filter_slider)
+              )
           },
           error = function(e) {
             showNotification(paste0("Map update failed: ", conditionMessage(e)), type = "error")

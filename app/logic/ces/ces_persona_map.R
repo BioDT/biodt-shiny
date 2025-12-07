@@ -21,7 +21,7 @@ box::use(
     editToolbarOptions,
   ],
   htmlwidgets[onRender],
-  terra[project],
+  terra[project, values, `values<-`],
 )
 
 get_base_layers <- function() {
@@ -240,8 +240,17 @@ setup_map <- function(pal = NULL, button_container_id = "button_container", ns =
 ##' @param opacity Numeric opacity for raster layers (0-1).
 ##' @param clear_existing If TRUE, attempt to clear any existing overlay groups with the same names.
 ##' @param hide_after_add If TRUE, hide all layers after adding them (default FALSE for backward compatibility).
+##' @param filter_threshold Numeric threshold (0-1) to filter layers. Values below threshold are set to NA. NULL (default) means no filtering.
 ##' @return A leaflet map (or proxy) with the new overlay layers and a layers control.
-update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal = "Spectral", hide_after_add = FALSE) {
+update_map <- function(
+  proxy,
+  layers,
+  opacity = 0.8,
+  clear_existing = TRUE,
+  pal = "Spectral",
+  hide_after_add = FALSE,
+  filter_threshold = NULL
+) {
   # Expect a leafletProxy object
   if (is.null(layers) || length(layers) == 0) {
     return(proxy)
@@ -253,6 +262,24 @@ update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal 
 
   if (is.null(names(layers)) || any(names(layers) == "")) {
     names(layers) <- paste0("Layer ", seq_along(layers))
+  }
+
+  # Apply filtering if threshold is provided
+  if (!is.null(filter_threshold)) {
+    # Store the original names
+    original_names <- names(layers)
+
+    layers <- lapply(layers, function(layer) {
+      # Create a copy to avoid modifying the original
+      filtered_layer <- layer
+      layer_values <- values(filtered_layer)
+      layer_values[layer_values < filter_threshold] <- NA
+      values(filtered_layer) <- layer_values
+      return(filtered_layer)
+    })
+
+    # Restore the names after lapply
+    names(layers) <- original_names
   }
 
   # Rename technical layer names to human-readable names
@@ -283,32 +310,32 @@ update_map <- function(proxy, layers, opacity = 0.8, clear_existing = TRUE, pal 
   for (nm in names(layers)) {
     lyr <- layers[[nm]]
 
-    proxy <- tryCatch(
-      {
-        # Only pass colors parameter if pal is not NULL
-        if (!is.null(pal)) {
-          addRasterImage(
-            proxy,
-            lyr,
-            opacity = opacity,
-            group = nm,
-            colors = pal,
-            options = list(zIndex = 400)
-          )
-        } else {
-          addRasterImage(
-            proxy,
-            lyr,
-            opacity = opacity,
-            group = nm,
-            options = list(zIndex = 400)
-          )
-        }
-      },
-      error = function(e) {
-        proxy
-      }
-    )
+    # proxy <- tryCatch(
+    # {
+    # Only pass colors parameter if pal is not NULL
+    if (!is.null(pal)) {
+      addRasterImage(
+        proxy,
+        lyr,
+        opacity = opacity,
+        group = nm,
+        colors = pal,
+        options = list(zIndex = 400)
+      )
+    } else {
+      addRasterImage(
+        proxy,
+        lyr,
+        opacity = opacity,
+        group = nm,
+        options = list(zIndex = 400)
+      )
+    }
+    # },
+    # error = function(e) {
+    # proxy
+    # }
+    # )
   }
 
   # Hide all layers if requested
