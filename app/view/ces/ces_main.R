@@ -37,7 +37,7 @@ ces_ui <- function(id, i18n) {
     ),
     nav_panel(
       title = i18n$t("Personalised Recreation"),
-      value = "CES",
+      value = "CES_Persona",
       icon = icon("tree"),
       ces_persona_ui(
         ns("ces_persona"),
@@ -77,16 +77,7 @@ ces_server <- function(id, i18n, language_change) {
       input$tab,
       ignoreInit = TRUE,
       {
-        # Check if the tab matches any of the specified tabs
-        if (
-          !ces_selected() &&
-            (input$tab == "CES")
-          # || input$tab == "Recreation potential" ||
-          # || input$tab == "Biodiversity"
-        ) {
-          # Set ces_selected to TRUE if it's not already TRUE
-          ces_selected(TRUE)
-        }
+        ces_selected(input$tab)
       }
     )
 

@@ -128,6 +128,8 @@ ces_biodiversity_ui <- function(id, i18n) {
 #' @export
 ces_biodiversity_server <- function(id, ces_selected, i18n) {
   moduleServer(id, function(input, output, session) {
+    first_time <- reactiveVal(TRUE)
+
     msg <-
       waiter_text(message = tags$h3(i18n$t("Loading..."), style = "color: #414f2f;"))
 
@@ -160,9 +162,11 @@ ces_biodiversity_server <- function(id, ces_selected, i18n) {
 
     # Load the species list when CES tab is opened
     observeEvent(ces_selected(), {
-      if (ces_selected() && is.null(cairngorms_sp_list())) {
+      if (ces_selected() == "Biodiversity" && is.null(cairngorms_sp_list())) {
         if (file.exists(paste0(ces_path, "/cairngorms_sp_list.csv"))) {
+          w$show()
           cairngorms_sp_list(read.csv(paste0(ces_path, "/cairngorms_sp_list.csv")))
+          w$hide()
         } else {
           showNotification(
             paste0(i18n$t("File missing: "), paste0(ces_path, "/cairngorms_sp_list.csv")),
@@ -264,6 +268,7 @@ ces_biodiversity_server <- function(id, ces_selected, i18n) {
     # Reactive expression to arrange species based on the mean probability of SDM rasters and join additional data
     species_arranged <- reactive({
       req(input$radio_group_select, cairngorms_sp_list(), species_gap_arranged())
+      w$show()
       sdm_rasts_used <- sdm_rasts() |> crop(bounding_box)
 
       mean_prob_values <- rep(0, dim(sdm_rasts_used)[3])
@@ -278,7 +283,7 @@ ces_biodiversity_server <- function(id, ces_selected, i18n) {
         arrange(desc(mean_prob)) |>
         left_join(cairngorms_sp_list(), by = "speciesKey") |>
         left_join(species_gap_arranged(), by = "speciesKey")
-
+      w$hide()
       out
     })
 

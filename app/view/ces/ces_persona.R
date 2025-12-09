@@ -353,6 +353,7 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
 
     ns <- session$ns
     ces_path <- file.path(config$get("data_path"), "ces")
+    first_time <- reactiveVal(TRUE)
 
     # Create reactive variables outside of observeEvent
     biodiversity_pal <- reactiveVal()
@@ -518,6 +519,7 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
       ces_selected(),
       ignoreInit = TRUE,
       {
+        req(ces_selected() == "CES_Persona", first_time())
         w$show()
         # Create palettes
         biodiversity_pal(colorBin(
@@ -562,7 +564,8 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
           )
         })
 
-        print("First time CES opened")
+        print("First time CES Persona opened")
+        first_time(FALSE)
         w$hide()
       }
     )
