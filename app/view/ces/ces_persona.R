@@ -614,12 +614,12 @@ ces_persona_server <- function(id, ces_selected, i18n, language_change) {
       }
     )
 
-    # Render the map in leaflet
-    output$combined_map_plot <- renderLeaflet({
-      req(ces_selected())
-
-      setup_map(recreation_pal(), ns("button_container"), ns)
-    })
+    # Render the map in leaflet (only once)
+    output$combined_map_plot <- renderLeaflet(
+      {
+        setup_map(recreation_pal(), ns("button_container"), ns)
+      }
+    )
 
     # Observe event for base layer changes
     observeEvent(
