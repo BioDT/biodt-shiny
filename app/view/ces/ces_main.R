@@ -5,7 +5,6 @@ box::use(
 
 box::use(
   app / view / ces / ces_info[ces_info_ui, ces_info_server],
-  app / view / ces / ces_rp[ces_rp_ui, ces_rp_server],
   app / view / ces / ces_contributors[ces_contributors_ui, ces_contributors_server],
   app / view / ces / ces_biodiversity[ces_biodiversity_ui, ces_biodiversity_server],
   app / view / ces / ces_rp_biodiversity[ces_rp_biodiversity_ui, ces_rp_biodiversity_server],
@@ -42,15 +41,6 @@ ces_ui <- function(id, i18n) {
       icon = icon("tree"),
       ces_persona_ui(
         ns("ces_persona"),
-        i18n
-      )
-    ),
-    nav_panel(
-      title = i18n$t("Recreation Potential"),
-      value = "Recreation potential",
-      icon = icon("person-walking"),
-      ces_rp_ui(
-        ns("ces_rp"),
         i18n
       )
     ),
@@ -101,7 +91,6 @@ ces_server <- function(id, i18n, language_change) {
     )
 
     # Call downstream module servers only the first time
-    ces_rp_server("ces_rp", i18n)
     ces_biodiversity_server("ces_biodiversity", ces_selected, i18n)
     ces_rp_biodiversity_server(
       "ces_rp_biodiversity",
