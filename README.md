@@ -144,8 +144,6 @@ The app is modularized and each pDT have files in its own subfolder. UI files ar
 
 ## Technicals
 
-🔒 Authentication and access to running models on LUMI/KAROLINA is enabled using R package {r4lexis} https://github.com/It4innovations/r4lexis the package is only available on GitHub.
-
 🎨 We use {bslib} in order to use Bootstrap 5 elements (https://rstudio.github.io/bslib/). The theme is a custom BioDT theme. The css, favicons, backgrounds etc. are located in `inst/app/www`.
 
 ✅ Tests are developed using the {testthat} package. Tests are written as `.R` files in `tests/testthat/`.
