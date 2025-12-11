@@ -91,20 +91,31 @@ Note! **You might probably want to restart (re-open) your R terminal at this mom
 
 ### 4. Get local data
 
-Download any required local data, first you need to create a folder to hold this data. This folder is ignored by git so you need to create it first. You can do this manually or run in R
+Not all pDTs require local data, and data is only needed when accessing specific pDT pages. Therefore, you typically don't need to download all data for development.
+
+**pDTs that don't require local data:**
+- Invasive Alien Species (data is embedded)
+- Real-time Bird Monitoring (data is fetched automatically)
+
+**For pDTs that do require local data:**
+
+First, you need to create a folder to hold this data. This folder is ignored by git so you need to create it first. You can do this manually or run in R
 
 ```
 dir.create("app/data")
 ```
 
-Then download the data from the
-[sharepoint](https://tt.eduuni.fi/sites/csc-rdi-fileshare/BioDT/Forms/AllItems.aspx?RootFolder=%2Fsites%2Fcsc%2Drdi%2Dfileshare%2FBioDT%2FWP7%20%2D%20Integration%20%26%20Service%20Uptake%20with%20Research%20Infrastructure%20Environments%2FShinyAppData) (authenticated access required)
+If you need access to data for development, please contact tomas.martinovic@vsb.cz or reach out through LifeWatch ERIC channels.
 
-Each pDT's shiny module has it's own folder for local data within this which you can see specififed in this file: https://github.com/BioDT/biodt-shiny/blob/main/dev/run_dev.R therefore you need to create a folder within the `local_data` folder. The folder names are:
+Each pDT's shiny module has its own folder for local data within this which you can see specified in the `config.yml` file. The folder names are:
 
  - Crop wild relatives: `app/data/cwr`
  - BEEHAVE: `app/data/honeybee`
- - Cultural ecosystem services: `app/data/ces` 
+ - Cultural ecosystem services: `app/data/ces`
+ - Disease outbreaks: `app/data/disease_outbreak`
+ - Forest biodiversity: `app/data/forest_bird`
+ - Grassland dynamics: `app/data/grassland`
+ - Real-time bird monitoring: `app/data/rtbm` 
 
 ### 5. Launch the app
 
@@ -123,10 +134,12 @@ Please feel free to create a branch and pull requests for making significant cha
 The app is modularized and each pDT have files in its own subfolder. UI files are located mainly in the `app/view` subfolder, R function mainly in the `app/logic` subfolder. UI files for each pDT is located:
 
  * BEEHAVE: `app/view/honeybee`
- * Cultural Ecosystem Services: `TBD`
- * Crop wild relatives: `TBD`
+ * Cultural Ecosystem Services: `app/view/ces`
+ * Crop wild relatives: `app/view/cwr`
+ * Disease outbreaks: `app/view/disease_outbreaks`
+ * Forest biodiversity: `app/view/forest`
  * GRASSLAND: `app/view/grassland`
- * Invasive alien species: `TBD`
+ * Invasive alien species: `app/view/ias`
  * RTBM (Real-time Bird Monitoring): `app/view/rtbm`
 
 ## Technicals
@@ -167,6 +180,3 @@ You can then use the following lines within your shiny code:
 
 See https://waiter.john-coene.com/ for more info
 
-### Tutorials with {cicerone}
-
-We use cicerone to create guided tours of your shiny module to help users understand how to use the app. See https://cicerone.john-coene.com/ for more info
