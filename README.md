@@ -4,6 +4,49 @@
 
 This repository contains the codes for the Shiny web application hosted at [app.biodt.eu](https://app.biodt.eu). The Shiny app is intended as the simplest way of interacting with BioDT by end-users. The app uses [Shiny framework](https://shiny.posit.co/) on top of [R language ](https://www.r-project.org/) and is built using power of [development framework Rhino](https://appsilon.github.io/rhino/).
 
+## Quick Start with Docker Compose
+
+The easiest way to run the BioDT Shiny app is using Docker Compose:
+
+### Prerequisites
+
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Running the app
+
+1. Clone the repository:
+
+```bash
+git clone git@github.com:BioDT/biodt-shiny.git
+cd biodt-shiny
+```
+
+2. Setup local data (see [section 4](#4-get-local-data) for details on which pDTs require data)
+
+   **Note:** By default, the `docker-compose.yml` expects data in `${PWD}/app/data`. If you place your data in a different location, update the left-hand side of the volume mount in `docker-compose.yml`:
+   
+   ```yaml
+   volumes:
+     - "/your/custom/path:/app/data"  # Change /your/custom/path to your data location
+   ```
+
+3. Start the application:
+
+```bash
+docker compose up
+```
+
+4. Open your browser and navigate to `http://localhost:7860`
+
+To stop the application, press `Ctrl+C` or run:
+
+```bash
+docker compose down
+```
+
+**Note:** The Honeybee and Disease Outbreaks pDTs require Docker socket access (`/var/run/docker.sock`) which is already configured in the `docker-compose.yml` file.
+
 ## Getting Started (development set up)
 
 ### 0. Prerequisites
