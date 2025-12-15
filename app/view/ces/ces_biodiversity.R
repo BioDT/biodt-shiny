@@ -76,7 +76,7 @@ ces_biodiversity_ui <- function(id, i18n) {
           i18n$t("Please select a species group from the list below:"),
           species_groups,
           inline = TRUE,
-          selected = character(0)
+          selected = "mammals"
         )
       )
     ),
