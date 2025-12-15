@@ -52,6 +52,17 @@ jobs:
       - name: Build and push base image
         uses: docker/build-push-action@v5
         with:
+          context: .
+          file: containers/base/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/biodt/shiny-base:latest
+            ghcr.io/biodt/shiny-base:${{ github.sha }}
+            ${{ steps.tag.outputs.is_tag == 'true' && format('ghcr.io/biodt/shiny-base:{0}', steps.tag.outputs.version) || '' }}
+
+  build-app-after-base:
+    needs: build-base
+    if: |
       (github.event_name == 'workflow_dispatch' && inputs.build_type == 'both') ||
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
@@ -87,24 +98,25 @@ jobs:
           tags: |
             ghcr.io/biodt/shiny-app:latest
             ghcr.io/biodt/shiny-app:${{ github.sha }}
-            ${{ steps.tag.outputs.is_tag == 'true' && format('ghcr.io/biodt/shiny-app:{0}', steps.tag.outputs.version) || ''
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: Build and push app image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/biodt/shiny-app:latest
-            ghcr.io/biodt/shiny-app:${{ github.sha }}
+            ${{ steps.tag.outputs.is_tag == 'true' && format('ghcr.io/biodt/shiny-app:{0}', steps.tag.outputs.version) || '' }}
 
   build-app-only:
     if: |
       github.event_name == 'workflow_dispatch' && inputs.build_type == 'app'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Extract tag name
         id: tag
@@ -124,16 +136,4 @@ jobs:
           tags: |
             ghcr.io/biodt/shiny-app:latest
             ghcr.io/biodt/shiny-app:${{ github.sha }}
-            ${{ steps.tag.outputs.is_tag == 'true' && format('ghcr.io/biodt/shiny-app:{0}', steps.tag.outputs.version) || ''
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        
-      - name: Build and push app image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/biodt/shiny-app:latest
-            ghcr.io/biodt/shiny-app:${{ github.sha }}
+            ${{ steps.tag.outputs.is_tag == 'true' && format('ghcr.io/biodt/shiny-app:{0}', steps.tag.outputs.version) || '' }}
