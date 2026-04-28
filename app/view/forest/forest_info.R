@@ -16,7 +16,7 @@ forest_info_ui <- function(id, i18n) {
         class = "col-sm-10 offset-sm-1 text-center mt-5 mb-5",
         tags$h2(
           class = "greeting display-4 font-weight-bold",
-          i18n$translate("Forest Biodiversity Prototype Digital Twin (pDT)")
+          i18n$translate("Forest Biodiversity Prototype Digital Twin (ForestBioDT)")
         ),
         tags$p(
           class = "pt-3 fw-bold",
@@ -27,7 +27,7 @@ forest_info_ui <- function(id, i18n) {
         tags$p(
           tags$strong(i18n$translate("Purpose: ")),
           i18n$translate(
-            "This pDT aims to investigate the impact of different forest management strategies and climate change scenarios on forests and biodiversity. The goal is to identify the most appropriate treatment option that improves biodiversity for a specific forest region under various climate scenarios."
+            "ForestBioDT aims to investigate the impact of different forest management strategies and climate change scenarios on forests and biodiversity. The goal is to identify the most appropriate treatment option that improves biodiversity for a specific forest region under various climate scenarios."
           )
         ),
         tags$p(
@@ -85,7 +85,7 @@ forest_info_ui <- function(id, i18n) {
           )
         ),
         tags$p(
-          i18n$translate("Source code and scripts of the pDT can be found at "),
+          i18n$translate("Source code and scripts of the ForestBioDT can be found at "),
           tags$a(
             icon("github"),
             "https://github.com/BioDT/uc-forest-bird",

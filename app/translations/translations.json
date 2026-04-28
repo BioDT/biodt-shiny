@@ -256,7 +256,7 @@
       "el": "Γράφημα εξόδου"
     },
     {
-      "en": "This pDT aims to investigate the impact of different forest management strategies and climate change scenarios on forests and biodiversity. The goal is to identify the most appropriate treatment option that improves biodiversity for a specific forest region under various climate scenarios.",
+      "en": "ForestBioDT aims to investigate the impact of different forest management strategies and climate change scenarios on forests and biodiversity. The goal is to identify the most appropriate treatment option that improves biodiversity for a specific forest region under various climate scenarios.",
       "cz": "Toto pDT si klade za cíl zkoumat dopad různých strategií lesního hospodaření a scénářů změny klimatu na lesy a biodiverzitu. Cílem je identifikovat nejvhodnější možnost zacházení, která zlepšuje biodiverzitu pro konkrétní lesní oblast v různých klimatických scénářích.",
       "fi": "Tämän pDT:n tavoitteena on tutkia erilaisten metsänhoitostrategioiden ja ilmastonmuutosskenaarioiden vaikutusta metsiin ja biodiversiteettiin. Tavoitteena on tunnistaa sopivin käsittelyvaihtoehto, joka parantaa biodiversiteettiä tietyllä metsäalueella eri ilmastoskenaarioissa.",
       "it": "Questo pDT mira a indagare l'impatto di diverse strategie di gestione forestale e scenari di cambiamento climatico sulle foreste e sulla biodiversità. L'obiettivo è identificare l'opzione di trattamento più appropriata che migliori la biodiversità per una specifica regione forestale in vari scenari climatici.",
@@ -290,7 +290,7 @@
       "el": "Σκοπός: "
     },
     {
-      "en": "Forest Biodiversity Prototype Digital Twin (pDT)",
+      "en": "Forest Biodiversity Prototype Digital Twin (ForestBioDT)",
       "cz": "Prototyp digitálního dvojčete (pDT) lesní biodiverzity",
       "fi": "Metsän biodiversiteetin prototyyppi-digitaalinen kaksonen (pDT)",
       "it": "Gemello digitale prototipale della biodiversità forestale (pDT)",
@@ -1206,6 +1206,23 @@
       "sl": "Podatki o biodiverziteti se pridobivajo iz Global Biodiversity Information Facility (GBIF)",
       "bg": "Данните за биоразнообразие се получават от Global Biodiversity Information Facility (GBIF)",
       "el": "Τα δεδομένα βιοποικιλότητας προσεγγίζονται από το Global Biodiversity Information Facility (GBIF)"
+    },
+    {
+      "en": "Source code and scripts of the ForestBioDT can be found at ",
+      "cz": "Zdrojový kód a skripty tohoto ForestBioDT lze nalézt na ",
+      "fi": "ForestBioDT:n lähdekoodi ja skriptit löytyvät osoitteesta ",
+      "it": "Il codice sorgente e gli script del ForestBioDT si trovano su ",
+      "nl": "Broncode en scripts van de ForestBioDT zijn te vinden op ",
+      "est": "ForestBioDT lähtekoodi ja skripte leiab aadressil ",
+      "sv": "Källkod och skript för ForestBioDT finns på ",
+      "de": "Quellcode und Skripte des ForestBioDT finden Sie unter ",
+      "no": "Kildekode og skript for ForestBioDT finnes på ",
+      "da": "Kildekode og scripts til ForestBioDT kan findes på ",
+      "es": "El código fuente y scripts del ForestBioDT se pueden encontrar en ",
+      "pt": "O código fonte e scripts do ForestBioDT podem ser encontrados em ",
+      "sl": "Izvorna koda in skripti ForestBioDT se nahajajo na ",
+      "bg": "Изходният код и скриптовете на ForestBioDT могат да бъдат намерени на ",
+      "el": "Ο πηγαίος κώδικας και τα σκρίπτ του ForestBioDT μπορούν να βρεθούν στο "
     },
     {
       "en": "Source code and scripts of the pDT can be found at ",
