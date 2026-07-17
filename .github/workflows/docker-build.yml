@@ -20,6 +20,10 @@ permissions:
   contents: read
   packages: write
 
+env:
+  UC_GRASSLAND_MODEL_REPO: https://github.com/BioDT/uc-grassland-model.git
+  UC_GRASSLAND_MODEL_REF: main
+
 jobs:
   build-base:
     if: |
@@ -96,6 +100,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          build-args: |
+            UC_GRASSLAND_MODEL_REPO=${{ env.UC_GRASSLAND_MODEL_REPO }}
+            UC_GRASSLAND_MODEL_REF=${{ env.UC_GRASSLAND_MODEL_REF }}
           push: true
           tags: |
             ghcr.io/biodt/shiny-app:latest
@@ -135,6 +142,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          build-args: |
+            UC_GRASSLAND_MODEL_REPO=${{ env.UC_GRASSLAND_MODEL_REPO }}
+            UC_GRASSLAND_MODEL_REF=${{ env.UC_GRASSLAND_MODEL_REF }}
           push: true
           tags: |
             ghcr.io/biodt/shiny-app:latest

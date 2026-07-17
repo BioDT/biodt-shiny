@@ -2,7 +2,13 @@ services:
   shiny:
     container_name: biodt-shiny
     platform: linux/amd64
-    image: ghcr.io/biodt/shiny-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UC_GRASSLAND_MODEL_REPO: https://github.com/BioDT/uc-grassland-model.git
+        UC_GRASSLAND_MODEL_REF: main
+    image: biodt/shiny-app:local
     ports:
       - "7860:7860"
     volumes:
@@ -16,3 +22,4 @@ services:
       - HOST_BASE_PATH="${PWD}/app/data"
       - DATA_PATH="/app/data"
       - TRANSL_FILE="/app/data/translations/translations.json"
+      - UC_GRASSLAND_MODEL_DIR="/opt/uc-grassland-model"
